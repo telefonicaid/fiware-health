@@ -1,0 +1,4 @@
+python-novaclient
+python-neutronclient
+nose
+nose-html-reporting
