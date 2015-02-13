@@ -60,6 +60,7 @@ Test Cases or the Regions Sanity Check
 --------------------------------------
 
 **Base TestCases**
+
 This Test Cases will be common for all federated regions.
 - Test 01: Check if the Region has flavors.
 - Test 02: Check if the Region has images.
@@ -70,6 +71,7 @@ This Test Cases will be common for all federated regions.
 - Test 07: Allocate a public IP
 
 **Regions with an OpenStack network service**
+
 - Test 08: Check if it is possible to create a new Network with subnets
 - Test 09: Check if there are external networks configured in the Region
 - Test 10: Check if it is possible to create a new Router without setting the Gateway
@@ -81,6 +83,7 @@ This Test Cases will be common for all federated regions.
 - Test 16: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, NetworkID, Sec. Group, keypair, metadata
 
 **Regions without an OpenStack network service**
+
 - Test 17: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, Metadatas
 - Test 18: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new Keypair
 - Test 19: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new Sec. Group
@@ -91,6 +94,7 @@ This Test Cases will be common for all federated regions.
 Configuration file
 ------------------
 Some configuration is needed before test case execution. This configuration is set in the *resources/settings.json* file:
+
 - Fiware Keystone endpoint.
 - Valid FIWARE credentials for the configured *keystone_url*: User, Password and TenantId.
 - Some configuration about each region: External Network name
@@ -136,8 +140,11 @@ All configuration values will be 'strings'.
 
 Tests execution
 ---------------
+
 - Go to the main test folder of the project if not already on it or.
-- Run *sh launch_tests.sh*. This command will execute all Sanity Tests. You can run *nosetests* command to use more specific test configurations. For instance ::
+- Run *sh launch_tests.sh*. This command will execute all Sanity Tests. You can run *nosetests* command to use more specific test configurations. For instance:
+
+::
 
   nosetests tests/regions --exe --with-xunit --xunit-file=test_results.xml --with-html --html-report=test_results.html --html-report-template=resources/templates/test_report_template.html -v
 
