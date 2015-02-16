@@ -65,8 +65,8 @@ section:target .test-details {
 </head>
 <body>
     <div align="center">
-        <img src="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/images/a/a5/FI-WARE_logo.png" width="20%" height="20%"/>
-        <h1>FIWARE REGIONS - SANITY TESTS</h1>
+        <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="20%"/>
+        <h1>FIWARE REGIONS - SANITY CHECK | {{timestamp}}</h1>
     </div>
     <h1>Overview</h1>
     <section>
@@ -96,6 +96,19 @@ section:target .test-details {
             </tr>
         </table>
     </section>
+
+    <h1>Performed test cases for each Region</h1>
+    {% for class, group in report.items() %}
+    <section>
+        <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
+        <ul>
+            {% for test in group.tests %}
+                <li><a class="{% if test.failed %}failed" href="#{{ class }}:{{ test.name }}"{% else %}success"{% endif %}>{{ test.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endfor %}
+
     <h1>Failure details</h1>
     {% for class, group in report.items() %}
         {% if group.stats.failures or group.stats.errors %}
@@ -118,18 +131,6 @@ section:target .test-details {
                 </div>
             </section>
         {% endif %}
-    {% endfor %}
-
-    <h1>All tests</h1>
-    {% for class, group in report.items() %}
-    <section>
-        <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
-        <ul>
-            {% for test in group.tests %}
-                <li><a class="{% if test.failed %}failed" href="#{{ class }}:{{ test.name }}"{% else %}success"{% endif %}>{{ test.name }}</a></li>
-            {% endfor %}
-        </ul>
-    </section>
     {% endfor %}
 </body>
 <script>

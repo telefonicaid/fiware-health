@@ -25,7 +25,8 @@ __author__ = 'jfernandez'
 
 
 from tests import fiware_region_base_tests
-from commons.constants import WAIT_FOR_INSTANCE_ACTIVE, SLEEP_TIME, BASE_IMAGE_NAME
+from commons.constants import WAIT_FOR_INSTANCE_ACTIVE, SLEEP_TIME, BASE_IMAGE_NAME, PROPERTIES_CONFIG_REGION_CONFIG, \
+    PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET
 
 
 class FiwareRegionWithNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
@@ -123,7 +124,14 @@ class FiwareRegionWithNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         external_network_id = None
         external_network_list = self.neutron_operations.get_network_external_list()
         if len(external_network_list) != 0:
-            external_network_id = external_network_list[0]['id']
+            external_net_region = self.conf[PROPERTIES_CONFIG_REGION_CONFIG][PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET]
+            if self.region_name in external_net_region:
+                ext_net_config = external_net_region[self.region_name]
+                for external_network in external_network_list:
+                    if external_network['name'] == ext_net_config:
+                        external_network_id = external_network['id']
+            if external_network_id is None:
+                external_network_id = external_network_list[0]['id']
         self.assertIsNotNone(external_network_id, "No external networks has been found")
 
         router_name = "testing_router_02"
@@ -174,7 +182,7 @@ class FiwareRegionWithNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         """
         self.__deploy_instance_helper__("testing_instance_06",
                                         network_name="testingnetwork06",
-                                        network_cidr="10.250.254.0/24",
+                                        network_cidr="10.250.255.0/24",
                                         keypair_name="testing_keypair06",
                                         sec_group_name="testing_sec_group_06",
                                         metadata={"metadatatest01": "qatesting01"})

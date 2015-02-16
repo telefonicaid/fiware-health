@@ -2,3 +2,4 @@ python-novaclient
 python-neutronclient
 nose
 nose-html-reporting
+git+https://github.com/jframos/nose-html-reporting.git
