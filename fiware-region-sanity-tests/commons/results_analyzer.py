@@ -26,6 +26,8 @@ __author__ = 'jfernandez'
 
 from xml.dom import minidom
 import sys
+from constants import PROPERTIES_FILE, PROPERTIES_CONFIG_KEYTESTCASES
+import json
 
 
 class ResultAnalyzer(object):
@@ -75,14 +77,51 @@ class ResultAnalyzer(object):
         """
         Print report through standard output
         """
-        print "*********************************"
-        print "REGION TEST REPORT: "
+        print "\n*********************************\n"
+        print "REGION TEST SUMMARY REPORT: "
         for item in self.dict:
             print "\n >> {}".format(item.replace("TestSuite", ""))
             for result_value in self.dict[item]:
                 print "  {status}\t {name}".format(name=result_value['test_name'], status=result_value['status'])
-        print "*********************************"
 
+    def get_regions_with_key_test_cases_passed(self):
+        """
+        This method will parse all test results for each Region and will take in account only test cases defined in the
+        settings.json file to consider is Regions is OK or NOT.
+        :return:
+        """
+
+        region_ok_list = []
+
+        with open(PROPERTIES_FILE) as config_file:
+            try:
+                conf = json.load(config_file)
+            except Exception, e:
+                print 'Error parsing config file: %s' % e
+
+        key_test_cases_list = conf[PROPERTIES_CONFIG_KEYTESTCASES]
+        for item in self.dict:
+            passed = True
+            for result_value in self.dict[item]:
+                passed = True
+                for key_test_case in key_test_cases_list:
+                    if key_test_case in result_value['test_name']:
+                        if result_value['status'] != 'OK':
+                            passed = False
+                            break
+                if not passed:
+                    break
+            if passed:
+                region_ok_list.append(item.replace("TestSuite", ""))
+
+        print "\nREGION GLOBAL STATUS\n"
+        print "Key Test Cases list:", str(key_test_cases_list)
+        print "Region list with that test cases as PASSED status:"
+        if len(region_ok_list) == 0:
+            print "NONE!!!!!!!"
+        else:
+            for region in region_ok_list:
+                print " >> ", region
 
 if __name__ == "__main__":
 
@@ -92,4 +131,5 @@ if __name__ == "__main__":
 
     checker = ResultAnalyzer(str(sys.argv[1]))
     checker.get_results()
+    checker.get_regions_with_key_test_cases_passed()
     checker.print_results()
