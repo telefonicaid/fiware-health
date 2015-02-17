@@ -62,6 +62,7 @@ Test Cases or the Regions Sanity Check
 **Base TestCases**
 
 This Test Cases will be common for all federated regions.
+
 - Test 01: Check if the Region has flavors.
 - Test 02: Check if the Region has images.
 - Test 03: Check if the Region has images with 'init' in the name.
@@ -122,7 +123,7 @@ All configuration values will be 'strings'.
                 "Prague": "default",
                 "Mexico": "ext-net",
                 "PiraeusN": "Public",
-                "PiraeusU": "public-ext-net-01",
+                "PiraeusU": "public-ext-net-1",
                 "Zurich": "public-ext-net-1",
                 "Karlskrona": "PUBLIC3_external",
                 "NITOS-UTH": "net04_ext",
@@ -133,7 +134,8 @@ All configuration values will be 'strings'.
                 "Gent": "Public-Net",
                 "Crete": "net04_ext"
             }
-        }
+        },
+        "key_test_cases": ["test_allocate_ip", "test_deploy_instance"]
     }
 
 
@@ -146,5 +148,18 @@ Tests execution
 
 ::
 
-  nosetests tests/regions --exe --with-xunit --xunit-file=test_results.xml --with-html --html-report=test_results.html --html-report-template=resources/templates/test_report_template.html -v
+  nosetests tests/regions --exe
+            --with-xunit --xunit-file=test_results.xml --with-html --html-report=test_results.html
+            --html-report-template=resources/templates/test_report_template.html -v
 
+
+**'Result Analyzer' script**
+
+You can use the script *commons/result_analyzer.py* to create a summary report of the xUnit test result file (xml).
+This script will print on screen the result for each test case and will analyze the "Region Status" using the
+*key_test_cases* information configured in the settings.json file: One region is "working" if all test cases defined in this
+property have been PASSED.
+
+::
+
+ python commons/results_analyzer.py test_results.xml
