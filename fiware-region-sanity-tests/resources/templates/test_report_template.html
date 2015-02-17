@@ -74,6 +74,7 @@ section:target .test-details {
             <tr>
                 <th> Class </th>
                 <th> Fail </th>
+                <th> Error </th>
                 <th> Skip </th>
                 <th> Success </th>
                 <th> Total </th>
@@ -82,6 +83,7 @@ section:target .test-details {
                 <tr>
                     <td> {{ class }} </td>
                     <td> {{ group.stats.failures }} </td>
+                    <td> {{ group.stats.errors   }} </td>
                     <td> {{ group.stats.skipped  }} </td>
                     <td> {{ group.stats.passes   }} </td>
                     <td> {{ group.stats.total    }} </td>
@@ -90,6 +92,7 @@ section:target .test-details {
             <tr>
                 <td><strong> Total </strong></td>
                 <td>{{ stats.failures }}</td>
+                <td>{{ stats.errors   }}</td>
                 <td>{{ stats.skipped  }}</td>
                 <td>{{ stats.passes   }}</td>
                 <td>{{ stats.total    }}</td>
