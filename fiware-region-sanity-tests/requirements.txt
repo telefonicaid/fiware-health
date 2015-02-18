@@ -1,0 +1,4 @@
+python-novaclient
+python-neutronclient
+nose
+git+https://github.com/telefonicaid/nose-html-reporting.git
