@@ -1,12 +1,14 @@
 ===================================
-Fiware Health - Region Sanity Check
+FIWARE Health - Region Sanity Tests
 ===================================
-This project contains a Sanity Check for being executed over each FIWARE region to test some of their capabilities and
-the global Region Status.
 
-Test case implementation has been performed using `Python <http://www.python.org/>`_ and its
-`Unit Testing <https://docs.python.org/2/library/unittest.html>`_. framework
+This project contains **sanity checks** for being executed over each FIWARE
+region to test some of their capabilities and the global Region Status.
 
+Test case implementation has been performed using Python_ and its
+`unit testing`__ framework.
+
+__ `Python - Unittest`_
 
 
 Test environment
@@ -14,31 +16,40 @@ Test environment
 
 **Prerequisites**
 
-- Python 2.7 or newer (2.x) (https://www.python.org/downloads/)
-- pip (https://pypi.python.org/pypi/pip)
-- virtualenv (https://pypi.python.org/pypi/virtualenv) or Vagrant (https://www.vagrantup.com/)
+- `Python 2.7`__ or newer
+- pip_
+- virtualenv_ or Vagrant__
+
+__ `Python - Downloads`_
+__ `Vagrant - Downloads`_
 
 
 **Test case execution using virtualenv**
 
-1. Create a virtual environment somewhere *(virtualenv $WORKON_HOME/venv)*
-#. Activate the virtual environment *(source $WORKON_HOME/venv/bin/activate)*
+1. Create a virtual environment somewhere (``virtualenv $WORKON_HOME/venv``)
+#. Activate the virtual environment (``source $WORKON_HOME/venv/bin/activate``)
 #. Go to main folder in the test project
-#. Install the requirements for the test case execution in the virtual environment *(pip install -r requirements.txt --allow-all-external)*
+#. Install the requirements for the test case execution in the virtual
+   environment (``pip install -r requirements.txt --allow-all-external``)
 
 
 **Test case execution using Vagrant (optional)**
 
-Instead of using virtualenv, you can use the provided Vagrantfile to deploy a local VM using `Vagrant <https://www.vagrantup.com/>`_, that will provide all environment configurations for launching test cases.
+Instead of using virtualenv, you can use the provided Vagrantfile to deploy a
+local VM using Vagrant_, that will provide all environment configurations for
+launching test cases.
 
-1. Download and install Vagrant (https://www.vagrantup.com/downloads.html)
+1. Download and install Vagrant
 #. Go to main folder in the test project
-#. Execute *vagrant up* to launch a VM based on Vagrantfile provided.
-#. After Vagrant provision, your VM is properly configured to launch the Sanity Check. You have to access to the VM using *vagrant ssh* and change to */vagrant* directory that will have mounted your test project workspace.
+#. Execute ``vagrant up`` to launch a VM based on Vagrantfile provided.
+#. After Vagrant provision, your VM is properly configured to launch the
+   Sanity Check. You have to access to the VM using ``vagrant ssh`` and change
+   to ``/vagrant`` directory that will have mounted your test project workspace.
 
-If you need more information about how to use Vagrant, you can see
-`Vagrant Getting Started <https://docs.vagrantup.com/v2/getting-started/index.html>`_
+If you need more information about how to use Vagrant, you can see the
+`getting started section`__ of Vagrant documentation.
 
+__ `Vagrant - Getting Started`_
 
 
 Test Algorithm
@@ -91,12 +102,13 @@ This Test Cases will be common for all federated regions.
 - Test 20: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, Sec. Group, keypair, metadata
 
 
-
 Configuration file
 ------------------
-Some configuration is needed before test case execution. This configuration is set in the *resources/settings.json* file:
 
-- Fiware Keystone endpoint.
+Some configuration is needed before test case execution. This configuration is
+set in the ``resources/settings.json`` file:
+
+- FIWARE Keystone endpoint.
 - Valid FIWARE credentials for the configured *keystone_url*: User, Password and TenantId.
 - Some configuration about each region: External Network name
 
@@ -107,7 +119,7 @@ All configuration values will be 'strings'.
     {
         "environment": "fiware-lab",
         "credentials": {
-            "keystone_url": "http://cloud.lab.fi-ware.org:4731/v2.0/",
+            "keystone_url": "http://cloud.lab.fiware.org:4731/v2.0/",
             "tenant_id": "00000000000000000000000000000",
             "tenant_name": "myTenantName",
             "user": "MyUser",
@@ -139,27 +151,43 @@ All configuration values will be 'strings'.
     }
 
 
-
 Tests execution
 ---------------
 
 - Go to the main test folder of the project if not already on it or.
-- Run *sh launch_tests.sh*. This command will execute all Sanity Tests. You can run *nosetests* command to use more specific test configurations. For instance:
+- Run ``launch_tests.sh``. This command will execute all Sanity Tests.
+  You can run ``nosetests`` command to use more specific test configurations.
+  For instance:
 
 ::
 
-  nosetests tests/regions --exe
-            --with-xunit --xunit-file=test_results.xml --with-html --html-report=test_results.html
+  nosetests tests/regions --exe \
+            --with-xunit --xunit-file=test_results.xml \
+            --with-html --html-report=test_results.html \
             --html-report-template=resources/templates/test_report_template.html -v
 
 
 **'Result Analyzer' script**
 
-You can use the script *commons/result_analyzer.py* to create a summary report of the xUnit test result file (xml).
-This script will print on screen the result for each test case and will analyze the "Region Status" using the
-*key_test_cases* information configured in the settings.json file: One region is "working" if all test cases defined in this
-property have been PASSED.
+You can use the script ``commons/result_analyzer.py`` to create a summary report
+of the xUnit test result file (xml). This script will print on screen the result
+for each test case and will analyze the "Region Status" using the
+*key_test_cases* information configured in the ``settings.json`` file:
+one region is "working" if all test cases defined in this property have
+been PASSED.
 
 ::
 
- python commons/results_analyzer.py test_results.xml
+  python commons/results_analyzer.py test_results.xml
+
+
+.. REFERENCES
+
+.. _Python: http://www.python.org/
+.. _Python - Downloads: https://www.python.org/downloads/
+.. _Python - Unittest: https://docs.python.org/2/library/unittest.html
+.. _Vagrant: https://www.vagrantup.com/
+.. _Vagrant - Downloads: https://www.vagrantup.com/downloads.html
+.. _Vagrant - Getting Started: https://docs.vagrantup.com/v2/getting-started/index.html
+.. _virtualenv: https://pypi.python.org/pypi/virtualenv
+.. _pip: https://pypi.python.org/pypi/pip
