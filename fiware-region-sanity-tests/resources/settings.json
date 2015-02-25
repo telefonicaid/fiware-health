@@ -1,7 +1,7 @@
 {
     "environment": "fiware-lab",
     "credentials": {
-        "keystone_url": "http://cloud.lab.fi-ware.org:4731/v2.0/",
+        "keystone_url": "http://cloud.lab.fiware.org:4731/v2.0/",
         "tenant_id": "",
         "tenant_name": "",
         "user": "",
@@ -11,14 +11,14 @@
         "external_network_name": {
             "Spain": "net8300",
             "Trento": "ext-net",
-            "Lannion": "ext-net",
+            "Lannion": "public-ext-net-02",
             "Waterford": "public-ext-net-01",
             "Berlin": "ext-net-federation",
             "Prague": "default",
             "Mexico": "ext-net",
             "PiraeusN": "Public",
             "PiraeusU": "public-ext-net-1",
-            "Zurich": "public-ext-net-1",
+            "Zurich": "net-04-ext",
             "Karlskrona": "PUBLIC3_external",
             "NITOS-UTH": "net04_ext",
             "Budapest": "publicRange",
