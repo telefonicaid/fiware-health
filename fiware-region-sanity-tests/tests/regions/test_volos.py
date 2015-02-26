@@ -26,5 +26,5 @@ __author__ = 'jfernandez'
 from tests import fiware_region_with_networks_tests
 
 
-class NitosUTHTestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetkorkTest):
-    region_name = "NITOS-UTH"
+class VolosTestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetkorkTest):
+    region_name = "Volos"
