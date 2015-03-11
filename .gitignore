@@ -52,3 +52,14 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# IDE
+.idea/
+
+# Temporal executions result
+fiware-region-sanity-tests/resources/test_results.html
+fiware-region-sanity-tests/test_results.html
+fiware-region-sanity-tests/test_results.xml
+
+# Virtual env
+fiware-region-sanity-tests/venv/
