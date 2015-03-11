@@ -61,5 +61,5 @@ fiware-region-sanity-tests/resources/test_results.html
 fiware-region-sanity-tests/test_results.html
 fiware-region-sanity-tests/test_results.xml
 
-# Virtual env
+# Virtual environment
 fiware-region-sanity-tests/venv/
