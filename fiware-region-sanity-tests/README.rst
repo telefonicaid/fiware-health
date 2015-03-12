@@ -128,10 +128,11 @@ All configuration values will be 'strings'.
         "region_configuration": {
             "external_network_name": {
                 "Spain": "net8300",
+                "Spain2": "public-ext-net-01",
                 "Trento": "ext-net",
                 "Lannion": "public-ext-net-02",
                 "Waterford": "public-ext-net-01",
-                "Berlin": "ext-net-federation",
+                "Berlin": "ext-net-public",
                 "Prague": "default",
                 "Mexico": "ext-net",
                 "PiraeusN": "public-ext-net-1",
