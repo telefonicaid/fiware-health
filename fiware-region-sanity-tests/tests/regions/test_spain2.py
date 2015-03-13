@@ -26,5 +26,5 @@ __author__ = 'fla'
 from tests import fiware_region_with_networks_tests
 
 
-class StockholmTestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetkorkTest):
+class Spain2TestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetkorkTest):
     region_name = "Spain2"
