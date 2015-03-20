@@ -135,7 +135,7 @@ All configuration values will be 'strings'.
                 "Berlin": "ext-net-public",
                 "Prague": "default",
                 "Mexico": "ext-net",
-                "PiraeusN": "public-ext-net-1",
+                "PiraeusN": "public-ext-net-01",
                 "PiraeusU": "public-ext-net-1",
                 "Zurich": "public-ext-net-1",
                 "Karlskrona": "public-ext-net-01",
