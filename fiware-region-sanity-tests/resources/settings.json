@@ -18,15 +18,15 @@
             "Prague": "default",
             "Mexico": "ext-net",
             "PiraeusN": "public-ext-net-01",
-            "PiraeusU": "public-ext-net-1",
-            "Zurich": "public-ext-net-1",
+            "PiraeusU": "public-ext-net-01",
+            "Zurich": "public-ext-net-01",
             "Karlskrona": "public-ext-net-01",
             "Volos": "public-ext-net-01",
             "Budapest": "publicRange",
             "Stockholm": "public-ext-net-01",
             "SophiaAntipolis": "net04_ext",
             "Poznan": "public_L3_v4",
-            "Gent": "Public-Net",
+            "Gent": "public-ext-net-03",
             "Crete": "net04_ext"
         }
     },
