@@ -127,12 +127,12 @@ All configuration values will be 'strings'.
         },
         "region_configuration": {
             "external_network_name": {
-                "Spain": "net8300",
+                "Spain": "public-ext-net-01",
                 "Spain2": "public-ext-net-01",
-                "Trento": "ext-net",
+                "Trento": "public-ext-net-01",
                 "Lannion": "public-ext-net-02",
                 "Waterford": "public-ext-net-01",
-                "Berlin": "ext-net-public",
+                "Berlin": "public-ext-net-01",
                 "Prague": "default",
                 "Mexico": "ext-net",
                 "PiraeusN": "public-ext-net-01",
@@ -140,7 +140,7 @@ All configuration values will be 'strings'.
                 "Zurich": "public-ext-net-01",
                 "Karlskrona": "public-ext-net-01",
                 "Volos": "public-ext-net-01",
-                "Budapest": "publicRange",
+                "Budapest": "public-ext-net-01",
                 "Stockholm": "public-ext-net-01",
                 "SophiaAntipolis": "net04_ext",
                 "Poznan": "public_L3_v4",
@@ -166,6 +166,17 @@ Tests execution
             --with-xunit --xunit-file=test_results.xml \
             --with-html --html-report=test_results.html \
             --html-report-template=resources/templates/test_report_template.html -v
+
+
+If you want to launch only the tests in a specific regions, for example in Spain
+region, just execute the following command:
+
+::
+
+  nosetests tests.regions.test_spain --exe \
+          --with-xunit --xunit-file=test_results.xml \
+          --with-html --html-report=test_results.html \
+          --html-report-template=resources/templates/test_report_template.html -v
 
 
 **'Result Analyzer' script**
