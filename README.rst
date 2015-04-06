@@ -15,9 +15,6 @@ Components
 `Region Sanity Checks <fiware-region-sanity-tests/README.rst>`_
    Tests checking capabilities and global status of a node (*region*).
 
-`Nagios Configuration <fiware-nagios-configuration/README.rst>`_
-   Configuration files to setup infrastructure monitoring using Nagios_.
-
 
 License
 -------
@@ -28,4 +25,3 @@ License
 .. REFERENCES
 
 .. _FIWARE Lab: http://www.fiware.org/lab/
-.. _Nagios: http://www.nagios.org/
