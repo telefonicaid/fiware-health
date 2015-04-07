@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -31,20 +31,21 @@ import time
 
 class FiwareNovaOperations:
 
-    def __init__(self, username, password, tenant_id, keystone_url, region_name):
+    def __init__(self, logger, region_name, **kwargs):
         """
-        Inits Nova-Client. Url will be loaded from Keystone Service Catalog (publicURL, compute service)
-        :param username: Fiware username
-        :param password: Fiware password
-        :param tenant_id: Fiware Tenant ID
-        :param keystone_url: Keystore URL
+        Initializes Nova-Client.
+        :param logger: Logger object
         :param region_name: Fiware Region name
-        :return: None
+        :param auth_session: Keystone auth session object
+        :param auth_url: Keystone auth URL (needed if no session is given)
+        :param auth_token: Keystone auth token (needed if no session is given)
         """
-        self.region_name = region_name
-        self.client = client.Client(username=username, api_key=password, project_id=tenant_id, auth_url=keystone_url,
-                                    endpoint_type='publicURL', service_type="compute", region_name=region_name,
-                                    timeout=DEFAULT_REQUEST_TIMEOUT)
+
+        self.logger = logger
+        self.client = client.Client(session=kwargs.get('auth_session'),
+                                    auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
+                                    endpoint_type='publicURL', service_type="compute",
+                                    region_name=region_name, timeout=DEFAULT_REQUEST_TIMEOUT)
 
     def get_flavor_list(self):
         """
@@ -54,7 +55,7 @@ class FiwareNovaOperations:
         flavor_list = []
 
         nova_flavor_list = self.client.flavors.list()
-        print "Favor list: ", nova_flavor_list
+        self.logger.debug("Flavor list: %s", nova_flavor_list)
 
         if nova_flavor_list is not None and len(nova_flavor_list) != 0:
             for flavor in nova_flavor_list:
@@ -89,7 +90,7 @@ class FiwareNovaOperations:
         img_list = []
 
         nova_img_list = self.client.images.list()
-        print "Image list: ", nova_img_list
+        self.logger.debug("Image list: %s", nova_img_list)
 
         if nova_img_list is not None and len(nova_img_list) != 0:
             for image in nova_img_list:
@@ -137,13 +138,13 @@ class FiwareNovaOperations:
         sec_group_id = None
 
         nova_sec_group_created = self.client.security_groups.create(name, "Testing purpose")
-        print "Created security group:", nova_sec_group_created
+        self.logger.debug("Created security group: %s", nova_sec_group_created)
         sec_group_id = nova_sec_group_created.to_dict()['id']
 
         nova_sec_group_rule = self.client.security_group_rules.create(sec_group_id, ip_protocol="TCP",
                                                                       from_port="22", to_port="22",
                                                                       cidr="0.0.0.0/0", group_id=None)
-        print "Created security group rule (TCP 22 0.0.0.0/0):", nova_sec_group_rule
+        self.logger.debug("Created security group rule (TCP 22 0.0.0.0/0): %s", nova_sec_group_rule)
 
         return sec_group_id
 
@@ -162,7 +163,7 @@ class FiwareNovaOperations:
         :return: Private Key generated.
         """
         nova_keypair = self.client.keypairs.create(name)
-        print "Created keypair:", nova_keypair
+        self.logger.debug("Created keypair: %s", nova_keypair)
         return nova_keypair.to_dict()['private_key']
 
     def delete_keypair(self, name):
@@ -201,7 +202,7 @@ class FiwareNovaOperations:
                                                           security_groups=security_group_name_list,
                                                           nics=network_id_list, min_count="1", max_count="1")
 
-        print "Created server", nova_server_response.to_dict()
+        self.logger.debug("Created server: %s", nova_server_response.to_dict())
         return nova_server_response.to_dict()
 
     def get_server(self, instance_id):
@@ -222,11 +223,12 @@ class FiwareNovaOperations:
         """
         for i in range(WAIT_FOR_INSTANCE_ACTIVE):
             server_data = self.get_server(server_id)
-            print "TIME {time}. Waiting for status '{expected_status}'. Instance: {server}. Current status: {status}".\
-                format(time=i, expected_status=status, server=server_id, status=server_data['status'])
+            self.logger.debug("TIME {time}. Waiting for status '{expected_status}'. " +
+                              "Instance: {server}. Current status: {status}".format(
+                                  time=i, expected_status=status, server=server_id, status=server_data['status']))
             if server_data['status'] == status or server_data['status'] == 'ERROR':
                 break
-            time.sleep(SLEEP_TIME) # Sleep SLEEP_TIME seconds.
+            time.sleep(SLEEP_TIME)  # Sleep SLEEP_TIME seconds.
 
         return server_data['status']
 
@@ -245,8 +247,6 @@ class FiwareNovaOperations:
         :return: Allocated IP
         """
         response_data = self.client.floating_ips.create(pool=pool_name)
-        print "IP allocated:", response_data
-
         return response_data.to_dict()
 
     def deallocate_ip(self, ip_id):

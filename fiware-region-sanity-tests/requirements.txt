@@ -1,4 +1,5 @@
 python-novaclient
 python-neutronclient
-nose
+python-keystoneclient
+nose>=1.3.6
 git+https://github.com/telefonicaid/nose-html-reporting.git

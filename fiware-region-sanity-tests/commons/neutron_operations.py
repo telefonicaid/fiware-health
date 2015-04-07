@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -30,20 +30,23 @@ from commons.constants import DEFAULT_REQUEST_TIMEOUT
 
 class FiwareNeutronOperations:
 
-    def __init__(self, username, password, tenant_id, keystone_url, region_name):
+    def __init__(self, logger, region_name, tenant_id, **kwargs):
         """
-        Inits Neutron Rest Client. Url will be loaded from Keystone Service Catalog (publicURL, network service)
-        :param username: Fiware username
-        :param password: Fiware password
-        :param tenant_id: Fiware Tenant ID
-        :param keystone_url: Keystore URL
+        Initializes Neutron-Client.
+        :param logger: Logger object
         :param region_name: Fiware Region name
-        :return: None
+        :param tenant_id: Tenant identifier
+        :param auth_session: Keystone auth session object
+        :param auth_url: Keystone auth URL (needed if no session is given)
+        :param auth_token: Keystone auth token (needed if no session is given)
         """
+
+        self.logger = logger
         self.tenant_id = tenant_id
-        self.client = client.Client(username=username, password=password, tenant_id=tenant_id, auth_url=keystone_url,
-                                    endpoint_type='publicURL', service_type="network", region_name=region_name,
-                                    timeout=DEFAULT_REQUEST_TIMEOUT)
+        self.client = client.Client(session=kwargs.get('auth_session'),
+                                    auth_url=kwargs.get('auth_url'), token=kwargs.get('auth_token'),
+                                    endpoint_type='publicURL', service_type="network",
+                                    region_name=region_name, timeout=DEFAULT_REQUEST_TIMEOUT)
 
     def __build_body_create_network__(self, network_name, admin_state_up=True):
         """
@@ -109,7 +112,7 @@ class FiwareNeutronOperations:
         """
         create_router_body = self.__build_body_create_router__(router_name, external_network_id)
         neutron_network_response = self.client.create_router(create_router_body)
-        print "Created router:", neutron_network_response
+        self.logger.debug("Created router: %s", neutron_network_response)
 
         return neutron_network_response['router']
 
@@ -141,7 +144,7 @@ class FiwareNeutronOperations:
         neutron_subnetwork_response = self.client.create_subnet(body_subnetwork)
         neutron_network_response['network'].update(neutron_subnetwork_response)
 
-        print "Created network and sub-network:", neutron_network_response['network']
+        self.logger.debug("Created network and sub-network: %s", neutron_network_response['network'])
         return neutron_network_response['network']
 
     def delete_network(self, network_id):

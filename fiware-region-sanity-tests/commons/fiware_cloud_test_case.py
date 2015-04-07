@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -24,73 +24,125 @@
 __author__ = 'jfernandez'
 
 
+from keystoneclient import auth, session
+from keystoneclient.openstack.common.apiclient.exceptions import ClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
+from commons.constants import *
 import unittest
-from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_PASS, \
-    PROPERTIES_CONFIG_CRED_TENANT_ID, PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_KEYSTONE_URL
+import logging
 import json
-import sys
 
 
 class FiwareTestCase(unittest.TestCase):
 
-    # Spain region, by default
-    region_name = 'Spain'
+    # Test region (to be overriden)
+    region_name = None
+
+    # Test authentication
+    auth_url = None
+    auth_sess = None
+    auth_token = None
 
     # Temporal test data
     test_world = dict()
 
+    # Test logger
+    logger = None
+
     @classmethod
-    def __load_project_properties(cls):
+    def load_project_properties(cls):
         """
         Parse the JSON configuration file located in the settings folder and
         store the resulting dictionary in the config class variable.
         """
 
-        print "Loading test properties"
+        cls.logger.debug("Loading test settings...")
         with open(PROPERTIES_FILE) as config_file:
             try:
                 cls.conf = json.load(config_file)
-            except Exception, e:
-                print 'Error parsing config file: %s' % e
-                sys.exit(1)
+            except Exception as e:
+                assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
+
+        for name in [PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID]:
+            if not cls.conf[PROPERTIES_CONFIG_CRED][name]:
+                assert False, "A value for '{}' must be provided".format(name)
+
+    @classmethod
+    def init_auth(cls):
+        """
+        Init the variables related to authorization, needed to execute tests
+        """
+
+        credentials = auth.identity.v2.Password(
+            auth_url=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
+            username=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
+            password=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS],
+            tenant_name=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID])
+
+        cls.logger.debug("Getting auth token...")
+        cls.auth_url = credentials.auth_url
+        cls.auth_sess = session.Session(auth=credentials)
+        try:
+            cls.auth_token = cls.auth_sess.get_token()
+            cls.logger.debug("X-Auth-Token: %s", cls.auth_token)
+        except ClientException as e:
+            cls.logger.error("No auth token (%s): all tests will be skipped", e.message)
 
     @classmethod
     def init_world(cls):
         """
-        Init the 'world' variable to store created data by Test Cases
-        :return: None
+        Init the 'test_world' variable to store created data by tests
         """
-        cls.test_world.update({'servers': list(), 'sec_groups': list(), 'keypair_names': list(), 'networks': list(),
-                               'routers': list(), 'allocated_ips': list()})
+
+        cls.test_world.update({
+            'servers': list(),
+            'sec_groups': list(),
+            'keypair_names': list(),
+            'networks': list(),
+            'routers': list(),
+            'allocated_ips': list()
+        })
 
     @classmethod
     def setUpClass(cls):
         """
-        SetUp all test cases. Init REST-Clients.
-        Will be execute before ALL tests.
-        :return: None
+        Setup testcase (executed before ALL tests): initialize logger and REST-Clients.
         """
-        cls.__load_project_properties()
 
-        print "SetUp Class - test case for '{region_name}' region".format(region_name=cls.region_name)
-        cls.nova_operations = FiwareNovaOperations(
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS],
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID],
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
-                                                cls.region_name)
-        cls.neutron_operations = FiwareNeutronOperations(
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS],
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID],
-                                                cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
-                                                cls.region_name)
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+        cls.logger = logging.getLogger("TestCase")
+        cls.logger.addHandler(handler)
+        cls.logger.setLevel(logging.NOTSET)
 
-        # Init world variables
+        # These tests should be particularized for a region
+        cls.logger.debug("Tests for '%s' region", cls.region_name)
+
+        # Load properties from config file
+        cls.load_project_properties()
+        username = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER]
+        tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
+        cls.logger.debug("Settings = { user: '%s', tenant: '%s' }", username, tenant_id)
+
+        # Initialize session and try to get auth token
+        cls.init_auth()
+
+        # Initialize world variables
         cls.init_world()
+
+        # Initialize OpenStack operations
+        cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, auth_session=cls.auth_sess)
+        cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
+                                                         auth_session=cls.auth_sess)
 
     @classmethod
     def tearDownClass(cls):
         None
+
+    def setUp(self):
+        """
+        Skip test if no auth token could be retrieved.
+        """
+        if not self.auth_token:
+            self.skipTest("No auth token could be retrieved")
