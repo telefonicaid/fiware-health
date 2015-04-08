@@ -25,7 +25,8 @@ __author__ = 'jfernandez'
 
 
 from keystoneclient import auth, session
-from keystoneclient.openstack.common.apiclient.exceptions import ClientException
+from keystoneclient.openstack.common.apiclient.exceptions import ClientException as KeystoneClientException
+from novaclient.exceptions import ClientException as NovaClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
 from commons.constants import *
@@ -45,7 +46,7 @@ class FiwareTestCase(unittest.TestCase):
     auth_token = None
 
     # Temporal test data
-    test_world = dict()
+    test_world = {}
 
     # Test logger
     logger = None
@@ -72,6 +73,7 @@ class FiwareTestCase(unittest.TestCase):
     def init_auth(cls):
         """
         Init the variables related to authorization, needed to execute tests
+        :return: The auth token retrieved
         """
 
         credentials = auth.identity.v2.Password(
@@ -85,24 +87,62 @@ class FiwareTestCase(unittest.TestCase):
         cls.auth_sess = session.Session(auth=credentials)
         try:
             cls.auth_token = cls.auth_sess.get_token()
-            cls.logger.debug("X-Auth-Token: %s", cls.auth_token)
-        except ClientException as e:
+        except KeystoneClientException as e:
             cls.logger.error("No auth token (%s): all tests will be skipped", e.message)
+
+        return cls.auth_token
+
+    @classmethod
+    def init_clients(cls, tenant_id):
+        """
+        Init the OpenStack API clients
+        """
+
+        cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, auth_session=cls.auth_sess)
+        cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
+                                                         auth_session=cls.auth_sess)
 
     @classmethod
     def init_world(cls):
         """
-        Init the 'test_world' variable to store created data by tests
+        Init the test_world variable to store created data by tests
         """
 
         cls.test_world.update({
-            'servers': list(),
-            'sec_groups': list(),
-            'keypair_names': list(),
-            'networks': list(),
-            'routers': list(),
-            'allocated_ips': list()
+            'servers': [],
+            'sec_groups': [],
+            'keypair_names': [],
+            'networks': [],
+            'routers': [],
+            'allocated_ips': []
         })
+
+        cls.reset_world_allocated_ips(init=True)
+        cls.logger.debug("test_world = %s", str(cls.test_world))
+
+    @classmethod
+    def reset_world_allocated_ips(cls, init=False):
+        """
+        Init the test_world['allocated_ips'] entry (possibly, after deallocating resources)
+        """
+
+        if init:
+            # get pre-existing allocated IP list (ideally, empty when starting the tests)
+            try:
+                ip_data_list = cls.nova_operations.list_allocated_ips()
+                for ip_data in ip_data_list:
+                    cls.logger.debug("init_world() found IP %s not deallocated", ip_data.ip)
+                    cls.test_world['allocated_ips'].append(ip_data.id)
+            except NovaClientException as e:
+                cls.logger.error("init_world() failed to get allocated IP list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for allocated_ip_id in list(cls.test_world['allocated_ips']):
+            try:
+                cls.nova_operations.deallocate_ip(allocated_ip_id)
+                cls.test_world['allocated_ips'].remove(allocated_ip_id)
+            except NovaClientException as e:
+                cls.logger.error("Failed to deallocate IP %s: %s", allocated_ip_id, e)
 
     @classmethod
     def setUpClass(cls):
@@ -123,18 +163,12 @@ class FiwareTestCase(unittest.TestCase):
         cls.load_project_properties()
         username = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER]
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
-        cls.logger.debug("Settings = { user: '%s', tenant: '%s' }", username, tenant_id)
+        cls.logger.debug("Settings = {'user': '%s', 'tenant': '%s'}", username, tenant_id)
 
-        # Initialize session and try to get auth token
-        cls.init_auth()
-
-        # Initialize world variables
-        cls.init_world()
-
-        # Initialize OpenStack operations
-        cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, auth_session=cls.auth_sess)
-        cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
-                                                         auth_session=cls.auth_sess)
+        # Initialize session trying to get auth token; on success, continue with initialization
+        if cls.init_auth():
+            cls.init_clients(tenant_id)
+            cls.init_world()
 
     @classmethod
     def tearDownClass(cls):
@@ -142,7 +176,9 @@ class FiwareTestCase(unittest.TestCase):
 
     def setUp(self):
         """
-        Skip test if no auth token could be retrieved.
+        Setup each single test
         """
+
+        # skip test if no auth token could be retrieved
         if not self.auth_token:
             self.skipTest("No auth token could be retrieved")

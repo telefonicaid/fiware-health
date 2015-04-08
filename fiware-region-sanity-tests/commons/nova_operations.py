@@ -246,8 +246,9 @@ class FiwareNovaOperations:
         :param pool_name: Name of the IP Pool
         :return: Allocated IP
         """
-        response_data = self.client.floating_ips.create(pool=pool_name)
-        return response_data.to_dict()
+        allocated_ip_data = self.client.floating_ips.create(pool=pool_name)
+        self.logger.debug("Allocated IP %s: %s", allocated_ip_data.ip, allocated_ip_data.id)
+        return allocated_ip_data.to_dict()
 
     def deallocate_ip(self, ip_id):
         """
@@ -255,3 +256,11 @@ class FiwareNovaOperations:
         :param ip_id: The floating ip address to delete.
         """
         self.client.floating_ips.delete(ip_id)
+        self.logger.debug("Deallocated IP with id %s", ip_id)
+
+    def list_allocated_ips(self):
+        """
+        Gets all the IPs currently allocated
+        :return: IP list
+        """
+        return self.client.floating_ips.list()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -25,16 +25,19 @@ __author__ = 'jfernandez'
 
 
 from commons.fiware_cloud_test_case import FiwareTestCase
-from commons.constants import BASE_IMAGE_NAME, PROPERTIES_CONFIG_REGION_CONFIG, \
-    PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET
-from novaclient.exceptions import NotFound
+from commons.constants import *
+from novaclient.exceptions import NotFound, Forbidden
 import time
 
 
-class FiwareRegionsBaseTests (FiwareTestCase):
+class FiwareRegionsBaseTests(FiwareTestCase):
 
-    def setUp(self):
-        print "Setting up Test Cases - ", self.region_name
+    region_conf = None
+
+    @classmethod
+    def setUpClass(cls):
+        super(FiwareRegionsBaseTests, cls).setUpClass()
+        cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION_CONFIG]
 
     def test_flavors_not_empty(self):
         """
@@ -96,23 +99,26 @@ class FiwareRegionsBaseTests (FiwareTestCase):
 
     def test_allocate_ip(self):
         """
-        Test 07: Allocate a public IP
-        :return:
+        Test allocation of a public IP
         """
-        net = self.conf[PROPERTIES_CONFIG_REGION_CONFIG][PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET][self.region_name]
-        allocated_ip_data = self.nova_operations.allocate_ip(net)
-        self.assertIsNotNone(allocated_ip_data, "Problems allocating IP from pool: " + net)
 
-        self.test_world['allocated_ips'].append(allocated_ip_data['id'])
+        # skip if not all IPs were deallocated
+        if self.test_world['allocated_ips']:
+            self.skipTest("Not all the IPs were deallocated")
+
+        net = self.region_conf[PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET][self.region_name]
+        try:
+            allocated_ip_data = self.nova_operations.allocate_ip(net)
+            self.assertIsNotNone(allocated_ip_data, "Problems allocating IP from pool '%s'" % net)
+            self.test_world['allocated_ips'].append(allocated_ip_data['id'])
+        except Forbidden as e:
+            self.logger.debug("Quota exceeded when allocating IP from pool '%s'", net)
+            self.fail(e)
 
     def tearDown(self):
         """
-        TearDown. Clean all test data from the environment after each test execution.
-        :return: None
+        Clean all test data from the environment after each test execution.
         """
-
-        print "TearDown - Removing generated test data"
-        print str(self.test_world)
 
         error_message = ""
         if 'servers' in self.test_world:
@@ -156,15 +162,9 @@ class FiwareRegionsBaseTests (FiwareTestCase):
                 except Exception as detail:
                     error_message = error_message + "ERROR deleting routers. " + str(detail) + "\n"
 
-        if 'allocated_ips' in self.test_world:
-            for ip_id in self.test_world['allocated_ips']:
-                try:
-                    self.nova_operations.deallocate_ip(ip_id)
-                except Exception as detail:
-                    error_message = error_message + "ERROR deallocating IP. " + str(detail) + "\n"
-
-        #Init world after cleaning
-        self.init_world()
+        if self.test_world.get('allocated_ips'):
+            self.logger.debug("Tearing down allocated IPs...")
+            self.reset_world_allocated_ips()
 
         if error_message != "":
             raise Exception(error_message)
