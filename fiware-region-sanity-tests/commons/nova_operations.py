@@ -131,30 +131,48 @@ class FiwareNovaOperations:
 
     def create_security_group_and_rules(self, name):
         """
-        Creates a new Security Group and a default Rule (TCP/IP 22)
+        Creates a new Security Group and a default Rule (TCP/22)
         :param name: Name of Sec. Group.
         :return: Security Group ID
         """
-        sec_group_id = None
 
-        nova_sec_group_created = self.client.security_groups.create(name, "Testing purpose")
-        self.logger.debug("Created security group: %s", nova_sec_group_created)
-        sec_group_id = nova_sec_group_created.to_dict()['id']
+        # new security group
+        sec_group = self.client.security_groups.create(name, "Testing purpose")
+        self.logger.debug("Created security group '%s': %s", name, sec_group.id)
 
-        nova_sec_group_rule = self.client.security_group_rules.create(sec_group_id, ip_protocol="TCP",
-                                                                      from_port="22", to_port="22",
-                                                                      cidr="0.0.0.0/0", group_id=None)
-        self.logger.debug("Created security group rule (TCP 22 0.0.0.0/0): %s", nova_sec_group_rule)
+        # new rule in security group
+        cidr = "0.0.0.0/0"
+        protocol = "TCP"
+        port = 22
+        sec_group_rule = self.client.security_group_rules.create(sec_group.id, ip_protocol=protocol,
+                                                                 from_port=port, to_port=port, cidr=cidr)
+        self.logger.debug("Created security group rule (%s %d %s): %s", protocol, port, cidr, sec_group_rule)
 
-        return sec_group_id
+        return sec_group.id
 
-    def delete_security_group(self, id):
+    def delete_security_group(self, sec_group_id):
         """
         Removes the Sec. Group.
-        :param id: Sec. Group to be deleted.
+        :param sec_group_id: Sec. Group to be deleted.
         :return: None
         """
-        self.client.security_groups.delete(id)
+        self.client.security_groups.delete(sec_group_id)
+        self.logger.debug("Deleted security group %s", sec_group_id)
+
+    def list_security_groups(self, name=None):
+        """
+        Gets all the security groups
+        :param name: Security group name to be added to the search options
+        :return: Security group list
+        """
+        search_opts = {'name': name} if name else None
+        sec_group_list = self.client.security_groups.list(search_opts)
+
+        # TODO: remove this filtering when Compute API v2 extensions supports 'search_opts' as query parameters
+        if name:
+            sec_group_list = [sec_group for sec_group in sec_group_list if sec_group.name == name]
+
+        return sec_group_list
 
     def create_keypair(self, name):
         """

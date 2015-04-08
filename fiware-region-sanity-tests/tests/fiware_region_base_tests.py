@@ -79,13 +79,21 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
     def test_create_security_group_and_rules(self):
         """
-        Test 05: Check if it is possible to create a new Security Group with rules.
+        Test creating a new security group with rules
         """
-        sec_group_name = "testing_sec_group"
-        sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
-        self.assertIsNotNone(sec_group_id, "Problems creating Security Group")
 
-        self.test_world['sec_groups'].append(sec_group_id)
+        # skip if not all security groups were deleted
+        if self.test_world['sec_groups']:
+            self.skipTest("Not all the security groups were deleted")
+
+        sec_group_name = TEST_SEC_GROUP
+        try:
+            sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
+            self.assertIsNotNone(sec_group_id, "Problems creating security group '%s'" % sec_group_name)
+            self.test_world['sec_groups'].append(sec_group_id)
+        except Forbidden as e:
+            self.logger.debug("Quota exceeded when creating a security group")
+            self.fail(e)
 
     def test_create_keypair(self):
         """
@@ -134,12 +142,9 @@ class FiwareRegionsBaseTests(FiwareTestCase):
             # Wait 5 seconds after Server deletion process
             time.sleep(5)
 
-        if 'sec_groups' in self.test_world:
-            for sec_group in self.test_world['sec_groups']:
-                try:
-                    self.nova_operations.delete_security_group(sec_group)
-                except Exception as detail:
-                    error_message = error_message + "ERROR deleting security groups. " + str(detail) + "\n"
+        if self.test_world.get('sec_groups'):
+            self.logger.debug("Tearing down security groups...")
+            self.reset_world_sec_groups()
 
         if 'keypair_names' in self.test_world:
             for keypair_name in self.test_world['keypair_names']:

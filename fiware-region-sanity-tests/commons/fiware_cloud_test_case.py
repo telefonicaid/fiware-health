@@ -117,8 +117,33 @@ class FiwareTestCase(unittest.TestCase):
             'allocated_ips': []
         })
 
+        cls.reset_world_sec_groups(init=True)
         cls.reset_world_allocated_ips(init=True)
         cls.logger.debug("test_world = %s", str(cls.test_world))
+
+    @classmethod
+    def reset_world_sec_groups(cls, init=False):
+        """
+        Init the test_world['sec_groups'] entry (possibly, after deleting resources)
+        """
+
+        if init:
+            # get pre-existing test security group list (ideally, empty when starting the tests)
+            try:
+                sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP)
+                for sec_group_data in sec_group_data_list:
+                    cls.logger.debug("init_world() found security group '%s' not deleted", sec_group_data.name)
+                    cls.test_world['sec_groups'].append(sec_group_data.id)
+            except NovaClientException as e:
+                cls.logger.error("init_world() failed to get security group list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for sec_group_id in list(cls.test_world['sec_groups']):
+            try:
+                cls.nova_operations.delete_security_group(sec_group_id)
+                cls.test_world['sec_groups'].remove(sec_group_id)
+            except NovaClientException as e:
+                cls.logger.error("Failed to delete security group %s: %s", sec_group_id, e)
 
     @classmethod
     def reset_world_allocated_ips(cls, init=False):

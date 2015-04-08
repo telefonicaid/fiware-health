@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -45,3 +45,4 @@ SLEEP_TIME = 5
 
 # TEST DATA
 BASE_IMAGE_NAME = "CentOS-6.3init"
+TEST_SEC_GROUP = "testing_sec_group"
