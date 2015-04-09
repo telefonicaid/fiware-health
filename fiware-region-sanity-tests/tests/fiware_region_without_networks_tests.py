@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -23,12 +23,13 @@
 
 __author__ = 'jfernandez'
 
-
+from novaclient.exceptions import OverLimit, Forbidden, ClientException
 from tests import fiware_region_base_tests
-from commons.constants import WAIT_FOR_INSTANCE_ACTIVE, SLEEP_TIME, BASE_IMAGE_NAME
+from commons.constants import *
+from datetime import datetime
 
 
-class FiwareRegionWithoutNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
+class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
 
     def __deploy_instance_helper__(self, instance_name, keypair_name=None, sec_group_name=None, metadata=None):
         """
@@ -43,61 +44,88 @@ class FiwareRegionWithoutNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseT
         :return: None
         """
 
+        # skip if not all servers were deleted
+        if self.test_world['servers']:
+            self.skipTest("Not all the servers were deleted")
+
         flavor_id = self.nova_operations.get_any_flavor_id()
         self.assertIsNotNone(flavor_id, "Problems retrieving a flavor")
 
         image_id = self.nova_operations.find_image_id_by_name(image_name=BASE_IMAGE_NAME)
         self.assertIsNotNone(image_id, "Problems retrieving the image '{}'".format(BASE_IMAGE_NAME))
 
-        if keypair_name is not None:
-            keypair_value = self.nova_operations.create_keypair(keypair_name)
-            self.test_world['keypair_names'].append(keypair_name)
+        # instance prerequisites
+        try:
+            if keypair_name:
+                self.nova_operations.create_keypair(keypair_name)
+                self.test_world['keypair_names'].append(keypair_name)
 
-        security_group_name_list = None
-        if sec_group_name is not None:
-            sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
-            self.test_world['sec_groups'].append(sec_group_id)
-            security_group_name_list = [sec_group_name]
+            security_group_name_list = None
+            if sec_group_name:
+                sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
+                self.test_world['sec_groups'].append(sec_group_id)
+                security_group_name_list = [sec_group_name]
+        except ClientException as e:
+            self.logger.debug("Either required keypair or security group could not be created: %s", e)
+            self.fail(e)
 
-        server_data = self.nova_operations.launch_instance(instance_name=instance_name, flavor_id=flavor_id,
-                                                           image_id=image_id,
-                                                           metadata=metadata,
-                                                           keypair_name=keypair_name,
-                                                           security_group_name_list=security_group_name_list)
-        self.test_world['servers'].append(server_data['id'])
+        # create new instance
+        try:
+            server_data = self.nova_operations.launch_instance(instance_name=instance_name,
+                                                               flavor_id=flavor_id,
+                                                               image_id=image_id,
+                                                               metadata=metadata,
+                                                               keypair_name=keypair_name,
+                                                               security_group_name_list=security_group_name_list)
+        except Forbidden as e:
+            self.logger.debug("Quota exceeded when launching a new instance")
+            self.fail(e)
+        except OverLimit as e:
+            self.logger.debug("Not enough resources to launch new instance: %s", e)
+            self.fail(e)
+        else:
+            self.test_world['servers'].append(server_data['id'])
 
         # Wait for status=ACTIVE
         status = self.nova_operations.wait_for_task_status(server_data['id'], 'ACTIVE')
-        self.assertEqual(status, 'ACTIVE',
-                         "Server launched is not ACTIVE after {seconds} seconds. Current Server status: {status}"
-                         .format(seconds=WAIT_FOR_INSTANCE_ACTIVE*SLEEP_TIME, status=status))
+        self.assertEqual(status, 'ACTIVE', "Server NOT ACTIVE after {seconds} seconds. Current status is {status}"
+                         .format(seconds=MAX_WAIT_ITERATIONS*SLEEP_TIME, status=status))
 
-    def test_deploy_instance_with_metadatas(self):
+    def test_deploy_instance_with_custom_metadata(self):
         """
-        Test 17: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, Metadatas
+        Test whether it is possible to deploy an instance with custom metadata
         """
-        self.__deploy_instance_helper__("testing_instance_03",
-                                        metadata={"metadatatest01": "qatesting01"})
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        instance_name = TEST_SERVER_PREFIX + "_metadata_" + suffix
+        instance_meta = {"test_item": "test_value"}
+        self.__deploy_instance_helper__(instance_name=instance_name, metadata=instance_meta)
 
     def test_deploy_instance_with_keypair(self):
         """
-        Test 18: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new Keypair
+        Test whether it is possible to deploy an instance with new keypair
         """
-        self.__deploy_instance_helper__("testing_instance_04",
-                                        keypair_name="testing_keypair04")
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        instance_name = TEST_SERVER_PREFIX + "_keypair_" + suffix
+        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
+        self.__deploy_instance_helper__(instance_name=instance_name, keypair_name=keypair_name)
 
     def test_deploy_instance_with_sec_group(self):
         """
-        Test 19: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new Sec. Group
+        Test whether it is possible to deploy an instance with new security group
         """
-        self.__deploy_instance_helper__("testing_instance_05",
-                                        sec_group_name="testing_sec_group_05")
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        instance_name = TEST_SERVER_PREFIX + "_sec_group_" + suffix
+        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
+        self.__deploy_instance_helper__(instance_name=instance_name, sec_group_name=sec_group_name)
 
     def test_deploy_instance_with_all_params(self):
         """
-        Test 20: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, Sec. Group, keypair, metadata
+        Test whether it is possible to deploy an instance with all params
         """
-        self.__deploy_instance_helper__("testing_instance_06",
-                                        keypair_name="testing_keypair06",
-                                        sec_group_name="testing_sec_group_06",
-                                        metadata={"metadatatest01": "qatesting01"})
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        instance_meta = {"test_item": "test_value"}
+        instance_name = TEST_SERVER_PREFIX + "_all_params_" + suffix
+        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
+        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
+        self.__deploy_instance_helper__(instance_name=instance_name, metadata=instance_meta,
+                                        keypair_name=keypair_name, sec_group_name=sec_group_name)

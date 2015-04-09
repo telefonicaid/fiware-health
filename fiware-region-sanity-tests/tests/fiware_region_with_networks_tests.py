@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -25,8 +25,8 @@ __author__ = 'jfernandez'
 
 
 from tests import fiware_region_base_tests
-from commons.constants import WAIT_FOR_INSTANCE_ACTIVE, SLEEP_TIME, BASE_IMAGE_NAME, PROPERTIES_CONFIG_REGION_CONFIG, \
-    PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET
+from commons.constants import MAX_WAIT_ITERATIONS, SLEEP_TIME, BASE_IMAGE_NAME, PROPERTIES_CONFIG_REGION, \
+    PROPERTIES_CONFIG_REGION_EXTERNAL_NET
 
 
 class FiwareRegionWithNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
@@ -83,8 +83,7 @@ class FiwareRegionWithNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         status = self.nova_operations.wait_for_task_status(server_data['id'], 'ACTIVE')
         self.assertEqual(status, 'ACTIVE',
                          "Server launched is not ACTIVE after {seconds} seconds. Current Server status: {status}"
-                         .format(seconds=WAIT_FOR_INSTANCE_ACTIVE*SLEEP_TIME, status=status))
-
+                         .format(seconds=MAX_WAIT_ITERATIONS*SLEEP_TIME, status=status))
 
     def test_create_network_and_subnet(self):
         """
@@ -124,7 +123,7 @@ class FiwareRegionWithNetkorkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         external_network_id = None
         external_network_list = self.neutron_operations.get_network_external_list()
         if len(external_network_list) != 0:
-            external_net_region = self.conf[PROPERTIES_CONFIG_REGION_CONFIG][PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET]
+            external_net_region = self.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_EXTERNAL_NET]
             if self.region_name in external_net_region:
                 ext_net_config = external_net_region[self.region_name]
                 for external_network in external_network_list:

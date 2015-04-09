@@ -25,23 +25,25 @@ __author__ = 'jfernandez'
 
 
 from novaclient.v1_1 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, WAIT_FOR_INSTANCE_ACTIVE
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_DEFAULT_FLAVOR
 import time
 
 
 class FiwareNovaOperations:
 
-    def __init__(self, logger, region_name, **kwargs):
+    def __init__(self, logger, region_name, test_flavor, **kwargs):
         """
         Initializes Nova-Client.
         :param logger: Logger object
         :param region_name: Fiware Region name
+        :param test_flavor: Flavor for new test instances
         :param auth_session: Keystone auth session object
         :param auth_url: Keystone auth URL (needed if no session is given)
         :param auth_token: Keystone auth token (needed if no session is given)
         """
 
         self.logger = logger
+        self.test_flavor = test_flavor or TEST_DEFAULT_FLAVOR
         self.client = client.Client(session=kwargs.get('auth_session'),
                                     auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
                                     endpoint_type='publicURL', service_type="compute",
@@ -54,19 +56,18 @@ class FiwareNovaOperations:
         :return: A list of :class:`Flavor`
         """
         flavor_list = self.client.flavors.list()
-        self.logger.debug("Available flavors: %s", [str(flavor.name) for flavor in flavor_list])
         return flavor_list
 
     def get_any_flavor_id(self):
         """
-        Gets a flavor id from the available ones (first with name "small", or the last of all otherwise)
+        Gets a flavor id from the available ones (preferably the default test flavor, otherwise the last one)
         :return: Flavor ID, or None if no flavors were available
         """
         flavor_id = None
         flavor_list = self.get_flavor_list()
         for flavor in flavor_list:
             flavor_id = flavor.id
-            if flavor.name == 'small':
+            if flavor.name == self.test_flavor:
                 break
         return flavor_id
 
@@ -133,18 +134,15 @@ class FiwareNovaOperations:
         self.client.security_groups.delete(sec_group_id)
         self.logger.debug("Deleted security group %s", sec_group_id)
 
-    def list_security_groups(self, name=None):
+    def list_security_groups(self, name_prefix=None):
         """
         Gets all the security groups
-        :param name: Security group name to be added to the search options
-        :return: Security group list
+        :param name_prefix: Prefix to match security group names
+        :return: A list of :class:`SecurityGroup`
         """
-        search_opts = {'name': name} if name else None
-        sec_group_list = self.client.security_groups.list(search_opts)
-
-        # TODO: remove this filtering when Compute API v2 extensions supports 'search_opts' as query parameters
-        if name:
-            sec_group_list = [sec_group for sec_group in sec_group_list if sec_group.name == name]
+        sec_group_list = self.client.security_groups.list()
+        if name_prefix:
+            sec_group_list = [sec_group for sec_group in sec_group_list if sec_group.name.startswith(name_prefix)]
 
         return sec_group_list
 
@@ -155,7 +153,7 @@ class FiwareNovaOperations:
         :return: Private Key generated.
         """
         nova_keypair = self.client.keypairs.create(name)
-        self.logger.debug("Created keypair %s", nova_keypair)
+        self.logger.debug("Created keypair %s", nova_keypair.name)
         return nova_keypair.to_dict()['private_key']
 
     def delete_keypair(self, name):
@@ -168,20 +166,23 @@ class FiwareNovaOperations:
         self.client.keypairs.delete(keypair)
         self.logger.debug("Deleted keypair '%s'", name)
 
-    def list_keypairs(self, name=None):
+    def list_keypairs(self, name_prefix=None):
         """
         Gets all the keypairs
-        :param name: Keypair name to filter out results
-        :return: Keypair list
+        :param name_prefix: Prefix to match keypair names
+        :return: A list of :class:`Keypair`
         """
-        find_kwargs = {'name': name} if name else {}
-        return self.client.keypairs.findall(**find_kwargs)
+        keypair_list = self.client.keypairs.list()
+        if name_prefix:
+            keypair_list = [keypair for keypair in keypair_list if keypair.name.startswith(name_prefix)]
+
+        return keypair_list
 
     def launch_instance(self, instance_name, image_id, flavor_id, keypair_name=None, metadata=None, userdata=None,
                         security_group_name_list=None, network_id_list=None):
         """
         Launches a new Service Instance.
-        :param name: Something to name the server.
+        :param instance_name: Something to name the server.
         :param image_id: The ImageID to boot with.
         :param flavor_id: The FlavorID to boot onto.
         :param keypair_name: (optional extension) name of previously created
@@ -199,12 +200,13 @@ class FiwareNovaOperations:
                       Example: network_id_list=[{'net-id': network['id']}]
         :return: Instance data launched
         """
+
         nova_server_response = self.client.servers.create(name=instance_name, image=image_id, flavor=flavor_id,
                                                           key_name=keypair_name, meta=metadata, userdata=userdata,
                                                           security_groups=security_group_name_list,
                                                           nics=network_id_list, min_count="1", max_count="1")
 
-        self.logger.debug("Created server: %s", nova_server_response.to_dict())
+        self.logger.debug("Created server '%s': %s", instance_name, nova_server_response.id)
         return nova_server_response.to_dict()
 
     def get_server(self, instance_id):
@@ -216,31 +218,39 @@ class FiwareNovaOperations:
         nova_server_response = self.client.servers.get(instance_id)
         return nova_server_response.to_dict()
 
-    def wait_for_task_status(self, server_id, status):
+    def delete_server(self, instance_id):
         """
-        Wait for a task status. This method will wait until the task has got the given status or 'ERROR' one.
-        :param server_id: Deployed ServerID to be monitored
-        :param status: Status value
-        :return: Real task status at the end
-        """
-        for i in range(WAIT_FOR_INSTANCE_ACTIVE):
-            server_data = self.get_server(server_id)
-            self.logger.debug("TIME {time}. Waiting for status '{expected_status}'. " +
-                              "Instance: {server}. Current status: {status}".format(
-                                  time=i, expected_status=status, server=server_id, status=server_data['status']))
-            if server_data['status'] == status or server_data['status'] == 'ERROR':
-                break
-            time.sleep(SLEEP_TIME)  # Sleep SLEEP_TIME seconds.
-
-        return server_data['status']
-
-    def delete_instance(self, instance_id):
-        """
-        Removes a launched instance.
-        :param instance_id: InstaceID to be deleted.
+        Removes a server.
+        :param instance_id: ServerID to be deleted.
         :return: None
         """
         self.client.servers.delete(instance_id)
+
+    def list_servers(self):
+        """
+        Gets all the servers of the tenant
+        :return: A list of :class:`Server`
+        """
+        return self.client.servers.list()
+
+    def wait_for_task_status(self, server_id, expected_status):
+        """
+        Wait for a task status. This method will wait until the task has got the given status or 'ERROR' one.
+        :param server_id: Deployed ServerID to be monitored
+        :param expected_status: Expected status value
+        :return: Real task status at the end
+        """
+        for i in range(MAX_WAIT_ITERATIONS):
+            server_data = self.get_server(server_id)
+            if server_data['status'] == expected_status or server_data['status'] == 'ERROR':
+                break
+
+            self.logger.debug("Waiting (#%d) for status %s of instance %s (current is %s)...",
+                              i+1, expected_status, server_id, server_data['status'])
+            time.sleep(SLEEP_TIME)
+
+        self.logger.debug("Status of instance %s is %s", server_id, server_data['status'])
+        return server_data['status']
 
     def allocate_ip(self, pool_name):
         """

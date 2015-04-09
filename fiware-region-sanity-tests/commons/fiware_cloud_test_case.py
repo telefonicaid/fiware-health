@@ -27,12 +27,14 @@ __author__ = 'jfernandez'
 from keystoneclient import auth, session
 from keystoneclient.openstack.common.apiclient.exceptions import ClientException as KeystoneClientException
 from novaclient.exceptions import ClientException as NovaClientException
+from novaclient.exceptions import NotFound
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
 from commons.constants import *
 import unittest
 import logging
 import json
+import time
 
 
 class FiwareTestCase(unittest.TestCase):
@@ -67,7 +69,7 @@ class FiwareTestCase(unittest.TestCase):
 
         for name in [PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID]:
             if not cls.conf[PROPERTIES_CONFIG_CRED][name]:
-                assert False, "A value for '{}' must be provided".format(name)
+                assert False, "A value for '{}' must be provided in config file '{}'".format(name, PROPERTIES_FILE)
 
     @classmethod
     def init_auth(cls):
@@ -93,12 +95,13 @@ class FiwareTestCase(unittest.TestCase):
         return cls.auth_token
 
     @classmethod
-    def init_clients(cls, tenant_id):
+    def init_clients(cls, tenant_id, test_flavor):
         """
         Init the OpenStack API clients
         """
 
-        cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, auth_session=cls.auth_sess)
+        cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor,
+                                                   auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
 
@@ -117,10 +120,41 @@ class FiwareTestCase(unittest.TestCase):
             'allocated_ips': []
         })
 
+        cls.reset_world_servers(init=True)
         cls.reset_world_sec_groups(init=True)
         cls.reset_world_keypair_names(init=True)
         cls.reset_world_allocated_ips(init=True)
         cls.logger.debug("test_world = %s", str(cls.test_world))
+
+    @classmethod
+    def reset_world_servers(cls, init=False):
+        """
+        Init the test_world['servers'] entry (possibly, after deleting resources)
+        """
+
+        if init:
+            # get pre-existing server list (ideally, empty when starting the tests)
+            try:
+                server_list = cls.nova_operations.list_servers()
+                for server in server_list:
+                    cls.logger.debug("init_world() found server '%s' not deleted", server.name)
+                    cls.test_world['servers'].append(server.id)
+            except NovaClientException as e:
+                cls.logger.error("init_world() failed to get server list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for server_id in list(cls.test_world['servers']):
+            try:
+                cls.nova_operations.delete_server(server_id)
+                cls.nova_operations.wait_for_task_status(server_id, 'DELETED')
+            except NotFound:
+                cls.test_world['servers'].remove(server_id)
+                cls.logger.debug("Deleted instance %s", server_id)
+            except NovaClientException as e:
+                cls.logger.error("Failed to delete server %s: %s", server_id, e)
+
+        # wait after server deletion process
+        time.sleep(5)
 
     @classmethod
     def reset_world_sec_groups(cls, init=False):
@@ -131,7 +165,7 @@ class FiwareTestCase(unittest.TestCase):
         if init:
             # get pre-existing test security group list (ideally, empty when starting the tests)
             try:
-                sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP)
+                sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP_PREFIX)
                 for sec_group_data in sec_group_data_list:
                     cls.logger.debug("init_world() found security group '%s' not deleted", sec_group_data.name)
                     cls.test_world['sec_groups'].append(sec_group_data.id)
@@ -155,7 +189,7 @@ class FiwareTestCase(unittest.TestCase):
         if init:
             # get pre-existing test keypair list (ideally, empty when starting the tests)
             try:
-                keypair_list = cls.nova_operations.list_keypairs(TEST_KEYPAIR)
+                keypair_list = cls.nova_operations.list_keypairs(TEST_KEYPAIR_PREFIX)
                 for keypair in keypair_list:
                     cls.logger.debug("init_world() found keypair '%s' not deleted", keypair.name)
                     cls.test_world['keypair_names'].append(keypair.name)
@@ -213,11 +247,12 @@ class FiwareTestCase(unittest.TestCase):
         cls.load_project_properties()
         username = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER]
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
+        test_flavor = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_FLAVOR].get(cls.region_name)
         cls.logger.debug("Settings = {'user': '%s', 'tenant': '%s'}", username, tenant_id)
 
         # Initialize session trying to get auth token; on success, continue with initialization
         if cls.init_auth():
-            cls.init_clients(tenant_id)
+            cls.init_clients(tenant_id, test_flavor)
             cls.init_world()
 
     @classmethod

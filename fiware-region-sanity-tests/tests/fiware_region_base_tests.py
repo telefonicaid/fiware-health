@@ -37,7 +37,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
     @classmethod
     def setUpClass(cls):
         super(FiwareRegionsBaseTests, cls).setUpClass()
-        cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION_CONFIG]
+        cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION]
 
     def test_flavors_not_empty(self):
         """
@@ -45,6 +45,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         """
         flavor_list = self.nova_operations.get_flavor_list()
         self.assertNotEqual(len(flavor_list), 0, "Flavor list is empty")
+        self.logger.debug("Available flavors: %s", [str(flavor.name) for flavor in flavor_list])
 
     def test_images_not_empty(self):
         """
@@ -85,7 +86,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         if self.test_world['sec_groups']:
             self.skipTest("Not all the security groups were deleted")
 
-        sec_group_name = TEST_SEC_GROUP
+        sec_group_name = TEST_SEC_GROUP_PREFIX
         try:
             sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
             self.assertIsNotNone(sec_group_id, "Problems creating security group '%s'" % sec_group_name)
@@ -103,7 +104,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         if self.test_world['keypair_names']:
             self.skipTest("Not all the keypairs were deleted")
 
-        keypair_name = TEST_KEYPAIR
+        keypair_name = TEST_KEYPAIR_PREFIX
         try:
             keypair_value = self.nova_operations.create_keypair(keypair_name)
             self.assertIsNotNone(keypair_value, "Problems creating keypair '%s" % keypair_name)
@@ -121,7 +122,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         if self.test_world['allocated_ips']:
             self.skipTest("Not all the IPs were deallocated")
 
-        net = self.region_conf[PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET][self.region_name]
+        net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET][self.region_name]
         try:
             allocated_ip_data = self.nova_operations.allocate_ip(net)
             self.assertIsNotNone(allocated_ip_data, "Problems allocating IP from pool '%s'" % net)
@@ -136,18 +137,10 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         """
 
         error_message = ""
-        if 'servers' in self.test_world:
-            for server_id in self.test_world['servers']:
-                try:
-                    self.nova_operations.delete_instance(server_id)
-                    self.nova_operations.wait_for_task_status(server_id, 'DELETED')
-                except NotFound:
-                    print "Server '{}' deleted".format(server_id)
-                except Exception as detail:
-                    error_message = error_message + "ERROR deleting instances. " + str(detail) + "\n"
 
-            # Wait 5 seconds after Server deletion process
-            time.sleep(5)
+        if self.test_world.get('servers'):
+            self.logger.debug("Tearing down servers...")
+            self.reset_world_servers()
 
         if self.test_world.get('sec_groups'):
             self.logger.debug("Tearing down security groups...")
