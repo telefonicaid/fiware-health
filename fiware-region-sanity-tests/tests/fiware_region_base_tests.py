@@ -48,26 +48,26 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
     def test_images_not_empty(self):
         """
-        Test 02: Check if the Region has images.
+        Test whether region has images
         """
         image_list = self.nova_operations.get_image_list()
-        self.assertIsNotNone(image_list, "Image list is empty")
         self.assertNotEqual(len(image_list), 0, "Image list is empty")
+        self.logger.debug("Found %d available images", len(image_list))
 
-    def test_there_are_init_images(self):
+    def test_cloud_init_aware_images(self):
         """
-        Test 03: Check if the Region has images with 'init' in the name.
+        Test whether region has 'cloud-init-aware' images (suitable for blueprints)
         """
         image_list = self.nova_operations.get_image_list()
-        self.assertIsNotNone(image_list, "Image list is empty")
-        self.assertNotEqual(len(image_list), 0, "Image list is empty")
 
-        found = False
-        for image in image_list:
-            if 'init' in image['name']:
-                found = True
-                break
-        self.assertTrue(found, "No 'init' images has been found")
+        # Filter out images with 'init' in its name
+        image_list = [image for image in image_list if 'init' in image.name]
+
+        # Filter out images with 'sdc_aware' metadata attribute set to True
+        image_list = [image for image in image_list if image.metadata.get('sdc_aware', "false").lower() == "true"]
+
+        self.assertNotEqual(len(image_list), 0, "Cloud-init-aware image list is empty")
+        self.logger.debug("Found %d images", len(image_list))
 
     def test_base_image_for_testing_exists(self):
         """

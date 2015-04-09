@@ -72,36 +72,22 @@ class FiwareNovaOperations:
 
     def get_image_list(self):
         """
-        Gets the list of images from the instantiated Nova client.
-        :return: List of Python dict with the retrieved image data
+        Gets the list of images.
+        :return: A list of :class:`Image`
         """
-        img_list = []
-
-        nova_img_list = self.client.images.list()
-        self.logger.debug("Image list: %s", nova_img_list)
-
-        if nova_img_list is not None and len(nova_img_list) != 0:
-            for image in nova_img_list:
-                # Get full dict
-                image = image.to_dict()
-                img_list.append(image)
-
-        return img_list
+        image_list = self.client.images.list()
+        return image_list
 
     def get_any_image_id(self):
         """
-        Gets a image id from the available ones.
-        Gets the first image with 'init' in its name
-        :return: Image ID
+        Gets a image id from the available ones (first with 'init' in its name)
+        :return: Image ID, or None if not found
         """
-        # GET IMAGE
-        image_list = self.get_image_list()
-
-        # Get the first 'init' image
         image_id = None
+        image_list = self.get_image_list()
         for image in image_list:
-            if 'init' in image['name']:
-                image_id = image['id']
+            if 'init' in image.name:
+                image_id = image.id
                 break
         return image_id
 
