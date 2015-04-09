@@ -41,10 +41,9 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
     def test_flavors_not_empty(self):
         """
-        Test 01: Check if the Region has flavors.
+        Test whether region has flavors
         """
         flavor_list = self.nova_operations.get_flavor_list()
-        self.assertIsNotNone(flavor_list, "Flavor list is empty")
         self.assertNotEqual(len(flavor_list), 0, "Flavor list is empty")
 
     def test_images_not_empty(self):

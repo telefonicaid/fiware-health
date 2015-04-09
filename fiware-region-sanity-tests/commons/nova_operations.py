@@ -45,41 +45,29 @@ class FiwareNovaOperations:
         self.client = client.Client(session=kwargs.get('auth_session'),
                                     auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
                                     endpoint_type='publicURL', service_type="compute",
-                                    region_name=region_name, timeout=DEFAULT_REQUEST_TIMEOUT)
+                                    region_name=region_name,
+                                    timeout=DEFAULT_REQUEST_TIMEOUT)
 
     def get_flavor_list(self):
         """
-        Gets the list of flavors from the instantiated Nova client.
-        :return: A list of Python dict with the retrieved flavor data
+        Gets the list of flavors.
+        :return: A list of :class:`Flavor`
         """
-        flavor_list = []
-
-        nova_flavor_list = self.client.flavors.list()
-        self.logger.debug("Flavor list: %s", nova_flavor_list)
-
-        if nova_flavor_list is not None and len(nova_flavor_list) != 0:
-            for flavor in nova_flavor_list:
-                # Get full dict
-                flavor = flavor.to_dict()
-                flavor_list.append(flavor)
-
+        flavor_list = self.client.flavors.list()
+        self.logger.debug("Available flavors: %s", [str(flavor.name) for flavor in flavor_list])
         return flavor_list
 
     def get_any_flavor_id(self):
         """
-        Gets a flavor id from the available ones
-        Gets the first flavor ID with name "small" or the last of all if no "small" are found
-        :return: Flavor ID
+        Gets a flavor id from the available ones (first with name "small", or the last of all otherwise)
+        :return: Flavor ID, or None if no flavors were available
         """
-        flavor_list = self.get_flavor_list()
-
         flavor_id = None
+        flavor_list = self.get_flavor_list()
         for flavor in flavor_list:
-            if 'small' in flavor['name']:
-                flavor_id = flavor['id']
+            flavor_id = flavor.id
+            if flavor.name == 'small':
                 break
-        flavor_id = flavor[-1] if flavor_id is None else flavor_id
-
         return flavor_id
 
     def get_image_list(self):
