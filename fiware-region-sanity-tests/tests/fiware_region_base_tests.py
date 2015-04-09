@@ -79,7 +79,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
     def test_create_security_group_and_rules(self):
         """
-        Test creating a new security group with rules
+        Test creation of a new security group with rules
         """
 
         # skip if not all security groups were deleted
@@ -97,13 +97,21 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
     def test_create_keypair(self):
         """
-        Test 06: Check if it is possible to create a new Keypair.
+        Test creation of a new keypair
         """
-        keypair_name = "testing_keypair"
-        keypair_value = self.nova_operations.create_keypair(keypair_name)
-        self.assertIsNotNone(keypair_value, "Problems creating Keypair")
 
-        self.test_world['keypair_names'].append(keypair_name)
+        # skip if not all keypairs were deleted
+        if self.test_world['keypair_names']:
+            self.skipTest("Not all the keypairs were deleted")
+
+        keypair_name = TEST_KEYPAIR
+        try:
+            keypair_value = self.nova_operations.create_keypair(keypair_name)
+            self.assertIsNotNone(keypair_value, "Problems creating keypair '%s" % keypair_name)
+            self.test_world['keypair_names'].append(keypair_name)
+        except Forbidden as e:
+            self.logger.debug("Quota exceeded when creating a keypair")
+            self.fail(e)
 
     def test_allocate_ip(self):
         """
@@ -146,12 +154,9 @@ class FiwareRegionsBaseTests(FiwareTestCase):
             self.logger.debug("Tearing down security groups...")
             self.reset_world_sec_groups()
 
-        if 'keypair_names' in self.test_world:
-            for keypair_name in self.test_world['keypair_names']:
-                try:
-                    self.nova_operations.delete_keypair(keypair_name)
-                except Exception as detail:
-                    error_message = error_message + "ERROR deleting keypairs. " + str(detail) + "\n"
+        if self.test_world.get('keypair_names'):
+            self.logger.debug("Tearing down keypairs...")
+            self.reset_world_keypair_names()
 
         if 'networks' in self.test_world:
             for network_id in self.test_world['networks']:

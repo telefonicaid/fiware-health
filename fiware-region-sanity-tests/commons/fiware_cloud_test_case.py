@@ -118,6 +118,7 @@ class FiwareTestCase(unittest.TestCase):
         })
 
         cls.reset_world_sec_groups(init=True)
+        cls.reset_world_keypair_names(init=True)
         cls.reset_world_allocated_ips(init=True)
         cls.logger.debug("test_world = %s", str(cls.test_world))
 
@@ -144,6 +145,30 @@ class FiwareTestCase(unittest.TestCase):
                 cls.test_world['sec_groups'].remove(sec_group_id)
             except NovaClientException as e:
                 cls.logger.error("Failed to delete security group %s: %s", sec_group_id, e)
+
+    @classmethod
+    def reset_world_keypair_names(cls, init=False):
+        """
+        Init the test_world['keypair_names'] entry (possibly, after deleting resources)
+        """
+
+        if init:
+            # get pre-existing test keypair list (ideally, empty when starting the tests)
+            try:
+                keypair_list = cls.nova_operations.list_keypairs(TEST_KEYPAIR)
+                for keypair in keypair_list:
+                    cls.logger.debug("init_world() found keypair '%s' not deleted", keypair.name)
+                    cls.test_world['keypair_names'].append(keypair.name)
+            except NovaClientException as e:
+                cls.logger.error("init_world() failed to get keypair list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for keypair_name in list(cls.test_world['keypair_names']):
+            try:
+                cls.nova_operations.delete_keypair(keypair_name)
+                cls.test_world['keypair_names'].remove(keypair_name)
+            except NovaClientException as e:
+                cls.logger.error("Failed to delete keypair %s: %s", keypair_name, e)
 
     @classmethod
     def reset_world_allocated_ips(cls, init=False):

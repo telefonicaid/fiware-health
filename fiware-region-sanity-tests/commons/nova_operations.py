@@ -181,7 +181,7 @@ class FiwareNovaOperations:
         :return: Private Key generated.
         """
         nova_keypair = self.client.keypairs.create(name)
-        self.logger.debug("Created keypair: %s", nova_keypair)
+        self.logger.debug("Created keypair %s", nova_keypair)
         return nova_keypair.to_dict()['private_key']
 
     def delete_keypair(self, name):
@@ -192,6 +192,16 @@ class FiwareNovaOperations:
         """
         keypair = self.client.keypairs.find(name=name)
         self.client.keypairs.delete(keypair)
+        self.logger.debug("Deleted keypair '%s'", name)
+
+    def list_keypairs(self, name=None):
+        """
+        Gets all the keypairs
+        :param name: Keypair name to filter out results
+        :return: Keypair list
+        """
+        find_kwargs = {'name': name} if name else {}
+        return self.client.keypairs.findall(**find_kwargs)
 
     def launch_instance(self, instance_name, image_id, flavor_id, keypair_name=None, metadata=None, userdata=None,
                         security_group_name_list=None, network_id_list=None):

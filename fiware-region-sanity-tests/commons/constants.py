@@ -46,3 +46,4 @@ SLEEP_TIME = 5
 # TEST DATA
 BASE_IMAGE_NAME = "CentOS-6.3init"
 TEST_SEC_GROUP = "testing_sec_group"
+TEST_KEYPAIR = "testing_keypair"
