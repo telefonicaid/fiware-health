@@ -72,10 +72,10 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
     def test_base_image_for_testing_exists(self):
         """
-        Test 04: Check if the Region has the BASE_IMAGE_NAME used for testing
+        Test whether region has the image used for testing
         """
-        image_id = self.nova_operations.find_image_id_by_name(image_name=BASE_IMAGE_NAME)
-        self.assertIsNotNone(image_id, "Problems retrieving the image '{}'".format(BASE_IMAGE_NAME))
+        image_id = self.nova_operations.find_image_id_by_name(BASE_IMAGE_NAME)
+        self.assertIsNotNone(image_id, "Problems retrieving image '%s'" % BASE_IMAGE_NAME)
 
     def test_create_security_group_and_rules(self):
         """

@@ -119,13 +119,13 @@ class FiwareNovaOperations:
 
     def find_image_id_by_name(self, image_name):
         """
-        Finds and returns the id of the first image by name
+        Finds an image by name
         :param image_name: Name of the image
-        :return: First image that matches with the given name
+        :return: Id of first image that matches the given name
         """
         nova_img_list = self.client.images.findall(name=image_name)
         if len(nova_img_list) != 0:
-            return nova_img_list[0].to_dict()['id']
+            return nova_img_list[0].id
         else:
             return None
 
