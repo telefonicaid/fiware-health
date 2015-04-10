@@ -136,8 +136,6 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         Clean all test data from the environment after each test execution.
         """
 
-        error_message = ""
-
         if self.test_world.get('servers'):
             self.logger.debug("Tearing down servers...")
             self.reset_world_servers()
@@ -154,16 +152,10 @@ class FiwareRegionsBaseTests(FiwareTestCase):
             self.logger.debug("Tearing down networks...")
             self.reset_world_networks()
 
-        if 'routers' in self.test_world:
-            for router_id in self.test_world['routers']:
-                try:
-                    self.neutron_operations.delete_router(router_id)
-                except Exception as detail:
-                    error_message = error_message + "ERROR deleting routers. " + str(detail) + "\n"
+        if self.test_world.get('routers'):
+            self.logger.debug("Tearing down routers...")
+            self.reset_world_routers()
 
         if self.test_world.get('allocated_ips'):
             self.logger.debug("Tearing down allocated IPs...")
             self.reset_world_allocated_ips()
-
-        if error_message != "":
-            raise Exception(error_message)

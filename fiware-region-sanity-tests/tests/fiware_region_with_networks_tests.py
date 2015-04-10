@@ -27,7 +27,7 @@ __author__ = 'jfernandez'
 from tests import fiware_region_base_tests
 from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit, ClientException as NovaClientException
-from neutronclient.common.exceptions import NeutronClientException
+from neutronclient.common.exceptions import NeutronClientException, IpAddressGenerationFailureClient
 from datetime import datetime
 
 
@@ -53,6 +53,14 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         # skip if not all servers were deleted
         if self.test_world['servers']:
             self.skipTest("Not all the servers were deleted")
+
+        # skip if not all networks were deleted
+        if self.test_world['networks']:
+            self.skipTest("Not all the networks were deleted")
+
+        # skip if not all routers were deleted
+        if self.test_world['routers']:
+            self.skipTest("Not all the routers were deleted")
 
         flavor_id = self.nova_operations.get_any_flavor_id()
         self.assertIsNotNone(flavor_id, "Problems retrieving a flavor")
@@ -127,22 +135,23 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
 
     def test_create_router_no_external_network(self):
         """
-        Test 10: Check if it is possible to create a new Router without setting the Gateway
+        Test whether it is possible to create a new router without setting the gateway
         """
-        router_name = "testing_router_01"
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        router_name = TEST_ROUTER_PREFIX + "_" + suffix
         router = self.neutron_operations.create_router(router_name)
         self.assertIsNotNone(router, "Problems creating router")
-        self.assertEqual(router['status'], 'ACTIVE', "Router status is not ACTIVE")
-
+        self.assertEqual(router['status'], 'ACTIVE', "Router status is NOT ACTIVE")
         self.test_world['routers'].append(router['id'])
+        self.logger.debug("%s", router)
 
     def test_create_router_external_network(self):
         """
-        Test 11: Check if it is possible to create a new Router, with a default Gateway
+        Test whether it is possible to create a new router with a default gateway
         """
-        # Get the first external network id
+        # First, get external network id
         external_network_id = None
-        external_network_list = self.neutron_operations.get_network_external_list()
+        external_network_list = self.neutron_operations.find_networks(router_external=True)
         if len(external_network_list) != 0:
             external_net_region = self.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_EXTERNAL_NET]
             if self.region_name in external_net_region:
@@ -152,14 +161,20 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
                         external_network_id = external_network['id']
             if external_network_id is None:
                 external_network_id = external_network_list[0]['id']
-        self.assertIsNotNone(external_network_id, "No external networks has been found")
+        self.assertIsNotNone(external_network_id, "No external networks found")
 
-        router_name = "testing_router_02"
-        router = self.neutron_operations.create_router(router_name, external_network_id)
+        # Then, create router
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        router_name = TEST_ROUTER_PREFIX + "_ext_" + suffix
+        try:
+            router = self.neutron_operations.create_router(router_name, external_network_id)
+        except IpAddressGenerationFailureClient as e:
+            self.logger.debug("An error occurred creating router: %s", e)
+            self.fail(e)
         self.assertIsNotNone(router, "Problems creating router")
-        self.assertEqual(router['status'], 'ACTIVE', "Router status is not ACTIVE")
-
+        self.assertEqual(router['status'], 'ACTIVE', "Router status is NOT ACTIVE")
         self.test_world['routers'].append(router['id'])
+        self.logger.debug("%s", router)
 
     def test_deploy_instance_with_new_network(self):
         """

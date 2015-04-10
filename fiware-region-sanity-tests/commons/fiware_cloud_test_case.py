@@ -124,6 +124,7 @@ class FiwareTestCase(unittest.TestCase):
         cls.reset_world_sec_groups(init=True)
         cls.reset_world_keypair_names(init=True)
         cls.reset_world_networks(init=True)
+        cls.reset_world_routers(init=True)
         cls.reset_world_allocated_ips(init=True)
         cls.logger.debug("test_world = %s", str(cls.test_world))
 
@@ -226,8 +227,32 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.neutron_operations.delete_network(network_id)
                 cls.test_world['networks'].remove(network_id)
-            except NovaClientException as e:
+            except NeutronClientException as e:
                 cls.logger.error("Failed to delete network %s: %s", network_id, e)
+
+    @classmethod
+    def reset_world_routers(cls, init=False):
+        """
+        Init the test_world['routers'] entry (possibly, after deleting resources)
+        """
+
+        if init:
+            # get pre-existing test router list (ideally, empty when starting the tests)
+            try:
+                router_list = cls.neutron_operations.list_routers(TEST_ROUTER_PREFIX)
+                for router in router_list:
+                    cls.logger.debug("init_world() found router '%s' not deleted", router['name'])
+                    cls.test_world['routers'].append(router['id'])
+            except NeutronClientException as e:
+                cls.logger.error("init_world() failed to get router list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for router_id in list(cls.test_world['routers']):
+            try:
+                cls.neutron_operations.delete_router(router_id)
+                cls.test_world['routers'].remove(router_id)
+            except NeutronClientException as e:
+                cls.logger.error("Failed to delete router %s: %s", router_id, e)
 
     @classmethod
     def reset_world_allocated_ips(cls, init=False):

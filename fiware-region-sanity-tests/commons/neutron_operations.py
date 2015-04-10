@@ -108,18 +108,6 @@ class FiwareNeutronOperations:
             })
         return body
 
-    def get_network_external_list(self):
-        """
-        Gets the list of created networks with attribute router:external = True
-        :return: List of external networks
-        """
-        network_list = self.list_networks()
-        external_network_list = list()
-        for network in network_list['networks']:
-            if network['router:external'] is True:
-                external_network_list.append(network)
-        return external_network_list
-
     def create_router(self, router_name, external_network_id=None):
         """
         Creates a new Router
@@ -129,8 +117,7 @@ class FiwareNeutronOperations:
         """
         create_router_body = self.__build_body_create_router__(router_name, external_network_id)
         neutron_network_response = self.client.create_router(create_router_body)
-        self.logger.debug("Created router: %s", neutron_network_response)
-
+        self.logger.debug("Created router %s", neutron_network_response['router']['id'])
         return neutron_network_response['router']
 
     def delete_router(self, router_id):
@@ -140,6 +127,19 @@ class FiwareNeutronOperations:
         :return: None
         """
         self.client.delete_router(router_id)
+        self.logger.debug("Deleted router %s", router_id)
+
+    def list_routers(self, name_prefix=None):
+        """
+        Gets the list of routers.
+        :param name_prefix: Prefix to match router names
+        :return: A list of :class:`dict` with router data
+        """
+        router_list = self.client.list_routers().get('routers')
+        if name_prefix:
+            router_list = [router for router in router_list if router['name'].startswith(name_prefix)]
+
+        return router_list
 
     def create_network_and_subnet(self, network_name, cidr=TEST_DEFAULT_CIDR):
         """
