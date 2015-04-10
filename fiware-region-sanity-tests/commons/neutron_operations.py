@@ -25,7 +25,7 @@ __author__ = 'jfernandez'
 
 
 from neutronclient.v2_0 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, TEST_DEFAULT_CIDR
 
 
 class FiwareNeutronOperations:
@@ -55,7 +55,12 @@ class FiwareNeutronOperations:
         :param admin_state_up: Admin state. By default, True
         :return: Body to be used in the request
         """
-        body = {'network': {'name': network_name, 'admin_state_up': admin_state_up}}
+        body = {
+            'network': {
+                'name': network_name,
+                'admin_state_up': admin_state_up
+            }
+        }
         return body
 
     def __build_body_create_subnetwork__(self, subnetwork_name, network_id, cidr, ip_version, enable_dhcp=True):
@@ -68,8 +73,16 @@ class FiwareNeutronOperations:
         :param enable_dhcp: If DHCP should be enables. By default: True
         :return: Body to be used in the request
         """
-        body = {"subnet": {"name": subnetwork_name, "network_id": network_id, "cidr": cidr, "ip_version": ip_version,
-                           "tenant_id": self.tenant_id, "enable_dhcp": enable_dhcp}}
+        body = {
+            "subnet": {
+                "name": subnetwork_name,
+                "network_id": network_id,
+                "cidr": cidr,
+                "ip_version": ip_version,
+                "tenant_id": self.tenant_id,
+                "enable_dhcp": enable_dhcp
+            }
+        }
         return body
 
     def __build_body_create_router__(self, router_name, external_network_id=None):
@@ -79,24 +92,28 @@ class FiwareNeutronOperations:
         :param external_network_id: External network ID to us as Gateway. By default: None
         :return: Body to be used in the request
         """
-        body = {'router': {'external_gateway_info': {}, 'name': router_name}}
+        body = {
+            'router': {
+                'external_gateway_info': {},
+                'name': router_name
+            }
+        }
         if external_network_id is not None:
-            body.update({'router': {'external_gateway_info': {'network_id': external_network_id}}})
+            body.update({
+                'router': {
+                    'external_gateway_info': {
+                        'network_id': external_network_id
+                    }
+                }
+            })
         return body
-
-    def get_network_list(self):
-        """
-        Gets the list of created networks.
-        :return: List of networks
-        """
-        return self.client.list_networks(retrieve_all=True)
 
     def get_network_external_list(self):
         """
         Gets the list of created networks with attribute router:external = True
         :return: List of external networks
         """
-        network_list = self.get_network_list()
+        network_list = self.list_networks()
         external_network_list = list()
         for network in network_list['networks']:
             if network['router:external'] is True:
@@ -124,7 +141,7 @@ class FiwareNeutronOperations:
         """
         self.client.delete_router(router_id)
 
-    def create_network_and_subnet(self, network_name, cidr="192.168.100.0/24"):
+    def create_network_and_subnet(self, network_name, cidr=TEST_DEFAULT_CIDR):
         """
         Creates a new network with one subnet.
         :param network_name: Name of the network. (Subnet will be called sub-{network_name})
@@ -144,7 +161,7 @@ class FiwareNeutronOperations:
         neutron_subnetwork_response = self.client.create_subnet(body_subnetwork)
         neutron_network_response['network'].update(neutron_subnetwork_response)
 
-        self.logger.debug("Created network and sub-network: %s", neutron_network_response['network'])
+        self.logger.debug("Created network %s", neutron_network_response['network']['id'])
         return neutron_network_response['network']
 
     def delete_network(self, network_id):
@@ -154,3 +171,33 @@ class FiwareNeutronOperations:
         :return: None
         """
         self.client.delete_network(network_id)
+        self.logger.debug("Deleted network %s", network_id)
+
+    def list_networks(self, name_prefix=None):
+        """
+        Gets the list of networks created by tenant.
+        :param name_prefix: Prefix to match network names
+        :return: A list of :class:`dict` with network data
+        """
+        network_list = self.find_networks(tenant_id=self.tenant_id)
+        if name_prefix:
+            network_list = [network for network in network_list if network['name'].startswith(name_prefix)]
+
+        return network_list
+
+    def find_networks(self, **kwargs):
+        """
+        Gets the list of networks matching attributes given in `kwargs`.
+        :return: A list of :class:`dict` with network data
+        """
+        found = []
+        search = kwargs.items()
+        network_list = self.client.list_networks(retrieve_all=True).get('networks')
+        for network in network_list:
+            try:
+                if all(network.get(attr, network[attr.replace('_', ':')]) == value for (attr, value) in search):
+                    found.append(network)
+            except KeyError:
+                continue
+
+        return found

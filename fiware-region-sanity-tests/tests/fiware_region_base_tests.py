@@ -150,12 +150,9 @@ class FiwareRegionsBaseTests(FiwareTestCase):
             self.logger.debug("Tearing down keypairs...")
             self.reset_world_keypair_names()
 
-        if 'networks' in self.test_world:
-            for network_id in self.test_world['networks']:
-                try:
-                    self.neutron_operations.delete_network(network_id)
-                except Exception as detail:
-                    error_message = error_message + "ERROR deleting networks. " + str(detail) + "\n"
+        if self.test_world.get('networks'):
+            self.logger.debug("Tearing down networks...")
+            self.reset_world_networks()
 
         if 'routers' in self.test_world:
             for router_id in self.test_world['routers']:

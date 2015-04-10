@@ -47,6 +47,8 @@ SLEEP_TIME = 5
 # TEST DATA
 BASE_IMAGE_NAME = "CentOS-6.3init"
 TEST_DEFAULT_FLAVOR = "small"
+TEST_DEFAULT_CIDR = "10.250.254.0/24"
 TEST_SEC_GROUP_PREFIX = "testing_sec_group"
 TEST_KEYPAIR_PREFIX = "testing_keypair"
 TEST_SERVER_PREFIX = "testing_instance"
+TEST_NETWORK_PREFIX = "testingnetwork"

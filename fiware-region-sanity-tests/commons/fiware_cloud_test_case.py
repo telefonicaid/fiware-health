@@ -26,8 +26,8 @@ __author__ = 'jfernandez'
 
 from keystoneclient import auth, session
 from keystoneclient.openstack.common.apiclient.exceptions import ClientException as KeystoneClientException
-from novaclient.exceptions import ClientException as NovaClientException
-from novaclient.exceptions import NotFound
+from novaclient.exceptions import NotFound, ClientException as NovaClientException
+from neutronclient.common.exceptions import NeutronClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
 from commons.constants import *
@@ -123,6 +123,7 @@ class FiwareTestCase(unittest.TestCase):
         cls.reset_world_servers(init=True)
         cls.reset_world_sec_groups(init=True)
         cls.reset_world_keypair_names(init=True)
+        cls.reset_world_networks(init=True)
         cls.reset_world_allocated_ips(init=True)
         cls.logger.debug("test_world = %s", str(cls.test_world))
 
@@ -203,6 +204,30 @@ class FiwareTestCase(unittest.TestCase):
                 cls.test_world['keypair_names'].remove(keypair_name)
             except NovaClientException as e:
                 cls.logger.error("Failed to delete keypair %s: %s", keypair_name, e)
+
+    @classmethod
+    def reset_world_networks(cls, init=False):
+        """
+        Init the test_world['networks'] entry (possibly, after deleting resources)
+        """
+
+        if init:
+            # get pre-existing test network list (ideally, empty when starting the tests)
+            try:
+                network_list = cls.neutron_operations.list_networks(TEST_NETWORK_PREFIX)
+                for network in network_list:
+                    cls.logger.debug("init_world() found network '%s' not deleted", network['name'])
+                    cls.test_world['networks'].append(network['id'])
+            except NeutronClientException as e:
+                cls.logger.error("init_world() failed to get network list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for network_id in list(cls.test_world['networks']):
+            try:
+                cls.neutron_operations.delete_network(network_id)
+                cls.test_world['networks'].remove(network_id)
+            except NovaClientException as e:
+                cls.logger.error("Failed to delete network %s: %s", network_id, e)
 
     @classmethod
     def reset_world_allocated_ips(cls, init=False):
