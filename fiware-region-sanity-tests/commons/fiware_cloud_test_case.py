@@ -47,6 +47,9 @@ class FiwareTestCase(unittest.TestCase):
     auth_sess = None
     auth_token = None
 
+    # Test neutron networks (could be overriden)
+    with_networks = True
+
     # Temporal test data
     test_world = {}
 
@@ -212,7 +215,7 @@ class FiwareTestCase(unittest.TestCase):
         Init the test_world['networks'] entry (possibly, after deleting resources)
         """
 
-        if init:
+        if init and cls.with_networks:
             # get pre-existing test network list (ideally, empty when starting the tests)
             try:
                 network_list = cls.neutron_operations.list_networks(TEST_NETWORK_PREFIX)
@@ -236,7 +239,7 @@ class FiwareTestCase(unittest.TestCase):
         Init the test_world['routers'] entry (possibly, after deleting resources)
         """
 
-        if init:
+        if init and cls.with_networks:
             # get pre-existing test router list (ideally, empty when starting the tests)
             try:
                 router_list = cls.neutron_operations.list_routers(TEST_ROUTER_PREFIX)
