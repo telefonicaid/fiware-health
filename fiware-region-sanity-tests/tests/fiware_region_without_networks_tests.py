@@ -31,6 +31,8 @@ from datetime import datetime
 
 class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
 
+    with_networks = False
+
     def __deploy_instance_helper__(self, instance_name, keypair_name=None, sec_group_name=None, metadata=None):
         """
         HELPER. Creates an instance with the given data. If param is None, that one will not be passed to Nova.
