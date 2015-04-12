@@ -143,7 +143,7 @@ All configuration values will be 'strings'.
                 "Budapest": "public-ext-net-01",
                 "Stockholm": "public-ext-net-01",
                 "SophiaAntipolis": "net04_ext",
-                "Poznan": "public_L3_v4",
+                "Poznan": "public-ext-net-01",
                 "Gent": "public-ext-net-03",
                 "Crete": "net04_ext"
             }
