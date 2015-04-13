@@ -26,8 +26,8 @@ __author__ = 'jfernandez'
 
 from commons.fiware_cloud_test_case import FiwareTestCase
 from commons.constants import *
-from novaclient.exceptions import NotFound, Forbidden
-import time
+from novaclient.exceptions import Forbidden
+from datetime import datetime
 
 
 class FiwareRegionsBaseTests(FiwareTestCase):
@@ -82,7 +82,8 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         Test creation of a new security group with rules
         """
 
-        sec_group_name = TEST_SEC_GROUP_PREFIX
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         try:
             sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
             self.assertIsNotNone(sec_group_id, "Problems creating security group '%s'" % sec_group_name)
@@ -96,7 +97,8 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         Test creation of a new keypair
         """
 
-        keypair_name = TEST_KEYPAIR_PREFIX
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
         try:
             keypair_value = self.nova_operations.create_keypair(keypair_name)
             self.assertIsNotNone(keypair_value, "Problems creating keypair '%s" % keypair_name)
