@@ -55,6 +55,7 @@ class FiwareTestCase(unittest.TestCase):
 
     # Test logger
     logger = None
+    logger_handler = logging.StreamHandler()
 
     @classmethod
     def load_project_properties(cls):
@@ -287,10 +288,9 @@ class FiwareTestCase(unittest.TestCase):
         Setup testcase (executed before ALL tests): initialize logger and REST-Clients.
         """
 
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+        cls.logger_handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
         cls.logger = logging.getLogger("TestCase")
-        cls.logger.addHandler(handler)
+        cls.logger.addHandler(cls.logger_handler)
         cls.logger.setLevel(logging.NOTSET)
 
         # These tests should be particularized for a region
