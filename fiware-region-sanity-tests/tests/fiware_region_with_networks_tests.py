@@ -50,18 +50,6 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         :return: None
         """
 
-        # skip if not all servers were deleted
-        if self.test_world['servers']:
-            self.skipTest("Not all the servers were deleted")
-
-        # skip if not all networks were deleted
-        if self.test_world['networks']:
-            self.skipTest("Not all the networks were deleted")
-
-        # skip if not all routers were deleted
-        if self.test_world['routers']:
-            self.skipTest("Not all the routers were deleted")
-
         flavor_id = self.nova_operations.get_any_flavor_id()
         self.assertIsNotNone(flavor_id, "Problems retrieving a flavor")
 

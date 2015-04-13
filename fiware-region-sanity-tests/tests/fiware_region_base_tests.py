@@ -82,10 +82,6 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         Test creation of a new security group with rules
         """
 
-        # skip if not all security groups were deleted
-        if self.test_world['sec_groups']:
-            self.skipTest("Not all the security groups were deleted")
-
         sec_group_name = TEST_SEC_GROUP_PREFIX
         try:
             sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
@@ -100,10 +96,6 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         Test creation of a new keypair
         """
 
-        # skip if not all keypairs were deleted
-        if self.test_world['keypair_names']:
-            self.skipTest("Not all the keypairs were deleted")
-
         keypair_name = TEST_KEYPAIR_PREFIX
         try:
             keypair_value = self.nova_operations.create_keypair(keypair_name)
@@ -117,10 +109,6 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         """
         Test allocation of a public IP
         """
-
-        # skip if not all IPs were deallocated
-        if self.test_world['allocated_ips']:
-            self.skipTest("Not all the IPs were deallocated")
 
         net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET][self.region_name]
         try:
