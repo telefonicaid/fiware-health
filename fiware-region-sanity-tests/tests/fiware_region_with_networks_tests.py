@@ -76,18 +76,26 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
                 network = self.neutron_operations.create_network_and_subnet(network_name, cidr=cidr)
                 self.test_world['networks'].append(network['id'])
                 network_id_list = [{'net-id': network['id']}]
+        except NeutronClientException as e:
+            self.logger.debug("Required network could not be created: %s", e)
+            self.fail(e)
 
+        try:
             if keypair_name:
                 self.nova_operations.create_keypair(keypair_name)
                 self.test_world['keypair_names'].append(keypair_name)
+        except NovaClientException as e:
+            self.logger.debug("Required keypair could not be created: %s", e)
+            self.fail(e)
 
+        try:
             security_group_name_list = None
             if sec_group_name:
                 sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
                 self.test_world['sec_groups'].append(sec_group_id)
                 security_group_name_list = [sec_group_name]
-        except (NovaClientException, NeutronClientException) as e:
-            self.logger.debug("Either required network or keypair or security group could not be created: %s", e)
+        except NovaClientException as e:
+            self.logger.debug("Required security group could not be created: %s", e)
             self.fail(e)
 
         # create new instance

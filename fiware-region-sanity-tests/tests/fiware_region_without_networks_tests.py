@@ -61,14 +61,18 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
             if keypair_name:
                 self.nova_operations.create_keypair(keypair_name)
                 self.test_world['keypair_names'].append(keypair_name)
+        except ClientException as e:
+            self.logger.debug("Required keypair could not be created: %s", e)
+            self.fail(e)
 
+        try:
             security_group_name_list = None
             if sec_group_name:
                 sec_group_id = self.nova_operations.create_security_group_and_rules(sec_group_name)
                 self.test_world['sec_groups'].append(sec_group_id)
                 security_group_name_list = [sec_group_name]
         except ClientException as e:
-            self.logger.debug("Either required keypair or security group could not be created: %s", e)
+            self.logger.debug("Required security group could not be created: %s", e)
             self.fail(e)
 
         # create new instance
