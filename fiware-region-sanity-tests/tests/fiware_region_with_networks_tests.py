@@ -117,9 +117,8 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
             self.test_world['servers'].append(server_data['id'])
 
         # Wait for status=ACTIVE
-        status = self.nova_operations.wait_for_task_status(server_data['id'], 'ACTIVE')
-        self.assertEqual(status, 'ACTIVE', "Server NOT ACTIVE after {seconds} seconds. Current status is {status}"
-                         .format(seconds=MAX_WAIT_ITERATIONS*SLEEP_TIME, status=status))
+        status, detail = self.nova_operations.wait_for_task_status(server_data['id'], 'ACTIVE')
+        self.assertEqual(status, 'ACTIVE', "{detail}. Current status is {status}".format(detail=detail, status=status))
 
     def test_create_network_and_subnet(self):
         """

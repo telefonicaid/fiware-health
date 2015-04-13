@@ -238,11 +238,13 @@ class FiwareNovaOperations:
         Wait for a task status. This method will wait until the task has got the given status or 'ERROR' one.
         :param server_id: Deployed ServerID to be monitored
         :param expected_status: Expected status value
-        :return: Real task status at the end
+        :return: (Real task status at the end, Detailed reason to end waiting)
         """
+        detail = "Server NOT {} after {} seconds".format(expected_status, MAX_WAIT_ITERATIONS * SLEEP_TIME)
         for i in range(MAX_WAIT_ITERATIONS):
             server_data = self.get_server(server_id)
             if server_data['status'] == expected_status or server_data['status'] == 'ERROR':
+                detail = "Server " + ("NOT " if server_data['status'] == 'ERROR' else "") + expected_status
                 break
 
             self.logger.debug("Waiting (#%d) for status %s of instance %s (current is %s)...",
@@ -250,7 +252,7 @@ class FiwareNovaOperations:
             time.sleep(SLEEP_TIME)
 
         self.logger.debug("Status of instance %s is %s", server_id, server_data['status'])
-        return server_data['status']
+        return server_data['status'], detail
 
     def allocate_ip(self, pool_name):
         """
