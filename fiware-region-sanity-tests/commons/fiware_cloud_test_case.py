@@ -25,8 +25,10 @@ __author__ = 'jfernandez'
 
 
 from keystoneclient import auth, session
-from keystoneclient.openstack.common.apiclient.exceptions import ClientException as KeystoneClientException
+from keystoneclient.exceptions import ClientException as KeystoneClientException
+from keystoneclient.exceptions import ConnectionRefused as KeystoneConnectionRefused
 from novaclient.exceptions import NotFound, ClientException as NovaClientException
+from novaclient.exceptions import ConnectionRefused as NovaConnectionRefused
 from neutronclient.common.exceptions import NeutronClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
@@ -86,14 +88,14 @@ class FiwareTestCase(unittest.TestCase):
             auth_url=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
             username=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
             password=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS],
-            tenant_name=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID])
+            tenant_name=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_NAME])
 
         cls.logger.debug("Getting auth token...")
         cls.auth_url = credentials.auth_url
         cls.auth_sess = session.Session(auth=credentials)
         try:
             cls.auth_token = cls.auth_sess.get_token()
-        except KeystoneClientException as e:
+        except (KeystoneClientException, KeystoneConnectionRefused) as e:
             cls.logger.error("No auth token (%s): all tests will be skipped", e.message)
 
         return cls.auth_token
@@ -145,7 +147,7 @@ class FiwareTestCase(unittest.TestCase):
                 for server in server_list:
                     cls.logger.debug("init_world() found server '%s' not deleted", server.name)
                     cls.test_world['servers'].append(server.id)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("init_world() failed to get server list: %s", e)
 
         # release resources to ensure a clean test_world
@@ -156,7 +158,7 @@ class FiwareTestCase(unittest.TestCase):
             except NotFound:
                 cls.test_world['servers'].remove(server_id)
                 cls.logger.debug("Deleted instance %s", server_id)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("Failed to delete server %s: %s", server_id, e)
 
         # wait after server deletion process
@@ -175,7 +177,7 @@ class FiwareTestCase(unittest.TestCase):
                 for sec_group_data in sec_group_data_list:
                     cls.logger.debug("init_world() found security group '%s' not deleted", sec_group_data.name)
                     cls.test_world['sec_groups'].append(sec_group_data.id)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("init_world() failed to get security group list: %s", e)
 
         # release resources to ensure a clean test_world
@@ -183,7 +185,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.nova_operations.delete_security_group(sec_group_id)
                 cls.test_world['sec_groups'].remove(sec_group_id)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("Failed to delete security group %s: %s", sec_group_id, e)
 
     @classmethod
@@ -199,7 +201,7 @@ class FiwareTestCase(unittest.TestCase):
                 for keypair in keypair_list:
                     cls.logger.debug("init_world() found keypair '%s' not deleted", keypair.name)
                     cls.test_world['keypair_names'].append(keypair.name)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("init_world() failed to get keypair list: %s", e)
 
         # release resources to ensure a clean test_world
@@ -207,7 +209,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.nova_operations.delete_keypair(keypair_name)
                 cls.test_world['keypair_names'].remove(keypair_name)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("Failed to delete keypair %s: %s", keypair_name, e)
 
     @classmethod
@@ -223,7 +225,7 @@ class FiwareTestCase(unittest.TestCase):
                 for network in network_list:
                     cls.logger.debug("init_world() found network '%s' not deleted", network['name'])
                     cls.test_world['networks'].append(network['id'])
-            except NeutronClientException as e:
+            except (NeutronClientException, KeystoneConnectionRefused) as e:
                 cls.logger.error("init_world() failed to get network list: %s", e)
 
         # release resources to ensure a clean test_world
@@ -231,7 +233,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.neutron_operations.delete_network(network_id)
                 cls.test_world['networks'].remove(network_id)
-            except NeutronClientException as e:
+            except (NeutronClientException, KeystoneConnectionRefused) as e:
                 cls.logger.error("Failed to delete network %s: %s", network_id, e)
 
     @classmethod
@@ -247,7 +249,7 @@ class FiwareTestCase(unittest.TestCase):
                 for router in router_list:
                     cls.logger.debug("init_world() found router '%s' not deleted", router['name'])
                     cls.test_world['routers'].append(router['id'])
-            except NeutronClientException as e:
+            except (NeutronClientException, KeystoneConnectionRefused) as e:
                 cls.logger.error("init_world() failed to get router list: %s", e)
 
         # release resources to ensure a clean test_world
@@ -255,7 +257,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.neutron_operations.delete_router(router_id)
                 cls.test_world['routers'].remove(router_id)
-            except NeutronClientException as e:
+            except (NeutronClientException, KeystoneConnectionRefused) as e:
                 cls.logger.error("Failed to delete router %s: %s", router_id, e)
 
     @classmethod
@@ -271,7 +273,7 @@ class FiwareTestCase(unittest.TestCase):
                 for ip_data in ip_data_list:
                     cls.logger.debug("init_world() found IP %s not deallocated", ip_data.ip)
                     cls.test_world['allocated_ips'].append(ip_data.id)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("init_world() failed to get allocated IP list: %s", e)
 
         # release resources to ensure a clean test_world
@@ -279,7 +281,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.nova_operations.deallocate_ip(allocated_ip_id)
                 cls.test_world['allocated_ips'].remove(allocated_ip_id)
-            except NovaClientException as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("Failed to deallocate IP %s: %s", allocated_ip_id, e)
 
     @classmethod
@@ -288,7 +290,7 @@ class FiwareTestCase(unittest.TestCase):
         Setup testcase (executed before ALL tests): initialize logger and REST-Clients.
         """
 
-        cls.logger_handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+        cls.logger_handler.setFormatter(logging.Formatter("%(levelname)s %(asctime)s %(message)s"))
         cls.logger = logging.getLogger("TestCase")
         cls.logger.addHandler(cls.logger_handler)
         cls.logger.setLevel(logging.NOTSET)

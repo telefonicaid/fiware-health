@@ -26,7 +26,7 @@ __author__ = 'jfernandez'
 
 from commons.fiware_cloud_test_case import FiwareTestCase
 from commons.constants import *
-from novaclient.exceptions import Forbidden
+from novaclient.exceptions import Forbidden, OverLimit
 from datetime import datetime
 
 
@@ -117,7 +117,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
             allocated_ip_data = self.nova_operations.allocate_ip(net)
             self.assertIsNotNone(allocated_ip_data, "Problems allocating IP from pool '%s'" % net)
             self.test_world['allocated_ips'].append(allocated_ip_data['id'])
-        except Forbidden as e:
+        except OverLimit as e:
             self.logger.debug("Quota exceeded when allocating IP from pool '%s'", net)
             self.fail(e)
 
