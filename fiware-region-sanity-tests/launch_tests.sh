@@ -36,7 +36,7 @@ NAME=$(basename $0)
 
 # nosetests options
 TESTS=
-NOSEOPTS="--logging-filter=TestCase --logging-level=ERROR"
+NOSEOPTS="--logging-filter=TestCase,novaclient,neutronclient --logging-level=ERROR"
 
 # Available regions
 REGIONS=$(cd tests/regions; ls test_*.py | sed 's/test_\(.*\).py/\1/g')
