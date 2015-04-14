@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -25,25 +25,28 @@ __author__ = 'jfernandez'
 
 
 from neutronclient.v2_0 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, TEST_CIDR_DEFAULT
 
 
 class FiwareNeutronOperations:
 
-    def __init__(self, username, password, tenant_id, keystone_url, region_name):
+    def __init__(self, logger, region_name, tenant_id, **kwargs):
         """
-        Inits Neutron Rest Client. Url will be loaded from Keystone Service Catalog (publicURL, network service)
-        :param username: Fiware username
-        :param password: Fiware password
-        :param tenant_id: Fiware Tenant ID
-        :param keystone_url: Keystore URL
+        Initializes Neutron-Client.
+        :param logger: Logger object
         :param region_name: Fiware Region name
-        :return: None
+        :param tenant_id: Tenant identifier
+        :param auth_session: Keystone auth session object
+        :param auth_url: Keystone auth URL (needed if no session is given)
+        :param auth_token: Keystone auth token (needed if no session is given)
         """
+
+        self.logger = logger
         self.tenant_id = tenant_id
-        self.client = client.Client(username=username, password=password, tenant_id=tenant_id, auth_url=keystone_url,
-                                    endpoint_type='publicURL', service_type="network", region_name=region_name,
-                                    timeout=DEFAULT_REQUEST_TIMEOUT)
+        self.client = client.Client(session=kwargs.get('auth_session'),
+                                    auth_url=kwargs.get('auth_url'), token=kwargs.get('auth_token'),
+                                    endpoint_type='publicURL', service_type="network",
+                                    region_name=region_name, timeout=DEFAULT_REQUEST_TIMEOUT)
 
     def __build_body_create_network__(self, network_name, admin_state_up=True):
         """
@@ -52,7 +55,12 @@ class FiwareNeutronOperations:
         :param admin_state_up: Admin state. By default, True
         :return: Body to be used in the request
         """
-        body = {'network': {'name': network_name, 'admin_state_up': admin_state_up}}
+        body = {
+            'network': {
+                'name': network_name,
+                'admin_state_up': admin_state_up
+            }
+        }
         return body
 
     def __build_body_create_subnetwork__(self, subnetwork_name, network_id, cidr, ip_version, enable_dhcp=True):
@@ -65,8 +73,16 @@ class FiwareNeutronOperations:
         :param enable_dhcp: If DHCP should be enables. By default: True
         :return: Body to be used in the request
         """
-        body = {"subnet": {"name": subnetwork_name, "network_id": network_id, "cidr": cidr, "ip_version": ip_version,
-                           "tenant_id": self.tenant_id, "enable_dhcp": enable_dhcp}}
+        body = {
+            "subnet": {
+                "name": subnetwork_name,
+                "network_id": network_id,
+                "cidr": cidr,
+                "ip_version": ip_version,
+                "tenant_id": self.tenant_id,
+                "enable_dhcp": enable_dhcp
+            }
+        }
         return body
 
     def __build_body_create_router__(self, router_name, external_network_id=None):
@@ -76,29 +92,21 @@ class FiwareNeutronOperations:
         :param external_network_id: External network ID to us as Gateway. By default: None
         :return: Body to be used in the request
         """
-        body = {'router': {'external_gateway_info': {}, 'name': router_name}}
+        body = {
+            'router': {
+                'external_gateway_info': {},
+                'name': router_name
+            }
+        }
         if external_network_id is not None:
-            body.update({'router': {'external_gateway_info': {'network_id': external_network_id}}})
+            body.update({
+                'router': {
+                    'external_gateway_info': {
+                        'network_id': external_network_id
+                    }
+                }
+            })
         return body
-
-    def get_network_list(self):
-        """
-        Gets the list of created networks.
-        :return: List of networks
-        """
-        return self.client.list_networks(retrieve_all=True)
-
-    def get_network_external_list(self):
-        """
-        Gets the list of created networks with attribute router:external = True
-        :return: List of external networks
-        """
-        network_list = self.get_network_list()
-        external_network_list = list()
-        for network in network_list['networks']:
-            if network['router:external'] is True:
-                external_network_list.append(network)
-        return external_network_list
 
     def create_router(self, router_name, external_network_id=None):
         """
@@ -109,8 +117,7 @@ class FiwareNeutronOperations:
         """
         create_router_body = self.__build_body_create_router__(router_name, external_network_id)
         neutron_network_response = self.client.create_router(create_router_body)
-        print "Created router:", neutron_network_response
-
+        self.logger.debug("Created router %s", neutron_network_response['router']['id'])
         return neutron_network_response['router']
 
     def delete_router(self, router_id):
@@ -120,8 +127,21 @@ class FiwareNeutronOperations:
         :return: None
         """
         self.client.delete_router(router_id)
+        self.logger.debug("Deleted router %s", router_id)
 
-    def create_network_and_subnet(self, network_name, cidr="192.168.100.0/24"):
+    def list_routers(self, name_prefix=None):
+        """
+        Gets the list of routers.
+        :param name_prefix: Prefix to match router names
+        :return: A list of :class:`dict` with router data
+        """
+        router_list = self.client.list_routers().get('routers')
+        if name_prefix:
+            router_list = [router for router in router_list if router['name'].startswith(name_prefix)]
+
+        return router_list
+
+    def create_network_and_subnet(self, network_name, cidr=TEST_CIDR_DEFAULT):
         """
         Creates a new network with one subnet.
         :param network_name: Name of the network. (Subnet will be called sub-{network_name})
@@ -141,7 +161,7 @@ class FiwareNeutronOperations:
         neutron_subnetwork_response = self.client.create_subnet(body_subnetwork)
         neutron_network_response['network'].update(neutron_subnetwork_response)
 
-        print "Created network and sub-network:", neutron_network_response['network']
+        self.logger.debug("Created network %s", neutron_network_response['network']['id'])
         return neutron_network_response['network']
 
     def delete_network(self, network_id):
@@ -151,3 +171,33 @@ class FiwareNeutronOperations:
         :return: None
         """
         self.client.delete_network(network_id)
+        self.logger.debug("Deleted network %s", network_id)
+
+    def list_networks(self, name_prefix=None):
+        """
+        Gets the list of networks created by tenant.
+        :param name_prefix: Prefix to match network names
+        :return: A list of :class:`dict` with network data
+        """
+        network_list = self.find_networks(tenant_id=self.tenant_id)
+        if name_prefix:
+            network_list = [network for network in network_list if network['name'].startswith(name_prefix)]
+
+        return network_list
+
+    def find_networks(self, **kwargs):
+        """
+        Gets the list of networks matching attributes given in `kwargs`.
+        :return: A list of :class:`dict` with network data
+        """
+        found = []
+        search = kwargs.items()
+        network_list = self.client.list_networks(retrieve_all=True).get('networks')
+        for network in network_list:
+            try:
+                if all(network.get(attr, network[attr.replace('_', ':')]) == value for (attr, value) in search):
+                    found.append(network)
+            except KeyError:
+                continue
+
+        return found

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -25,9 +25,9 @@ __author__ = 'jfernandez'
 
 
 from xml.dom import minidom
-import sys
 from constants import PROPERTIES_FILE, PROPERTIES_CONFIG_KEYTESTCASES
 import json
+import sys
 
 
 class ResultAnalyzer(object):
@@ -66,12 +66,13 @@ class ResultAnalyzer(object):
                 if child_node_list[0].localName == "failure" or child_node_list[0].localName == "error":
                     status = "NOK"
 
-            classname = testcase.getAttribute('classname').split(".")[-1]
+            testpackage = testcase.getAttribute('classname').split(".")[-2]
+            testregion = testpackage.replace("test_", "")
             info_test = {"test_name": testcase.getAttribute('name'), "status": status}
-            if classname in self.dict:
-                self.dict[classname].append(info_test)
+            if testregion in self.dict:
+                self.dict[testregion].append(info_test)
             else:
-                self.dict.update({classname: [info_test]})
+                self.dict.update({testregion: [info_test]})
 
     def print_results(self):
         """
@@ -80,7 +81,7 @@ class ResultAnalyzer(object):
         print "\n*********************************\n"
         print "REGION TEST SUMMARY REPORT: "
         for item in self.dict:
-            print "\n >> {}".format(item.replace("TestSuite", ""))
+            print "\n >> {}".format(item)
             for result_value in self.dict[item]:
                 print "  {status}\t {name}".format(name=result_value['test_name'], status=result_value['status'])
 
@@ -112,7 +113,7 @@ class ResultAnalyzer(object):
                 if not passed:
                     break
             if passed:
-                region_ok_list.append(item.replace("TestSuite", ""))
+                region_ok_list.append(item)
 
         print "\nREGION GLOBAL STATUS\n"
         print "Key Test Cases list:", str(key_test_cases_list)
@@ -121,7 +122,7 @@ class ResultAnalyzer(object):
             print "NONE!!!!!!!"
         else:
             for region in region_ok_list:
-                print " >> ", region
+                print " >> {}".format(region)
 
 if __name__ == "__main__":
 

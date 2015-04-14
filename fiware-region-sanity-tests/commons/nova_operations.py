@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -25,135 +25,126 @@ __author__ = 'jfernandez'
 
 
 from novaclient.v1_1 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, WAIT_FOR_INSTANCE_ACTIVE
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_FLAVOR_DEFAULT
 import time
 
 
 class FiwareNovaOperations:
 
-    def __init__(self, username, password, tenant_id, keystone_url, region_name):
+    def __init__(self, logger, region_name, test_flavor, **kwargs):
         """
-        Inits Nova-Client. Url will be loaded from Keystone Service Catalog (publicURL, compute service)
-        :param username: Fiware username
-        :param password: Fiware password
-        :param tenant_id: Fiware Tenant ID
-        :param keystone_url: Keystore URL
+        Initializes Nova-Client.
+        :param logger: Logger object
         :param region_name: Fiware Region name
-        :return: None
+        :param test_flavor: Flavor for new test instances
+        :param auth_session: Keystone auth session object
+        :param auth_url: Keystone auth URL (needed if no session is given)
+        :param auth_token: Keystone auth token (needed if no session is given)
         """
-        self.region_name = region_name
-        self.client = client.Client(username=username, api_key=password, project_id=tenant_id, auth_url=keystone_url,
-                                    endpoint_type='publicURL', service_type="compute", region_name=region_name,
+
+        self.logger = logger
+        self.test_flavor = test_flavor or TEST_FLAVOR_DEFAULT
+        self.client = client.Client(session=kwargs.get('auth_session'),
+                                    auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
+                                    endpoint_type='publicURL', service_type="compute",
+                                    region_name=region_name,
                                     timeout=DEFAULT_REQUEST_TIMEOUT)
 
     def get_flavor_list(self):
         """
-        Gets the list of flavors from the instantiated Nova client.
-        :return: A list of Python dict with the retrieved flavor data
+        Gets the list of flavors.
+        :return: A list of :class:`Flavor`
         """
-        flavor_list = []
-
-        nova_flavor_list = self.client.flavors.list()
-        print "Favor list: ", nova_flavor_list
-
-        if nova_flavor_list is not None and len(nova_flavor_list) != 0:
-            for flavor in nova_flavor_list:
-                # Get full dict
-                flavor = flavor.to_dict()
-                flavor_list.append(flavor)
-
+        flavor_list = self.client.flavors.list()
         return flavor_list
 
     def get_any_flavor_id(self):
         """
-        Gets a flavor id from the available ones
-        Gets the first flavor ID with name "small" or the last of all if no "small" are found
-        :return: Flavor ID
+        Gets a flavor id from the available ones (preferably the default test flavor, otherwise the last one)
+        :return: Flavor ID, or None if no flavors were available
         """
-        flavor_list = self.get_flavor_list()
-
         flavor_id = None
+        flavor_list = self.get_flavor_list()
         for flavor in flavor_list:
-            if 'small' in flavor['name']:
-                flavor_id = flavor['id']
+            flavor_id = flavor.id
+            if flavor.name == self.test_flavor:
                 break
-        flavor_id = flavor[-1] if flavor_id is None else flavor_id
-
         return flavor_id
 
     def get_image_list(self):
         """
-        Gets the list of images from the instantiated Nova client.
-        :return: List of Python dict with the retrieved image data
+        Gets the list of images.
+        :return: A list of :class:`Image`
         """
-        img_list = []
-
-        nova_img_list = self.client.images.list()
-        print "Image list: ", nova_img_list
-
-        if nova_img_list is not None and len(nova_img_list) != 0:
-            for image in nova_img_list:
-                # Get full dict
-                image = image.to_dict()
-                img_list.append(image)
-
-        return img_list
+        image_list = self.client.images.list()
+        return image_list
 
     def get_any_image_id(self):
         """
-        Gets a image id from the available ones.
-        Gets the first image with 'init' in its name
-        :return: Image ID
+        Gets a image id from the available ones (first with 'init' in its name)
+        :return: Image ID, or None if not found
         """
-        # GET IMAGE
-        image_list = self.get_image_list()
-
-        # Get the first 'init' image
         image_id = None
+        image_list = self.get_image_list()
         for image in image_list:
-            if 'init' in image['name']:
-                image_id = image['id']
+            if 'init' in image.name:
+                image_id = image.id
                 break
         return image_id
 
     def find_image_id_by_name(self, image_name):
         """
-        Finds and returns the id of the first image by name
+        Finds an image by name
         :param image_name: Name of the image
-        :return: First image that matches with the given name
+        :return: Id of first image that matches the given name
         """
         nova_img_list = self.client.images.findall(name=image_name)
         if len(nova_img_list) != 0:
-            return nova_img_list[0].to_dict()['id']
+            return nova_img_list[0].id
         else:
             return None
 
     def create_security_group_and_rules(self, name):
         """
-        Creates a new Security Group and a default Rule (TCP/IP 22)
+        Creates a new Security Group and a default Rule (TCP/22)
         :param name: Name of Sec. Group.
         :return: Security Group ID
         """
-        sec_group_id = None
 
-        nova_sec_group_created = self.client.security_groups.create(name, "Testing purpose")
-        print "Created security group:", nova_sec_group_created
-        sec_group_id = nova_sec_group_created.to_dict()['id']
+        # new security group
+        sec_group = self.client.security_groups.create(name, "Testing purpose")
+        self.logger.debug("Created security group '%s': %s", name, sec_group.id)
 
-        nova_sec_group_rule = self.client.security_group_rules.create(sec_group_id, ip_protocol="TCP",
-                                                                      from_port="22", to_port="22",
-                                                                      cidr="0.0.0.0/0", group_id=None)
-        print "Created security group rule (TCP 22 0.0.0.0/0):", nova_sec_group_rule
+        # new rule in security group
+        cidr = "0.0.0.0/0"
+        protocol = "TCP"
+        port = 22
+        sec_group_rule = self.client.security_group_rules.create(sec_group.id, ip_protocol=protocol,
+                                                                 from_port=port, to_port=port, cidr=cidr)
+        self.logger.debug("Created security group rule (%s %d %s): %s", protocol, port, cidr, sec_group_rule)
 
-        return sec_group_id
+        return sec_group.id
 
-    def delete_security_group(self, id):
+    def delete_security_group(self, sec_group_id):
         """
         Removes the Sec. Group.
-        :param id: Sec. Group to be deleted.
+        :param sec_group_id: Sec. Group to be deleted.
         :return: None
         """
-        self.client.security_groups.delete(id)
+        self.client.security_groups.delete(sec_group_id)
+        self.logger.debug("Deleted security group %s", sec_group_id)
+
+    def list_security_groups(self, name_prefix=None):
+        """
+        Gets all the security groups
+        :param name_prefix: Prefix to match security group names
+        :return: A list of :class:`SecurityGroup`
+        """
+        sec_group_list = self.client.security_groups.list()
+        if name_prefix:
+            sec_group_list = [sec_group for sec_group in sec_group_list if sec_group.name.startswith(name_prefix)]
+
+        return sec_group_list
 
     def create_keypair(self, name):
         """
@@ -162,7 +153,7 @@ class FiwareNovaOperations:
         :return: Private Key generated.
         """
         nova_keypair = self.client.keypairs.create(name)
-        print "Created keypair:", nova_keypair
+        self.logger.debug("Created keypair %s", nova_keypair.name)
         return nova_keypair.to_dict()['private_key']
 
     def delete_keypair(self, name):
@@ -173,12 +164,25 @@ class FiwareNovaOperations:
         """
         keypair = self.client.keypairs.find(name=name)
         self.client.keypairs.delete(keypair)
+        self.logger.debug("Deleted keypair '%s'", name)
+
+    def list_keypairs(self, name_prefix=None):
+        """
+        Gets all the keypairs
+        :param name_prefix: Prefix to match keypair names
+        :return: A list of :class:`Keypair`
+        """
+        keypair_list = self.client.keypairs.list()
+        if name_prefix:
+            keypair_list = [keypair for keypair in keypair_list if keypair.name.startswith(name_prefix)]
+
+        return keypair_list
 
     def launch_instance(self, instance_name, image_id, flavor_id, keypair_name=None, metadata=None, userdata=None,
                         security_group_name_list=None, network_id_list=None):
         """
         Launches a new Service Instance.
-        :param name: Something to name the server.
+        :param instance_name: Something to name the server.
         :param image_id: The ImageID to boot with.
         :param flavor_id: The FlavorID to boot onto.
         :param keypair_name: (optional extension) name of previously created
@@ -196,12 +200,13 @@ class FiwareNovaOperations:
                       Example: network_id_list=[{'net-id': network['id']}]
         :return: Instance data launched
         """
+
         nova_server_response = self.client.servers.create(name=instance_name, image=image_id, flavor=flavor_id,
                                                           key_name=keypair_name, meta=metadata, userdata=userdata,
                                                           security_groups=security_group_name_list,
                                                           nics=network_id_list, min_count="1", max_count="1")
 
-        print "Created server", nova_server_response.to_dict()
+        self.logger.debug("Created server '%s': %s", instance_name, nova_server_response.id)
         return nova_server_response.to_dict()
 
     def get_server(self, instance_id):
@@ -213,30 +218,41 @@ class FiwareNovaOperations:
         nova_server_response = self.client.servers.get(instance_id)
         return nova_server_response.to_dict()
 
-    def wait_for_task_status(self, server_id, status):
+    def delete_server(self, instance_id):
         """
-        Wait for a task status. This method will wait until the task has got the given status or 'ERROR' one.
-        :param server_id: Deployed ServerID to be monitored
-        :param status: Status value
-        :return: Real task status at the end
-        """
-        for i in range(WAIT_FOR_INSTANCE_ACTIVE):
-            server_data = self.get_server(server_id)
-            print "TIME {time}. Waiting for status '{expected_status}'. Instance: {server}. Current status: {status}".\
-                format(time=i, expected_status=status, server=server_id, status=server_data['status'])
-            if server_data['status'] == status or server_data['status'] == 'ERROR':
-                break
-            time.sleep(SLEEP_TIME) # Sleep SLEEP_TIME seconds.
-
-        return server_data['status']
-
-    def delete_instance(self, instance_id):
-        """
-        Removes a launched instance.
-        :param instance_id: InstaceID to be deleted.
+        Removes a server.
+        :param instance_id: ServerID to be deleted.
         :return: None
         """
         self.client.servers.delete(instance_id)
+
+    def list_servers(self):
+        """
+        Gets all the servers of the tenant
+        :return: A list of :class:`Server`
+        """
+        return self.client.servers.list()
+
+    def wait_for_task_status(self, server_id, expected_status):
+        """
+        Wait for a task status. This method will wait until the task has got the given status or 'ERROR' one.
+        :param server_id: Deployed ServerID to be monitored
+        :param expected_status: Expected status value
+        :return: (Real task status at the end, Detailed reason to end waiting)
+        """
+        detail = "Server NOT {} after {} seconds".format(expected_status, MAX_WAIT_ITERATIONS * SLEEP_TIME)
+        for i in range(MAX_WAIT_ITERATIONS):
+            server_data = self.get_server(server_id)
+            if server_data['status'] == expected_status or server_data['status'] == 'ERROR':
+                detail = "Server " + ("NOT " if server_data['status'] == 'ERROR' else "") + expected_status
+                break
+
+            self.logger.debug("Waiting (#%d) for status %s of instance %s (current is %s)...",
+                              i+1, expected_status, server_id, server_data['status'])
+            time.sleep(SLEEP_TIME)
+
+        self.logger.debug("Status of instance %s is %s", server_id, server_data['status'])
+        return server_data['status'], detail
 
     def allocate_ip(self, pool_name):
         """
@@ -244,10 +260,9 @@ class FiwareNovaOperations:
         :param pool_name: Name of the IP Pool
         :return: Allocated IP
         """
-        response_data = self.client.floating_ips.create(pool=pool_name)
-        print "IP allocated:", response_data
-
-        return response_data.to_dict()
+        allocated_ip_data = self.client.floating_ips.create(pool=pool_name)
+        self.logger.debug("Allocated IP %s: %s", allocated_ip_data.ip, allocated_ip_data.id)
+        return allocated_ip_data.to_dict()
 
     def deallocate_ip(self, ip_id):
         """
@@ -255,3 +270,11 @@ class FiwareNovaOperations:
         :param ip_id: The floating ip address to delete.
         """
         self.client.floating_ips.delete(ip_id)
+        self.logger.debug("Deallocated IP with id %s", ip_id)
+
+    def list_allocated_ips(self):
+        """
+        Gets all the IPs currently allocated
+        :return: IP list
+        """
+        return self.client.floating_ips.list()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -20,11 +20,12 @@
 #
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
+
 __author__ = 'jfernandez'
 
 
 from tests import fiware_region_with_networks_tests
 
 
-class PiraeusUTestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetkorkTest):
+class TestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetworkTest):
     region_name = "PiraeusU"

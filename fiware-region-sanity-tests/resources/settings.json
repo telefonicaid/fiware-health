@@ -28,6 +28,9 @@
             "Poznan": "public-ext-net-01",
             "Gent": "public-ext-net-03",
             "Crete": "net04_ext"
+        },
+        "test_flavor": {
+            "Prague": "tiny"
         }
     },
     "key_test_cases": ["test_allocate_ip", "test_deploy_instance"]

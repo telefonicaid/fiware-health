@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -27,6 +27,5 @@ __author__ = 'jfernandez'
 from tests import fiware_region_with_networks_tests
 
 
-class WaterfordTestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetkorkTest):
+class TestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetworkTest):
     region_name = "Waterford"
-

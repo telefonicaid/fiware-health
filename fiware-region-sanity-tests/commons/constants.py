@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -34,14 +34,23 @@ PROPERTIES_CONFIG_CRED_TENANT_ID = "tenant_id"
 PROPERTIES_CONFIG_CRED_TENANT_NAME = "tenant_name"
 PROPERTIES_CONFIG_CRED_USER = "user"
 PROPERTIES_CONFIG_CRED_PASS = "password"
-PROPERTIES_CONFIG_REGION_CONFIG = "region_configuration"
-PROPERTIES_CONFIG_REGION_CONFIG_EXTERNAL_NET = "external_network_name"
+PROPERTIES_CONFIG_REGION = "region_configuration"
+PROPERTIES_CONFIG_REGION_EXTERNAL_NET = "external_network_name"
+PROPERTIES_CONFIG_REGION_TEST_FLAVOR = "test_flavor"
 PROPERTIES_CONFIG_KEYTESTCASES = "key_test_cases"
 
 # TASK TIMERS AND TIMEOUTS
 DEFAULT_REQUEST_TIMEOUT = 60
-WAIT_FOR_INSTANCE_ACTIVE = 60
+MAX_WAIT_ITERATIONS = 60
 SLEEP_TIME = 5
 
 # TEST DATA
 BASE_IMAGE_NAME = "CentOS-6.3init"
+TEST_FLAVOR_DEFAULT = "small"
+TEST_CIDR_PATTERN = "10.250.254.%d/24"
+TEST_CIDR_DEFAULT = TEST_CIDR_PATTERN % 0
+TEST_SEC_GROUP_PREFIX = "testing_sec_group"
+TEST_KEYPAIR_PREFIX = "testing_keypair"
+TEST_SERVER_PREFIX = "testing_instance"
+TEST_NETWORK_PREFIX = "testing_network"
+TEST_ROUTER_PREFIX = "testing_router"
