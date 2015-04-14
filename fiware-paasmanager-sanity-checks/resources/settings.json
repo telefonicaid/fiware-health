@@ -1,0 +1,11 @@
+{
+    "environment": "fiware-lab",
+    "credentials": {
+        "keystone_url": "http://cloud.lab.fiware.org:4731/v2.0",
+        "tenant_id": "",
+        "tenant_name": "",
+        "user": "",
+        "password": "",
+        "region_name": "Spain"
+    }
+}

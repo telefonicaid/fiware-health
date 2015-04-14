@@ -1,1 +1,2 @@
 -e git+https://github.com/telefonicaid/fiware-paas.git@QA/python-paasmanagerclient#egg=python-paasmanagerclient&subdirectory=python-paasmanagerclient
+nose==1.3.4
