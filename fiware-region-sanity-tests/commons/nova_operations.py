@@ -25,7 +25,7 @@ __author__ = 'jfernandez'
 
 
 from novaclient.v1_1 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_DEFAULT_FLAVOR
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_FLAVOR_DEFAULT
 import time
 
 
@@ -43,7 +43,7 @@ class FiwareNovaOperations:
         """
 
         self.logger = logger
-        self.test_flavor = test_flavor or TEST_DEFAULT_FLAVOR
+        self.test_flavor = test_flavor or TEST_FLAVOR_DEFAULT
         self.client = client.Client(session=kwargs.get('auth_session'),
                                     auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
                                     endpoint_type='publicURL', service_type="compute",

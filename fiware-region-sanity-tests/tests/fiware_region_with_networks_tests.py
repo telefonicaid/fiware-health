@@ -60,7 +60,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         try:
             network_id_list = None
             if network_name:
-                cidr = network_cidr or TEST_DEFAULT_CIDR
+                cidr = network_cidr or TEST_CIDR_DEFAULT
                 network = self.neutron_operations.create_network_and_subnet(network_name, cidr=cidr)
                 self.test_world['networks'].append(network['id'])
                 network_id_list = [{'net-id': network['id']}]
@@ -114,7 +114,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         """
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_DEFAULT_CIDR
+        network_cidr = TEST_CIDR_PATTERN % 1
         network = self.neutron_operations.create_network_and_subnet(network_name, cidr=network_cidr)
         self.assertIsNotNone(network, "Problems creating network")
         self.assertEqual(network['status'], 'ACTIVE', "Network status is not ACTIVE")
@@ -178,7 +178,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         instance_name = TEST_SERVER_PREFIX + "_network_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_DEFAULT_CIDR
+        network_cidr = TEST_CIDR_PATTERN % 2
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
                                         network_cidr=network_cidr)
@@ -191,7 +191,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         instance_name = TEST_SERVER_PREFIX + "_network_metadata_" + suffix
         instance_meta = {"test_item": "test_value"}
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_DEFAULT_CIDR
+        network_cidr = TEST_CIDR_PATTERN % 3
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
                                         network_cidr=network_cidr,
@@ -205,7 +205,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         instance_name = TEST_SERVER_PREFIX + "_network_keypair_" + suffix
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_DEFAULT_CIDR
+        network_cidr = TEST_CIDR_PATTERN % 4
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
                                         network_cidr=network_cidr,
@@ -219,7 +219,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         instance_name = TEST_SERVER_PREFIX + "_network_sec_group_" + suffix
         sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_DEFAULT_CIDR
+        network_cidr = TEST_CIDR_PATTERN % 5
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
                                         network_cidr=network_cidr,
@@ -235,7 +235,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
         sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_DEFAULT_CIDR
+        network_cidr = TEST_CIDR_PATTERN % 6
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
                                         network_cidr=network_cidr,

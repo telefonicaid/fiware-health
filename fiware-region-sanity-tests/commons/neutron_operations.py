@@ -25,7 +25,7 @@ __author__ = 'jfernandez'
 
 
 from neutronclient.v2_0 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, TEST_DEFAULT_CIDR
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, TEST_CIDR_DEFAULT
 
 
 class FiwareNeutronOperations:
@@ -141,7 +141,7 @@ class FiwareNeutronOperations:
 
         return router_list
 
-    def create_network_and_subnet(self, network_name, cidr=TEST_DEFAULT_CIDR):
+    def create_network_and_subnet(self, network_name, cidr=TEST_CIDR_DEFAULT):
         """
         Creates a new network with one subnet.
         :param network_name: Name of the network. (Subnet will be called sub-{network_name})
