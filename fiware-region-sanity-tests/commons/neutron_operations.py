@@ -187,15 +187,16 @@ class FiwareNeutronOperations:
 
     def find_networks(self, **kwargs):
         """
-        Gets the list of networks matching attributes given in `kwargs`.
+        Gets the list of networks matching attributes given in `kwargs`. To filter by "router:external" attribute,
+        a keyword "router_external" must be supplied instead.
         :return: A list of :class:`dict` with network data
         """
         found = []
-        search = kwargs.items()
+        search = [(key.replace('router_', 'router:'), value) for (key, value) in kwargs.items()]
         network_list = self.client.list_networks(retrieve_all=True).get('networks')
         for network in network_list:
             try:
-                if all(network.get(attr, network[attr.replace('_', ':')]) == value for (attr, value) in search):
+                if all(network[attr] == value for (attr, value) in search):
                     found.append(network)
             except KeyError:
                 continue
