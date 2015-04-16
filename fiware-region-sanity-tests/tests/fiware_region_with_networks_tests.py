@@ -144,6 +144,11 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         """
         Test whether it is possible to create a new router with a default gateway
         """
+
+        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
+        if self.suite_world['allocated_ips']:
+            self.skipTest("There were pre-existing, not deallocated IPs")
+
         # First, get external network id
         external_network_id = None
         external_network_list = self.neutron_operations.find_networks(router_external=True)
