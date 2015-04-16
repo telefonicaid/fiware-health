@@ -3,3 +3,4 @@ python-neutronclient
 python-keystoneclient
 nose>=1.3.6
 git+https://github.com/telefonicaid/nose-html-reporting.git
+paramiko==1.12.4

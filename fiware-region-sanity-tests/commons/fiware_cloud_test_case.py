@@ -121,6 +121,7 @@ class FiwareTestCase(unittest.TestCase):
             'servers': [],
             'sec_groups': [],
             'keypair_names': [],
+            'ports': [],
             'networks': [],
             'routers': [],
             'allocated_ips': []
@@ -129,6 +130,7 @@ class FiwareTestCase(unittest.TestCase):
         cls.reset_world_servers(init=True)
         cls.reset_world_sec_groups(init=True)
         cls.reset_world_keypair_names(init=True)
+        cls.reset_world_ports(init=True)
         cls.reset_world_networks(init=True)
         cls.reset_world_routers(init=True)
         cls.reset_world_allocated_ips(init=True)
@@ -283,6 +285,36 @@ class FiwareTestCase(unittest.TestCase):
                 cls.test_world['allocated_ips'].remove(allocated_ip_id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
                 cls.logger.error("Failed to deallocate IP %s: %s", allocated_ip_id, e)
+
+    @classmethod
+    def reset_world_ports(cls, init=False):
+        """
+        Init the test_world['ports'] entry (possibly, after deleting resources)
+        """
+
+        if init and cls.with_networks:
+            # get pre-existing test port list (ideally, empty when starting the tests)
+            try:
+                port_list = cls.neutron_operations.list_ports()
+                for port in port_list:
+                    cls.logger.debug("init_world() found port '%s' not deleted", port['id'])
+                    cls.test_world['ports'].append(port['id'])
+            except (NeutronClientException, KeystoneConnectionRefused) as e:
+                cls.logger.error("init_world() failed to get port list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for port_id in list(cls.test_world['ports']):
+            try:
+                port_data = cls.neutron_operations.get_port(port_id)
+                if 'network:router_interface' == port_data['device_owner']:
+                    for fixed_ip in port_data['fixed_ips']:
+                        cls.neutron_operations.delete_router_interface(router_id=port_data['device_id'],
+                                                                       subnetwork_id=fixed_ip['subnet_id'])
+                else:
+                    cls.neutron_operations.delete_port(port_id)
+                cls.test_world['ports'].remove(port_id)
+            except (NeutronClientException, KeystoneConnectionRefused) as e:
+                cls.logger.error("Failed to delete port %s: %s", port_id, e)
 
     @classmethod
     def setUpClass(cls):

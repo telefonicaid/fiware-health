@@ -33,7 +33,8 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
 
     with_networks = False
 
-    def __deploy_instance_helper__(self, instance_name, keypair_name=None, sec_group_name=None, metadata=None):
+    def __deploy_instance_helper__(self, instance_name, keypair_name=None, is_keypair_new=True,
+                                   sec_group_name=None, metadata=None):
         """
         HELPER. Creates an instance with the given data. If param is None, that one will not be passed to Nova.
             - Creates Keypair if keypair_name is not None
@@ -41,9 +42,12 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
             - Adds metadata to server with teh given metadata dict.
         :param instance_name: Name of the new instance
         :param keypair_name: Name of the new keypair
+        :param is_keypair_new: If True, a new keypair will be created to be used by Server; Else, test will suppose the
+                                keypair already exists (looking for it by keypair_name). In this case, the keypair will
+                                not be append to Test World.
         :param sec_group_name: Name of the new Sec. Group
         :param metadata: Python dict with metadata info {"key": "value"}
-        :return: None
+        :return: Created Server ID (String)
         """
 
         flavor_id = self.nova_operations.get_any_flavor_id()
@@ -55,8 +59,12 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
         # instance prerequisites
         try:
             if keypair_name:
-                self.nova_operations.create_keypair(keypair_name)
-                self.test_world['keypair_names'].append(keypair_name)
+                if is_keypair_new:
+                    self.nova_operations.create_keypair(keypair_name)
+                    self.test_world['keypair_names'].append(keypair_name)
+                else:
+                    keypair_found = self.nova_operations.find_keypair(name=keypair_name)
+                    self.assertIsNotNone(keypair_found, "Required Keypair '%s' could not be found" % keypair_name)
         except ClientException as e:
             self.logger.debug("Required keypair could not be created: %s", e)
             self.fail(e)
@@ -91,6 +99,8 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
         # Wait for status=ACTIVE
         status, detail = self.nova_operations.wait_for_task_status(server_data['id'], 'ACTIVE')
         self.assertEqual(status, 'ACTIVE', "{detail}. Current status is {status}".format(detail=detail, status=status))
+
+        return server_data['id']
 
     def test_deploy_instance_with_custom_metadata(self):
         """
@@ -130,3 +140,52 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
         sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         self.__deploy_instance_helper__(instance_name=instance_name, metadata=instance_meta,
                                         keypair_name=keypair_name, sec_group_name=sec_group_name)
+
+    def test_deploy_instance_and_associate_public_ip(self):
+        """
+        Test whether it is possible to deploy and instance and assign an allocated public IP
+        """
+
+        # Deploy VM
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        instance_name = TEST_SERVER_PREFIX + "_public_ip" + suffix
+        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
+        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
+        net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET][self.region_name]
+
+        # Deploy
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
+                                                    keypair_name=keypair_name,
+                                                    sec_group_name=sec_group_name)
+
+        # Allocate IP
+        allocated_ip = self.__allocate_ip_test_helper__()
+
+        # Associate Public IP to Server
+        self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
+
+    def test_deploy_instance_and_e2e_connection_using_public_ip(self):
+        """
+        Test whether it is possible to deploy and instance, assign an allocated public IP and establish a SSH connection
+        """
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+
+        # Create Keypair
+        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
+        private_keypair_value = self.__create_keypair_test_helper__(keypair_name)
+
+        # Deploy (using the created keypair)
+        instance_name = TEST_SERVER_PREFIX + "_e2e_" + suffix
+        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
+                                                    keypair_name=keypair_name, is_keypair_new=False,
+                                                    sec_group_name=sec_group_name)
+
+        # AllocateIP
+        allocated_ip = self.__allocate_ip_test_helper__()
+
+        # Associate Public IP to Server
+        self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
+
+        ## SSH Connection
+        self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)

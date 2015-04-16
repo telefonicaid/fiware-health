@@ -154,7 +154,7 @@ class FiwareNovaOperations:
         """
         nova_keypair = self.client.keypairs.create(name)
         self.logger.debug("Created keypair %s", nova_keypair.name)
-        return nova_keypair.to_dict()['private_key']
+        return nova_keypair.private_key
 
     def delete_keypair(self, name):
         """
@@ -176,6 +176,15 @@ class FiwareNovaOperations:
         if name_prefix:
             keypair_list = [keypair for keypair in keypair_list if keypair.name.startswith(name_prefix)]
 
+        return keypair_list
+
+    def find_keypair(self, **kwargs):
+        """
+        Gets the keypairs matching attributes given in `kwargs`.
+        :return: A a keypair data :class:`Keypair` that matches with the giver params
+        """
+        keypair_list = self.client.keypairs.find(**kwargs)
+        self.logger.debug("Find keypairs by %s. Result: %s", str(kwargs.items()), str(keypair_list))
         return keypair_list
 
     def launch_instance(self, instance_name, image_id, flavor_id, keypair_name=None, metadata=None, userdata=None,
@@ -278,3 +287,12 @@ class FiwareNovaOperations:
         :return: IP list
         """
         return self.client.floating_ips.list()
+
+    def add_floating_ip_to_instance(self, server_id, ip_address):
+        """
+        Adds a already allocated floating IP to VM
+        :param server_id: Server ID where IP will be associated (String)
+        :param ip_address: Allocated IP to be associated (String)
+        :return: None
+        """
+        self.client.servers.add_floating_ip(server_id, ip_address, fixed_address=None)

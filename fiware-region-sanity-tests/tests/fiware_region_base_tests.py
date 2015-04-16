@@ -28,6 +28,10 @@ from commons.fiware_cloud_test_case import FiwareTestCase
 from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit
 from datetime import datetime
+from commons.ssh_client import SSHClient
+from paramiko.ssh_exception import AuthenticationException
+import socket
+import time
 
 
 class FiwareRegionsBaseTests(FiwareTestCase):
@@ -38,6 +42,56 @@ class FiwareRegionsBaseTests(FiwareTestCase):
     def setUpClass(cls):
         super(FiwareRegionsBaseTests, cls).setUpClass()
         cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION]
+
+    def __create_keypair_test_helper__(self, keypair_name):
+        """
+        HELPER. Creates new Keypair
+        :return: Private key value (String)
+        """
+        try:
+            keypair_value = self.nova_operations.create_keypair(keypair_name)
+            self.assertIsNotNone(keypair_value, "Problems creating keypair '%s" % keypair_name)
+            self.test_world['keypair_names'].append(keypair_name)
+        except Forbidden as e:
+            self.logger.debug("Quota exceeded when creating a keypair")
+            self.fail(e)
+
+        return keypair_value
+
+    def __allocate_ip_test_helper__(self):
+        """
+        HELPER. Allocates a IP from the Public Pool of the region
+        :return IP address (String)
+        """
+        net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET][self.region_name]
+        try:
+            allocated_ip_data = self.nova_operations.allocate_ip(net)
+            self.assertIsNotNone(allocated_ip_data, "Problems allocating IP from pool '%s'" % net)
+            self.test_world['allocated_ips'].append(allocated_ip_data['id'])
+        except OverLimit as e:
+            self.logger.debug("Quota exceeded when allocating IP from pool '%s'", net)
+            self.fail(e)
+
+        return allocated_ip_data['ip']
+
+    def __ssh_connection_test_helper__(self, host, private_key):
+        """
+        HELPER. Tries to connect (SSH) to the given host and retries if some failed (socket error)
+        :param host: IP or Hostname (String)
+        :param private_key: Private key value (String)
+        :return:
+        """
+        ssh_client = SSHClient(self.logger, host=host, username='root', private_key=private_key)
+        try:
+            ssh_client.connect_and_retry()
+        except AuthenticationException as e:
+            self.logger.debug("Authentication failed when connecting (SSH) to VM %s", host)
+            self.fail(e)
+        except socket.error as e:
+            self.logger.debug("SSH connection error to VM %s", host)
+            self.fail(e)
+        finally:
+            ssh_client.close()
 
     def test_flavors_not_empty(self):
         """
@@ -96,30 +150,15 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         """
         Test creation of a new keypair
         """
-
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
-        try:
-            keypair_value = self.nova_operations.create_keypair(keypair_name)
-            self.assertIsNotNone(keypair_value, "Problems creating keypair '%s" % keypair_name)
-            self.test_world['keypair_names'].append(keypair_name)
-        except Forbidden as e:
-            self.logger.debug("Quota exceeded when creating a keypair")
-            self.fail(e)
+        self.__create_keypair_test_helper__(keypair_name)
 
     def test_allocate_ip(self):
         """
         Test allocation of a public IP
         """
-
-        net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET][self.region_name]
-        try:
-            allocated_ip_data = self.nova_operations.allocate_ip(net)
-            self.assertIsNotNone(allocated_ip_data, "Problems allocating IP from pool '%s'" % net)
-            self.test_world['allocated_ips'].append(allocated_ip_data['id'])
-        except OverLimit as e:
-            self.logger.debug("Quota exceeded when allocating IP from pool '%s'", net)
-            self.fail(e)
+        self.__allocate_ip_test_helper__()
 
     def tearDown(self):
         """
@@ -137,6 +176,10 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         if self.test_world.get('keypair_names'):
             self.logger.debug("Tearing down keypairs...")
             self.reset_world_keypair_names()
+
+        if self.test_world.get('ports'):
+            self.logger.debug("Tearing down ports...")
+            self.reset_world_ports()
 
         if self.test_world.get('networks'):
             self.logger.debug("Tearing down networks...")
