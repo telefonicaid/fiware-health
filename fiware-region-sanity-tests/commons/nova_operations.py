@@ -27,6 +27,7 @@ __author__ = 'jfernandez'
 from novaclient.v1_1 import client
 from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_FLAVOR_DEFAULT
 import time
+import re
 
 
 class FiwareNovaOperations:
@@ -43,7 +44,7 @@ class FiwareNovaOperations:
         """
 
         self.logger = logger
-        self.test_flavor = test_flavor or TEST_FLAVOR_DEFAULT
+        self.test_flavor_regex = re.compile("(.+\.)?%s$" % (test_flavor or TEST_FLAVOR_DEFAULT))
         self.client = client.Client(session=kwargs.get('auth_session'),
                                     auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
                                     endpoint_type='publicURL', service_type="compute",
@@ -60,14 +61,14 @@ class FiwareNovaOperations:
 
     def get_any_flavor_id(self):
         """
-        Gets a flavor id from the available ones (preferably the default test flavor, otherwise the last one)
+        Gets a flavor id from the available ones (preferably that matching default test flavor, otherwise the last one)
         :return: Flavor ID, or None if no flavors were available
         """
         flavor_id = None
         flavor_list = self.get_flavor_list()
         for flavor in flavor_list:
             flavor_id = flavor.id
-            if flavor.name == self.test_flavor:
+            if self.test_flavor_regex.match(flavor.name):
                 break
         return flavor_id
 
