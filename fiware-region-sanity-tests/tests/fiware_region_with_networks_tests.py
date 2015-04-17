@@ -316,7 +316,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
 
     def test_deploy_instance_with_network_and_associate_public_ip(self):
         """
-        Test whether it is possible to deploy an instance with a new network and all params
+        Test whether it is possible to deploy an instance with a new network and assign an allocated public IP
         """
 
         # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
@@ -329,13 +329,11 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         # Deploy VM
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         instance_name = TEST_SERVER_PREFIX + "_public_ip_" + suffix
-        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
         network_cidr = TEST_CIDR_PATTERN % 247
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
                                                     network_name=network_name,
-                                                    network_cidr=network_cidr,
-                                                    keypair_name=keypair_name)
+                                                    network_cidr=network_cidr)
 
         # Associate Public IP to Server
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
@@ -374,9 +372,11 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         # Deploy VM (it will have only one IP from the Public Pool)
         instance_name = TEST_SERVER_PREFIX + "_e2e_" + suffix
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
+        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
                                                     network_name=network_name, is_network_new=False,
-                                                    keypair_name=keypair_name, is_keypair_new=False)
+                                                    keypair_name=keypair_name, is_keypair_new=False,
+                                                    sec_group_name=sec_group_name)
 
         # Associate the public IP to Server
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
