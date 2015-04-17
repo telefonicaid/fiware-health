@@ -28,8 +28,7 @@ from commons.fiware_cloud_test_case import FiwareTestCase
 from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit
 from datetime import datetime
-from commons.ssh_client import SSHClient
-from paramiko.ssh_exception import AuthenticationException
+from commons.ssh_client import SSHClient, AuthenticationException
 import socket
 
 

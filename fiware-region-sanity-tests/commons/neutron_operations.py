@@ -100,9 +100,9 @@ class FiwareNeutronOperations:
         }
         if external_network_id is not None:
             body['router'].update({
-                    'external_gateway_info': {
-                        'network_id': external_network_id
-                    }
+                'external_gateway_info': {
+                    'network_id': external_network_id
+                }
             })
         return body
 
@@ -129,7 +129,7 @@ class FiwareNeutronOperations:
         self.logger.debug("Created router %s", neutron_network_response['router']['id'])
         return neutron_network_response['router']
 
-    def add_router_interface(self, router_id, subnetwork_id):
+    def add_interface_router(self, router_id, subnetwork_id):
         """
         Adds a new port to the router, linked to the given subnet
         :param router_id: Rotuer ID
@@ -141,7 +141,7 @@ class FiwareNeutronOperations:
         self.logger.debug("Linked subnet '%s' to router %s", subnetwork_id, router_id)
         return response_body['port_id']
 
-    def delete_router_interface(self, router_id, subnetwork_id):
+    def delete_interface_router(self, router_id, subnetwork_id):
         """
         Deletes the port from that subnet to the router
         :param router_id: Rotuer ID
@@ -159,7 +159,7 @@ class FiwareNeutronOperations:
         """
         return self.client.list_ports().get('ports')
 
-    def get_port(self, port_id):
+    def show_port(self, port_id):
         """
         Gets a port data
         :param port_id: Port ID to retrieve its data

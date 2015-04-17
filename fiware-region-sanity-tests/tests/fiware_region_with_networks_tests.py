@@ -222,7 +222,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         network_cidr = TEST_CIDR_PATTERN % 253
         network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
 
-        port_id = self.neutron_operations.add_router_interface(router_id, subnet_id)
+        port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
         self.test_world['ports'].append(port_id)
 
     def test_create_router_external_network(self):
@@ -368,7 +368,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
 
         # Add interface to router
-        port_id = self.neutron_operations.add_router_interface(router_id, subnet_id)
+        port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
         self.test_world['ports'].append(port_id)
 
         # Deploy VM (it will have only one IP from the Public Pool)

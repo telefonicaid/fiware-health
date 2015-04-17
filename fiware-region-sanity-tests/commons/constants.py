@@ -56,6 +56,6 @@ TEST_SERVER_PREFIX = "testing_instance"
 TEST_NETWORK_PREFIX = "testing_network"
 TEST_ROUTER_PREFIX = "testing_router"
 
-# SSH CONNECTION
+# SSH CONNECTION (reference to time, in seconds)
 SSH_CONNECTION_PORT = 22
-SSH_CONNECTION_TIMEOUT = 8 #seconds
+SSH_CONNECTION_TIMEOUT = 8
