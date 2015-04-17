@@ -25,8 +25,10 @@ __author__ = 'jfernandez'
 
 
 from novaclient.v1_1 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_FLAVOR_DEFAULT
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_FLAVOR_DEFAULT, \
+    SSH_CONNECTION_PORT
 import time
+import re
 
 
 class FiwareNovaOperations:
@@ -43,7 +45,7 @@ class FiwareNovaOperations:
         """
 
         self.logger = logger
-        self.test_flavor = test_flavor or TEST_FLAVOR_DEFAULT
+        self.test_flavor_regex = re.compile("(.+\.)?%s$" % (test_flavor or TEST_FLAVOR_DEFAULT))
         self.client = client.Client(session=kwargs.get('auth_session'),
                                     auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
                                     endpoint_type='publicURL', service_type="compute",
@@ -60,14 +62,14 @@ class FiwareNovaOperations:
 
     def get_any_flavor_id(self):
         """
-        Gets a flavor id from the available ones (preferably the default test flavor, otherwise the last one)
+        Gets a flavor id from the available ones (preferably that matching default test flavor, otherwise the last one)
         :return: Flavor ID, or None if no flavors were available
         """
         flavor_id = None
         flavor_list = self.get_flavor_list()
         for flavor in flavor_list:
             flavor_id = flavor.id
-            if flavor.name == self.test_flavor:
+            if self.test_flavor_regex.match(flavor.name):
                 break
         return flavor_id
 
@@ -115,10 +117,10 @@ class FiwareNovaOperations:
         sec_group = self.client.security_groups.create(name, "Testing purpose")
         self.logger.debug("Created security group '%s': %s", name, sec_group.id)
 
-        # new rule in security group
+        # new rule in security group (by default)
         cidr = "0.0.0.0/0"
         protocol = "TCP"
-        port = 22
+        port = SSH_CONNECTION_PORT
         sec_group_rule = self.client.security_group_rules.create(sec_group.id, ip_protocol=protocol,
                                                                  from_port=port, to_port=port, cidr=cidr)
         self.logger.debug("Created security group rule (%s %d %s): %s", protocol, port, cidr, sec_group_rule)

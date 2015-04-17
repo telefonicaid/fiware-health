@@ -99,12 +99,10 @@ class FiwareNeutronOperations:
             }
         }
         if external_network_id is not None:
-            body.update({
-                'router': {
+            body['router'].update({
                     'external_gateway_info': {
                         'network_id': external_network_id
                     }
-                }
             })
         return body
 

@@ -31,7 +31,6 @@ from datetime import datetime
 from commons.ssh_client import SSHClient
 from paramiko.ssh_exception import AuthenticationException
 import socket
-import time
 
 
 class FiwareRegionsBaseTests(FiwareTestCase):
@@ -42,6 +41,11 @@ class FiwareRegionsBaseTests(FiwareTestCase):
     def setUpClass(cls):
         super(FiwareRegionsBaseTests, cls).setUpClass()
         cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION]
+
+    def setUp(self):
+        super(FiwareRegionsBaseTests, self).setUp()
+        self.test_world = {}
+        self.init_world(self.test_world)
 
     def __create_keypair_test_helper__(self, keypair_name):
         """
@@ -85,10 +89,12 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         try:
             ssh_client.connect_and_retry()
         except AuthenticationException as e:
-            self.logger.debug("Authentication failed when connecting (SSH) to VM %s", host)
+            self.logger.debug("Authentication failed when connecting (SSH) to VM %s, when trying to connect "
+                              "for more than %d seconds", host, MAX_WAIT_SSH_CONNECT_ITERATIONS * SLEEP_TIME)
             self.fail(e)
         except socket.error as e:
-            self.logger.debug("SSH connection error to VM %s", host)
+            self.logger.debug("SSH connection error to VM %s, when trying to connect "
+                              "for more than %d seconds", host, MAX_WAIT_SSH_CONNECT_ITERATIONS * SLEEP_TIME)
             self.fail(e)
         finally:
             ssh_client.close()
@@ -167,28 +173,28 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
         if self.test_world.get('servers'):
             self.logger.debug("Tearing down servers...")
-            self.reset_world_servers()
+            self.reset_world_servers(self.test_world)
 
         if self.test_world.get('sec_groups'):
             self.logger.debug("Tearing down security groups...")
-            self.reset_world_sec_groups()
+            self.reset_world_sec_groups(self.test_world)
 
         if self.test_world.get('keypair_names'):
             self.logger.debug("Tearing down keypairs...")
-            self.reset_world_keypair_names()
+            self.reset_world_keypair_names(self.test_world)
 
         if self.test_world.get('ports'):
             self.logger.debug("Tearing down ports...")
-            self.reset_world_ports()
+            self.reset_world_ports(self.test_world)
 
         if self.test_world.get('networks'):
             self.logger.debug("Tearing down networks...")
-            self.reset_world_networks()
+            self.reset_world_networks(self.test_world)
 
         if self.test_world.get('routers'):
             self.logger.debug("Tearing down routers...")
-            self.reset_world_routers()
+            self.reset_world_routers(self.test_world)
 
         if self.test_world.get('allocated_ips'):
             self.logger.debug("Tearing down allocated IPs...")
-            self.reset_world_allocated_ips()
+            self.reset_world_allocated_ips(self.test_world)

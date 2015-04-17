@@ -27,6 +27,7 @@ from paramiko import AuthenticationException
 import StringIO
 import socket
 import time
+import sys
 
 
 class SSHClient():
@@ -49,7 +50,6 @@ class SSHClient():
         self.private_key = private_key
 
         self.logger.debug("Initiating SSH Client. Host: %s, Username: %s", self.host, self.username)
-        self.logger.debug("Generating Paramiko PKey from private key: \n%s", self.private_key)
         self.pkey = self.__generate_pkey_from_string__(self.private_key)
 
     @staticmethod
@@ -72,39 +72,39 @@ class SSHClient():
         :return: None
         """
 
-        self.logger.debug("Trying SSH connection to '%s'", self.host)
+        self.logger.debug("Trying SSH connection to '%s'. Time out set to: %d", self.host, SSH_CONNECTION_TIMEOUT)
         self.ssh_client = paramiko.SSHClient()
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.ssh_client.connect(hostname=self.host, port=22, username=self.username, pkey=self.pkey, look_for_keys=False)
+        self.ssh_client.connect(hostname=self.host, port=SSH_CONNECTION_PORT, username=self.username,
+                                timeout=SSH_CONNECTION_TIMEOUT, pkey=self.pkey, look_for_keys=False)
 
     def connect_and_retry(self):
         """
-        Tries to connect and retry MAX_WAIT_SSH_ITERATIONS times if a socket error is raised
+        Tries to connect and retry MAX_WAIT_SSH_CONNECT_ITERATIONS times if a socket error is raised
         :return: None
         """
 
         self.logger.debug("Trying to establish a SSH connection to VM %s. Max. retries: %d", self.host,
-                          MAX_WAIT_SSH_ITERATIONS)
+                          MAX_WAIT_SSH_CONNECT_ITERATIONS)
 
         connected = False
-        last_socket_error = None
-        for i in range(MAX_WAIT_SSH_ITERATIONS):
+        for i in range(MAX_WAIT_SSH_CONNECT_ITERATIONS):
             try:
                 self.logger.debug("Attempt (#%d) for SSH connection to %s", i+1, self.host)
                 self.connect()
+            except socket.error as e:
+                self.logger.debug("SSH connection error. Error: %s; Message: %s", str(e.strerror), str(e.message))
+            except AuthenticationException as e:
+                self.logger.debug("Authentication exception: %s", str(e.message))
+            else:
                 connected = True
                 self.logger.debug("Connected!")
                 break
-            except socket.error as e:
-                self.logger.debug("SSH connection error. %s", str(e.strerror))
-                last_socket_error = e
-            except AuthenticationException as e:
-                self.logger.debug("Authentication exception. %s", str(e.message))
-                last_socket_error = e
             time.sleep(SLEEP_TIME)
 
         if not connected:
-            raise last_socket_error
+            # Raise last exception captured
+            raise sys.exc_info()[1]
 
     def close(self):
         """

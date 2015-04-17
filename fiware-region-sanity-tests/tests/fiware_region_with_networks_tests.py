@@ -169,7 +169,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
 
         return router['id']
 
-    def __create_router_and_subnet_test_helper__(self, network_name, network_cidr):
+    def __create_network_and_subnet_test_helper__(self, network_name, network_cidr):
         """
         HELPER. Creates network and subnet.
         :param network_name: Network name
@@ -191,7 +191,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
         network_cidr = TEST_CIDR_PATTERN % 254
-        self.__create_router_and_subnet_test_helper__(network_name, network_cidr)
+        self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
 
     def test_external_networks(self):
         """
@@ -220,7 +220,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         # Create Network with only one subnet
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
         network_cidr = TEST_CIDR_PATTERN % 253
-        network_id, subnet_id = self.__create_router_and_subnet_test_helper__(network_name, network_cidr)
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
 
         port_id = self.neutron_operations.add_router_interface(router_id, subnet_id)
         self.test_world['ports'].append(port_id)
@@ -229,13 +229,17 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         """
         Test whether it is possible to create a new router with a default gateway
         """
-        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-        router_name = TEST_ROUTER_PREFIX + "_ext_" + suffix
+
+        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
+        if self.suite_world['allocated_ips']:
+            self.skipTest("There were pre-existing, not deallocated IPs")
 
         # First, get external network id
         external_network_id = self.__get_external_network_test_helper__()
 
         # Then, create router
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        router_name = TEST_ROUTER_PREFIX + "_ext_" + suffix
         self.__create_router_test_helper__(router_name, external_network_id)
 
     def test_deploy_instance_with_new_network(self):
@@ -314,22 +318,24 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         """
         Test whether it is possible to deploy an instance with a new network and all params
         """
+
+        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
+        if self.suite_world['allocated_ips']:
+            self.skipTest("There were pre-existing, not deallocated IPs")
+
+        # Allocate IP
+        allocated_ip = self.__allocate_ip_test_helper__()
+
+        # Deploy VM
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         instance_name = TEST_SERVER_PREFIX + "_public_ip_" + suffix
-        instance_meta = {"test_item": "test_value"}
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
-        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
         network_cidr = TEST_CIDR_PATTERN % 247
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
                                                     network_name=network_name,
                                                     network_cidr=network_cidr,
-                                                    metadata=instance_meta,
-                                                    keypair_name=keypair_name,
-                                                    sec_group_name=sec_group_name)
-
-        # Allocate IP
-        allocated_ip = self.__allocate_ip_test_helper__()
+                                                    keypair_name=keypair_name)
 
         # Associate Public IP to Server
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
@@ -339,22 +345,27 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         Test whether it is possible to deploy and instance, assign an allocated public IP and establish a SSH connection
         """
 
-        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
+        if self.suite_world['allocated_ips']:
+            self.skipTest("There were pre-existing, not deallocated IPs")
+
+        # Allocate an IP
+        allocated_ip = self.__allocate_ip_test_helper__()
 
         # Create Keypair
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
         private_keypair_value = self.__create_keypair_test_helper__(keypair_name)
 
         # Create Router with an external network gateway
         router_name = TEST_ROUTER_PREFIX + "_ext_" + suffix
-
         external_network_id = self.__get_external_network_test_helper__()
         router_id = self.__create_router_test_helper__(router_name, external_network_id)
 
         # Create Network
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
         network_cidr = TEST_CIDR_PATTERN % 246
-        network_id, subnet_id = self.__create_router_and_subnet_test_helper__(network_name, network_cidr)
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
 
         # Add interface to router
         port_id = self.neutron_operations.add_router_interface(router_id, subnet_id)
@@ -363,17 +374,12 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         # Deploy VM (it will have only one IP from the Public Pool)
         instance_name = TEST_SERVER_PREFIX + "_e2e_" + suffix
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
-        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
                                                     network_name=network_name, is_network_new=False,
-                                                    keypair_name=keypair_name, is_keypair_new=False,
-                                                    sec_group_name=sec_group_name)
-
-        # Allocate an IP
-        allocated_ip = self.__allocate_ip_test_helper__()
+                                                    keypair_name=keypair_name, is_keypair_new=False)
 
         # Associate the public IP to Server
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
 
-        ## SSH Connection
+        # SSH Connection
         self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)
