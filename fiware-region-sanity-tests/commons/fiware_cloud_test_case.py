@@ -33,6 +33,7 @@ from neutronclient.common.exceptions import NeutronClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
 from commons.constants import *
+from os import environ
 import unittest
 import logging
 import json
@@ -57,13 +58,12 @@ class FiwareTestCase(unittest.TestCase):
 
     # Test logger
     logger = None
-    logger_handler = logging.StreamHandler()
 
     @classmethod
     def load_project_properties(cls):
         """
-        Parse the JSON configuration file located in the settings folder and
-        store the resulting dictionary in the config class variable.
+        Parse the JSON configuration file located in the settings folder and store the resulting dictionary in the
+        `conf` class variable. Values from "standard" OpenStack environment variables override this configuration.
         """
 
         cls.logger.debug("Loading test settings...")
@@ -73,9 +73,21 @@ class FiwareTestCase(unittest.TestCase):
             except Exception as e:
                 assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
 
-        for name in [PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID]:
-            if not cls.conf[PROPERTIES_CONFIG_CRED][name]:
-                assert False, "A value for '{}' must be provided in config file '{}'".format(name, PROPERTIES_FILE)
+        # Check for environment variables and update configuration
+        cred = cls.conf[PROPERTIES_CONFIG_CRED]
+        env_cred = {
+            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL', cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
+            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME', cred[PROPERTIES_CONFIG_CRED_USER]),
+            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cred[PROPERTIES_CONFIG_CRED_PASS]),
+            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID', cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
+            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME', cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+        }
+        cred.update(env_cred)
+
+        # Ensure all values are given (either by settings file or overriden by environment variables)
+        for name in env_cred.keys():
+            if not cred[name]:
+                assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)
 
     @classmethod
     def init_auth(cls):
@@ -291,16 +303,13 @@ class FiwareTestCase(unittest.TestCase):
         Setup testcase (executed before ALL tests): release resources, initialize logger and REST clients.
         """
 
-        cls.logger_handler.setFormatter(logging.Formatter("%(levelname)s %(asctime)s %(message)s"))
-        cls.logger = logging.getLogger("TestCase")
-        cls.logger.addHandler(cls.logger_handler)
-        cls.logger.setLevel(logging.NOTSET)
+        # Initialize logger
+        cls.logger = logging.getLogger(PROPERTIES_LOGGER)
 
         # These tests should be particularized for a region
         cls.logger.debug("Tests for '%s' region", cls.region_name)
 
-        # Load properties from config file
-        cls.load_project_properties()
+        # Get properties from global config
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
         test_flavor = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_FLAVOR].get(cls.region_name)
 

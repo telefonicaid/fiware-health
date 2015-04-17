@@ -26,6 +26,7 @@ __author__ = 'jfernandez'
 
 # CONFIGURATION PROPERTIES
 PROPERTIES_FILE = "resources/settings.json"
+PROPERTIES_LOGGER = "TestCase"
 PROPERTIES_CONFIG_ENV = "environment"
 PROPERTIES_CONFIG_ENV_NAME = "name"
 PROPERTIES_CONFIG_CRED = "credentials"
