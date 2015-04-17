@@ -149,14 +149,9 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
         # Deploy VM
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         instance_name = TEST_SERVER_PREFIX + "_public_ip" + suffix
-        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
-        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
-        net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET][self.region_name]
 
         # Deploy
-        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
-                                                    keypair_name=keypair_name,
-                                                    sec_group_name=sec_group_name)
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name)
 
         # Allocate IP
         allocated_ip = self.__allocate_ip_test_helper__()
