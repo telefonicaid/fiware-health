@@ -25,7 +25,8 @@ __author__ = 'jfernandez'
 
 
 from novaclient.v1_1 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_FLAVOR_DEFAULT
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, TEST_FLAVOR_DEFAULT, \
+    SSH_CONNECTION_PORT
 import time
 import re
 
@@ -116,10 +117,10 @@ class FiwareNovaOperations:
         sec_group = self.client.security_groups.create(name, "Testing purpose")
         self.logger.debug("Created security group '%s': %s", name, sec_group.id)
 
-        # new rule in security group
+        # new rule in security group (by default)
         cidr = "0.0.0.0/0"
         protocol = "TCP"
-        port = 22
+        port = SSH_CONNECTION_PORT
         sec_group_rule = self.client.security_group_rules.create(sec_group.id, ip_protocol=protocol,
                                                                  from_port=port, to_port=port, cidr=cidr)
         self.logger.debug("Created security group rule (%s %d %s): %s", protocol, port, cidr, sec_group_rule)
@@ -155,7 +156,7 @@ class FiwareNovaOperations:
         """
         nova_keypair = self.client.keypairs.create(name)
         self.logger.debug("Created keypair %s", nova_keypair.name)
-        return nova_keypair.to_dict()['private_key']
+        return nova_keypair.private_key
 
     def delete_keypair(self, name):
         """
@@ -177,6 +178,15 @@ class FiwareNovaOperations:
         if name_prefix:
             keypair_list = [keypair for keypair in keypair_list if keypair.name.startswith(name_prefix)]
 
+        return keypair_list
+
+    def find_keypair(self, **kwargs):
+        """
+        Gets the keypairs matching attributes given in `kwargs`.
+        :return: A a keypair data :class:`Keypair` that matches with the giver params
+        """
+        keypair_list = self.client.keypairs.find(**kwargs)
+        self.logger.debug("Find keypairs by %s. Result: %s", str(kwargs.items()), str(keypair_list))
         return keypair_list
 
     def launch_instance(self, instance_name, image_id, flavor_id, keypair_name=None, metadata=None, userdata=None,
@@ -279,3 +289,12 @@ class FiwareNovaOperations:
         :return: IP list
         """
         return self.client.floating_ips.list()
+
+    def add_floating_ip_to_instance(self, server_id, ip_address):
+        """
+        Adds a already allocated floating IP to VM
+        :param server_id: Server ID where IP will be associated (String)
+        :param ip_address: Allocated IP to be associated (String)
+        :return: None
+        """
+        self.client.servers.add_floating_ip(server_id, ip_address, fixed_address=None)

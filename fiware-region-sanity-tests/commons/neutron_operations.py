@@ -99,13 +99,22 @@ class FiwareNeutronOperations:
             }
         }
         if external_network_id is not None:
-            body.update({
-                'router': {
-                    'external_gateway_info': {
-                        'network_id': external_network_id
-                    }
+            body['router'].update({
+                'external_gateway_info': {
+                    'network_id': external_network_id
                 }
             })
+        return body
+
+    def __build_body_add_interface__(self, subnetwork_id):
+        """
+        Build the body to add a new interface to Router
+        :param subnetwork_id: Subnetwork ID
+        :return: Body to be used when adding interfaces to router
+        """
+        body = {
+            'subnet_id': subnetwork_id
+        }
         return body
 
     def create_router(self, router_name, external_network_id=None):
@@ -119,6 +128,53 @@ class FiwareNeutronOperations:
         neutron_network_response = self.client.create_router(create_router_body)
         self.logger.debug("Created router %s", neutron_network_response['router']['id'])
         return neutron_network_response['router']
+
+    def add_interface_router(self, router_id, subnetwork_id):
+        """
+        Adds a new port to the router, linked to the given subnet
+        :param router_id: Rotuer ID
+        :param subnetwork_id: Subnetwork ID to be linked to the router
+        :return: Port id (String)
+        """
+        add_interface_body = self.__build_body_add_interface__(subnetwork_id)
+        response_body = self.client.add_interface_router(router=router_id, body=add_interface_body)
+        self.logger.debug("Linked subnet '%s' to router %s", subnetwork_id, router_id)
+        return response_body['port_id']
+
+    def delete_interface_router(self, router_id, subnetwork_id):
+        """
+        Deletes the port from that subnet to the router
+        :param router_id: Rotuer ID
+        :param subnetwork_id: Subnetwork ID to remove the link to the router
+        :return: None
+        """
+        add_interface_body = self.__build_body_add_interface__(subnetwork_id)
+        self.client.remove_interface_router(router=router_id, body=add_interface_body)
+        self.logger.debug("Deleted link from subnet '%s' to router %s", subnetwork_id, router_id)
+
+    def list_ports(self):
+        """
+        Gets the list of ports.
+        :return: A list of :class:`dict` with port data
+        """
+        return self.client.list_ports().get('ports')
+
+    def show_port(self, port_id):
+        """
+        Gets a port data
+        :param port_id: Port ID to retrieve its data
+        :return: A port data :class:'dict'
+        """
+        return self.client.show_port(port_id).get('port')
+
+    def delete_port(self, port_id):
+        """
+        Removes the given port by its ID
+        :param port_id: Port id to be deleted
+        :return:
+        """
+        self.client.delete_port(port_id)
+        self.logger.debug("Deleted port %s", port_id)
 
     def delete_router(self, router_id):
         """

@@ -27,6 +27,7 @@ __author__ = 'jfernandez'
 from keystoneclient import auth, session
 from keystoneclient.exceptions import ClientException as KeystoneClientException
 from keystoneclient.exceptions import ConnectionRefused as KeystoneConnectionRefused
+from keystoneclient.exceptions import RequestTimeout as KeystoneRequestTimeout
 from novaclient.exceptions import NotFound, ClientException as NovaClientException
 from novaclient.exceptions import ConnectionRefused as NovaConnectionRefused
 from neutronclient.common.exceptions import NeutronClientException
@@ -134,6 +135,7 @@ class FiwareTestCase(unittest.TestCase):
             'servers': [],
             'sec_groups': [],
             'keypair_names': [],
+            'ports': [],
             'networks': [],
             'routers': [],
             'allocated_ips': []
@@ -143,6 +145,7 @@ class FiwareTestCase(unittest.TestCase):
             cls.reset_world_servers(world, suite)
             cls.reset_world_sec_groups(world, suite)
             cls.reset_world_keypair_names(world, suite)
+            cls.reset_world_ports(world, suite)
             cls.reset_world_networks(world, suite)
             cls.reset_world_routers(world, suite)
             cls.reset_world_allocated_ips(world, suite)
@@ -160,7 +163,7 @@ class FiwareTestCase(unittest.TestCase):
                 for server in server_list:
                     cls.logger.debug("init_world() found server '%s' not deleted", server.name)
                     world['servers'].append(server.id)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get server list: %s", e)
 
         # release resources to ensure a clean world
@@ -171,7 +174,7 @@ class FiwareTestCase(unittest.TestCase):
             except NotFound:
                 world['servers'].remove(server_id)
                 cls.logger.debug("Deleted instance %s", server_id)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete server %s: %s", server_id, e)
 
         # wait after server deletion process
@@ -190,7 +193,7 @@ class FiwareTestCase(unittest.TestCase):
                 for sec_group_data in sec_group_data_list:
                     cls.logger.debug("init_world() found security group '%s' not deleted", sec_group_data.name)
                     world['sec_groups'].append(sec_group_data.id)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get security group list: %s", e)
 
         # release resources to ensure a clean world
@@ -198,7 +201,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.nova_operations.delete_security_group(sec_group_id)
                 world['sec_groups'].remove(sec_group_id)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete security group %s: %s", sec_group_id, e)
 
     @classmethod
@@ -214,7 +217,7 @@ class FiwareTestCase(unittest.TestCase):
                 for keypair in keypair_list:
                     cls.logger.debug("init_world() found keypair '%s' not deleted", keypair.name)
                     world['keypair_names'].append(keypair.name)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get keypair list: %s", e)
 
         # release resources to ensure a clean world
@@ -222,7 +225,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.nova_operations.delete_keypair(keypair_name)
                 world['keypair_names'].remove(keypair_name)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete keypair %s: %s", keypair_name, e)
 
     @classmethod
@@ -238,7 +241,7 @@ class FiwareTestCase(unittest.TestCase):
                 for network in network_list:
                     cls.logger.debug("init_world() found network '%s' not deleted", network['name'])
                     world['networks'].append(network['id'])
-            except (NeutronClientException, KeystoneConnectionRefused) as e:
+            except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get network list: %s", e)
 
         # release resources to ensure a clean world
@@ -246,7 +249,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.neutron_operations.delete_network(network_id)
                 world['networks'].remove(network_id)
-            except (NeutronClientException, KeystoneConnectionRefused) as e:
+            except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete network %s: %s", network_id, e)
 
     @classmethod
@@ -262,7 +265,7 @@ class FiwareTestCase(unittest.TestCase):
                 for router in router_list:
                     cls.logger.debug("init_world() found router '%s' not deleted", router['name'])
                     world['routers'].append(router['id'])
-            except (NeutronClientException, KeystoneConnectionRefused) as e:
+            except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get router list: %s", e)
 
         # release resources to ensure a clean world
@@ -270,7 +273,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.neutron_operations.delete_router(router_id)
                 world['routers'].remove(router_id)
-            except (NeutronClientException, KeystoneConnectionRefused) as e:
+            except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete router %s: %s", router_id, e)
 
     @classmethod
@@ -286,7 +289,7 @@ class FiwareTestCase(unittest.TestCase):
                 for ip_data in ip_data_list:
                     cls.logger.debug("init_world() found IP %s not deallocated", ip_data.ip)
                     world['allocated_ips'].append(ip_data.id)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get allocated IP list: %s", e)
 
         # release resources to ensure a clean world
@@ -294,8 +297,38 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.nova_operations.deallocate_ip(allocated_ip_id)
                 world['allocated_ips'].remove(allocated_ip_id)
-            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused) as e:
+            except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to deallocate IP %s: %s", allocated_ip_id, e)
+
+    @classmethod
+    def reset_world_ports(cls, world, suite=False):
+        """
+        Init the world['ports'] entry (after deleting existing resources)
+        """
+
+        if suite and cls.with_networks:
+            # get pre-existing port list (ideally, empty when starting the tests)
+            try:
+                port_list = cls.neutron_operations.list_ports()
+                for port in port_list:
+                    cls.logger.debug("init_world() found port '%s' not deleted", port['id'])
+                    world['ports'].append(port['id'])
+            except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+                cls.logger.error("init_world() failed to get port list: %s", e)
+
+        # release resources to ensure a clean test_world
+        for port_id in list(world['ports']):
+            try:
+                port_data = cls.neutron_operations.show_port(port_id)
+                if 'network:router_interface' == port_data['device_owner']:
+                    for fixed_ip in port_data['fixed_ips']:
+                        cls.neutron_operations.delete_interface_router(router_id=port_data['device_id'],
+                                                                       subnetwork_id=fixed_ip['subnet_id'])
+                else:
+                    cls.neutron_operations.delete_port(port_id)
+                world['ports'].remove(port_id)
+            except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+                cls.logger.error("Failed to delete port %s: %s", port_id, e)
 
     @classmethod
     def setUpClass(cls):
