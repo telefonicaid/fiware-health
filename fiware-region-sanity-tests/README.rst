@@ -145,7 +145,7 @@ All configuration values will be 'strings'.
                 "SophiaAntipolis": "net04_ext",
                 "Poznan": "public-ext-net-01",
                 "Gent": "public-ext-net-03",
-                "Crete": "net04_ext"
+                "Crete": "public-ext-net-01"
             }
         },
         "key_test_cases": ["test_allocate_ip", "test_deploy_instance"]
