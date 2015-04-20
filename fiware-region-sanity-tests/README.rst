@@ -172,6 +172,11 @@ Tests execution
     restrict the execution to them
   - Verbose logging may be enabled by adding ``--verbose`` option
 
+::
+
+  $ ./launch_tests.sh
+  $ ./launch_tests.sh --verbose region2 region7 region8
+
 
 Analysis of results
 -------------------
