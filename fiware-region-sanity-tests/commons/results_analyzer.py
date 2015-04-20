@@ -30,12 +30,21 @@ import json
 import sys
 
 
+ATTR_TESTS_TOTAL = "tests"
+ATTR_TESTS_SKIP = "skip"
+ATTR_TESTS_ERROR = "errors"
+ATTR_TESTS_FAILURE = "failures"
+
+
+CHILD_NODE_SKIP = "skipped"
+CHILD_NODE_ERROR = "error"
+CHILD_NODE_FAILURE = "failure"
+
+
 class ResultAnalyzer(object):
 
     def __init__(self, file='test_results.xml'):
         self.file = file
-        self.test = 0
-        self.failures = 0
         self.dict = {}
 
     def get_results(self):
@@ -47,24 +56,22 @@ class ResultAnalyzer(object):
 
         testsuite = doc.getElementsByTagName("testsuite")[0]
 
-        # Print the total tests and failures
-        print "{} [Tests: {}, Errors: {}, Failures: {}, Skipped: {}]".format(
-            testsuite.getAttribute("name"), testsuite.getAttribute("tests"), testsuite.getAttribute("errors"),
-            testsuite.getAttribute("failures"), testsuite.getAttribute("skip"))
+        # Print a summary of the test results
+        print "[Tests: {}, Errors: {}, Failures: {}, Skipped: {}]".format(
+            testsuite.getAttribute(ATTR_TESTS_TOTAL),
+            testsuite.getAttribute(ATTR_TESTS_ERROR),
+            testsuite.getAttribute(ATTR_TESTS_FAILURE),
+            testsuite.getAttribute(ATTR_TESTS_SKIP))
 
-        # Total Tests
-        self.test += int(testsuite.getAttribute("tests"))
-
-        # Total Fail and Error Tests
-        self.failures += int(testsuite.getAttribute("failures")) + int(testsuite.getAttribute("errors"))
-
+        # Count errors/failures/skips
         for testcase in doc.getElementsByTagName('testcase'):
-            # Count errors/failures
             status = "OK"
             child_node_list = testcase.childNodes
             if child_node_list is not None and len(child_node_list) != 0:
-                if child_node_list[0].localName == "failure" or child_node_list[0].localName == "error":
+                if child_node_list[0].localName in [CHILD_NODE_FAILURE, CHILD_NODE_ERROR]:
                     status = "NOK"
+                elif child_node_list[0].localName == CHILD_NODE_SKIP:
+                    status = "N/A"
 
             testpackage = testcase.getAttribute('classname').split(".")[-2]
             testregion = testpackage.replace("test_", "")
