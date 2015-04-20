@@ -320,7 +320,7 @@ class FiwareTestCase(unittest.TestCase):
         for port_id in list(world['ports']):
             try:
                 port_data = cls.neutron_operations.show_port(port_id)
-                if 'network:router_interface' == port_data['device_owner']:
+                if 'network:router_interface' in port_data['device_owner']:
                     for fixed_ip in port_data['fixed_ips']:
                         cls.neutron_operations.delete_interface_router(router_id=port_data['device_id'],
                                                                        subnetwork_id=fixed_ip['subnet_id'])
