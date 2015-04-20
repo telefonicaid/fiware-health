@@ -6,7 +6,7 @@ This project contains **sanity checks** for being executed over each FIWARE
 region to test some of their capabilities and the global Region Status.
 
 Test case implementation has been performed using Python_ and its
-`unit testing`__ framework.
+testing__ framework.
 
 __ `Python - Unittest`_
 
@@ -58,94 +58,103 @@ Test Algorithm
 ::
 
   For each FIWARE Region:
+    Check authorization by first getting a token
     Init OpenStack REST Clients
+    Release pre-existing test resources
     For each Test Case:
         SetUp TestCase
         Execute TestCase
-        Clean all generated test data
+        Clean all resources used during tests
   Generate TestReports
 
 
 
-Test Cases or the Regions Sanity Check
---------------------------------------
+Test Cases of Region Sanity Tests
+---------------------------------
 
-**Base TestCases**
+**Base Test Cases**
 
-This Test Cases will be common for all federated regions.
+These Test Cases will be common for all federated regions.
 
-- Test 01: Check if the Region has flavors.
-- Test 02: Check if the Region has images.
-- Test 03: Check if the Region has images with 'init' in the name.
-- Test 04: Check if the Region has the BASE_IMAGE_NAME used for testing.
-- Test 05: Check if it is possible to create a new Security Group with rules.
-- Test 06: Check if it is possible to create a new Keypair.
-- Test 07: Allocate a public IP
+* Test whether region has flavors.
+* Test whether region has images.
+* Test whether region has 'cloud-init-aware' images (suitable for blueprints).
+* Test whether region has the image used for testing.
+* Test creation of a new security group with rules.
+* Test creation of a new keypair.
+* Test allocation of a public IP.
 
 **Regions with an OpenStack network service**
 
-- Test 08: Check if it is possible to create a new Network with subnets
-- Test 09: Check if there are external networks configured in the Region
-- Test 10: Check if it is possible to create a new Router without setting the Gateway
-- Test 11: Check if it is possible to create a new Router, with a default Gateway
-- Test 12: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new NetworkID
-- Test 13: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new NetworkID, Metadatas
-- Test 14: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new NetworkID, new Keypair
-- Test 15: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new NetworkID, new Sec. Group
-- Test 16: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, NetworkID, Sec. Group, keypair, metadata
+* Test whether it is possible to create a new network with subnets
+* Test whether there are external networks configured in the region
+* Test whether it is possible to create a new router without setting the gateway
+* Test whether it is possible to create a new router with a default gateway
+* Test whether it is possible to create a new router without external gateway
+  and link new network port
+* Test whether it is possible to deploy an instance with a new network
+* Test whether it is possible to deploy an instance with a new network
+  and custom metadata
+* Test whether it is possible to deploy an instance with a new network
+  and new keypair
+* Test whether it is possible to deploy an instance with a new network
+  and new security group
+* Test whether it is possible to deploy an instance with a new network
+  and all params
+* Test whether it is possible to deploy an instance with a new network
+  and assign an allocated public IP
+* Test whether it is possible to deploy and instance, assign an allocated
+  public IP and establish a SSH connection
 
 **Regions without an OpenStack network service**
 
-- Test 17: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, Metadatas
-- Test 18: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new Keypair
-- Test 19: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, new Sec. Group
-- Test 20: Check if it is possible to deploy a new Instance: Name, FlavorID, ImageID, Sec. Group, keypair, metadata
+* Test whether it is possible to deploy an instance with custom metadata
+* Test whether it is possible to deploy an instance with new keypair
+* Test whether it is possible to deploy an instance with new security group
+* Test whether it is possible to deploy an instance with all params
+* Test whether it is possible to deploy and instance and assign an allocated
+  public IP
+* Test whether it is possible to deploy and instance, assign an allocated
+  public IP and establish a SSH connection
 
 
-Configuration file
-------------------
+Configuration
+-------------
 
-Some configuration is needed before test case execution. This configuration is
-set in the ``resources/settings.json`` file:
+Some configuration is needed before test execution. This configuration may come
+from the file ``resources/settings.json`` or from the following environment
+variables (which override values from such file):
 
-- FIWARE Keystone endpoint.
-- Valid FIWARE credentials for the configured *keystone_url*: User, Password and TenantId.
-- Some configuration about each region: External Network name
+* ``OS_AUTH_URL``
+* ``OS_USERNAME``
+* ``OS_PASSWORD``
+* ``OS_TENANT_ID``
+* ``OS_TENANT_NAME``
 
-All configuration values will be 'strings'.
+Apart from the former data needed for authorization (``credentials`` section in
+settings file), it is possible to provide some per-region configuration values
+under ``region_configuration``:
 
-**Environment configuration example** ::
+* ``external_network_name`` is the network for external floating IP addresses
+* ``test_flavor`` let us customize the flavor of instances launched in tests
+
+
+**Configuration example** ::
 
     {
         "environment": "fiware-lab",
         "credentials": {
             "keystone_url": "http://cloud.lab.fiware.org:4731/v2.0/",
             "tenant_id": "00000000000000000000000000000",
-            "tenant_name": "myTenantName",
+            "tenant_name": "MyTenantName",
             "user": "MyUser",
             "password": "MyPassword"
         },
         "region_configuration": {
             "external_network_name": {
-                "Spain": "public-ext-net-01",
-                "Spain2": "public-ext-net-01",
-                "Trento": "public-ext-net-01",
-                "Lannion": "public-ext-net-02",
-                "Waterford": "public-ext-net-01",
-                "Berlin": "public-ext-net-01",
-                "Prague": "default",
-                "Mexico": "ext-net",
-                "PiraeusN": "public-ext-net-01",
-                "PiraeusU": "public-ext-net-01",
-                "Zurich": "public-ext-net-01",
-                "Karlskrona": "public-ext-net-01",
-                "Volos": "public-ext-net-01",
-                "Budapest": "public-ext-net-01",
-                "Stockholm": "public-ext-net-01",
-                "SophiaAntipolis": "net04_ext",
-                "Poznan": "public-ext-net-01",
-                "Gent": "public-ext-net-03",
-                "Crete": "public-ext-net-01"
+                "Region1": "public-ext-net-01",
+                "Region2": "my-ext-net",
+                ...
             }
         },
         "key_test_cases": ["test_allocate_ip", "test_deploy_instance"]
@@ -155,42 +164,32 @@ All configuration values will be 'strings'.
 Tests execution
 ---------------
 
-- Go to the main test folder of the project if not already on it or.
-- Run ``launch_tests.sh``. This command will execute all Sanity Tests.
-  You can run ``nosetests`` command to use more specific test configurations.
-  For instance:
+* Go to the root folder of the project.
+* Run ``launch_tests.sh``. This command will execute all sanity tests in all
+  regions found under ``tests/regions/`` folder:
+
+  - It is possible to provide a list of regions (in lowercase) as argument to
+    restrict the execution to them
+  - Verbose logging may be enabled by adding ``--verbose`` option
 
 ::
 
-  nosetests tests/regions --exe \
-            --with-xunit --xunit-file=test_results.xml \
-            --with-html --html-report=test_results.html \
-            --html-report-template=resources/templates/test_report_template.html -v
+  $ ./launch_tests.sh
+  $ ./launch_tests.sh --verbose region2 region7 region8
 
 
-If you want to launch only the tests in a specific regions, for example in Spain
-region, just execute the following command:
+Analysis of results
+-------------------
 
-::
-
-  nosetests tests.regions.test_spain --exe \
-          --with-xunit --xunit-file=test_results.xml \
-          --with-html --html-report=test_results.html \
-          --html-report-template=resources/templates/test_report_template.html -v
-
-
-**'Result Analyzer' script**
-
-You can use the script ``commons/result_analyzer.py`` to create a summary report
-of the xUnit test result file (xml). This script will print on screen the result
-for each test case and will analyze the "Region Status" using the
-*key_test_cases* information configured in the ``settings.json`` file:
-one region is "working" if all test cases defined in this property have
-been PASSED.
+You can use the script ``commons/result_analyzer.py`` to create a summary
+report of the xUnit test result file (xml). This script will print on screen
+the result for each test case and will analyze the "Region Status" using the
+*key_test_cases* information configured in the ``settings.json`` file: one
+region is "working" if all test cases defined in this property have been PASSED.
 
 ::
 
-  python commons/results_analyzer.py test_results.xml
+  $ python commons/results_analyzer.py test_results.xml
 
 
 .. REFERENCES
