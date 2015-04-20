@@ -237,12 +237,17 @@ class FiwareNovaOperations:
         """
         self.client.servers.delete(instance_id)
 
-    def list_servers(self):
+    def list_servers(self, name_prefix=None):
         """
         Gets all the servers of the tenant
+        :param name_prefix: Prefix to match server names
         :return: A list of :class:`Server`
         """
-        return self.client.servers.list()
+        server_list = self.client.servers.list()
+        if name_prefix:
+            server_list = [server for server in server_list if server.name.startswith(name_prefix)]
+
+        return server_list
 
     def wait_for_task_status(self, server_id, expected_status):
         """

@@ -159,7 +159,7 @@ class FiwareTestCase(unittest.TestCase):
         if suite:
             # get pre-existing server list (ideally, empty when starting the tests)
             try:
-                server_list = cls.nova_operations.list_servers()
+                server_list = cls.nova_operations.list_servers(TEST_SERVER_PREFIX)
                 for server in server_list:
                     cls.logger.debug("init_world() found server '%s' not deleted", server.name)
                     world['servers'].append(server.id)
