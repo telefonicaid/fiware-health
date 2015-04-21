@@ -27,6 +27,7 @@ from novaclient.exceptions import OverLimit, Forbidden, ClientException
 from tests import fiware_region_base_tests
 from commons.constants import *
 from datetime import datetime
+from commons.http_phonehome_server import HttpPhoneHomeServer, get_phonehome_content, reset_phonehome_content
 
 
 class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
@@ -34,7 +35,7 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
     with_networks = False
 
     def __deploy_instance_helper__(self, instance_name, keypair_name=None, is_keypair_new=True,
-                                   sec_group_name=None, metadata=None):
+                                   sec_group_name=None, metadata=None, userdata=None):
         """
         HELPER. Creates an instance with the given data. If param is None, that one will not be passed to Nova.
             - Creates Keypair if keypair_name is not None
@@ -47,6 +48,7 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
                                 not be append to Test World.
         :param sec_group_name: Name of the new Sec. Group
         :param metadata: Python dict with metadata info {"key": "value"}
+        :param userdata: path to userdata file to be used by cloud-init
         :return: Created Server ID (String)
         """
 
@@ -86,7 +88,8 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
                                                                image_id=image_id,
                                                                metadata=metadata,
                                                                keypair_name=keypair_name,
-                                                               security_group_name_list=security_group_name_list)
+                                                               security_group_name_list=security_group_name_list,
+                                                               userdata=userdata)
         except Forbidden as e:
             self.logger.debug("Quota exceeded when launching a new instance")
             self.fail(e)
@@ -184,3 +187,22 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
 
         ## SSH Connection
         self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)
+
+    def test_deploy_instance_and_e2e_snat_connection(self):
+        """
+        Test whether it is possible to deploy and instance and connect to INTERNET (PhoneHome service)
+        """
+
+        # Deploy
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        instance_name = TEST_SERVER_PREFIX + "_snat_" + suffix
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
+                                                    userdata=PHONEHOME_USERDATA_PATH)
+
+        # Create and launch the PhoneHome service. Wait for request from VM
+        http_phonehome_server = HttpPhoneHomeServer(logger=self.logger, port=PHONEHOME_PORT, timeout=PHONEHOME_TIMEOUT)
+        http_phonehome_server.start()
+
+        self.assertIsNotNone(get_phonehome_content(), "Phone-Home request not received from VM '%s'" % server_id)
+        self.logger.debug("Request received from VM when 'calling home': %s", get_phonehome_content())
+        reset_phonehome_content()

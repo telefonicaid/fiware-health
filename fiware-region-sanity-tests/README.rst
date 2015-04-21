@@ -105,6 +105,8 @@ These Test Cases will be common for all federated regions.
   and assign an allocated public IP
 * Test whether it is possible to deploy and instance, assign an allocated
   public IP and establish a SSH connection
+* Test whether it is possible to deploy and instance with a new network
+  and connect to INTERNET (SNAT) without assign a public IP
 
 **Regions without an OpenStack network service**
 
@@ -116,6 +118,8 @@ These Test Cases will be common for all federated regions.
   public IP
 * Test whether it is possible to deploy and instance, assign an allocated
   public IP and establish a SSH connection
+* Test whether it is possible to deploy and instance and connect to INTERNET
+  (SNAT) without assign a public IP
 
 
 Configuration
