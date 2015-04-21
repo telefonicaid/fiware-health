@@ -190,7 +190,7 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
 
     def test_deploy_instance_and_e2e_snat_connection(self):
         """
-        Test whether it is possible to deploy and instance and connect to INTERNET (PhoneHome service)
+        Test whether it is possible to deploy an instance and connect to INTERNET (PhoneHome service)
         """
 
         # Deploy

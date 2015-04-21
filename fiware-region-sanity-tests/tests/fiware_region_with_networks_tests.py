@@ -389,7 +389,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
 
     def test_deploy_instance_with_networks_and_e2e_snat_connection(self):
         """
-        Test whether it is possible to deploy and instance with networks and connect to INTERNET (PhoneHome service)
+        Test whether it is possible to deploy an instance with new network and connect to INTERNET (PhoneHome service)
         """
 
         # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
