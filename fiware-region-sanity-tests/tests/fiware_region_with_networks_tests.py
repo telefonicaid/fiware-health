@@ -331,14 +331,25 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         # Allocate IP
         allocated_ip = self.__allocate_ip_test_helper__()
 
-        # Deploy VM
+        # Create Router with an external network gateway
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-        instance_name = TEST_SERVER_PREFIX + "_public_ip_" + suffix
+        router_name = TEST_ROUTER_PREFIX + "_public_ip_" + suffix
+        external_network_id = self.__get_external_network_test_helper__()
+        router_id = self.__create_router_test_helper__(router_name, external_network_id)
+
+        # Create Network
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
         network_cidr = TEST_CIDR_PATTERN % 247
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
+
+        # Add interface to router
+        port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
+        self.test_world['ports'].append(port_id)
+
+        # Deploy VM (it will have only one IP from the Public Pool)
+        instance_name = TEST_SERVER_PREFIX + "_public_ip_" + suffix
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
-                                                    network_name=network_name,
-                                                    network_cidr=network_cidr)
+                                                    network_name=network_name, is_network_new=False)
 
         # Associate Public IP to Server
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
@@ -361,7 +372,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         private_keypair_value = self.__create_keypair_test_helper__(keypair_name)
 
         # Create Router with an external network gateway
-        router_name = TEST_ROUTER_PREFIX + "_ext_" + suffix
+        router_name = TEST_ROUTER_PREFIX + "_e2e_" + suffix
         external_network_id = self.__get_external_network_test_helper__()
         router_id = self.__create_router_test_helper__(router_name, external_network_id)
 
