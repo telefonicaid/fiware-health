@@ -200,8 +200,8 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
         userdata_file = open(PHONEHOME_USERDATA_PATH, "r")
         userdata_content = userdata_file.read()
         phonehome_endpoint = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
-        phonehome_port = re.match(".*://.*:(\d{1,5}).*", phonehome_endpoint).group(1)
-        self.logger.debug("PhoneHome port to be used by server: %s", phonehome_port)
+        phonehome_port = int(re.match(".*://.*:(\d{1,5}).*", phonehome_endpoint).group(1))
+        self.logger.debug("PhoneHome port to be used by server: %d", phonehome_port)
 
         userdata_content = replace_template_properties(userdata_content, phone_home_service=phonehome_endpoint)
         self.logger.debug("Userdata content: " + userdata_content)
@@ -217,5 +217,16 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
         http_phonehome_server.start()
 
         self.assertIsNotNone(get_phonehome_content(), "Phone-Home request not received from VM '%s'" % server_id)
-        self.logger.debug("Request received from VM when 'calling home': %s", get_phonehome_content())
+        call_content = get_phonehome_content()
+        self.logger.debug("Request received from VM when 'calling home': %s", call_content)
+
+        # Get hostname from data received
+        self.assertIn("hostname", call_content, "Phone-Home request has been received but 'hostname' param is not in")
+        hostname_received = re.match(".*hostname=([\w-]*)", call_content).group(1)
+
+        # Check hostname (VM will have as hostname, the instance_name with "-" instead of "_")
+        self.assertEqual(instance_name.replace("_", "-"), hostname_received,
+                         "Received hostname '%s' in PhoneHome request does not match with the expected instance name" %
+                         hostname_received)
+
         reset_phonehome_content()
