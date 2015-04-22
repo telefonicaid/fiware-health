@@ -30,6 +30,8 @@ from novaclient.exceptions import Forbidden, OverLimit, ClientException as NovaC
 from neutronclient.common.exceptions import NeutronClientException, IpAddressGenerationFailureClient
 from datetime import datetime
 from commons.http_phonehome_server import HttpPhoneHomeServer, get_phonehome_content
+from commons.template_utils import replace_template_properties
+import re
 
 
 class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
@@ -56,7 +58,7 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
                                 not be append to Test World.
         :param sec_group_name: Name of the new Sec. Group
         :param metadata: Python dict with metadata info {"key": "value"}
-        :param userdata: path to userdata file to be used by cloud-init
+        :param userdata: userdata file content (String)
         :return: Server ID (String)
         """
 
@@ -396,6 +398,17 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         if self.suite_world['allocated_ips']:
             self.skipTest("There were pre-existing, not deallocated IPs")
 
+        # Load userdata from file and compile the template (replace template values)
+        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
+        userdata_file = open(PHONEHOME_USERDATA_PATH, "r")
+        userdata_content = userdata_file.read()
+        phonehome_endpoint = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
+        phonehome_port = re.match(".*://.*:(\d{1,5}).*", phonehome_endpoint).group(1)
+        self.logger.debug("PhoneHome port to be used by server: %s", phonehome_port)
+
+        userdata_content = replace_template_properties(userdata_content, phone_home_service=phonehome_endpoint)
+        self.logger.debug("Userdata content: " + userdata_content)
+
         # Create Router with an external network gateway
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         router_name = TEST_ROUTER_PREFIX + "_snat_" + suffix
@@ -415,10 +428,10 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         instance_name = TEST_SERVER_PREFIX + "_snat_" + suffix
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
                                                     network_name=network_name, is_network_new=False,
-                                                    userdata=PHONEHOME_USERDATA_PATH)
+                                                    userdata=userdata_content)
 
         # Create and launch a PhoneHome service. Wait for request from VM
-        http_phonehome_server = HttpPhoneHomeServer(logger=self.logger, port=PHONEHOME_PORT, timeout=PHONEHOME_TIMEOUT)
+        http_phonehome_server = HttpPhoneHomeServer(logger=self.logger, port=phonehome_port, timeout=PHONEHOME_TIMEOUT)
         http_phonehome_server.start()
 
         self.assertIsNotNone(get_phonehome_content(), "Phone-Home request not received from VM '%s'" % server_id)

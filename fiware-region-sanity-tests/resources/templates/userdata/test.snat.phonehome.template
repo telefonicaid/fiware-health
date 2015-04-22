@@ -9,9 +9,8 @@
 #  post: all
 #  tries: 10
 #
-# Phone Home service will be listening in: fi-health.lab.fiware.org:8081
 phone_home:
- url: http://fi-health.lab.fiware.org:8081/
+ url: {{ phone_home_service }}
  post: [ hostname, instance_id ]
  tries: 10
 
