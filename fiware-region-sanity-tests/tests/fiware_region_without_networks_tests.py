@@ -27,6 +27,10 @@ from novaclient.exceptions import OverLimit, Forbidden, ClientException
 from tests import fiware_region_base_tests
 from commons.constants import *
 from datetime import datetime
+from commons.http_phonehome_server import HttpPhoneHomeServer, get_phonehome_content, reset_phonehome_content
+from commons.template_utils import replace_template_properties
+import urlparse
+import re
 
 
 class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
@@ -34,7 +38,7 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
     with_networks = False
 
     def __deploy_instance_helper__(self, instance_name, keypair_name=None, is_keypair_new=True,
-                                   sec_group_name=None, metadata=None):
+                                   sec_group_name=None, metadata=None, userdata=None):
         """
         HELPER. Creates an instance with the given data. If param is None, that one will not be passed to Nova.
             - Creates Keypair if keypair_name is not None
@@ -47,6 +51,7 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
                                 not be append to Test World.
         :param sec_group_name: Name of the new Sec. Group
         :param metadata: Python dict with metadata info {"key": "value"}
+        :param userdata: userdata file content (String)
         :return: Created Server ID (String)
         """
 
@@ -86,7 +91,8 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
                                                                image_id=image_id,
                                                                metadata=metadata,
                                                                keypair_name=keypair_name,
-                                                               security_group_name_list=security_group_name_list)
+                                                               security_group_name_list=security_group_name_list,
+                                                               userdata=userdata)
         except Forbidden as e:
             self.logger.debug("Quota exceeded when launching a new instance")
             self.fail(e)
@@ -184,3 +190,47 @@ class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseT
 
         ## SSH Connection
         self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)
+
+    def test_deploy_instance_and_e2e_snat_connection(self):
+        """
+        Test whether it is possible to deploy an instance and connect to INTERNET (PhoneHome service)
+        """
+
+        # skip test if no PhoneHome service endpoint was given by configuration (either in settings or by environment)
+        phonehome_endpoint = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
+        if not phonehome_endpoint:
+            self.skipTest("No value found for '{}.{}' setting".format(
+                PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
+
+        # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
+        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
+        with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
+            userdata_content = userdata_file.read()
+            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
+            self.logger.debug("Userdata content: %s", userdata_content)
+            phonehome_port = urlparse.urlsplit(phonehome_endpoint).port
+            self.logger.debug("PhoneHome port to be used by server: %d", phonehome_port)
+
+        # Deploy VM
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        instance_name = TEST_SERVER_PREFIX + "_snat_" + suffix
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
+                                                    userdata=userdata_content)
+
+        # Create and launch a PhoneHome service listening at <localhost:phonehome_port>. Wait for request from VM
+        http_phonehome_server = HttpPhoneHomeServer(logger=self.logger, port=phonehome_port, timeout=PHONEHOME_TIMEOUT)
+        http_phonehome_server.start()
+        self.assertIsNotNone(get_phonehome_content(), "Phone-Home request not received from VM '%s'" % server_id)
+        call_content = get_phonehome_content()
+        self.logger.debug("Request received from VM when 'calling home': %s", call_content)
+
+        # Get hostname from data received
+        self.assertIn("hostname", call_content, "Phone-Home request has been received but 'hostname' param is not in")
+        hostname_received = re.match(".*hostname=([\w-]*)", call_content).group(1)
+
+        # Check hostname (VM will have as hostname, the instance_name with "-" instead of "_")
+        self.assertEqual(instance_name.replace("_", "-"), hostname_received,
+                         "Received hostname '%s' in PhoneHome request does not match with the expected instance name" %
+                         hostname_received)
+
+        reset_phonehome_content()

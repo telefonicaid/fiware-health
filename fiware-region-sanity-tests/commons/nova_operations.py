@@ -201,9 +201,7 @@ class FiwareNovaOperations:
         :param metadata:  A dict of arbitrary key/value metadata to store for this
                      server. A maximum of five entries is allowed, and both
                      keys and values must be 255 characters or less.
-        :param userdata: user data to pass to be exposed by the metadata
-                      server this can be a file type object as well or a
-                      string.
+        :param userdata: userdata file content (String)
         :param security_group_name_list: Sec. Groups ID list to be used by the instance
         :param network_id_list: (optional extension) an ordered list of nics to be
                       added to this server, with information about
@@ -213,7 +211,8 @@ class FiwareNovaOperations:
         """
 
         nova_server_response = self.client.servers.create(name=instance_name, image=image_id, flavor=flavor_id,
-                                                          key_name=keypair_name, meta=metadata, userdata=userdata,
+                                                          key_name=keypair_name, meta=metadata,
+                                                          userdata=userdata,
                                                           security_groups=security_group_name_list,
                                                           nics=network_id_list, min_count="1", max_count="1")
 

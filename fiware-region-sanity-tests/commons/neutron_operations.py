@@ -25,7 +25,7 @@ __author__ = 'jfernandez'
 
 
 from neutronclient.v2_0 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, TEST_CIDR_DEFAULT
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, TEST_CIDR_DEFAULT, DEFAULT_DNS_SERVER
 
 
 class FiwareNeutronOperations:
@@ -63,7 +63,8 @@ class FiwareNeutronOperations:
         }
         return body
 
-    def __build_body_create_subnetwork__(self, subnetwork_name, network_id, cidr, ip_version, enable_dhcp=True):
+    def __build_body_create_subnetwork__(self, subnetwork_name, network_id, cidr, ip_version,
+                                         dns_name_server=DEFAULT_DNS_SERVER, enable_dhcp=True):
         """
         Builds the body to create a new subnetwork
         :param subnetwork_name: Subnetwork name
@@ -71,6 +72,7 @@ class FiwareNeutronOperations:
         :param cidr: CIDR
         :param ip_version: IP version. By default: 4
         :param enable_dhcp: If DHCP should be enables. By default: True
+        :param dns_name_server: DNS name server to use in the network. By default: DEFAULT_DNS_SERVER
         :return: Body to be used in the request
         """
         body = {
@@ -80,7 +82,8 @@ class FiwareNeutronOperations:
                 "cidr": cidr,
                 "ip_version": ip_version,
                 "tenant_id": self.tenant_id,
-                "enable_dhcp": enable_dhcp
+                "enable_dhcp": enable_dhcp,
+                "dns_nameservers": [dns_name_server]
             }
         }
         return body

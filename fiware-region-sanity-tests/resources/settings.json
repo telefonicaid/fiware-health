@@ -7,6 +7,9 @@
         "user": "",
         "password": ""
     },
+    "test_configuration": {
+        "phonehome_endpoint": ""
+    },
     "region_configuration": {
         "external_network_name": {
             "Spain": "public-ext-net-01",
