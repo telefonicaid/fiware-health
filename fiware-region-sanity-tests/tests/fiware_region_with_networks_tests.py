@@ -31,6 +31,7 @@ from neutronclient.common.exceptions import NeutronClientException, IpAddressGen
 from datetime import datetime
 from commons.http_phonehome_server import HttpPhoneHomeServer, get_phonehome_content, reset_phonehome_content
 from commons.template_utils import replace_template_properties
+import urlparse
 import re
 
 
@@ -409,16 +410,20 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         if self.suite_world['allocated_ips']:
             self.skipTest("There were pre-existing, not deallocated IPs")
 
-        # Load userdata from file and compile the template (replace template values)
-        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
-        userdata_file = open(PHONEHOME_USERDATA_PATH, "r")
-        userdata_content = userdata_file.read()
+        # skip test if no PhoneHome service endpoint was given by configuration (either in settings or by environment)
         phonehome_endpoint = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
-        phonehome_port = int(re.match(".*://.*:(\d{1,5}).*", phonehome_endpoint).group(1))
-        self.logger.debug("PhoneHome port to be used by server: %d", phonehome_port)
+        if not phonehome_endpoint:
+            self.skipTest("No value found for '{}.{}' setting".format(
+                PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
 
-        userdata_content = replace_template_properties(userdata_content, phone_home_service=phonehome_endpoint)
-        self.logger.debug("Userdata content: " + userdata_content)
+        # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
+        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
+        with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
+            userdata_content = userdata_file.read()
+            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
+            self.logger.debug("Userdata content: %s", userdata_content)
+            phonehome_port = urlparse.urlsplit(phonehome_endpoint).port
+            self.logger.debug("PhoneHome port to be used by server: %d", phonehome_port)
 
         # Create Router with an external network gateway
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -441,10 +446,9 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
                                                     network_name=network_name, is_network_new=False,
                                                     userdata=userdata_content)
 
-        # Create and launch a PhoneHome service. Wait for request from VM
+        # Create and launch a PhoneHome service listening at <localhost:phonehome_port>. Wait for request from VM
         http_phonehome_server = HttpPhoneHomeServer(logger=self.logger, port=phonehome_port, timeout=PHONEHOME_TIMEOUT)
         http_phonehome_server.start()
-
         self.assertIsNotNone(get_phonehome_content(), "Phone-Home request not received from VM '%s'" % server_id)
         call_content = get_phonehome_content()
         self.logger.debug("Request received from VM when 'calling home': %s", call_content)

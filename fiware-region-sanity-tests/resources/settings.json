@@ -8,7 +8,7 @@
         "password": ""
     },
     "test_configuration": {
-        "phonehome_endpoint": "http://fi-health.lab.fiware.org:8081/"
+        "phonehome_endpoint": ""
     },
     "region_configuration": {
         "external_network_name": {

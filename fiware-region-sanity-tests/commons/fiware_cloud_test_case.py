@@ -74,7 +74,7 @@ class FiwareTestCase(unittest.TestCase):
             except Exception as e:
                 assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
 
-        # Check for environment variables and update configuration
+        # Check for environment variables related to credentials and update configuration
         cred = cls.conf[PROPERTIES_CONFIG_CRED]
         env_cred = {
             PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL', cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
@@ -85,7 +85,15 @@ class FiwareTestCase(unittest.TestCase):
         }
         cred.update(env_cred)
 
-        # Ensure all values are given (either by settings file or overriden by environment variables)
+        # Check for optional environment variables related to test configuration and update configuration
+        conf = cls.conf[PROPERTIES_CONFIG_TEST]
+        phonehome_endpoint = environ.get('TEST_PHONEHOME_ENDPOINT', conf[PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT])
+        env_conf = {
+            PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT: phonehome_endpoint
+        }
+        conf.update(env_conf)
+
+        # Ensure credentials are given (either by settings file or overriden by environment variables)
         for name in env_cred.keys():
             if not cred[name]:
                 assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)

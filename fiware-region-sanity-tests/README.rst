@@ -129,15 +129,20 @@ Some configuration is needed before test execution. This configuration may come
 from the file ``resources/settings.json`` or from the following environment
 variables (which override values from such file):
 
-* ``OS_AUTH_URL``
-* ``OS_USERNAME``
-* ``OS_PASSWORD``
-* ``OS_TENANT_ID``
-* ``OS_TENANT_NAME``
+* ``credentials``: data needed for authorization
 
-Apart from the former data needed for authorization (``credentials`` section in
-settings file), it is possible to provide some per-region configuration values
-under ``region_configuration``:
+  - ``OS_AUTH_URL``
+  - ``OS_USERNAME``
+  - ``OS_PASSWORD``
+  - ``OS_TENANT_ID``
+  - ``OS_TENANT_NAME``
+
+* ``test_configuration``: other configuration values
+
+  - ``TEST_PHONEHOME_ENDPOINT``
+
+Apart from the former data, it is also possible to provide some per-region
+configuration values under ``region_configuration``:
 
 * ``external_network_name`` is the network for external floating IP addresses
 * ``test_flavor`` let us customize the flavor of instances launched in tests
@@ -154,11 +159,17 @@ under ``region_configuration``:
             "user": "MyUser",
             "password": "MyPassword"
         },
+        "test_configuration": {
+            "phonehome_endpoint": "http://LocalHostPublicAddress:SomePort"
+        },
         "region_configuration": {
             "external_network_name": {
                 "Region1": "public-ext-net-01",
                 "Region2": "my-ext-net",
                 ...
+            },
+            "test_flavor": {
+                "RegionN": "tiny"
             }
         },
         "key_test_cases": ["test_allocate_ip", "test_deploy_instance"]
