@@ -114,7 +114,7 @@ class FiwareTestCase(unittest.TestCase):
 
         cls.logger.debug("Getting auth token for tenant %s...", tenant_id)
         cls.auth_url = credentials.auth_url
-        cls.auth_sess = session.Session(auth=credentials)
+        cls.auth_sess = session.Session(auth=credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
         try:
             cls.auth_token = cls.auth_sess.get_token()
         except (KeystoneClientException, KeystoneConnectionRefused) as e:
