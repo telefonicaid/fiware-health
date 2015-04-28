@@ -33,6 +33,7 @@ from novaclient.exceptions import ConnectionRefused as NovaConnectionRefused
 from neutronclient.common.exceptions import NeutronClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
+from commons.swift_operations import FiwareSwiftOperations
 from commons.constants import *
 from os import environ
 import unittest
@@ -106,15 +107,15 @@ class FiwareTestCase(unittest.TestCase):
         """
 
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
-        credentials = auth.identity.v2.Password(
+        cls.credentials = auth.identity.v2.Password(
             auth_url=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
             username=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
             password=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS],
             tenant_name=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_NAME])
 
         cls.logger.debug("Getting auth token for tenant %s...", tenant_id)
-        cls.auth_url = credentials.auth_url
-        cls.auth_sess = session.Session(auth=credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
+        cls.auth_url = cls.credentials.auth_url
+        cls.auth_sess = session.Session(auth=cls.credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
         try:
             cls.auth_token = cls.auth_sess.get_token()
         except (KeystoneClientException, KeystoneConnectionRefused) as e:
@@ -131,6 +132,8 @@ class FiwareTestCase(unittest.TestCase):
         cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor,
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
+                                                         auth_session=cls.auth_sess)
+        cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cred=cls.credentials,
                                                          auth_session=cls.auth_sess)
 
     @classmethod
