@@ -136,6 +136,7 @@ variables (which override values from such file):
   - ``OS_PASSWORD``
   - ``OS_TENANT_ID``
   - ``OS_TENANT_NAME``
+  - ``OS_USER_DOMAIN_NAME`` (only for v3)
 
 * ``test_configuration``: other configuration values
 
