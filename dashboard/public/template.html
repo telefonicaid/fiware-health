@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sanity Check Result Report- Fiware Region Status</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css"/>
+
+</head>
+<body>
+    <div class="header">
+      <div class="header-content">
+        FIWARE REGIONS - SANITY CHECK | {{timestamp}}
+      </div>
+    </div>
+    <h1>Overview</h1>
+    <section>
+        <table>
+            <tr>
+                <th> Class </th>
+                <th> Fail </th>
+                <th> Error </th>
+                <th> Skip </th>
+                <th> Success </th>
+                <th> Total </th>
+            </tr>
+            {% for class, group in report.items() %}
+                <tr>
+                    <td> {{ class }} </td>
+                    <td> {{ group.stats.failures }} </td>
+                    <td> {{ group.stats.errors   }} </td>
+                    <td> {{ group.stats.skipped  }} </td>
+                    <td> {{ group.stats.passes   }} </td>
+                    <td> {{ group.stats.total    }} </td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td><strong> Total </strong></td>
+                <td>{{ stats.failures }}</td>
+                <td>{{ stats.errors   }}</td>
+                <td>{{ stats.skipped  }}</td>
+                <td>{{ stats.passes   }}</td>
+                <td>{{ stats.total    }}</td>
+            </tr>
+        </table>
+    </section>
+
+    <h1>Performed test cases for each Region</h1>
+    {% for class, group in report.items() %}
+    <section>
+        <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
+        <ul>
+            {% for test in group.tests %}
+                <li><a class="{% if test.failed %}failed" href="#{{ class }}:{{ test.name }}"{% else %}success"{% endif %}>{{ test.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endfor %}
+
+    <h1>Failure details</h1>
+    {% for class, group in report.items() %}
+        {% if group.stats.failures or group.stats.errors %}
+            <section>
+                <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
+                <div>
+                    {% for test in group.tests %}
+                        {% if test.failed and test.type != 'skipped' %}
+                        <section id="{{ class }}:{{ test.name }}">
+                            <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
+                            <div class="test-details">
+                                <h4>Traceback</h4>
+                                <pre class="traceback">{{ test.tb }}</pre>
+                                <h4>Details</h4>
+                                <pre>{{ test.message }}</pre>
+                            </div>
+                        </section>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endfor %}
+</body>
+<script>
+    Array.prototype.forEach.call(document.querySelectorAll('h1, h2, h3, h4'), function(el) {
+        el.addEventListener('click', function() {
+            el.nextElementSibling.style.display = document.defaultView.getComputedStyle(el.nextElementSibling).display == 'none' ? 'block' : 'none';
+        })
+    })
+</script>
+</html>

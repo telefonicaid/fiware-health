@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  .header
+   .header-content
+
+    p FIWARE REGIONS - SANITY CHECK - #{timestamp}
+
+  ul.region-list
+   each region in regions
+      - color = region['status'] == 'ok' ?'green' : 'red';
+      li: a(class='#{color}', href="/template.html", title="#{region['node']") #{region['node']}
+        button.btn(data-action="btn-subscribe") Subscribe

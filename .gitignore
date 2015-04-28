@@ -64,3 +64,5 @@ fiware-region-sanity-tests/test_results.xml
 # Virtual environment
 fiware-region-sanity-tests/venv/
 
+# Node js
+node_modules/

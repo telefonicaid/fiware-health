@@ -1,0 +1,94 @@
+body {
+    font-family: Calibri, "Trebuchet MS", sans-serif;
+}
+* {
+    word-break: break-all;
+}
+table, td, th, .dataid {
+    border: 1px solid #aaa;
+    border-collapse: collapse;
+    background: #fff;
+    padding: 1px 10px 1px 10px;
+}
+section {
+    background: rgba(0, 0, 0, 0.05);
+    margin: 2ex;
+    padding: 1ex;
+    border: 1px solid #999;
+    border-radius: 5px;
+}
+h1 {
+    font-size: 130%;
+}
+h2 {
+    font-size: 120%;
+}
+h3 {
+    font-size: 100%;
+}
+h4 {
+    font-size: 85%;
+}
+h1, h2, h3, h4, a[href] {
+    cursor: pointer;
+    color: #0074d9;
+    text-decoration: none;
+}
+h3 strong, a.failed {
+    color: #ff4136;
+}
+a.success {
+    color: #3d9970;
+}
+pre {
+    font-family: 'Consolas', 'Deja Vu Sans Mono',
+                 'Bitstream Vera Sans Mono', 'Monaco',
+                 'Courier New', monospace;
+}
+
+.test-details,
+.traceback {
+    display: none;
+}
+section:target .test-details {
+    display: block;
+}
+
+
+.header{
+  background-image: url(https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png);
+  background-size: 505px 107px;
+  width: 600px;
+  height: 200px;
+  background-repeat: no-repeat;
+  margin-left: auto;
+  margin-right: auto;
+  position:relative;
+}
+.header-content {
+  position: absolute;
+  bottom: 0;
+  font-size: 130%;
+  color: #0074d9;
+  text-decoration: none;
+  text-align: center;
+  left: 0;
+  right: 0;
+  font-weight: bold;
+}
+
+.region-list {
+ list-style-type:none;
+ }
+ .green {
+   color:green;
+ }
+ .red {
+   color:red;
+ }
+ a.red {
+     color: red;
+ }
+ a.green {
+     color: green;
+ }
