@@ -24,7 +24,7 @@
 __author__ = 'jfernandez'
 
 
-from keystoneclient import auth, session
+from keystoneclient import session
 from keystoneclient.exceptions import ClientException as KeystoneClientException
 from keystoneclient.exceptions import ConnectionRefused as KeystoneConnectionRefused
 from keystoneclient.exceptions import RequestTimeout as KeystoneRequestTimeout
@@ -33,9 +33,11 @@ from novaclient.exceptions import ConnectionRefused as NovaConnectionRefused
 from neutronclient.common.exceptions import NeutronClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
+from commons.swift_operations import FiwareSwiftOperations
 from commons.constants import *
 from os import environ
 import unittest
+import urlparse
 import logging
 import json
 import time
@@ -47,6 +49,7 @@ class FiwareTestCase(unittest.TestCase):
     region_name = None
 
     # Test authentication
+    auth_api = 'v2.0'
     auth_url = None
     auth_sess = None
     auth_token = None
@@ -75,15 +78,27 @@ class FiwareTestCase(unittest.TestCase):
                 assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
 
         # Check for environment variables related to credentials and update configuration
-        cred = cls.conf[PROPERTIES_CONFIG_CRED]
+        cls.cred = cls.conf[PROPERTIES_CONFIG_CRED]
         env_cred = {
-            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL', cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
-            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME', cred[PROPERTIES_CONFIG_CRED_USER]),
-            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cred[PROPERTIES_CONFIG_CRED_PASS]),
-            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID', cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
-            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME', cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL', cls.cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
+            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME', cls.cred[PROPERTIES_CONFIG_CRED_USER]),
+            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cls.cred[PROPERTIES_CONFIG_CRED_PASS]),
+            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID', cls.cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
+            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME', cls.cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
         }
-        cred.update(env_cred)
+
+        # Check Identity API version from auth_url (v3 requires additional properties)
+        try:
+            cls.auth_url = env_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
+            cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
+            if cls.auth_api == 'v3':
+                user_domain_name = environ.get('OS_USER_DOMAIN_NAME', cls.cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
+                env_cred.update({PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: user_domain_name})
+        except IndexError:
+            assert False, "Invalid setting {}.{}".format(PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_KEYSTONE_URL)
+
+        # Update configuration with values from environment variables
+        cls.cred.update(env_cred)
 
         # Check for optional environment variables related to test configuration and update configuration
         conf = cls.conf[PROPERTIES_CONFIG_TEST]
@@ -95,7 +110,7 @@ class FiwareTestCase(unittest.TestCase):
 
         # Ensure credentials are given (either by settings file or overriden by environment variables)
         for name in env_cred.keys():
-            if not cred[name]:
+            if not cls.cred[name]:
                 assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)
 
     @classmethod
@@ -106,14 +121,32 @@ class FiwareTestCase(unittest.TestCase):
         """
 
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
-        credentials = auth.identity.v2.Password(
-            auth_url=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
-            username=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
-            password=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS],
-            tenant_name=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_NAME])
+        cred_kwargs = {
+            'auth_url': cls.auth_url,
+            'username': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
+            'password': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS]
+        }
 
+        # Currently, both v2 and v3 Identity API versions are supported
+        if cls.auth_api == 'v2.0':
+            cred_kwargs['tenant_name'] = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_NAME]
+        elif cls.auth_api == 'v3':
+            cred_kwargs['user_domain_name'] = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME]
+        else:
+            assert False, "Identity API {} ({}) not supported".format(cls.auth_api, cls.auth_url)
+
+        # Instantiate a Password object
+        try:
+            identity_package = 'keystoneclient.auth.identity.%s' % cls.auth_api.replace('.0', '')
+            identity_module = __import__(identity_package, fromlist=['Password'])
+            password_class = getattr(identity_module, 'Password')
+            cls.logger.debug("Authentication with %s", password_class)
+            credentials = password_class(**cred_kwargs)
+        except (ImportError, AttributeError) as e:
+            assert False, "Could not find Identity API {} Password class: {}".format(cls.auth_api, e)
+
+        # Get auth token
         cls.logger.debug("Getting auth token for tenant %s...", tenant_id)
-        cls.auth_url = credentials.auth_url
         cls.auth_sess = session.Session(auth=credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
         try:
             cls.auth_token = cls.auth_sess.get_token()
@@ -132,6 +165,8 @@ class FiwareTestCase(unittest.TestCase):
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
+        cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name,
+                                                         auth_cred=cls.cred)
 
     @classmethod
     def init_world(cls, world, suite=False):

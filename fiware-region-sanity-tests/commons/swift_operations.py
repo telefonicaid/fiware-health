@@ -25,7 +25,9 @@ __author__ = 'gjp'
 
 
 from swiftclient import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, MAX_RETRIES
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, OBJECT_STORE_MAX_RETRIES, PROPERTIES_CONFIG_CRED_KEYSTONE_URL, \
+    PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID, SERVICE_SWIFT_NAME, \
+    ENDPOINT_TYPE_PUBLIC_URL
 import keystoneclient.v2_0.client as keystoneClient
 
 
@@ -40,19 +42,20 @@ class FiwareSwiftOperations:
         """
 
         self.logger = logger
-        self.keystone_client = keystoneClient.Client(auth_url=kwargs.get('cred').auth_url,
-                                                     username=kwargs.get('cred').username,
-                                                     password=kwargs.get('cred').password,
-                                                     tenant_id=kwargs.get('cred').tenant_name)
+        self.keystone_client = keystoneClient.Client(
+            auth_url=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
+            username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER],
+            password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASS],
+            tenant_id=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_TENANT_ID])
 
-        object_store_url = self.keystone_client.service_catalog.url_for(service_type='object-store',
-                                                       endpoint_type='publicURL', region_name=region_name)
+        object_store_url = self.keystone_client.service_catalog.url_for(service_type=SERVICE_SWIFT_NAME,
+                                                       endpoint_type=ENDPOINT_TYPE_PUBLIC_URL, region_name=region_name)
         self.logger.info("Getting object_store_url from Keystone: %s" % object_store_url)
 
         self.client = client.Connection(
             preauthurl=object_store_url,
             preauthtoken=self.keystone_client.auth_token,
-            retries=MAX_RETRIES,
+            retries=OBJECT_STORE_MAX_RETRIES,
             max_backoff=DEFAULT_REQUEST_TIMEOUT,
             insecure=True)
 

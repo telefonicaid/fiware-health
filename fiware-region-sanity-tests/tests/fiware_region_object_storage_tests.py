@@ -24,14 +24,16 @@
 __author__ = 'gjp'
 
 from tests import fiware_region_base_tests
+from commons.constants import TEST_CONTAINER_PREFIX
 from swiftclient.exceptions import ClientException
-import time
+from datetime import datetime
 
 
 class FiwareRegionsObjectStorageTests(fiware_region_base_tests.FiwareRegionsBaseTests):
 
     with_networks = False
-    containerName = "testHealthContainer"
+    suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    containerName = TEST_CONTAINER_PREFIX + suffix
 
     def test_create_and_get_container(self):
         """
