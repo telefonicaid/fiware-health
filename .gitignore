@@ -66,3 +66,4 @@ fiware-region-sanity-tests/venv/
 
 # Node js
 node_modules/
+coverage/

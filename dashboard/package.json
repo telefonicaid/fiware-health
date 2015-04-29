@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "test": "mocha test/unit",
+    "cover": "istanbul cover _mocha test/unit -- -R spec"
   },
   "dependencies": {
     "body-parser": "~1.12.0",
@@ -13,5 +15,9 @@
     "jade": "~1.9.2",
     "morgan": "~1.5.1",
     "serve-favicon": "~2.2.0"
+  },
+  "devDependencies": {
+    "mocha": "2.2.4",
+    "istanbul": "1.4.3"
   }
 }
