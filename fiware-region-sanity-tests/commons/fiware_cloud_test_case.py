@@ -88,7 +88,7 @@ class FiwareTestCase(unittest.TestCase):
 
         # Check Identity API version from auth_url (v3 requires additional properties)
         try:
-            cls.auth_url = cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
+            cls.auth_url = env_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
             cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
             if cls.auth_api == 'v3':
                 user_domain_name = environ.get('OS_USER_DOMAIN_NAME', cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
