@@ -31,8 +31,10 @@ from keystoneclient.exceptions import RequestTimeout as KeystoneRequestTimeout
 from novaclient.exceptions import NotFound, ClientException as NovaClientException
 from novaclient.exceptions import ConnectionRefused as NovaConnectionRefused
 from neutronclient.common.exceptions import NeutronClientException
+from swiftclient.exceptions import ClientException as SwiftClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
+from commons.swift_operations import FiwareSwiftOperations
 from commons.constants import *
 from os import environ
 import unittest
@@ -52,6 +54,7 @@ class FiwareTestCase(unittest.TestCase):
     auth_url = None
     auth_sess = None
     auth_token = None
+    auth_cred = {}
 
     # Test neutron networks (could be overriden)
     with_networks = True
@@ -77,13 +80,13 @@ class FiwareTestCase(unittest.TestCase):
                 assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
 
         # Check for environment variables related to credentials and update configuration
-        cred = cls.conf[PROPERTIES_CONFIG_CRED]
+        cls.auth_cred = cls.conf[PROPERTIES_CONFIG_CRED]
         env_cred = {
-            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL', cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
-            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME', cred[PROPERTIES_CONFIG_CRED_USER]),
-            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cred[PROPERTIES_CONFIG_CRED_PASS]),
-            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID', cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
-            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME', cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL', cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
+            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
+            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
+            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
+            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
         }
 
         # Check Identity API version from auth_url (v3 requires additional properties)
@@ -91,13 +94,13 @@ class FiwareTestCase(unittest.TestCase):
             cls.auth_url = env_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
             cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
             if cls.auth_api == 'v3':
-                user_domain_name = environ.get('OS_USER_DOMAIN_NAME', cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
+                user_domain_name = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
                 env_cred.update({PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: user_domain_name})
         except IndexError:
             assert False, "Invalid setting {}.{}".format(PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_KEYSTONE_URL)
 
         # Update configuration with values from environment variables
-        cred.update(env_cred)
+        cls.auth_cred.update(env_cred)
 
         # Check for optional environment variables related to test configuration and update configuration
         conf = cls.conf[PROPERTIES_CONFIG_TEST]
@@ -109,7 +112,7 @@ class FiwareTestCase(unittest.TestCase):
 
         # Ensure credentials are given (either by settings file or overriden by environment variables)
         for name in env_cred.keys():
-            if not cred[name]:
+            if not cls.auth_cred[name]:
                 assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)
 
     @classmethod
@@ -164,6 +167,8 @@ class FiwareTestCase(unittest.TestCase):
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
+        cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
+                                                         auth_cred=cls.auth_cred)
 
     @classmethod
     def init_world(cls, world, suite=False):
@@ -178,7 +183,8 @@ class FiwareTestCase(unittest.TestCase):
             'ports': [],
             'networks': [],
             'routers': [],
-            'allocated_ips': []
+            'allocated_ips': [],
+            'containers': []
         })
 
         if suite:
@@ -189,6 +195,7 @@ class FiwareTestCase(unittest.TestCase):
             cls.reset_world_networks(world, suite)
             cls.reset_world_routers(world, suite)
             cls.reset_world_allocated_ips(world, suite)
+            cls.reset_world_containers(world, suite)
 
     @classmethod
     def reset_world_servers(cls, world, suite=False):
@@ -369,6 +376,30 @@ class FiwareTestCase(unittest.TestCase):
                 world['ports'].remove(port_id)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete port %s: %s", port_id, e)
+
+    @classmethod
+    def reset_world_containers(cls, world, suite=False):
+        """
+        Init the world['containers'] entry (after deleting existing resources)
+        """
+
+        if suite:
+            # get pre-existing test containers list (ideally, empty when starting the tests)
+            try:
+                container_list = cls.swift_operations.list_containers(TEST_CONTAINER_PREFIX)
+                for container in container_list:
+                    cls.logger.debug("init_world() found container '%s' not deleted", container["name"])
+                    world['containers'].append(container["name"])
+            except (ClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+                cls.logger.error("init_world() failed to get container list: %s", e)
+
+        # release resources to ensure a clean world
+        for container in list(world['containers']):
+            try:
+                cls.swift_operations.delete_container(container)
+                world['containers'].remove(container)
+            except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+                cls.logger.error("Failed to delete container %s: %s", container, e)
 
     @classmethod
     def setUpClass(cls):

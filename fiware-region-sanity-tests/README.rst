@@ -121,6 +121,11 @@ These Test Cases will be common for all federated regions.
 * Test whether it is possible to deploy an instance and connect to INTERNET
   (SNAT) without assigning a public IP
 
+**Regions with Object Storage service**
+
+* Test whether it is possible to create a new container into the object storage, get it and delete the container.
+* Test whether it is possible to create a new container into the object storage.
+
 
 Configuration
 -------------
