@@ -1,0 +1,9 @@
+--jsdoc
+--summary
+--beep
+--check_html
+--nomultiprocess
+--debug_indentation
+--time
+--disable=1,110,212,217
+--custom_jsdoc_tags=module,function,callback,abstract,constant,augments,memberof,returns
