@@ -43,6 +43,7 @@ class FiwareRegionsObjectStorageTests(fiware_region_base_tests.FiwareRegionsBase
 
         response = self.swift_operations.create_container(containerName)
         self.assertIsNone(response)
+        self.test_world['containers'].append(containerName)
         self.logger.debug("Created %s container was created" % containerName)
 
         response = self.swift_operations.get_container(containerName)
@@ -52,9 +53,23 @@ class FiwareRegionsObjectStorageTests(fiware_region_base_tests.FiwareRegionsBase
 
         response = self.swift_operations.delete_container(containerName)
         self.assertIsNone(response)
+        self.test_world['containers'].remove(containerName)
 
         try:
             response = self.swift_operations.get_container(containerName)
         except ClientException as e:
             self.assertRaises(e)
             self.logger.debug("%s container was successfully removed from the object storage" % containerName)
+
+    def test_create_container(self):
+        """
+        Test if it can be possible create a new container into the object storage.
+        """
+
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
+        containerName = TEST_CONTAINER_PREFIX + suffix
+
+        response = self.swift_operations.create_container(containerName)
+        self.assertIsNone(response)
+        self.test_world['containers'].append(containerName)
+        self.logger.debug("Created %s container was created" % containerName)

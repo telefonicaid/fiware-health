@@ -197,3 +197,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         if self.test_world.get('allocated_ips'):
             self.logger.debug("Tearing down allocated IPs...")
             self.reset_world_allocated_ips(self.test_world)
+
+        if self.test_world.get('containers'):
+            self.logger.debug("Tearing down containers...")
+            self.reset_world_containers(self.test_world)

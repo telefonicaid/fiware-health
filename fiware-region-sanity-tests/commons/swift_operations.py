@@ -67,6 +67,19 @@ class FiwareSwiftOperations:
             max_backoff=DEFAULT_REQUEST_TIMEOUT,
             insecure=True)
 
+    def list_containers(self, name_prefix=None):
+        """
+        Gets all the containers
+        :param name_prefix: Prefix to match container names
+        :return: A list of container names
+        """
+        container_list = self.client.get_account()[1]
+
+        if name_prefix:
+            container_list = [container for container in container_list if container["name"].startswith(name_prefix)]
+
+        return container_list
+
     def create_container(self, containerName):
         """
         Creates a new Container

@@ -31,6 +31,7 @@ from keystoneclient.exceptions import RequestTimeout as KeystoneRequestTimeout
 from novaclient.exceptions import NotFound, ClientException as NovaClientException
 from novaclient.exceptions import ConnectionRefused as NovaConnectionRefused
 from neutronclient.common.exceptions import NeutronClientException
+from swiftclient.exceptions import ClientException
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
 from commons.swift_operations import FiwareSwiftOperations
@@ -181,7 +182,8 @@ class FiwareTestCase(unittest.TestCase):
             'ports': [],
             'networks': [],
             'routers': [],
-            'allocated_ips': []
+            'allocated_ips': [],
+            'containers': []
         })
 
         if suite:
@@ -192,6 +194,7 @@ class FiwareTestCase(unittest.TestCase):
             cls.reset_world_networks(world, suite)
             cls.reset_world_routers(world, suite)
             cls.reset_world_allocated_ips(world, suite)
+            cls.reset_world_containers(world, suite)
 
     @classmethod
     def reset_world_servers(cls, world, suite=False):
@@ -372,6 +375,30 @@ class FiwareTestCase(unittest.TestCase):
                 world['ports'].remove(port_id)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete port %s: %s", port_id, e)
+
+    @classmethod
+    def reset_world_containers(cls, world, suite=False):
+        """
+        Init the world['containers'] entry (after deleting existing resources)
+        """
+
+        if suite:
+            # get pre-existing test containers list (ideally, empty when starting the tests)
+            try:
+                container_list = cls.swift_operations.list_containers(TEST_CONTAINER_PREFIX)
+                for container in container_list:
+                    cls.logger.debug("init_world() found container '%s' not deleted", container["name"])
+                    world['containers'].append(container["name"])
+            except (ClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+                cls.logger.error("init_world() failed to get container list: %s", e)
+
+        # release resources to ensure a clean world
+        for container in list(world['containers']):
+            try:
+                cls.swift_operations.delete_container(container)
+                world['containers'].remove(container)
+            except (ClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+                cls.logger.error("Failed to delete container %s: %s", container, e)
 
     @classmethod
     def setUpClass(cls):
