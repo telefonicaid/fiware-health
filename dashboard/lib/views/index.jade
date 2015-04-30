@@ -2,12 +2,17 @@ extends layout
 
 block content
   .header
-   .header-content
+    .header-content
+      p FIWARE REGIONS - SANITY CHECK - #{timestamp}
 
-    p FIWARE REGIONS - SANITY CHECK - #{timestamp}
 
-  ul.region-list
-   each region in regions
-      - color = region['status'] == 'ok' ?'green' : 'red';
-      li: a(class='#{color}', href="template.html", title="#{region['node']") #{region['node']}
-        button.btn(data-action="btn-subscribe") Subscribe
+
+  block container
+      .box1
+        ul.region-list
+           each region in regions
+              - color = region['status'] == 'ok' ?'green' : 'red';
+              li: a(class='#{color}', href="template.html", title="#{region['node']") #{region['node']}
+                button.btn(data-action="btn-subscribe") Subscribe
+
+
