@@ -1,12 +1,12 @@
 {
     "environment": "fiware-lab",
     "credentials": {
-        "keystone_url": "http://cloud.lab.fiware.org:4731/v2.0/",
-        "tenant_id": "",
-        "tenant_name": "",
-        "user_domain_name": "",
-        "user": "",
-        "password": ""
+        "keystone_url": "http://cloud.lab.fi-ware.org:4731/v2.0",
+        "tenant_id": "00000000000000000000000000000139",
+        "tenant_name": "00000000000000000000000000000139",
+        "user": "e.fiware@tid.es",
+        "password": "temporal",
+        "user_domain_name": "default"
     },
     "test_configuration": {
         "phonehome_endpoint": ""

@@ -25,7 +25,7 @@ __author__ = 'gjp'
 
 from tests import fiware_region_base_tests
 from commons.constants import TEST_CONTAINER_PREFIX
-from swiftclient.exceptions import ClientException
+from swiftclient.exceptions import ClientException as SwiftClientException
 from datetime import datetime
 
 
@@ -55,7 +55,7 @@ class FiwareRegionsObjectStorageTests(fiware_region_base_tests.FiwareRegionsBase
 
         try:
             response = self.swift_operations.get_container(containerName)
-        except ClientException as e:
+        except SwiftClientException as e:
             self.assertRaises(e)
             self.logger.debug("%s container was successfully removed from the object storage" % containerName)
 
