@@ -15,7 +15,8 @@
     "jade": "~1.9.2",
     "morgan": "~1.5.1",
     "serve-favicon": "~2.2.0",
-    "dateformat": "1.0.11"
+    "dateformat": "1.0.11",
+    "jslint": "^0.9.0-pre006"
   },
   "devDependencies": {
     "mocha": "^2.2.4",
