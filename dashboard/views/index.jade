@@ -9,5 +9,5 @@ block content
   ul.region-list
    each region in regions
       - color = region['status'] == 'ok' ?'green' : 'red';
-      li: a(class='#{color}', href="/template.html", title="#{region['node']") #{region['node']}
+      li: a(class='#{color}', href="template.html", title="#{region['node']") #{region['node']}
         button.btn(data-action="btn-subscribe") Subscribe
