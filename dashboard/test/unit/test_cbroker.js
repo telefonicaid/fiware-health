@@ -1,7 +1,7 @@
 var assert = require("assert");
 
 
-var cbroker = require('../../routes/cbroker.js');
+var cbroker = require('../../lib/routes/cbroker.js');
 var fs = require('fs');
 
 describe('contexBroker', function () {
