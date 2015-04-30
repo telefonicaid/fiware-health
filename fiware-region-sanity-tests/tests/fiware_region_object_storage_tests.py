@@ -32,31 +32,29 @@ from datetime import datetime
 class FiwareRegionsObjectStorageTests(fiware_region_base_tests.FiwareRegionsBaseTests):
 
     with_networks = False
-    suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    containerName = TEST_CONTAINER_PREFIX + suffix
 
-    def test_create_and_get_container(self):
+    def test_create_get_and_delete_container(self):
         """
-        Test if it can be possible create a new container into the object storage and list that container.
+        Test if it can be possible create a new container into the object storage, list it and delete the container.
         """
-        response = self.swift_operations.create_container(self.containerName)
+
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        containerName = TEST_CONTAINER_PREFIX + suffix
+
+        response = self.swift_operations.create_container(containerName)
         self.assertIsNone(response)
-        self.logger.debug("Created %s container was created" % self.containerName)
+        self.logger.debug("Created %s container was created" % containerName)
 
-        response = self.swift_operations.get_container(self.containerName)
+        response = self.swift_operations.get_container(containerName)
         self.assertEquals('x-container-object-count' in response[0], True)
         self.assertEquals(len(response[-1]), 0)  # The list of items should be 0.
-        self.logger.debug("Getting %s container details from the object storage" % self.containerName)
+        self.logger.debug("Getting %s container details from the object storage" % containerName)
 
-    def test_delete_container(self):
-        """
-        Test if it can be possible deleting containers.
-        """
-        response = self.swift_operations.delete_container(self.containerName)
+        response = self.swift_operations.delete_container(containerName)
         self.assertIsNone(response)
 
         try:
-            response = self.swift_operations.get_container(self.containerName)
+            response = self.swift_operations.get_container(containerName)
         except ClientException as e:
             self.assertRaises(e)
-            self.logger.debug("%s container was successfully removed from the object storage" % self.containerName)
+            self.logger.debug("%s container was successfully removed from the object storage" % containerName)

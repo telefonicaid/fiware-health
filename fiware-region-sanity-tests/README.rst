@@ -123,9 +123,7 @@ These Test Cases will be common for all federated regions.
 
 **Regions with Object Storage service**
 
-* Test if it can be possible create a new container into the object storage
-  and list that container
-* Test if it can be possible deleting containers
+* Test if it can be possible create a new container into the object storage, list it and delete the container.
 
 
 Configuration
