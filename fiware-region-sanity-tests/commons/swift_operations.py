@@ -27,13 +27,14 @@ __author__ = 'gjp'
 from swiftclient import client
 from commons.constants import DEFAULT_REQUEST_TIMEOUT, OBJECT_STORE_MAX_RETRIES, PROPERTIES_CONFIG_CRED_KEYSTONE_URL, \
     PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID, SERVICE_SWIFT_NAME, \
-    ENDPOINT_TYPE_PUBLIC_URL
+    ENDPOINT_TYPE_PUBLIC_URL, PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME
 import keystoneclient.v2_0.client as keystoneClient
+import keystoneclient.v3.client as keystoneclientv3
 
 
 class FiwareSwiftOperations:
 
-    def __init__(self, logger, region_name, **kwargs):
+    def __init__(self, logger, region_name, auth_api, **kwargs):
         """
         Initializes Swift-Client.
         :param logger: Logger object
@@ -42,11 +43,18 @@ class FiwareSwiftOperations:
         """
 
         self.logger = logger
-        self.keystone_client = keystoneClient.Client(
-            auth_url=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
-            username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER],
-            password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASS],
-            tenant_id=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_TENANT_ID])
+        if auth_api == 'v2.0':
+            self.keystone_client = keystoneClient.Client(
+                auth_url=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
+                username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER],
+                password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASS],
+                tenant_id=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_TENANT_ID])
+        elif auth_api == 'v3':
+            self.keystone_client = keystoneclientv3.Client(
+                auth_url=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
+                username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER],
+                password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASS],
+                user_domain_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
 
         object_store_url = self.keystone_client.service_catalog.url_for(service_type=SERVICE_SWIFT_NAME,
                                                        endpoint_type=ENDPOINT_TYPE_PUBLIC_URL, region_name=region_name)

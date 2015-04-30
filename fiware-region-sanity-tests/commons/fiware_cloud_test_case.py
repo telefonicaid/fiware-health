@@ -165,7 +165,7 @@ class FiwareTestCase(unittest.TestCase):
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
-        cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name,
+        cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
                                                          auth_cred=cls.cred)
 
     @classmethod
