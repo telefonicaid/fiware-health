@@ -37,7 +37,7 @@
 #     -i, --os-tenant-id=ID		optional OpenStack tenant_id
 #     -n, --os-tenant-name=NAME		optional OpenStack tenant_name
 #     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name (to
-#					replace the former if Identity API v3)
+#     					replace the former if Identity API v3)
 #
 # Actions:
 #     prepare				Sanity Check preparation process
@@ -160,13 +160,13 @@ fi
 
 # Check FIHealth environment variables for paths
 if [ -z "$FIHEALTH_WORKSPACE" -o -z "$FIHEALTH_HTDOCS" ]; then
-	printf "FIHEALTH_WORKSPACE or FIHEALTH_HTDOCS variable missing\n" 1>&2
+	printf "Either 'workspace' or 'htdocs' path not specified\n" 1>&2
 	exit 3
 fi
 
 # Check FIHealth environment variables for endpoints
 if [ -z "$FIHEALTH_ADAPTER_URL" -o -z "$FIHEALTH_CB_URL" ]; then
-	printf "FIHEALTH_ADAPTER_URL or FIHEALTH_CB_URL variable missing\n" 1>&2
+	printf "Either NGSI Adapter or ContextBroker URL not specified\n" 1>&2
 	exit 3
 fi
 
