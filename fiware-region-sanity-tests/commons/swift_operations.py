@@ -34,9 +34,6 @@ import keystoneclient.v3.client as keystoneclientv3
 
 class FiwareSwiftOperations:
 
-    ### TODO I do not take the session from the init_clients because swiftclient do not accept sessions yet
-    ### TODO Import keystoneclient dynamically from the correct version api
-
     def __init__(self, logger, region_name, auth_api, **kwargs):
         """
         Initializes Swift-Client.
