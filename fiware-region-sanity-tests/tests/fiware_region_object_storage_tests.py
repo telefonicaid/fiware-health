@@ -31,8 +31,6 @@ from datetime import datetime
 
 class FiwareRegionsObjectStorageTests(fiware_region_base_tests.FiwareRegionsBaseTests):
 
-    with_networks = False
-
     def test_create_get_and_delete_container(self):
         """
         Test if it can be possible create a new container into the object storage, list it and delete the container.
