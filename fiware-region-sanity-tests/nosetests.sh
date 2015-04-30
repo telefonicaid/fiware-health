@@ -27,7 +27,8 @@
 #     -h, --help			show this help message
 #     -v, --verbose			enable logging with verbose details
 #     -o, --output-name=NAME		basename for generated report files
-#     -t, --phonehome-endpoint=URL	optional PhoneHome service endpoint
+#     -t, --template-name=NAME		filename of the HTML report template
+#     -e, --phonehome-endpoint=URL	optional PhoneHome service endpoint
 #     -l, --os-auth-url=URL		optional OpenStack auth_url (see below)
 #     -u, --os-username=STRING		optional OpenStack username
 #     -p, --os-password=STRING		optional OpenStack password
@@ -60,7 +61,8 @@ OPTS=`tr -d '\n ' <<END
       h(help)
       v(verbose)
       o(output-name):
-      t(phonehome-endpoint):
+      t(template-name):
+      e(phonehome-endpoint):
       l(os-auth-url):
       u(os-username):
       p(os-password):
@@ -71,6 +73,7 @@ END`
 
 # Command line options (default values)
 OUTPUT_NAME=test_results
+TEMPLATE_NAME=test_report_template.html
 
 # Environment variables for nosetests
 export TEST_PHONEHOME_ENDPOINT
@@ -93,7 +96,8 @@ OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0 | head -n -2;
 while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
 case $OPT in
 'v')	NOSEOPTS="$NOSEOPTS --logging-level=DEBUG";;
-'t')	TEST_PHONEHOME_ENDPOINT=$OPTARG;;
+'e')	TEST_PHONEHOME_ENDPOINT=$OPTARG;;
+'t')	TEMPLATE_NAME=$OPTARG;;
 'o')	OUTPUT_NAME=$OPTARG;;
 'l')	OS_AUTH_URL=$OPTARG;;
 'u')	OS_USERNAME=$OPTARG;;
@@ -132,7 +136,8 @@ TESTS=${TESTS:-tests/regions}
 
 # Main
 nosetests $TESTS $NOSEOPTS -v --exe \
---with-xunit --xunit-file=$OUTPUT_NAME.xml \
---with-html --html-report=$OUTPUT_NAME.html \
---html-report-template=resources/templates/test_report_template.html \
-&& commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
+	--with-xunit --xunit-file=$OUTPUT_NAME.xml \
+	--with-html --html-report=$OUTPUT_NAME.html \
+	--html-report-template=resources/templates/$TEMPLATE_NAME
+
+commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt

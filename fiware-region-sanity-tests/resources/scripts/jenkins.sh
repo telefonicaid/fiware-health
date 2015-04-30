@@ -199,7 +199,8 @@ prepare)
 	rm -rf $VIRTUALENV
 	virtualenv -p python2.7 $VIRTUALENV
 
-	# Install dependencies
+	# Install dependencies in virtualenv
+	source $VIRTUALENV/bin/activate
 	pip install -r requirements.txt --allow-all-external
 	;;
 
@@ -217,11 +218,14 @@ test)
 	# Execute tests
 	export OS_AUTH_URL OS_USERNAME OS_PASSWORD
 	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
-	./nosetests.sh --output-name=$OUTPUT_NAME --verbose $REGIONS
+	./nosetests.sh --verbose \
+		--output-name=$OUTPUT_NAME \
+		--template-name="dashboard_template.html" \
+		$REGIONS
 
 	# Publish results to webserver
-	cp -f $OUTPUT_NAME.html $FIHEALTH_HTDOCS/index.html
-	cp -f $OUTPUT_NAME.txt $FIHEALTH_HTDOCS/summary_report.txt
+	cp -f $OUTPUT_NAME.html $FIHEALTH_HTDOCS
+	cp -f $OUTPUT_NAME.txt $FIHEALTH_HTDOCS
 
 	# In single region tests, change status according to results
 	change_status $OUTPUT_NAME.txt
