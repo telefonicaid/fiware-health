@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2015 Telefónica I+D
+# Copyright 2013-2015 Telefónica I+D
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -20,26 +20,69 @@
 # Launch testcase execution and generate reports
 #
 # Usage:
-#     $0 [--verbose] [region ...]
+#     $0 [options] [region ...]
 #     $0 --help
 #
 # Options:
-#     -v, --verbose	enable logging with verbose details
-#     -h, --help	show this help message
+#     -h, --help			show this help message
+#     -v, --verbose			enable logging with verbose details
+#     -o, --output-name=NAME		basename for generated report files
+#     -t, --phonehome-endpoint=URL	optional PhoneHome service endpoint
+#     -l, --os-auth-url=URL		optional OpenStack auth_url (see below)
+#     -u, --os-username=STRING		optional OpenStack username
+#     -p, --os-password=STRING		optional OpenStack password
+#     -i, --os-tenant-id=ID		optional OpenStack tenant_id
+#     -n, --os-tenant-name=NAME		optional OpenStack tenant_name
+#     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name (to
+#					replace the former if Identity API v3)
+#
+# Environment:
+#     TEST_PHONEHOME_ENDPOINT		default value for --phonehome-endpoint
+#     OS_AUTH_URL			default value for --os-auth-url
+#     OS_USERNAME			default value for --os-username
+#     OS_PASSWORD			default value for --os-password
+#     OS_TENANT_ID			default value for --os-tenant-id
+#     OS_TENANT_NAME			default value for --os-tenant-name
+#     OS_USER_DOMAIN_NAME		default value for --os-user-domain-name
+#
+# Requirements:
+#     python2.7				Python 2.7 interpreter (found in path)
 #
 # Regions:
-#     Given by existing tests/regions/test_{region_name}.py files
+#     Given by existing files 'tests/regions/test_{region_name_lowercase}.py'
+#
+# OpenStack credentials and PhoneHome service endpoint:
+#     Override values defined in 'settings.json' file.
 #
 
-OPTS='v(verbose)h(help)'
 NAME=$(basename $0)
+OPTS=`tr -d '\n ' <<END
+      h(help)
+      v(verbose)
+      o(output-name):
+      t(phonehome-endpoint):
+      l(os-auth-url):
+      u(os-username):
+      p(os-password):
+      i(os-tenant-id):
+      n(os-tenant-name):
+      d(os-user-domain-name):
+END`
 
-# nosetests options
+# Command line options (default values)
+OUTPUT_NAME=test_results
+
+# Environment variables for nosetests
+export TEST_PHONEHOME_ENDPOINT
+export OS_AUTH_URL OS_USERNAME OS_PASSWORD
+export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
+
+# Options for nosetests
 TESTS=
 NOSEOPTS="--logging-filter=TestCase,novaclient,neutronclient --logging-level=ERROR"
 
 # Available regions
-REGIONS=$(cd tests/regions; ls test_*.py | sed 's/test_\(.*\).py/\1/g')
+REGIONS=$(cd tests/regions; ls test_*.py | sed 's/test_\(.*\).py/\u\1/g')
 REGIONS_PATTERN='^\('$(echo $REGIONS | sed 's/ /\\|/g')'\)$'
 
 # Process command line
@@ -50,6 +93,14 @@ OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0 | head -n -2;
 while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
 case $OPT in
 'v')	NOSEOPTS="$NOSEOPTS --logging-level=DEBUG";;
+'t')	TEST_PHONEHOME_ENDPOINT=$OPTARG;;
+'o')	OUTPUT_NAME=$OPTARG;;
+'l')	OS_AUTH_URL=$OPTARG;;
+'u')	OS_USERNAME=$OPTARG;;
+'p')	OS_PASSWORD=$OPTARG;;
+'i')	OS_TENANT_ID=$OPTARG;;
+'n')	OS_TENANT_NAME=$OPTARG;;
+'d')	OS_USER_DOMAIN_NAME=$OPTARG;;
 'h')	OPTERR="$OPTHLP";;
 '?')	OPTERR="Unknown option -$OPTARG";;
 ':')	OPTERR="Missing value for option -$OPTARG";;
@@ -66,7 +117,7 @@ case $OPT in
 esac; break; done; done
 shift $(expr $OPTIND - 1)
 while [ -z "$OPTERR" -a -n "$1" ]; do
-	REGION_NAME=$(expr "$1" : "$REGIONS_PATTERN") && shift
+	REGION_NAME=$(expr "$1" : "$REGIONS_PATTERN" | sed 's/.*/\L&/') && shift
 	[ -z "$REGION_NAME" ] && OPTERR="Invalid region '$1'"
 	TESTS="$TESTS tests.regions.test_$REGION_NAME"
 done
@@ -81,6 +132,7 @@ TESTS=${TESTS:-tests/regions}
 
 # Main
 nosetests $TESTS $NOSEOPTS -v --exe \
-	--with-xunit --xunit-file=test_results.xml \
-	--with-html --html-report=test_results.html \
-	--html-report-template=resources/templates/test_report_template.html
+--with-xunit --xunit-file=$OUTPUT_NAME.xml \
+--with-html --html-report=$OUTPUT_NAME.html \
+--html-report-template=resources/templates/test_report_template.html \
+&& commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
