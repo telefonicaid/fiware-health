@@ -37,7 +37,6 @@ class FiwareSwiftOperations:
     ### TODO import keystoneclient dynamically from api version.
     ### TODO Session is not taken from kwargs because swiftclient does not support it yet. It is needed auth credentials
 
-
     def __init__(self, logger, region_name, auth_api, **kwargs):
         """
         Initializes Swift-Client.
