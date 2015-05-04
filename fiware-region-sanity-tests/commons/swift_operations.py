@@ -67,7 +67,7 @@ class FiwareSwiftOperations:
         Inits the swiftclient with the endpoint retrieved from keystone
         """
         object_store_url = self.keystone_client.service_catalog.url_for(service_type=SERVICE_SWIFT_NAME,
-                                                       endpoint_type=ENDPOINT_TYPE_PUBLIC_URL, region_name=self.region_name)
+                                                endpoint_type=ENDPOINT_TYPE_PUBLIC_URL, region_name=self.region_name)
 
         self.logger.info("Getting object_store_url from Keystone: %s" % object_store_url)
 
@@ -84,9 +84,6 @@ class FiwareSwiftOperations:
         :param name_prefix: Prefix to match container names
         :return: A list of container names
         """
-        if self.client == None:
-            self.init_swift_client()
-
         container_list = self.client.get_account()[1]
 
         if name_prefix:
@@ -100,9 +97,6 @@ class FiwareSwiftOperations:
         :param container_name: Name of the container
         :return: None if container was created and the error message if something failed.
         """
-        if self.client == None:
-            self.init_swift_client()
-
         response = self.client.put_container(containerName)
         return response
 
@@ -112,9 +106,6 @@ class FiwareSwiftOperations:
         :param container_name: Name of the container
         :return: Tuple with the request response about the container.
         """
-        if self.client == None:
-            self.init_swift_client()
-
         response = self.client.get_container(containerName)
         return response
 
@@ -124,8 +115,5 @@ class FiwareSwiftOperations:
         :param container_name: Name of the container
         :return: None if container was deleted and the error message if something failed.
         """
-        if self.client == None:
-            self.init_swift_client()
-
         response = self.client.delete_container(containerName)
         return response
