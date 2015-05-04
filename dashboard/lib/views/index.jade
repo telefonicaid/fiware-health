@@ -11,7 +11,7 @@ block content
       .box1
         ul.region-list
            each region in regions
-              - color = region['status'] == 'ok' ?'green' : 'red';
+              - color = region['status'] == 'OK' ?'green' : region['status'] == 'NOK'?'red':'yellow';
               li: a(class='#{color}', href="template.html", title="#{region['node']") #{region['node']}
                 button.btn(data-action="btn-subscribe") Subscribe
 

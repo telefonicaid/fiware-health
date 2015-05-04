@@ -16,10 +16,10 @@
  */
 'use strict';
 
-var express = require('express');
-var router = express.Router();
-var dateFormat = require('dateformat');
-var cbroker = require('./cbroker.js');
+var express = require('express'),
+    router = express.Router(),
+    dateFormat = require('dateformat'),
+    cbroker = require('./cbroker');
 
 /* GET home page. */
 router.get('/', function (req, res) {

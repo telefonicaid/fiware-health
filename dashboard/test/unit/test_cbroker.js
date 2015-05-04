@@ -17,7 +17,7 @@
 'use strict';
 
 var assert = require('assert'),
-    cbroker = require('../../lib/routes/cbroker.js'),
+    cbroker = require('../../lib/routes/cbroker'),
     fs = require('fs');
 
 
@@ -37,8 +37,10 @@ suite('cbroker', function () {
         var result = cbroker.parseRegions(json);
         //then
         var expected = [
-            {node: 'Spain2', status: 'fail'},
-            {node: 'Spain', status: 'ok'}
+            {node: 'Spain2', status: 'NOK'},
+            {node: 'Spain', status: 'OK'},
+            {node: 'Trento', status: 'N/A'}
+
         ];
 
         assert.deepEqual(expected, result);

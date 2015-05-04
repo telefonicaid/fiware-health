@@ -16,35 +16,33 @@
  */
 'use strict';
 
-var http = require('http');
-var cbroker = {};
+var http = require('http'),
+    cbroker = {};
 
 
-var FIELDNAME = 'status'; // field name for value about regions status
+var FIELDNAME = 'sanity_status'; // field name for value about regions status
 
 
 /**
  * @function parseRegions
  *
- * @param {JSON} json
+ * @param {Object} entities
  * @return {Array}
  */
-cbroker.parseRegions = function (json) {
+cbroker.parseRegions = function (entities) {
 
     var result = [];
 
-    var list = json.contextResponses;
-
-    list.forEach(function (entry) {
+    entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === 'region') {
-            var timestamp = '';
+            var sanity_status = '';
             entry.contextElement.attributes.forEach(function (value) {
                 if (value.name === FIELDNAME) {
-                    timestamp = value.value;
+                    sanity_status = value.value;
                 }
             });
-            result.push({node: entry.contextElement.id, status: timestamp});
+            result.push({node: entry.contextElement.id, status: sanity_status});
         }
     });
 
@@ -70,7 +68,7 @@ cbroker.postAllRegions = function (callback) {
         'Content-Length': payloadString.length
     };
     var options = {
-        host: '10.0.64.4',
+        host: 'localhost',
         port: 1026,
         path: '/NGSI10/queryContext',
         method: 'POST',
