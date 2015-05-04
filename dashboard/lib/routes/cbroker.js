@@ -20,7 +20,8 @@ var http = require('http'),
     cbroker = {};
 
 
-var FIELDNAME = 'sanity_status'; // field name for value about regions status
+var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
+    REGION_TYPE = "region";
 
 
 /**
@@ -35,10 +36,10 @@ cbroker.parseRegions = function (entities) {
 
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
-        if (type === 'region') {
+        if (type === REGION_TYPE) {
             var sanity_status = '';
             entry.contextElement.attributes.forEach(function (value) {
-                if (value.name === FIELDNAME) {
+                if (value.name === SANITY_STATUS_ATTRIBUTE) {
                     sanity_status = value.value;
                 }
             });

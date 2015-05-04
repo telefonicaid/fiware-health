@@ -4,76 +4,6 @@
             "contextElement": {
                 "attributes": [
                     {
-                        "name": "coreUsed",
-                        "type": "string",
-                        "value": "211"
-                    },
-                    {
-                        "name": "coreEnabled",
-                        "type": "string",
-                        "value": "192"
-                    },
-                    {
-                        "name": "coreTot",
-                        "type": "string",
-                        "value": "480"
-                    },
-                    {
-                        "name": "vmUsed",
-                        "type": "string",
-                        "value": "146"
-                    },
-                    {
-                        "name": "vmTot",
-                        "type": "string",
-                        "value": "155"
-                    },
-                    {
-                        "name": "hdUsed",
-                        "type": "string",
-                        "value": "3785"
-                    },
-                    {
-                        "name": "hdTot",
-                        "type": "string",
-                        "value": "12648"
-                    },
-                    {
-                        "name": "ramUsed",
-                        "type": "string",
-                        "value": "395776"
-                    },
-                    {
-                        "name": "ramTot",
-                        "type": "string",
-                        "value": "965565"
-                    },
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "value": "IE"
-                    },
-                    {
-                        "name": "latitude",
-                        "type": "string",
-                        "value": "52.2536118"
-                    },
-                    {
-                        "name": "longitude",
-                        "type": "string",
-                        "value": "-7.1875053"
-                    },
-                    {
-                        "name": "timeSample",
-                        "type": "string",
-                        "value": "1430304226"
-                    },
-                    {
-                        "name": "nUser",
-                        "type": "string",
-                        "value": "0"
-                    },
-                    {
                         "name": "_timestamp",
                         "type": "string",
                         "value": "1430304226"
@@ -84,7 +14,7 @@
                         "value": "NOK"
                     }
                 ],
-                "id": "Spain2",
+                "id": "Region1",
                 "isPattern": "false",
                 "type": "region"
             },
@@ -96,76 +26,6 @@
         {
             "contextElement": {
                 "attributes": [
-                    {
-                        "name": "coreUsed",
-                        "type": "string",
-                        "value": "211"
-                    },
-                    {
-                        "name": "coreEnabled",
-                        "type": "string",
-                        "value": "192"
-                    },
-                    {
-                        "name": "coreTot",
-                        "type": "string",
-                        "value": "480"
-                    },
-                    {
-                        "name": "vmUsed",
-                        "type": "string",
-                        "value": "146"
-                    },
-                    {
-                        "name": "vmTot",
-                        "type": "string",
-                        "value": "155"
-                    },
-                    {
-                        "name": "hdUsed",
-                        "type": "string",
-                        "value": "3785"
-                    },
-                    {
-                        "name": "hdTot",
-                        "type": "string",
-                        "value": "12648"
-                    },
-                    {
-                        "name": "ramUsed",
-                        "type": "string",
-                        "value": "395776"
-                    },
-                    {
-                        "name": "ramTot",
-                        "type": "string",
-                        "value": "965565"
-                    },
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "value": "IE"
-                    },
-                    {
-                        "name": "latitude",
-                        "type": "string",
-                        "value": "52.2536118"
-                    },
-                    {
-                        "name": "longitude",
-                        "type": "string",
-                        "value": "-7.1875053"
-                    },
-                    {
-                        "name": "timeSample",
-                        "type": "string",
-                        "value": "1430304226"
-                    },
-                    {
-                        "name": "nUser",
-                        "type": "string",
-                        "value": "0"
-                    },
                     {
                         "name": "_timestamp",
                         "type": "string",
@@ -177,7 +37,7 @@
                         "value": "OK"
                     }
                 ],
-                "id": "Spain",
+                "id": "Region2",
                 "isPattern": "false",
                 "type": "region"
             },
@@ -190,76 +50,6 @@
             "contextElement": {
                 "attributes": [
                     {
-                        "name": "coreUsed",
-                        "type": "string",
-                        "value": "211"
-                    },
-                    {
-                        "name": "coreEnabled",
-                        "type": "string",
-                        "value": "192"
-                    },
-                    {
-                        "name": "coreTot",
-                        "type": "string",
-                        "value": "480"
-                    },
-                    {
-                        "name": "vmUsed",
-                        "type": "string",
-                        "value": "146"
-                    },
-                    {
-                        "name": "vmTot",
-                        "type": "string",
-                        "value": "155"
-                    },
-                    {
-                        "name": "hdUsed",
-                        "type": "string",
-                        "value": "3785"
-                    },
-                    {
-                        "name": "hdTot",
-                        "type": "string",
-                        "value": "12648"
-                    },
-                    {
-                        "name": "ramUsed",
-                        "type": "string",
-                        "value": "395776"
-                    },
-                    {
-                        "name": "ramTot",
-                        "type": "string",
-                        "value": "965565"
-                    },
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "value": "IE"
-                    },
-                    {
-                        "name": "latitude",
-                        "type": "string",
-                        "value": "52.2536118"
-                    },
-                    {
-                        "name": "longitude",
-                        "type": "string",
-                        "value": "-7.1875053"
-                    },
-                    {
-                        "name": "timeSample",
-                        "type": "string",
-                        "value": "1430304226"
-                    },
-                    {
-                        "name": "nUser",
-                        "type": "string",
-                        "value": "0"
-                    },
-                    {
                         "name": "_timestamp",
                         "type": "string",
                         "value": "1430304226"
@@ -270,7 +60,7 @@
                         "value": "N/A"
                     }
                 ],
-                "id": "Trento",
+                "id": "Region3",
                 "isPattern": "false",
                 "type": "region"
             },

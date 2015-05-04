@@ -85,14 +85,7 @@ section:target .test-details {
 
 .region-list {
     list-style-type: none;
-}
-
-.green {
-    color: green;
-}
-
-.red {
-    color: red;
+    width: 200px;
 }
 
 a.red {
@@ -103,6 +96,10 @@ a.green {
     color: green;
 }
 
-a.yellow {
+.yellow {
     color: #ff9b24;
+}
+
+.btn {
+    float: right;
 }
