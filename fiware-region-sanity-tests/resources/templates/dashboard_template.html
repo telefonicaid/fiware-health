@@ -7,11 +7,11 @@
     <link rel="stylesheet" type="text/css" href="dashboard.css">
     <script src="dashboard.js"></script>
 </head>
-<body>
+<body onload="changeTitle()">
     <div align="center">
         <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="20%"/>
         {% for class, group in report.items() %}
-            <h1>FIWARE Region {{ class }} - {{timestamp}}</h1>
+            <h1 id="subtitle">FIWARE Region {{ class }} - {{timestamp}}</h1>
         {% endfor %}
     </div>
     <h1>Test result stats</h1>
@@ -42,13 +42,12 @@
         <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
         <ul>
             {% for test in group.tests %}
-                <li><a class="{% if test.failed %}failed href="#{{ class }}:{{ test.name }}"{% else %}success"{% endif %}>{{ test.name }}</a></li>
-            {% endfor %}
+                <li><a href="javascript:openFailureDetailsInNewWindow();" {% if test.failed %}class="failed" {% else %}class="success" {% endif %}>{{ test.name }}</a></li>
+                {% endfor %}
         </ul>
     </section>
     {% endfor %}
 
-    <h1><a onclick="openFailureDetailsInNewWindow();">Failure details</a></h1>
     <div id="failure_details">
         <div id="html_failure_details">
                 <link rel="stylesheet" type="text/css" href="dashboard.css">

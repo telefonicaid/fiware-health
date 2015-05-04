@@ -9,9 +9,21 @@ function displaySections() {
 var strWindowFeatures = "resizable=yes,scrollbars=yes,status=yes";
 function openFailureDetailsInNewWindow(){
     var html = document.getElementById("html_failure_details").innerHTML;
-    var myWindow = window.open('','',strWindowFeatures);
+    var myWindow = window.open('','_self',strWindowFeatures);
     var doc = myWindow.document;
     doc.open();
     doc.write(html);
     doc.close();
+}
+
+function changeTitle() {
+    var subtitle = document.getElementById('subtitle').innerText;
+    var n = subtitle.search(".TestSuite");
+    var new_subtitle = "FIWARE Region " + capitalizeFirstLetter(subtitle.substring(33, n)) + subtitle.substring(n + 10);
+    document.getElementById('subtitle').innerText = new_subtitle;
+
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
