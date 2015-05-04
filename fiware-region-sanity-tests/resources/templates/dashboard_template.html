@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sanity Check Result Report- Fiware Region Status</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" type="text/css" href="dashboard.css">
+    <script src="dashboard.js"></script>
+</head>
+<body onload="changeTitle()">
+    <div align="center">
+        <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="20%"/>
+        {% for class, group in report.items() %}
+            <h1 id="subtitle">FIWARE Region {{ class }} - {{timestamp}}</h1>
+        {% endfor %}
+    </div>
+    <h1>Test result stats</h1>
+    <section>
+        <table>
+            <tr>
+                <th> Fail </th>
+                <th> Error </th>
+                <th> Skip </th>
+                <th> Success </th>
+                <th> Total </th>
+            </tr>
+            {% for class, group in report.items() %}
+                <tr>
+                    <td class="error"> {{ group.stats.failures }} </td>
+                    <td class="error"> {{ group.stats.errors   }} </td>
+                    <td class="skip"> {{ group.stats.skipped  }} </td>
+                    <td class="success"> {{ group.stats.passes   }} </td>
+                    <td class="total"> {{ group.stats.total    }} </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </section>
+
+    <h1>Performed test cases</h1>
+    {% for class, group in report.items() %}
+    <section>
+        <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
+        <ul>
+            {% for test in group.tests %}
+                <li><a href="javascript:openFailureDetailsInNewWindow();" {% if test.failed %}class="failed" {% else %}class="success" {% endif %}>{{ test.name }}</a></li>
+                {% endfor %}
+        </ul>
+    </section>
+    {% endfor %}
+
+    <div id="failure_details">
+        <div id="html_failure_details">
+                <link rel="stylesheet" type="text/css" href="dashboard.css">
+                <script src="dashboard.js"></script>
+                <div align="center">
+                    <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="16%"/>
+                    {% for class, group in report.items() %}
+                        <h1>FIWARE Region {{ class }} - {{timestamp}}</h1>
+                    {% endfor %}
+                </div>
+                <h1>Failure details</h1>
+                {% for class, group in report.items() %}
+                    {% if group.stats.failures or group.stats.errors %}
+                        <section>
+                            <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
+                            <div>
+                                {% for test in group.tests %}
+                                    {% if test.failed and test.type != 'skipped' %}
+                                    <section id="{{ class }}:{{ test.name }}">
+                                        <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
+                                        <div class="test-details">
+                                            <h4>Traceback</h4>
+                                            <pre class="traceback">{{ test.tb }}</pre>
+                                            <h4>Details</h4>
+                                            <pre>{{ test.message }}</pre>
+                                        </div>
+                                    </section>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
