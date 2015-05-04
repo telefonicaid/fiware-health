@@ -165,7 +165,7 @@ function change_status() {
 					]
 				}
 			],
-			"updateAction": "UPDATE"
+			"updateAction": "APPEND"
 		}
 		EOF
 	fi
