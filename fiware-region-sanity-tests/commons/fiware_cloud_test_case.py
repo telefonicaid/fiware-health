@@ -390,7 +390,7 @@ class FiwareTestCase(unittest.TestCase):
                 for container in container_list:
                     cls.logger.debug("init_world() found container '%s' not deleted", container["name"])
                     world['containers'].append(container["name"])
-            except (ClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+            except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get container list: %s", e)
 
         # release resources to ensure a clean world
