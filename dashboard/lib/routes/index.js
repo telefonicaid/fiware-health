@@ -30,7 +30,7 @@ router.get('/', function (req, res) {
 
         console.log('regions:' + regions);
 
-        res.render('index', {timestamp: timestamp, regions: regions});
+        res.render('index', {title: 'FIWARE Regions - Sanity check', timestamp: timestamp, regions: regions});
 
     });
 
