@@ -135,7 +135,7 @@ ACTION=$(expr "$1" : "^\(prepare\|test\)$") && shift
 # by NGSI Adapter according to that results report.
 function change_status() {
 	local region=$OS_REGION_NAME
-	local status="Maintenance"
+	local status="N/A"
 	local report=$1
 
 	# Finish if no region is set
@@ -146,7 +146,28 @@ function change_status() {
 		echo TODO: invoke $FIHEALTH_ADAPTER_URL with report $report
 	else
 		# Update region entity in ContextBroker
-		echo TODO: change $region status to $status in $FIHEALTH_CB_URL
+		(curl $FIHEALTH_CB_URL/NGSI10/updateContext -s -S \
+		--header 'Content-Type: application/json' \
+		--header 'Accept: application/json' -d @- \
+		| python -mjson.tool) <<-EOF
+		{
+			"contextElements": [
+				{
+					"type": "region",
+					"isPattern": "false",
+					"id": "$region",
+					"attributes": [
+						{
+							"name": "sanity_status",
+							"type": "string",
+							"value": "$status"
+						}
+					]
+				}
+			],
+			"updateAction": "UPDATE"
+		}
+		EOF
 	fi
 
 	return $?
