@@ -46,6 +46,9 @@ app.use(stylus.middleware(
     { src: __dirname + '/public', compile: compile
     }
 ));
+
+app.use("/report", express.static('/var/www/html/RegionSanityCheckv2/'));
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
