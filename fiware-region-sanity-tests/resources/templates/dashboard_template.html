@@ -42,7 +42,7 @@
         <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
         <ul>
             {% for test in group.tests %}
-                <li><a href="javascript:openFailureDetailsInNewWindow();" {% if test.failed %}class="failed" {% else %}class="success" {% endif %}>{{ test.name }}</a></li>
+                <li><a {% if test.failed %}class="failed" href="javascript:openFailureDetailsInNewWindow();" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
                 {% endfor %}
         </ul>
     </section>
