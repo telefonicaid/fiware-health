@@ -59,6 +59,9 @@ class FiwareTestCase(unittest.TestCase):
     # Test neutron networks (could be overriden)
     with_networks = True
 
+    # Test storage (could be overriden)
+    with_storage = True
+
     # Test data for the suite
     suite_world = {}
 
@@ -167,8 +170,9 @@ class FiwareTestCase(unittest.TestCase):
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
-        cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
-                                                         auth_cred=cls.auth_cred)
+        if cls.with_storage:
+            cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
+                                                          auth_cred=cls.auth_cred)
 
     @classmethod
     def init_world(cls, world, suite=False):
@@ -382,8 +386,7 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the world['containers'] entry (after deleting existing resources)
         """
-
-        if suite:
+        if suite and cls.with_storage:
             # get pre-existing test containers list (ideally, empty when starting the tests)
             try:
                 container_list = cls.swift_operations.list_containers(TEST_CONTAINER_PREFIX)

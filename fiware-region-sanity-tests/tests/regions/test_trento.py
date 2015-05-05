@@ -24,8 +24,8 @@
 __author__ = 'jfernandez'
 
 
-from tests import fiware_region_with_networks_tests
+from tests import fiware_region_with_networks_with_storage_tests
 
 
-class TestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetworkTest):
+class TestSuite(fiware_region_with_networks_with_storage_tests.FiwareRegionWithNetworkWithStorageTest):
     region_name = "Trento"

@@ -60,16 +60,10 @@ class FiwareSwiftOperations:
                 password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASS],
                 user_domain_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
 
-        self.client = None
-
-    def init_swift_client(self):
-        """
-        Inits the swiftclient with the endpoint retrieved from keystone
-        """
         object_store_url = self.keystone_client.service_catalog.url_for(service_type=SERVICE_SWIFT_NAME,
                                                 endpoint_type=ENDPOINT_TYPE_PUBLIC_URL, region_name=self.region_name)
 
-        self.logger.info("Getting object_store_url from Keystone: ", object_store_url)
+        self.logger.info("Getting object_store_url from Keystone: %s", object_store_url)
 
         self.client = client.Connection(
             preauthurl=object_store_url,

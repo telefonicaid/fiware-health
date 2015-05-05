@@ -24,6 +24,7 @@
 __author__ = 'jfernandez'
 
 from novaclient.exceptions import OverLimit, Forbidden, ClientException
+from swiftclient.exceptions import ClientException as SwiftClientException
 from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import *
 from datetime import datetime
@@ -235,3 +236,44 @@ class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
                          hostname_received)
 
         reset_phonehome_content()
+
+    def test_create_get_and_delete_container(self):
+        """
+        Test if it can be possible create a new container into the object storage, list it and delete the container.
+        """
+
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        containerName = TEST_CONTAINER_PREFIX + suffix
+
+        response = self.swift_operations.create_container(containerName)
+        self.assertIsNone(response)
+        self.test_world['containers'].append(containerName)
+        self.logger.debug("Created %s container was created" % containerName)
+
+        response = self.swift_operations.get_container(containerName)
+        self.assertEquals('x-container-object-count' in response[0], True)
+        self.assertEquals(len(response[-1]), 0)  # The list of items should be 0.
+        self.logger.debug("Getting %s container details from the object storage" % containerName)
+
+        response = self.swift_operations.delete_container(containerName)
+        self.assertIsNone(response)
+        self.test_world['containers'].remove(containerName)
+
+        try:
+            response = self.swift_operations.get_container(containerName)
+        except SwiftClientException as e:
+            self.assertRaises(e)
+            self.logger.debug("%s container was successfully removed from the object storage" % containerName)
+
+    def test_create_container(self):
+        """
+        Test if it can be possible create a new container into the object storage.
+        """
+
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
+        containerName = TEST_CONTAINER_PREFIX + suffix
+
+        response = self.swift_operations.create_container(containerName)
+        self.assertIsNone(response)
+        self.test_world['containers'].append(containerName)
+        self.logger.debug("Created %s container was created" % containerName)
