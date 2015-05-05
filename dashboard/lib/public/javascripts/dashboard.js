@@ -1,15 +1,15 @@
 function displaySections() {
-   Array.prototype.forEach.call(document.querySelectorAll('h1, h2, h3, h4'), function(el) {
-        el.addEventListener('click', function() {
+    Array.prototype.forEach.call(document.querySelectorAll('h1, h2, h3, h4'), function (el) {
+        el.addEventListener('click', function () {
             el.nextElementSibling.style.display = document.defaultView.getComputedStyle(el.nextElementSibling).display == 'none' ? 'block' : 'none';
         })
     })
 }
 
 var strWindowFeatures = "resizable=yes,scrollbars=yes,status=yes";
-function openFailureDetailsInNewWindow(){
+function openFailureDetailsInNewWindow() {
     var html = document.getElementById("html_failure_details").innerHTML;
-    var myWindow = window.open('','_self',strWindowFeatures);
+    var myWindow = window.open('', '_self', strWindowFeatures);
     var doc = myWindow.document;
     doc.open();
     doc.write(html);
@@ -17,10 +17,15 @@ function openFailureDetailsInNewWindow(){
 }
 
 function changeTitle() {
-    var subtitle = document.getElementById('subtitle').innerText;
+    var element = document.getElementById('subtitle');
+    var subtitle = element.innerText || element.textContent;
     var n = subtitle.search(".TestSuite");
     var new_subtitle = "FIWARE Region " + capitalizeFirstLetter(subtitle.substring(33, n)) + subtitle.substring(n + 10);
-    document.getElementById('subtitle').innerText = new_subtitle;
+    if (element.textContent == undefined) {
+        document.getElementById('subtitle').innerText = new_subtitle;
+    } else {
+        document.getElementById('subtitle').textContent = new_subtitle;
+    }
 
 }
 
