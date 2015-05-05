@@ -16,7 +16,9 @@
  */
 'use strict';
 
-var http = require('http');
+var http = require('http'),
+    domain = require("domain"),
+    logger = require('../logger');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
@@ -31,8 +33,11 @@ var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about reg
  */
 function parseRegions(entities) {
 
+    logger.getContext().op = "parseRegions";
+
     var result = [];
 
+    logger.debug("entities to parse" + entities);
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
@@ -89,11 +94,11 @@ function retrieveAllRegions(callback) {
     });
     req.on('error', function (e) {
         // TODO: handle error.
-        console.log('Error in connection with context broker: ' + e);
+        logger.error('Error in connection with context broker: ' + e);
         // only for testing end-to-end:
         var fs = require('fs');
         var json = JSON.parse(fs.readFileSync('./test/unit/post1.json', 'utf8'));
-        console.log(json);
+        logger.debug(json);
         callback(parseRegions(json));
     });
 

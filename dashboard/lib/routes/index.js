@@ -19,16 +19,17 @@
 var express = require('express'),
     router = express.Router(),
     dateFormat = require('dateformat'),
-    cbroker = require('./cbroker');
+    cbroker = require('./cbroker'),
+    domain = require('domain'),
+    logger = require('../logger');
 
 /* GET home page. */
 router.get('/', function (req, res) {
 
-
     var timestamp = dateFormat(new Date(), 'yyyy-mm-dd h:MM:ss');
     cbroker.retrieveAllRegions(function (regions) {
 
-        console.log('regions:' + regions);
+        logger.info({op: 'index#get'}, 'regions:' + regions);
 
         res.render('index', {title: 'FIWARE Regions - Sanity check', timestamp: timestamp, regions: regions});
 

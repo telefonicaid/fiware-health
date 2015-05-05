@@ -21,12 +21,13 @@ var stylus = require('stylus');
 var nib = require('nib');
 var path = require('path');
 // TODO var favicon = require('serve-favicon');
-var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
+var index = require('./routes/index');
 var users = require('./routes/users');
+
+var logger = require('./logger');
 
 var app = express();
 
@@ -35,6 +36,10 @@ function compile(str, path) {
         .set('filename', path)
         .use(nib());
 }
+
+
+//app.use(log4js.connectLogger(logger, { level: log4js.levels.INFO }));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -46,16 +51,21 @@ app.use(stylus.middleware(
     { src: __dirname + '/public', compile: compile
     }
 ));
+app.use(function (req, res, next) {
+    logger.debug('%s %s %s', req.method, req.url, req.path);
+    next();
+});
 
-app.use("/check/report", express.static('/var/www/html/RegionSanityCheckv2/'));
+app.use("/report", express.static('/var/www/html/RegionSanityCheckv2/'));
 
-app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+
+app.use('/', index);
+
 app.use('/users', users);
 
 // catch 404 and forward to error handler
@@ -64,6 +74,7 @@ app.use(function (req, res, next) {
     err.status = 404;
     next(err);
 });
+
 
 // error handlers
 
