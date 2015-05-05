@@ -47,7 +47,7 @@ app.use(stylus.middleware(
     }
 ));
 
-app.use("/report", express.static('/var/www/html/RegionSanityCheckv2/'));
+app.use("/check/report", express.static('/var/www/html/RegionSanityCheckv2/'));
 
 app.use(logger('dev'));
 app.use(bodyParser.json());

@@ -25,9 +25,9 @@ var assert = require('assert'),
 suite('cbroker', function () {
 
 
-    test('should_have_a_postAllRegions_method', function () {
-        assert.equal(typeof cbroker, 'object');
-        assert.equal(typeof cbroker.postAllRegions, 'function');
+    test('should_have_a_retrieveAllRegions_method', function () {
+        assert.equal(cbroker.retrieveAllRegions.name, 'retrieveAllRegions');
+
     });
 
     test('should_return_a_json_with_all_regions_and_status', function () {

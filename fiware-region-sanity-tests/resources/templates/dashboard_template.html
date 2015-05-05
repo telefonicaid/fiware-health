@@ -4,15 +4,16 @@
     <title>Sanity Check Result Report- Fiware Region Status</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
-    <link rel="stylesheet" type="text/css" href="../dashboard.css">
-    <script src="../dashboard.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/style.css">
+    <script src="../../javascripts/dashboard.js"></script>
 </head>
 <body onload="changeTitle()">
-    <div align="center">
-        <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="20%"/>
+    <div class="header">
+        <div class="header-content">
         {% for class, group in report.items() %}
             <h1 id="subtitle">FIWARE Region {{ class }} - {{timestamp}}</h1>
         {% endfor %}
+      </div>
     </div>
     <h1>Test result stats</h1>
     <section>
@@ -50,13 +51,14 @@
 
     <div id="failure_details">
         <div id="html_failure_details">
-                <link rel="stylesheet" type="text/css" href="dashboard.css">
-                <script src="dashboard.js"></script>
-                <div align="center">
-                    <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="16%"/>
+                <link rel="stylesheet" type="text/css" href="../../stylesheets/style.css">
+                <script src="../../javascripts/dashboard.js"></script>
+                <div class="header">
+                    <div class="header-content">
                     {% for class, group in report.items() %}
                         <h1>FIWARE Region {{ class }} - {{timestamp}}</h1>
                     {% endfor %}
+                  </div>
                 </div>
                 <h1>Failure details</h1>
                 {% for class, group in report.items() %}

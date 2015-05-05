@@ -16,8 +16,7 @@
  */
 'use strict';
 
-var http = require('http'),
-    cbroker = {};
+var http = require('http');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
@@ -30,7 +29,7 @@ var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about reg
  * @param {Object} entities
  * @return {Array}
  */
-cbroker.parseRegions = function (entities) {
+function parseRegions(entities) {
 
     var result = [];
 
@@ -49,18 +48,18 @@ cbroker.parseRegions = function (entities) {
 
 
     return result;
-};
+}
 
 /**
  * @function postAllRegions
  * Call to context broker and get all regions and status.
  * @param {function} callback
  */
-cbroker.postAllRegions = function (callback) {
+function retrieveAllRegions(callback) {
 
 
     var payload = {entities: [
-        {type: 'region', isPattern: 'true', id: '.*'}
+        {type: 'region', isPattern: 'true', id: '.*', attributes: [SANITY_STATUS_ATTRIBUTE]}
     ]};
     var payloadString = JSON.stringify(payload);
     var headers = {
@@ -85,7 +84,7 @@ cbroker.postAllRegions = function (callback) {
         });
         res.on('end', function () {
             var resultObject = JSON.parse(responseString);
-            callback(cbroker.parseRegions(resultObject));
+            callback(parseRegions(resultObject));
         });
     });
     req.on('error', function (e) {
@@ -95,15 +94,18 @@ cbroker.postAllRegions = function (callback) {
         var fs = require('fs');
         var json = JSON.parse(fs.readFileSync('./test/unit/post1.json', 'utf8'));
         console.log(json);
-        callback(cbroker.parseRegions(json));
+        callback(parseRegions(json));
     });
 
 
     req.write(payloadString);
     req.end();
 
-};
+}
 
 
 /** @export */
-module.exports = cbroker;
+module.exports.retrieveAllRegions = retrieveAllRegions;
+/** @export */
+module.exports.parseRegions = parseRegions;
+

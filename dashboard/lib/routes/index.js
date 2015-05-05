@@ -26,7 +26,7 @@ router.get('/', function (req, res) {
 
 
     var timestamp = dateFormat(new Date(), 'yyyy-mm-dd h:MM:ss');
-    cbroker.postAllRegions(function (regions) {
+    cbroker.retrieveAllRegions(function (regions) {
 
         console.log('regions:' + regions);
 

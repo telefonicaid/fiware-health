@@ -9,6 +9,29 @@ table, td, th, .dataid {
     padding: 1px 10px 1px 10px;
 }
 
+th {
+    background-color: #aaaaaa;
+}
+
+td.error {
+    background-color: lightcoral;
+}
+
+td.skip {
+    background-color: yellow;
+}
+
+td.success {
+    background-color: lightgreen;
+}
+
+td.total {
+    background-color: lightgray;
+    font-weight: bold;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 section {
     background: rgba(0, 0, 0, 0.05);
     margin: 2ex;
@@ -60,6 +83,10 @@ section:target .test-details {
     display: block;
 }
 
+#failure_details {
+    visibility: hidden;
+}
+
 .header {
     background-image: url(https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png);
     background-size: 505px 107px;
@@ -103,3 +130,4 @@ a.green {
 .btn {
     float: right;
 }
+
