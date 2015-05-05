@@ -84,7 +84,7 @@ section:target .test-details {
 }
 
 #failure_details {
-    visibility: hidden;
+    display: none;
 }
 
 .header {
