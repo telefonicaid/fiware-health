@@ -62,10 +62,9 @@ function parseRegions(entities) {
  */
 function retrieveAllRegions(callback) {
 
-
     var payload = {entities: [
-        {type: 'region', isPattern: 'true', id: '.*', attributes: [SANITY_STATUS_ATTRIBUTE]}
-    ]};
+        {type: 'region', isPattern: 'true', id: '.*'}
+    ], attributes: [SANITY_STATUS_ATTRIBUTE]};
     var payloadString = JSON.stringify(payload);
     var headers = {
         'Content-Type': 'application/json',
