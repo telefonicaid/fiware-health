@@ -57,10 +57,10 @@ class FiwareTestCase(unittest.TestCase):
     auth_cred = {}
 
     # Test neutron networks (could be overriden)
-    with_networks = True
+    with_networks = False
 
     # Test storage (could be overriden)
-    with_storage = True
+    with_storage = False
 
     # Test data for the suite
     suite_world = {}

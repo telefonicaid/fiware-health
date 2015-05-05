@@ -35,7 +35,6 @@ import re
 
 class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
 
-    with_networks = False
     with_storage = True
 
     def __deploy_instance_helper__(self, instance_name, keypair_name=None, is_keypair_new=True,
