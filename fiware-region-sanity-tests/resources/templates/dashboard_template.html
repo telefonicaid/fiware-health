@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="dashboard.css">
     <script src="dashboard.js"></script>
 </head>
-<body onload="changeTitle()">
+<body onload="displaySections();changeTitle()">
     <div align="center">
         <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="20%"/>
         {% for class, group in report.items() %}
@@ -67,11 +67,11 @@
                                 {% for test in group.tests %}
                                     {% if test.failed and test.type != 'skipped' %}
                                     <section id="{{ class }}:{{ test.name }}">
-                                        <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
+                                        <h3 onclick="displaySections()">{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
                                         <div class="test-details">
-                                            <h4>Traceback</h4>
+                                            <h4 onclick="displaySections()">Traceback</h4>
                                             <pre class="traceback">{{ test.tb }}</pre>
-                                            <h4>Details</h4>
+                                            <h4 onclick="displaySections()">Details</h4>
                                             <pre>{{ test.message }}</pre>
                                         </div>
                                     </section>
