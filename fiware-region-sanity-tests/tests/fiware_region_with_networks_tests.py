@@ -24,7 +24,7 @@
 __author__ = 'jfernandez'
 
 
-from tests import fiware_region_base_tests
+from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit, ClientException as NovaClientException
 from neutronclient.common.exceptions import NeutronClientException, IpAddressGenerationFailureClient
@@ -35,7 +35,9 @@ import urlparse
 import re
 
 
-class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
+class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
+
+    with_networks = True
 
     def __deploy_instance_helper__(self, instance_name,
                                    network_name=None, network_cidr=None, is_network_new=True,

@@ -24,7 +24,7 @@
 __author__ = 'jfernandez'
 
 from novaclient.exceptions import OverLimit, Forbidden, ClientException
-from tests import fiware_region_base_tests
+from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import *
 from datetime import datetime
 from commons.http_phonehome_server import HttpPhoneHomeServer, get_phonehome_content, reset_phonehome_content
@@ -33,9 +33,7 @@ import urlparse
 import re
 
 
-class FiwareRegionWithoutNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
-
-    with_networks = False
+class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
 
     def __deploy_instance_helper__(self, instance_name, keypair_name=None, is_keypair_new=True,
                                    sec_group_name=None, metadata=None, userdata=None):

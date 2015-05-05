@@ -23,13 +23,15 @@
 
 __author__ = 'gjp'
 
-from tests import fiware_region_base_tests
+from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import TEST_CONTAINER_PREFIX
 from swiftclient.exceptions import ClientException as SwiftClientException
 from datetime import datetime
 
 
-class FiwareRegionsObjectStorageTests(fiware_region_base_tests.FiwareRegionsBaseTests):
+class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
+
+    with_storage = True
 
     def test_create_get_and_delete_container(self):
         """
