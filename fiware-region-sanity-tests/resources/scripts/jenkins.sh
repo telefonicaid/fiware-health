@@ -143,7 +143,9 @@ function change_status() {
 
 	if [ -r "$report" ]; then
 		# Adjust status according to results report
-		echo TODO: invoke $FIHEALTH_ADAPTER_URL with report $report
+		local resource="sanity_tests?id=$region&type=region"
+		(curl "$FIHEALTH_ADAPTER_URL/$resource" -s -S \
+		--header 'Content-Type: text/plain' --data-binary @$report)
 	else
 		# Update region entity in ContextBroker
 		(curl $FIHEALTH_CB_URL/NGSI10/updateContext -s -S \
