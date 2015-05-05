@@ -57,7 +57,10 @@ class FiwareTestCase(unittest.TestCase):
     auth_cred = {}
 
     # Test neutron networks (could be overriden)
-    with_networks = True
+    with_networks = False
+
+    # Test storage (could be overriden)
+    with_storage = False
 
     # Test data for the suite
     suite_world = {}
@@ -167,8 +170,9 @@ class FiwareTestCase(unittest.TestCase):
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
-        cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
-                                                         auth_cred=cls.auth_cred)
+        if cls.with_storage:
+            cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
+                                                          auth_cred=cls.auth_cred)
 
     @classmethod
     def init_world(cls, world, suite=False):
@@ -382,15 +386,14 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the world['containers'] entry (after deleting existing resources)
         """
-
-        if suite:
+        if suite and cls.with_storage:
             # get pre-existing test containers list (ideally, empty when starting the tests)
             try:
                 container_list = cls.swift_operations.list_containers(TEST_CONTAINER_PREFIX)
                 for container in container_list:
                     cls.logger.debug("init_world() found container '%s' not deleted", container["name"])
                     world['containers'].append(container["name"])
-            except (ClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+            except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get container list: %s", e)
 
         # release resources to ensure a clean world
