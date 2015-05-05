@@ -18,7 +18,8 @@
 
 var http = require('http'),
     domain = require("domain"),
-    logger = require('../logger');
+    logger = require('../logger'),
+    config = require('../../bin/www');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
@@ -32,8 +33,6 @@ var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about reg
  * @return {Array}
  */
 function parseRegions(entities) {
-
-    logger.getContext().op = "parseRegions";
 
     var result = [];
 
@@ -71,10 +70,12 @@ function retrieveAllRegions(callback) {
         'Accept': 'application/json',
         'Content-Length': payloadString.length
     };
+
+    logger.debug("using configuration: " + JSON.stringify(config.cbroker));
     var options = {
-        host: 'localhost',
-        port: 1026,
-        path: '/NGSI10/queryContext',
+        host: config.cbroker.host,
+        port: config.cbroker.port,
+        path: config.cbroker.path,
         method: 'POST',
         headers: headers
     };

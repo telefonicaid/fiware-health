@@ -16,7 +16,6 @@ var prog = require('../package.json'),
 
 
 /**
- * /**
  * Program configuration.
  *
  * <var>config</var> attributes will be updated with those read from <var>config_file</var>, if exists,
@@ -25,10 +24,19 @@ var prog = require('../package.json'),
  * @type {{config_file: *, log_level: string}} default configuration file.
  */
 
-var config = {
-    config_file: util.format('../config/%s.yml', prog.name),
-    log_level: 'INFO'
-};
+var
+    config = {
+        config_file: util.format(__dirname + '/../config/%s.yml', prog.name),
+        log_level: 'DEBUG',
+        cbroker: {
+            host: '',
+            port: '',
+            path: '/NGSI10/queryContext'},
+        paths: {
+            reports_files: '/var/www/html/RegionSanityCheck',
+            reports_url: '/check/report'
+        }
+    };
 
 exports.main = function () {
 
@@ -48,23 +56,28 @@ exports.main = function () {
     var cfg_parser_result;
     try {
         var cfg_parse = yamljs.parse(fs.readFileSync(config.config_file, 'utf8'));
+
         cfg_parser_result = [ 'INFO', 'Read configuration file' ];
-        ['logging'].forEach(function (key) {
+        ['logging', 'cbroker'].forEach(function (key) {
             switch (key in cfg_parse && key) {
 
                 case 'logging':
-
-                    console.log(cfg_parse.logging.level);
-                    logger.setLevel(cfg_parse.logging.level);
+                    config.log_level = cfg_parse.logging.level;
                     break;
+                case 'cbroker':
+                    Object.keys(config.cbroker).filter(hasOwnProperty, cfg_parse.cbroker).forEach(function (key) {
+                        config.cbroker[key] = cfg_parse.cbroker[key];
+                    });
+                    break
                 default:
                     throw new Error(util.format('no "%s" node found', key));
+
+
             }
         });
     } catch (err) {
         var msg = err.errno ? 'Could not read configuration file' : util.format('Configuration file: %s', err.message);
         cfg_parser_result = [ 'WARN', msg ];
-        logger.setLevel(config.log_level);
     }
 
     // process command line arguments (considering environment variables)
@@ -79,10 +92,16 @@ exports.main = function () {
             } else if (argv.help) {
                 optimist.showHelp();
                 process.exit(0);
-            }
+            } else Object.keys(argv).forEach(function (key) {
+                var attr = key.replace('-', '_');
+                if (attr in config) config[attr] = argv[key];
+
+            });
+
         }
     ).parse(process.argv);
 
+    logger.info("Configuration result:" + cfg_parser_result);
 
     /**
      * Get port from environment and store in Express.
@@ -90,6 +109,7 @@ exports.main = function () {
 
     var port = normalizePort(process.env.PORT || '3000');
     app.set('port', port);
+
 
     /**
      * Create HTTP server.
@@ -105,6 +125,7 @@ exports.main = function () {
     server.on('error', onError);
     server.on('listening', onListening);
 
+    logger.setLevel(config.log_level);
     logger.info('Started %s v%s\n%s', prog.name, prog.version, JSON.stringify(config, null, 2));
 
     /**
@@ -167,8 +188,11 @@ exports.main = function () {
         logger.info('Listening on ' + bind);
     }
 
+
 };
 
 if (require.main === module) {
     exports.main();
+    exports.cbroker = config.cbroker;
+    exports.paths = config.paths;
 }
