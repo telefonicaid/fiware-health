@@ -8,8 +8,8 @@
     <script src="../../javascripts/dashboard.js"></script>
 </head>
 <body onload="displaySections();changeTitle()">
-    <div align="center">
-        <img src="https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png" width="40%" height="20%"/>
+  <div class="header">
+      <div class="header-content">
         {% for class, group in report.items() %}
             <h1 id="subtitle">FIWARE Region {{ class }} - {{timestamp}}</h1>
         {% endfor %}
