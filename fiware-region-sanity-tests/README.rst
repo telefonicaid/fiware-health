@@ -212,6 +212,19 @@ Tests execution
   been PASSED.
 
 
+Test data storage
+-----------------
+
+Results included in summary report ``test_results.txt`` can be published through
+a `Context Broker`_ (and therefore stored in a database). To do that, a request
+to the `NGSI Adapter`_ adaptation layer will be issued, which in turn extracts
+attributes from the report and invokes Context Broker.
+
+Such extraction is done by a custom parser ``resources/parsers/sanity_tests.js``
+provided as part of this component, which has to be installed together with the
+rest of standard parsers bundled in NGSI Adapter package.
+
+
 .. REFERENCES
 
 .. _Python: http://www.python.org/
@@ -222,3 +235,5 @@ Tests execution
 .. _Vagrant - Getting Started: https://docs.vagrantup.com/v2/getting-started/index.html
 .. _virtualenv: https://pypi.python.org/pypi/virtualenv
 .. _pip: https://pypi.python.org/pypi/pip
+.. _NGSI Adapter: https://github.com/telefonicaid/fiware-monitoring/tree/master/ngsi_adapter
+.. _Context Broker: http://catalogue.fiware.org/enablers/publishsubscribe-context-broker-orion-context-broker
