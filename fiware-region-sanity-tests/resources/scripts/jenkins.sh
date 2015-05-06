@@ -144,14 +144,15 @@ function change_status() {
 	if [ -r "$report" ]; then
 		# Adjust status according to results report
 		local resource="sanity_tests?id=$region&type=region"
-		(curl "$FIHEALTH_ADAPTER_URL/$resource" -s -S \
-		--header 'Content-Type: text/plain' --data-binary @$report)
+		curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
+		--write-out "%{url_effective} returned status %{http_code}\n" \
+		--header 'Content-Type: text/plain' --data-binary @$report
 	else
 		# Update region entity in ContextBroker
-		(curl $FIHEALTH_CB_URL/NGSI10/updateContext -s -S \
+		curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
+		--write-out "%{url_effective} returned status %{http_code}\n" \
 		--header 'Content-Type: application/json' \
-		--header 'Accept: application/json' -d @- \
-		| python -mjson.tool) <<-EOF
+		--header 'Accept: application/json' --data @- <<-EOF
 		{
 			"contextElements": [
 				{
