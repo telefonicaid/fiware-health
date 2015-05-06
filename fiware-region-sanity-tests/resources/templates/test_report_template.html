@@ -124,9 +124,9 @@ section:target .test-details {
                             <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
                             <div class="test-details">
                                 <h4>Traceback</h4>
-                                <pre class="traceback">{{ test.tb }}</pre>
+                                <pre class="traceback"><xmp>{{ test.tb }}</xmp></pre>
                                 <h4>Details</h4>
-                                <pre>{{ test.message }}</pre>
+                                <pre><xmp>{{ test.message }}</xmp></pre>
                             </div>
                         </section>
                         {% endif %}

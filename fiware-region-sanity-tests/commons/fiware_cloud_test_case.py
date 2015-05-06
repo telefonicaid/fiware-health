@@ -32,6 +32,7 @@ from novaclient.exceptions import NotFound, ClientException as NovaClientExcepti
 from novaclient.exceptions import ConnectionRefused as NovaConnectionRefused
 from neutronclient.common.exceptions import NeutronClientException
 from swiftclient.exceptions import ClientException as SwiftClientException
+from requests.exceptions import ConnectionError
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
 from commons.swift_operations import FiwareSwiftOperations
@@ -393,7 +394,7 @@ class FiwareTestCase(unittest.TestCase):
                 for container in container_list:
                     cls.logger.debug("init_world() found container '%s' not deleted", container["name"])
                     world['containers'].append(container["name"])
-            except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+            except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
                 cls.logger.error("init_world() failed to get container list: %s", e)
 
         # release resources to ensure a clean world
@@ -401,7 +402,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 cls.swift_operations.delete_container(container)
                 world['containers'].remove(container)
-            except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
+            except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
                 cls.logger.error("Failed to delete container %s: %s", container, e)
 
     @classmethod
