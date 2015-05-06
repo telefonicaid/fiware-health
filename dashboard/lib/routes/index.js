@@ -26,7 +26,7 @@ var express = require('express'),
 /* GET home page. */
 router.get('/', function (req, res) {
 
-    var timestamp = dateFormat(new Date(), 'yyyy-mm-dd h:MM:ss');
+    var timestamp = dateFormat(new Date(), 'yyyy-mm-dd H:MM:ss');
     cbroker.retrieveAllRegions(function (regions) {
 
         logger.info({op: 'index#get'}, 'regions:' + regions);

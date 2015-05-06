@@ -74,12 +74,12 @@ pre {
     font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', 'Monaco', 'Courier New', monospace;
 }
 
-.test-details,
+.test_details,
 .traceback {
     display: none;
 }
 
-section:target .test-details {
+section:target .test_details {
     display: block;
 }
 
