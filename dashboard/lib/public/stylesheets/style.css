@@ -127,9 +127,16 @@ a.green {
 
 .yellow {
     color: yellow;
+    font-weight: bold;
+}
+
+li.region_list {
+    height: 25px;
+    font-weight: bold;
 }
 
 .btn {
     float: right;
 }
+
 

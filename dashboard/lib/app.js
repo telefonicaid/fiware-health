@@ -17,6 +17,7 @@
 'use strict';
 
 var express = require('express'),
+    session = require('express-session'),
     stylus = require('stylus'),
     nib = require('nib'),
     path = require('path'),
@@ -25,7 +26,8 @@ var express = require('express'),
     bodyParser = require('body-parser'),
 
     index = require('./routes/index'),
-    logger = require('./logger');
+    logger = require('./logger'),
+    dateFormat = require('dateformat');
 
 
 var app = express();
@@ -54,14 +56,19 @@ app.use(stylus.middleware(
     { src: __dirname + '/public', compile: compile
     }
 ));
+
+app.use(session({secret: 'ssshhhhh', title_timestamp: ''}));
+
 // trace all requests
 app.use(function (req, res, next) {
     logger.debug('%s %s %s', req.method, req.url, req.path);
+
     next();
 });
 
+
 app.use("/report", express.static('/var/www/html/RegionSanityCheckv2/'));
-app.use("/check/report", express.static('/var/www/html/RegionSanityCheckv2/'));
+app.use("/sanity/report", express.static('/var/www/html/RegionSanityCheckv2/'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -76,29 +83,24 @@ app.use('/', index);
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
-    next(err);
+    res.render('error', {
+        message: err.message,
+        error: err,
+        timestamp: req.session.title_timestamp
+    });
+
+    //next(err);
 });
 
 
 // error handlers
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function (err, req, res) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.render('error', {
+        timestamp: req.session.title_timestamp,
         message: err.message,
         error: {}
     });

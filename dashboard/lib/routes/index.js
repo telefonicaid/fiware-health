@@ -26,12 +26,13 @@ var express = require('express'),
 /* GET home page. */
 router.get('/', function (req, res) {
 
-    var timestamp = dateFormat(new Date(), 'yyyy-mm-dd H:MM:ss');
+
+    req.session.title_timestamp = dateFormat(new Date(), 'yyyy-mm-dd H:MM:ss');
     cbroker.retrieveAllRegions(function (regions) {
 
         logger.info({op: 'index#get'}, 'regions:' + regions);
 
-        res.render('index', {title: 'FIWARE Regions - Sanity check', timestamp: timestamp, regions: regions});
+        res.render('index', {timestamp: req.session.title_timestamp, regions: regions});
 
     });
 

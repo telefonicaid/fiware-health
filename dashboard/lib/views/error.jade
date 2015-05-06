@@ -1,6 +1,11 @@
 extends layout
 
 block content
-  message
-  error.status
-  pre #{error.stack}
+  .header
+    .header-content
+      p SANITY CHECK STATUS | #{timestamp}
+
+
+  block container
+      pre #{message}
+      pre #{error.status}

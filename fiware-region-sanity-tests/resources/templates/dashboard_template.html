@@ -5,13 +5,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
     <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
     <script src="../javascripts/dashboard.js"></script>
 </head>
 <body onload="displaySections();changeAllTitles()">
   <div class="header">
       <div class="header-content">
         {% for class, group in report.items() %}
-            <h1 id="subtitle">FIWARE Region {{ class }} - {{timestamp}}</h1>
+            <h1 id="subtitle">SANITY CHECK STATUS | Region {{ class }} - {{timestamp}}</h1>
         {% endfor %}
       </div>
     </div>
@@ -52,11 +53,12 @@
     <div id="failure_details">
         <div id="html_failure_details">
                 <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
+                <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">                   
                 <script src="../javascripts/dashboard.js"></script>
                 <div class="header">
                     <div class="header-content">
                     {% for class, group in report.items() %}
-                        <h1 id="subtitle2">FIWARE Region {{ class }} - {{timestamp}}</h1>
+                        <h1 id="subtitle2">SANITY CHECK STATUS | Region {{ class }} - {{timestamp}}</h1>
                     {% endfor %}
                   </div>
                 </div>

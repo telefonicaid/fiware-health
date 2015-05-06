@@ -3,8 +3,7 @@ extends layout
 block content
   .header
     .header-content
-      p FIWARE REGIONS - SANITY CHECK - #{timestamp}
-
+      p SANITY CHECK STATUS | #{timestamp}
 
 
   block container
@@ -14,7 +13,8 @@ block content
               - color = region['status'] == 'OK' ?'green' : region['status'] == 'NOK'?'red':'yellow';
               - filename= region['node'] + "_results.html";
               if region['status']!='N/A'
-                li: a(class='#{color}', href='/check/report/#{filename}', title="#{region['node']}") #{region['node']}
+                li.region_list: a(class='#{color}', href='/sanity/report/#{filename}',
+                title="#{region['node']}") #{region['node']}
                   button.btn(data-action="btn-subscribe") Subscribe
               else
                 li(class='#{color}') #{region['node']}

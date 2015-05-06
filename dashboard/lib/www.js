@@ -5,10 +5,10 @@
  */
 
 var prog = require('../package.json'),
-    app = require('../lib/app'),
+    app = require('./app'),
     debug = require('debug')('dashboard:server'),
     http = require('http'),
-    logger = require('../lib/logger'),
+    logger = require('./logger'),
     util = require('util'),
     optimist = require('optimist'),
     yamljs = require('yamljs'),

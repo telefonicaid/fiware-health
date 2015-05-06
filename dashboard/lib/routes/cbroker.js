@@ -19,7 +19,7 @@
 var http = require('http'),
     domain = require("domain"),
     logger = require('../logger'),
-    config = require('../../bin/www');
+    config = require('../www');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
@@ -97,7 +97,7 @@ function retrieveAllRegions(callback) {
         logger.error('Error in connection with context broker: ' + e);
         // only for testing end-to-end:
         var fs = require('fs');
-        var json = JSON.parse(fs.readFileSync('./test/unit/post1.json', 'utf8'));
+        var json = JSON.parse(fs.readFileSync('../test/unit/post1.json', 'utf8'));
         logger.debug(json);
         callback(parseRegions(json));
     });
