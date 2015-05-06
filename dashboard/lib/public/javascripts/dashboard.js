@@ -21,7 +21,7 @@ function changeTitle(id) {
     var element = document.getElementById(id);
     var subtitle = element.innerText || element.textContent;
     var n = subtitle.search(".TestSuite");
-    var new_subtitle = "FIWARE Region " + capitalizeFirstLetter(subtitle.substring(33, n)) + subtitle.substring(n + 10);
+    var new_subtitle = "SANITY CHECK STATUS | " + capitalizeFirstLetter(subtitle.substring(48, n)) + subtitle.substring(n + 10);
     if (element.textContent == undefined) {
         document.getElementById(id).innerText = new_subtitle;
     } else {
