@@ -33,7 +33,6 @@ function changeTitle(id) {
 function changeAllTitles() {
     changeTitle('subtitle');
     changeTitle('subtitle2');
-
 }
 
 function capitalizeFirstLetter(string) {

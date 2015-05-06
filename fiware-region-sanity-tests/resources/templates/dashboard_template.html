@@ -71,10 +71,10 @@
                                     <section id="{{ class }}:{{ test.name }}">
                                         <h3 >{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
                                         <div class="test_details">
-                                            <h4>Details</h4>
-                                            <pre>{{ test.message }}</pre>
                                             <h4>Traceback</h4>
                                             <pre class="traceback">{{ test.tb }}</pre>
+                                            <h4>Details</h4>
+                                            <pre>{{ test.message }}</pre>
                                         </div>
                                     </section>
                                     {% endif %}
@@ -86,12 +86,12 @@
                 <script>
                   displaySections();
                 </script>
-
+                <footer>
+                    FIWARE Health - 2015
+                </footer>
         </div>
     </div>
-    <footer>
-        FIWARE Health - 2015
-    </footer>
+
 </body>
 
 </html>
