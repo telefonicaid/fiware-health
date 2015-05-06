@@ -68,7 +68,7 @@ app.use(function (req, res, next) {
 
 
 app.use("/report", express.static('/var/www/html/RegionSanityCheckv2/'));
-app.use("/sanity/report", express.static('/var/www/html/RegionSanityCheckv2/'));
+app.use("/RegionSanityCheck", express.static('/var/www/html/RegionSanityCheck/'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

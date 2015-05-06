@@ -53,7 +53,7 @@
     <div id="failure_details">
         <div id="html_failure_details">
                 <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
-                <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">                   
+                <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
                 <script src="../javascripts/dashboard.js"></script>
                 <div class="header">
                     <div class="header-content">
@@ -73,10 +73,10 @@
                                     <section id="{{ class }}:{{ test.name }}">
                                         <h3 >{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
                                         <div class="test_details">
-                                            <h4>Traceback</h4>
-                                            <pre class="traceback">{{ test.tb }}</pre>
-                                            <h4>Details</h4>
-                                            <pre>{{ test.message }}</pre>
+                                          <h4>Details</h4>
+                                          <pre>{{ test.message }}</pre>
+                                          <h4>Traceback</h4>
+                                          <pre class="traceback">{{ test.tb }}</pre>
                                         </div>
                                     </section>
                                     {% endif %}
