@@ -49,7 +49,7 @@ var parser = Object.create(require('./common/base').parser);
  * @returns {EntityData} An object with `status` and `summary` members.
  */
 parser.parseRequest = function(request) {
-    var items = request.body.split(/\*+/);
+    var items = request.body.split(/^\*+$/m);
     return { status: items[0], summary: items[1] };
 };
 
