@@ -202,8 +202,8 @@ Tests execution
 * The script ``commons/result_analyzer.py`` is invoked to create a summary
   report ``test_results.txt``. It will analyze the status of each region using
   the *key_test_cases* information configured in the ``settings.json`` file:
-  one region is "working" if all test cases defined in this property have
-  been PASSED.
+  a region is considered "OK" if all its test cases with names matching the
+  regular expressions defined in this property have been PASSED.
 
 
 .. REFERENCES
