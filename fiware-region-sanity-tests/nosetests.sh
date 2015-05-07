@@ -49,11 +49,12 @@
 # Requirements:
 #     python2.7				Python 2.7 interpreter (found in path)
 #
-# Regions:
-#     Given by existing files 'tests/regions/test_{region_name_lowercase}.py'
-#
 # OpenStack credentials and PhoneHome service endpoint:
-#     Override values defined in 'settings.json' file.
+#     Override values defined in 'settings.json' configuration file.
+#
+# Regions:
+#     Valid regions are those included in 'settings.json':
+#     $REGIONS
 #
 
 NAME=$(basename $0)
@@ -85,14 +86,15 @@ TESTS=
 NOSEOPTS="--logging-filter=TestCase,novaclient,neutronclient --logging-level=ERROR"
 
 # Available regions
-REGIONS=$(cd tests/regions; ls test_*.py | sed 's/test_\(.*\).py/\u\1/g')
+REGIONS=$(sed -n '/"external_network_name"/,/}/ p' resources/settings.json \
+	| awk -F\" 'NF==5 {print $2}')
 REGIONS_PATTERN='^\('$(echo $REGIONS | sed 's/ /\\|/g')'\)$'
 
 # Process command line
 OPTERR=
 OPTSTR=$(echo :-:$OPTS | sed 's/([a-zA-Z0-9]*)//g')
 OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0 | head -n -2;
-	for i in $REGIONS ""; do printf "    %s\n" $i; done)
+	for i in $REGIONS; do printf "    \"%s\"\n" $i; done)
 while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
 case $OPT in
 'v')	NOSEOPTS="$NOSEOPTS --logging-level=DEBUG";;
@@ -121,9 +123,10 @@ case $OPT in
 esac; break; done; done
 shift $(expr $OPTIND - 1)
 while [ -z "$OPTERR" -a -n "$1" ]; do
-	REGION_NAME=$(expr "$1" : "$REGIONS_PATTERN" | sed 's/.*/\L&/') && shift
-	[ -z "$REGION_NAME" ] && OPTERR="Invalid region '$1'"
-	TESTS="$TESTS tests.regions.test_$REGION_NAME"
+	REGION=$(expr "$1" : "$REGIONS_PATTERN" | sed 's/.*/\L&/')
+	[ -z "$REGION" ] && OPTERR="Invalid region '$1'"
+	TESTS="$TESTS tests.regions.test_$REGION"
+	shift
 done
 [ -n "$OPTERR" ] && {
 	[ "$OPTERR" != "$OPTHLP" ] && OPTERR="${OPTERR}\nTry \`$NAME --help'"
