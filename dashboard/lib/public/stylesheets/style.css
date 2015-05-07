@@ -1,5 +1,7 @@
 body {
     font-family: Calibri, "Trebuchet MS", sans-serif;
+    background: #eeeeee url("../images/bg.png");
+    margin: 0;
 }
 
 table, td, th, .dataid {
@@ -90,9 +92,8 @@ section:target .test_details {
 }
 
 .header {
-    background-image: url(https://account.lab.fiware.org/assets/Fi-lab-15197ad8322f8b1560d2296b2084db77.png);
-    background-size: 505px 107px;
-    width: 600px;
+    background-image: url('../images/logo.png');
+    width: 500px;
     height: 200px;
     background-repeat: no-repeat;
     margin-left: auto;
@@ -112,32 +113,5 @@ section:target .test_details {
     font-weight: bold;
 }
 
-.region-list {
-    list-style-type: none;
-    width: 200px;
-}
-
-a.red {
-    color: red;
-}
-
-a.green {
-    color: green;
-}
-
-.yellow {
-    color: yellow;
-    height: 25px;
-    font-weight: bold;
-}
-
-li.region_list {
-    height: 25px;
-    font-weight: bold;
-}
-
-.btn {
-    float: right;
-}
 
 
