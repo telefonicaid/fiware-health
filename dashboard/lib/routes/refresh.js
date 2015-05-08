@@ -50,25 +50,28 @@ router.get('/', function (req, res) {
         headers: headers
     };
 
-    var jira_req = http.request(options, function (res) {
+    var jira_req = http.request(options, function (jenkins_res) {
         logger.info('job started');
-        res.setEncoding('utf-8');
+        jenkins_res.setEncoding('utf-8');
         var responseString = '';
 
-        res.on('data', function (data) {
+        jenkins_res.on('data', function (data) {
             responseString += data;
         });
-        res.on('end', function () {
-            logger.info("response jenkins:" + res.statusCode + " " + res.statusMessage);
-            sleep.sleep(10)//sleep for 10 seconds
+        jenkins_res.on('end', function () {
+            logger.info("response jenkins:" + jenkins_res.statusCode + " " + jenkins_res.statusMessage);
+
+            sleep.sleep(10); //sleep for 10 seconds
             res.redirect('/');
         });
     });
     jira_req.on('error', function (e) {
         // TODO: handle error.
         logger.error('Error in connection with jenkins: ' + e);
-        sleep.sleep(10)//sleep for 10 seconds
+
+        sleep.sleep(10); //sleep for 10 seconds
         res.redirect('/');
+        ;
     });
 
     jira_req.write(payloadString);
