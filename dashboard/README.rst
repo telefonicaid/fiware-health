@@ -29,7 +29,7 @@ Usage
 
 
 License
--------
+=======
 
 \(c) 2015 Telefónica I+D, Apache License 2.0
 
