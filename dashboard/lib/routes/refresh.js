@@ -67,6 +67,8 @@ router.get('/', function (req, res) {
 
     jira_req.write(payloadString);
     jira_req.end();
+    var sleep = require('sleep');
+    sleep.sleep(10)//sleep for 10 seconds
     res.redirect('/');
 
 });

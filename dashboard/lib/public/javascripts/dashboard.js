@@ -38,3 +38,18 @@ function changeAllTitles() {
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+
+function refresh(button, region) {
+    button.disabled = true;
+    var value = "waiting..";
+    if (button.textContent == undefined) {
+        button.innerText = value;
+    } else {
+        button.textContent = value;
+    }
+
+    window.open('/refresh?region=' + region, '_self');
+
+
+}
