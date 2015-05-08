@@ -77,12 +77,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-var basic = auth.basic({
-        realm: "Web."
-    }, function (username, password, callback) { // Custom authentication method.
-        callback(username === "userName" && password === "password");
-    }
-);
+var basic = auth.digest({
+    realm: "Private area",
+    file: __dirname + "/htpasswd"
+});
 
 app.use('/refresh', auth.connect(basic), refresh);
 app.use('/', index);
