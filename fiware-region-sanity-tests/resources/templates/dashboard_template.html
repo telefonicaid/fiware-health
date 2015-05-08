@@ -43,11 +43,10 @@
         <h1>Performed test cases</h1>
         {% for class, group in report.items() %}
         <section>
-            <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
+            <h2>{{ class }}</h2>
             <ul>
                 {% for test in group.tests %}
-                <li><a title="{{ test.shortDescription }}" {% if test.failed %}class="failed" href="javascript:openFailureDetailsInNewWindow('#{{ class
-                    }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
+                <li><a title="{{ test.shortDescription }}" {% if test.failed %}class="{% if test.type == 'skipped' %}skipped{% else %}failed{% endif %}" href="javascript:openFailureDetailsInNewWindow('#{{ class }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
                 {% endfor %}
             </ul>
         </section>
@@ -73,13 +72,13 @@
 
                     <h1>Failure details</h1>
                     {% for class, group in report.items() %}
-                    {% if group.stats.failures or group.stats.errors %}
+                    {% if group.stats.failures or group.stats.errors or group.stats.skipped %}
                     <section>
                         <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
 
                         <div>
                             {% for test in group.tests %}
-                            {% if test.failed and test.type != 'skipped' %}
+                            {% if test.failed %}
                             <section id="{{ class }}:{{ test.name }}">
                                 <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
 
