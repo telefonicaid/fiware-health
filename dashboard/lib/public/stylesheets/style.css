@@ -12,23 +12,26 @@ table, td, th, .dataid {
 }
 
 th {
-    background-color: #aaaaaa;
+    background-color: #122964;
+    color: #999999;
 }
 
 td.error {
-    background-color: lightcoral;
+    background-color: #ff4136;
     text-align: center;
-
+    color: rgb(18, 41, 100);
 }
 
 td.skip {
-    background-color: #ff9b24;
+    background-color: #999999;
     text-align: center;
+    color: rgb(18, 41, 100);
 }
 
 td.success {
-    background-color: lightgreen;
+    background-color: #3d9970;
     text-align: center;
+    color: rgb(18, 41, 100);
 
 }
 
@@ -79,8 +82,9 @@ a.success {
     color: #3d9970;
 }
 
-a.skip {
-    color: #ff9b24;
+a.skipped {
+    color: #999999;
+    text-decoration: line-through;
 }
 
 pre {

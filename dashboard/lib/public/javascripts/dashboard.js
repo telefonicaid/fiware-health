@@ -1,5 +1,5 @@
 function displaySections() {
-    Array.prototype.forEach.call(document.querySelectorAll('h1, h2, h3, h4'), function (el) {
+    Array.prototype.forEach.call(document.querySelectorAll('h2, h3, h4'), function (el) {
         el.addEventListener('click', function () {
             el.nextElementSibling.style.display = document.defaultView.getComputedStyle(el.nextElementSibling).display == 'none' ? 'block' : 'none';
         })
