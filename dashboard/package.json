@@ -36,7 +36,8 @@
     "logops": "^0.2.0",
     "optimist": "^0.6.1",
     "yamljs": "^0.2.2",
-    "express-session": "^1.11.1"
+    "express-session": "^1.11.1",
+    "http-auth": "^2.2.5"
   },
   "devDependencies": {
     "mocha": "^2.2.4",

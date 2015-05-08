@@ -22,7 +22,7 @@ block content
                       else
                         li.yellow
                              | #{region['node']}
-                             button.btn(onclick='refresh()') Refresh
+                             button.btn(onclick="window.open('/refresh?region=#{region['node']}','_self');") Refresh
                              button.btn(data-action="btn-subscribe" disabled) Subscribe
 
            div.footer

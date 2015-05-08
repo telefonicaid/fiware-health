@@ -24,7 +24,7 @@ var express = require('express'),
     logger = require('../logger'),
     http = require('http');
 
-/* GET home page. */
+/* GET refresh. */
 router.get('/', function (req, res) {
 
     var region = req.param('region');
@@ -37,6 +37,7 @@ router.get('/', function (req, res) {
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': payloadString.length
+
     };
 
     var options = {

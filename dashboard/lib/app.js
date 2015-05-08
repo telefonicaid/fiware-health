@@ -28,7 +28,7 @@ var express = require('express'),
     refresh = require('./routes/refresh'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
-    http = require('http');
+    auth = require('http-auth');
 
 
 var app = express();
@@ -77,7 +77,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use('/refresh', refresh);
+var basic = auth.basic({
+        realm: "Web."
+    }, function (username, password, callback) { // Custom authentication method.
+        callback(username === "userName" && password === "password");
+    }
+);
+
+app.use('/refresh', auth.connect(basic), refresh);
 app.use('/', index);
 
 
