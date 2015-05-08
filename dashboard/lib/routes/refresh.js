@@ -41,7 +41,7 @@ router.get('/', function (req, res) {
     };
 
     var options = {
-        host: 'fi-health.lab.fiware.org',
+        host: 'localhost',
         port: 8080,
         path: '/job/FiHealth-SanityCheck-2-Exec-Region/buildWithParameters?OS_REGION_NAME=' + region,
         method: 'POST',

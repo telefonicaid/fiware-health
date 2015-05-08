@@ -18,12 +18,12 @@ block content
                         li.red_and_green
                              a(class='#{color}', href='/report/#{filename}', title="#{region['node']}") #{region['node']}
                              button.btn(onclick="window.open('/refresh?region=#{region['node']}','_self');") Refresh
-                             button.btn(data-action="btn-subscribe" disabled) Subscribe
+                             button.btn(disabled style="display: none") Subscribe
                       else
                         li.yellow
                              | #{region['node']}
-                             button.btn(onclick="window.open('/refresh?region=#{region['node']}','_self');") Refresh
-                             button.btn(data-action="btn-subscribe" disabled) Subscribe
+                             button.btn(disabled) Refresh
+                             button.btn(disabled style="display: none") Subscribe
 
            div.footer
                  ul.unstyled

@@ -18,7 +18,7 @@ ____________________________________
 
     $ npm install -g htdigest
 
-    $ htdigest -c $DASHBOARD_HOME/htpasswd "Private area" foo
+    $ htdigest -c $DASHBOARD_HOME/lib/htpasswd "Private area" foo
 
 Usage
 =====
