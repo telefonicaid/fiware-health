@@ -22,7 +22,9 @@ var express = require('express'),
     cbroker = require('./cbroker'),
     domain = require('domain'),
     logger = require('../logger'),
-    http = require('http');
+    http = require('http'),
+    sleep = require('sleep');
+
 
 /* GET refresh. */
 router.get('/', function (req, res) {
@@ -58,18 +60,20 @@ router.get('/', function (req, res) {
         });
         res.on('end', function () {
             logger.info("response jenkins:" + res.statusCode + " " + res.statusMessage);
+            sleep.sleep(10)//sleep for 10 seconds
+            res.redirect('/');
         });
     });
     jira_req.on('error', function (e) {
         // TODO: handle error.
         logger.error('Error in connection with jenkins: ' + e);
+        sleep.sleep(10)//sleep for 10 seconds
+        res.redirect('/');
     });
 
     jira_req.write(payloadString);
     jira_req.end();
-    var sleep = require('sleep');
-    sleep.sleep(10)//sleep for 10 seconds
-    res.redirect('/');
+
 
 });
 

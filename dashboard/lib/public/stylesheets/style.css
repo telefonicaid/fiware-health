@@ -17,14 +17,19 @@ th {
 
 td.error {
     background-color: lightcoral;
+    text-align: center;
+
 }
 
 td.skip {
-    background-color: yellow;
+    background-color: #ff9b24;
+    text-align: center;
 }
 
 td.success {
     background-color: lightgreen;
+    text-align: center;
+
 }
 
 td.total {
@@ -32,6 +37,8 @@ td.total {
     font-weight: bold;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
+
 }
 
 section {
@@ -70,6 +77,10 @@ h3 strong, a.failed {
 
 a.success {
     color: #3d9970;
+}
+
+a.skip {
+    color: #ff9b24;
 }
 
 pre {
