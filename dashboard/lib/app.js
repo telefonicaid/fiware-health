@@ -24,10 +24,11 @@ var express = require('express'),
 // TODO var favicon = require('serve-favicon');
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
-
     index = require('./routes/index'),
+    refresh = require('./routes/refresh'),
     logger = require('./logger'),
-    dateFormat = require('dateformat');
+    dateFormat = require('dateformat'),
+    auth = require('http-auth');
 
 
 var app = express();
@@ -76,6 +77,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+var basic = auth.basic({
+        realm: "Web."
+    }, function (username, password, callback) { // Custom authentication method.
+        callback(username === "userName" && password === "password");
+    }
+);
+
+app.use('/refresh', auth.connect(basic), refresh);
 app.use('/', index);
 
 
