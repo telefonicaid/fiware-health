@@ -93,13 +93,11 @@ function retrieveAllRegions(callback) {
         });
     });
     req.on('error', function (e) {
-        // TODO: handle error.
         logger.error('Error in connection with context broker: ' + e);
-        // only for testing end-to-end:
-        var fs = require('fs');
-        var json = JSON.parse(fs.readFileSync('../test/unit/post1.json', 'utf8'));
-        logger.debug(json);
-        callback(parseRegions(json));
+        callback(function () {
+                return [];
+            }
+        );
     });
 
 
