@@ -24,7 +24,7 @@
 __author__ = 'jfernandez'
 
 
-from tests import fiware_region_base_tests
+from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit, ClientException as NovaClientException
 from neutronclient.common.exceptions import NeutronClientException, IpAddressGenerationFailureClient
@@ -35,7 +35,9 @@ import urlparse
 import re
 
 
-class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTests):
+class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
+
+    with_networks = True
 
     def __deploy_instance_helper__(self, instance_name,
                                    network_name=None, network_cidr=None, is_network_new=True,
@@ -76,9 +78,11 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
                 if is_network_new:
                     # Create the given network
                     cidr = network_cidr or TEST_CIDR_DEFAULT
-                    network = self.neutron_operations.create_network_and_subnet(network_name, cidr=cidr)
+                    network = self.neutron_operations.create_network(network_name)
                     self.test_world['networks'].append(network['id'])
                     network_id_list = [{'net-id': network['id']}]
+                    # Create a subnet
+                    self.neutron_operations.create_subnet(network, cidr=cidr)
                 else:
                     # Look for the network id
                     net_list = self.neutron_operations.find_networks(name=network_name)
@@ -182,12 +186,13 @@ class FiwareRegionWithNetworkTest(fiware_region_base_tests.FiwareRegionsBaseTest
         :param network_cidr: CIDR to use in the network
         :return: (NetworkId, SubnetworkId) (String, String)
         """
-        network = self.neutron_operations.create_network_and_subnet(network_name, cidr=network_cidr)
+        network = self.neutron_operations.create_network(network_name)
         self.assertIsNotNone(network, "Problems creating network")
         self.assertEqual(network['status'], 'ACTIVE', "Network status is not ACTIVE")
         self.test_world['networks'].append(network['id'])
+        network = self.neutron_operations.create_subnet(network, cidr=network_cidr)
+        self.assertIsNotNone(network['subnet']['id'], "Problems creating subnet")
         self.logger.debug("%s", network)
-
         return network['id'], network['subnet']['id']
 
     def test_create_network_and_subnet(self):
