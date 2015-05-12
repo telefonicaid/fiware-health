@@ -29,7 +29,7 @@ from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit, ClientException as NovaClientException
 from neutronclient.common.exceptions import NeutronClientException, IpAddressGenerationFailureClient
 from datetime import datetime
-from commons.http_phonehome_server import HttpPhoneHomeServer, get_phonehome_content, reset_phonehome_content
+from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
 import urlparse
 import re
@@ -448,20 +448,21 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
                                                     network_name=network_name, is_network_new=False,
                                                     userdata=userdata_content)
 
-        # Create and launch a PhoneHome service listening at <localhost:phonehome_port>. Wait for request from VM
-        http_phonehome_server = HttpPhoneHomeServer(logger=self.logger, port=phonehome_port, timeout=PHONEHOME_TIMEOUT)
-        http_phonehome_server.start()
-        self.assertIsNotNone(get_phonehome_content(), "Phone-Home request not received from VM '%s'" % server_id)
-        call_content = get_phonehome_content()
-        self.logger.debug("Request received from VM when 'calling home': %s", call_content)
+        # VM will have as hostname, the instance_name with "-" instead of "_"
+        expected_instance_name = instance_name.replace("_", "-")
+
+        # Create new new DBus connection and wait for emitted signal from HTTP PhoneHome service
+        client = DbusPhoneHomeClient(self.logger)
+        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
+                                                              expected_instance_name)
+        self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
+        self.logger.debug("Request received from VM when 'calling home': %s", result)
 
         # Get hostname from data received
-        self.assertIn("hostname", call_content, "Phone-Home request has been received but 'hostname' param is not in")
-        hostname_received = re.match(".*hostname=([\w-]*)", call_content).group(1)
+        self.assertIn("hostname", result, "Phone-Home request has been received but 'hostname' param is not in")
+        received_hostname = re.match(".*hostname=([\w-]*)", result).group(1)
 
-        # Check hostname (VM will have as hostname, the instance_name with "-" instead of "_")
-        self.assertEqual(instance_name.replace("_", "-"), hostname_received,
+        # Check hostname
+        self.assertEqual(expected_instance_name, received_hostname,
                          "Received hostname '%s' in PhoneHome request does not match with the expected instance name" %
-                         hostname_received)
-
-        reset_phonehome_content()
+                         received_hostname)

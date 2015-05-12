@@ -27,9 +27,8 @@ import json
 from os import environ
 import sys
 from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
-    PHONEHOME_DBUS_NAME, LOGGING_FILE, PHONEHOME_DBUS_OBJECT_PATH
+    LOGGING_FILE, PHONEHOME_DBUS_OBJECT_PATH
 import urlparse
-import re
 from dbus_phonehome_service import DbusPhoneHomeServer
 import logging.config
 
