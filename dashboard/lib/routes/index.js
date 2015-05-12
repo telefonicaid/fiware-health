@@ -21,7 +21,17 @@ var express = require('express'),
     dateFormat = require('dateformat'),
     cbroker = require('./cbroker'),
     domain = require('domain'),
-    logger = require('../logger');
+    logger = require('../logger'),
+    subscribe = require('./subscribe');
+
+
+function searchSubscription(user, regions) {
+    for (var i in regions) {
+        var region = regions[i];
+        region.subscribed = subscribe.isSubscribed(user, region.node);
+        console.log(region.node + " " + region.subscribed);
+    }
+}
 
 
 /* GET home page. */
@@ -38,6 +48,10 @@ router.get('/', function (req, res) {
         logger.info({op: 'index#get'}, 'userinfo:' + userinfo);
 
         if (userinfo != undefined) {
+
+            //search for subscription
+
+            searchSubscription(userinfo.email, regions);
 
             res.render('logged', {name: userinfo.displayName, timestamp: req.session.title_timestamp, regions: regions});
 

@@ -26,6 +26,7 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     index = require('./routes/index'),
     refresh = require('./routes/refresh'),
+    subscribe = require('./routes/subscribe'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
     auth = require('http-auth'),
@@ -83,18 +84,49 @@ var basic = auth.digest({
     file: __dirname + "/htpasswd"
 });
 
-app.use('/refresh', auth.connect(basic), refresh);
+
+app.use('/refresh', function (req, res, next) {
+    logger.debug('Accessing to relaunch')
+    if (req.session.access_token) {
+
+        next(); // pass control to the next handler
+    } else {
+        res.redirect('/error');
+    }
+}, subscribe);
+
+app.use('/subscribe', function (req, res, next) {
+    logger.debug('Accessing to subscribe')
+    if (req.session.access_token) {
+
+        next(); // pass control to the next handler
+    } else {
+        res.redirect('/error');
+    }
+}, subscribe);
+
+app.use('/unsubscribe', function (req, res, next) {
+    logger.debug('Accessing to unsubscribe')
+    if (req.session.access_token) {
+
+        next(); // pass control to the next handler
+    } else {
+        res.redirect('/error');
+    }
+}, subscribe);
+
+
 app.use('/', index);
 
 //configure login with oAuth
 
 // Creates oauth library object with the config data
-var oa = new OAuth2('1181404dd018468a9ab42de26d961c88',
-    'cf7a115b9baa45098b90d764d74dc569',
+var oa = new OAuth2('b52519dc0add48319448b18ab44ffbfc',
+    '72f473984a4c4a529511de6e05618459',
     'https://account.lab.fiware.org',
     '/oauth2/authorize',
     '/oauth2/token',
-    'http://localhost:3001/login');
+    'http://fi-health.lab.fiware.org/login');
 
 // Handles requests to the main page
 app.get('/signin', function (req, res) {
