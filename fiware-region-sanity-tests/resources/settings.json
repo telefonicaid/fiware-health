@@ -12,7 +12,6 @@
     },
     "region_configuration": {
         "external_network_name": {
-            "Spain": "public-ext-net-01",
             "Spain2": "public-ext-net-01",
             "Trento": "public-ext-net-01",
             "Lannion": "public-ext-net-02",
