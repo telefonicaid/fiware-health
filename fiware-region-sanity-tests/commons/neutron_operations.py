@@ -200,28 +200,33 @@ class FiwareNeutronOperations:
 
         return router_list
 
-    def create_network_and_subnet(self, network_name, cidr=TEST_CIDR_DEFAULT):
+    def create_network(self, network_name):
         """
-        Creates a new network with one subnet.
-        :param network_name: Name of the network. (Subnet will be called sub-{network_name})
-        :param cidr: CIDR to be used by subnet
-        :return: Python dict with all created network data
+        Creates a new network.
+        :param network_name: Name of the network.
+        :return: Python dict with created network data
         """
-        # Create network
         body_network = self.__build_body_create_network__(network_name)
         neutron_network_response = self.client.create_network(body_network)
+        self.logger.debug("Created network %s", neutron_network_response['network']['id'])
+        return neutron_network_response['network']
 
-        # Create subnetwork
-        subnetwork_name = "sub-{network_name}".format(network_name=network_name)
+    def create_subnet(self, network_dict, cidr=TEST_CIDR_DEFAULT):
+        """
+        Creates a subnet within a given network.
+        :param network_dict: Python dict with created network data
+        :param cidr: CIDR used for the subnet
+        :return: Python dict updated with created subnet data
+        """
+        subnetwork_name = "sub-{network_name}".format(network_name=network_dict['name'])
         body_subnetwork = self.__build_body_create_subnetwork__(subnetwork_name=subnetwork_name,
-                                                                network_id=neutron_network_response['network']['id'],
+                                                                network_id=network_dict['id'],
                                                                 cidr=cidr,
                                                                 ip_version="4")
         neutron_subnetwork_response = self.client.create_subnet(body_subnetwork)
-        neutron_network_response['network'].update(neutron_subnetwork_response)
-
-        self.logger.debug("Created network %s", neutron_network_response['network']['id'])
-        return neutron_network_response['network']
+        self.logger.debug("Created subnet %s", subnetwork_name)
+        network_dict.update(neutron_subnetwork_response)
+        return network_dict
 
     def delete_network(self, network_id):
         """
