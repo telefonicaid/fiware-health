@@ -123,7 +123,8 @@ These Test Cases will be common for all federated regions.
 
 **Regions with Object Storage service**
 
-* Test whether it is possible to create a new container into the object storage, get it and delete the container.
+* Test whether it is possible to create a new container into the object storage,
+  get it and delete the container.
 * Test whether it is possible to create a new container into the object storage.
 
 
@@ -141,7 +142,7 @@ variables (which override values from such file):
   - ``OS_PASSWORD``
   - ``OS_TENANT_ID``
   - ``OS_TENANT_NAME``
-  - ``OS_USER_DOMAIN_NAME`` (only for v3)
+  - ``OS_USER_DOMAIN_NAME``
 
 * ``test_configuration``: other configuration values
 
@@ -186,31 +187,42 @@ Tests execution
 ---------------
 
 * Go to the root folder of the project.
-* Run ``launch_tests.sh``. This command will execute all sanity tests in all
+* Run ``nosetests.sh``. This command will execute all sanity tests in all
   regions found under ``tests/regions/`` folder:
 
-  - It is possible to provide a list of regions (in lowercase) as argument to
-    restrict the execution to them
+  - It is possible to provide a list of regions as argument to restrict the
+    execution to them
   - Verbose logging may be enabled by adding ``--verbose`` option
 
 ::
 
-  $ ./launch_tests.sh
-  $ ./launch_tests.sh --verbose region2 region7 region8
+  $ ./nosetests.sh
+  $ ./nosetests.sh --verbose Region2 Region7 Region8
+
+* Results of tests execution are written to a xUnit file ``test_results.xml``
+  (basename may be changed using ``--output-name`` command line option), and
+  additionally an HTML report ``test_results.html`` (or the same basename as
+  the former) is generated from the given template (or the default found at
+  ``resources/templates/`` folder).
+
+* The script ``commons/result_analyzer.py`` is invoked to create a summary
+  report ``test_results.txt``. It will analyze the status of each region using
+  the *key_test_cases* information configured in the ``settings.json`` file:
+  a region is considered "OK" if all its test cases with names matching the
+  regular expressions defined in this property have been PASSED.
 
 
-Analysis of results
--------------------
+Test data storage
+-----------------
 
-You can use the script ``commons/result_analyzer.py`` to create a summary
-report of the xUnit test result file (xml). This script will print on screen
-the result for each test case and will analyze the "Region Status" using the
-*key_test_cases* information configured in the ``settings.json`` file: one
-region is "working" if all test cases defined in this property have been PASSED.
+Results included in summary report ``test_results.txt`` can be published through
+a `Context Broker`_ (and therefore stored in a database). To do that, a request
+to the `NGSI Adapter`_ adaptation layer will be issued, which in turn extracts
+attributes from the report and invokes Context Broker.
 
-::
-
-  $ python commons/results_analyzer.py test_results.xml
+Such extraction is done by a custom parser ``resources/parsers/sanity_tests.js``
+provided as part of this component, which has to be installed together with the
+rest of standard parsers bundled in NGSI Adapter package.
 
 
 .. REFERENCES
@@ -223,3 +235,5 @@ region is "working" if all test cases defined in this property have been PASSED.
 .. _Vagrant - Getting Started: https://docs.vagrantup.com/v2/getting-started/index.html
 .. _virtualenv: https://pypi.python.org/pypi/virtualenv
 .. _pip: https://pypi.python.org/pypi/pip
+.. _NGSI Adapter: https://github.com/telefonicaid/fiware-monitoring/tree/master/ngsi_adapter
+.. _Context Broker: http://catalogue.fiware.org/enablers/publishsubscribe-context-broker-orion-context-broker

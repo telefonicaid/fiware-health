@@ -37,5 +37,5 @@
             "Prague": "tiny"
         }
     },
-    "key_test_cases": ["test_allocate_ip", "test_deploy_instance"]
+    "key_test_cases": [ "test_(.*)" ]
 }
