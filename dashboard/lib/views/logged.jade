@@ -10,10 +10,10 @@ block content
 
 
           div.box1
-
-
              #box2.box2
-                button.btn(onclick="window.location.href='/signin'") Sign in
+                div.username
+                    | #{name}
+                    button.btn(onclick="window.location.href='/logout'") Log out
 
                 ul.region_list
                    each region in regions
@@ -22,9 +22,13 @@ block content
                       if region['status']!='N/A'
                         li.red_and_green
                              a( class='#{color}', href='/report/#{filename}') #{region['node']}
+                             button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Relaunch
+                             button.btn(onclick="window.location.href='/subscribe'" ) Subscribe
                       else
                         li.yellow
                              | #{region['node']}
+                             button.btn(disabled) Relaunch
+                             button.btn(onclick="window.location.href='/subscribe'" ) Subscribe
 
           div.footer
                  ul.unstyled

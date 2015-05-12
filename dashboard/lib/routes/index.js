@@ -23,6 +23,7 @@ var express = require('express'),
     domain = require('domain'),
     logger = require('../logger');
 
+
 /* GET home page. */
 router.get('/', function (req, res) {
 
@@ -32,8 +33,19 @@ router.get('/', function (req, res) {
 
         logger.info({op: 'index#get'}, 'regions:' + regions);
 
-        res.render('index', {timestamp: req.session.title_timestamp, regions: regions});
+        var userinfo = req.session.user;
 
+        logger.info({op: 'index#get'}, 'userinfo:' + userinfo);
+
+        if (userinfo != undefined) {
+
+            res.render('logged', {name: userinfo.displayName, timestamp: req.session.title_timestamp, regions: regions});
+
+        }
+        else {
+            res.render('index', {name: 'sig in', timestamp: req.session.title_timestamp, regions: regions});
+
+        }
     });
 
 });

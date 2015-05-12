@@ -20,6 +20,10 @@
   margin-right: auto;
   margin-bottom: 100px;
 }
+.box2 .username {
+  float: right;
+  color: #0d2d64;
+}
 .box2 p {
   font-size: 13px;
   padding: 0px 10px;

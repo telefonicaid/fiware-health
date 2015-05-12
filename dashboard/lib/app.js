@@ -28,7 +28,8 @@ var express = require('express'),
     refresh = require('./routes/refresh'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
-    auth = require('http-auth');
+    auth = require('http-auth'),
+    OAuth2 = require('./oauth2').OAuth2;
 
 
 var app = express();
@@ -85,6 +86,94 @@ var basic = auth.digest({
 app.use('/refresh', auth.connect(basic), refresh);
 app.use('/', index);
 
+//configure login with oAuth
+
+// Creates oauth library object with the config data
+var oa = new OAuth2('1181404dd018468a9ab42de26d961c88',
+    'cf7a115b9baa45098b90d764d74dc569',
+    'https://account.lab.fiware.org',
+    '/oauth2/authorize',
+    '/oauth2/token',
+    'http://localhost:3001/login');
+
+// Handles requests to the main page
+app.get('/signin', function (req, res) {
+    logger.debug({op: 'app#get signin'}, "token: " + req.session.access_token);
+
+    // If auth_token is not stored in a session redirect to IDM
+    if (!req.session.access_token) {
+        var path = oa.getAuthorizeUrl();
+        logger.debug({op: 'app#get signin'}, "idm path: " + path);
+        res.redirect(path);
+        // If auth_token is stored in a session cookie it sends a button to get user info
+    } else {
+
+        oa.get('https://account.lab.fiware.org/user/', req.session.access_token, function (e, response) {
+            logger.debug("userinfo: " + response);
+            if (response != undefined) {
+                var user = JSON.parse(response);
+                req.session.user = user;
+            }
+            res.redirect('/');
+
+        });
+
+    }
+});
+
+// Handles requests from IDM with the access code
+app.get('/login', function (req, res) {
+
+    logger.debug({op: 'app#get login'}, "req:" + req.query.code);
+
+    // Using the access code goes again to the IDM to obtain the access_token
+    oa.getOAuthAccessToken(req.query.code, function (e, results) {
+        logger.debug({op: 'app#get login'}, "get access token:" + results);
+
+        if (results != undefined) {
+
+            // Stores the access_token in a session cookie
+            req.session.access_token = results.access_token;
+
+            logger.debug({op: 'app#get login'}, "access_token: " + results.access_token);
+
+            oa.get('https://account.lab.fiware.org/user/', results.access_token, function (e, response) {
+                logger.debug({op: 'app#get login'}, "response get userinfo: " + response);
+                if (response != undefined) {
+                    var user = JSON.parse(response);
+                    req.session.user = user;
+                } else {
+                    req.session.access_token = undefined;
+                    req.session.user = undefined;
+                }
+                res.redirect('/');
+
+            });
+        } else {
+            res.redirect('/');
+
+        }
+
+
+    });
+
+
+})
+;
+
+// Redirection to IDM authentication portal
+app.get('/auth', function (req, res) {
+    var path = oa.getAuthorizeUrl();
+    res.redirect(path);
+});
+
+// Handles logout requests to remove access_token from the session cookie
+app.get('/logout', function (req, res) {
+
+    req.session.access_token = undefined;
+    req.session.user = undefined;
+    res.redirect('/');
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
