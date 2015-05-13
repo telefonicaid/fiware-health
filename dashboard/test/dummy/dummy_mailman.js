@@ -17,11 +17,21 @@
 'use strict';
 
 var express = require('express'),
-    bodyParser = require("body-parser"),
+    bodyParser = require('body-parser'),
+    fs = require('fs'),
     app = express();
 
 //Here we are configuring express to use body-parser as middle-ware.
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// context broker dummy
+app.post('/NGSI10/*', function (req, res) {
+    console.log("POST context broker " + req.params.list);
+    var fs = require('fs');
+    var json = JSON.parse(fs.readFileSync('../unit/post1.json', 'utf8'));
+    res.send(json);
+
+});
 
 // Returns an array of email addresses.
 app.get('/:list', function (req, res) {

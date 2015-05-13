@@ -23,19 +23,23 @@ block content
                       if region['status']!='N/A'
                         li.red_and_green
                              a( class='#{color}', href='/report/#{filename}') #{region['node']}
-                             button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Relaunch
+                             button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
                              if region['subscribed']
                                 button.btn(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
                              else
                                 button.btn(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
+                             div.timestamp
+                               |(last updated: #{region['timestamp']})
                       else
                         li.yellow
                              | #{region['node']}
-                             button.btn(disabled) Relaunch
+                             button.btn(disabled) Refresh
                              if region['subscribed']
                                 button.btn(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
                              else
                                 button.btn(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
+                             div.timestamp
+                               |(last updated: #{region['timestamp']})
 
           div.footer
                  ul.unstyled

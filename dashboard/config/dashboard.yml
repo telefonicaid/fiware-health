@@ -8,9 +8,15 @@ logging:
 #---------------------------------------------------------------------
 # context broker connection http (mandatory)
 #---------------------------------------------------------------------
+#cbroker:
+#  host: '127.0.0.1'
+#  port: 1026
+#  path: '/NGSI10/queryContext'
+
+# context broker dummy
 cbroker:
-  host: '127.0.0.1'
-  port: 1026
+  host: 'localhost'
+  port: 8000
   path: '/NGSI10/queryContext'
 
 

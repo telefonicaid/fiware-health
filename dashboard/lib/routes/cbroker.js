@@ -19,10 +19,12 @@
 var http = require('http'),
     domain = require("domain"),
     logger = require('../logger'),
-    config = require('../config');
+    config = require('../config'),
+    dateFormat = require('dateformat');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
+    TIMESTAMP_ATTRIBUTE = '_timestamp', // field name for value about timestamp
     REGION_TYPE = "region";
 
 
@@ -40,14 +42,18 @@ function parseRegions(entities) {
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
-            var sanity_status = '';
+            var sanity_status = '', timestamp = '';
             entry.contextElement.attributes.forEach(function (value) {
                 if (value.name === SANITY_STATUS_ATTRIBUTE) {
                     sanity_status = value.value;
                 }
-            });
-            result.push({node: entry.contextElement.id, status: sanity_status});
+                if (value.name === TIMESTAMP_ATTRIBUTE) {
+                    console.log(value.value);
+                    timestamp = dateFormat(new Date(parseInt(value.value)), 'yyyy/mm/dd H:MM');
 
+                }
+            });
+            result.push({node: entry.contextElement.id, status: sanity_status, timestamp: timestamp });
         }
     });
 
@@ -62,9 +68,15 @@ function parseRegions(entities) {
  */
 function retrieveAllRegions(callback) {
 
-    var payload = {entities: [
-        {type: 'region', isPattern: 'true', id: '.*'}
-    ], attributes: [SANITY_STATUS_ATTRIBUTE]};
+    var payload = {
+        entities: [
+            {type: 'region', isPattern: 'true', id: '.*'}
+        ],
+        attributes: [
+            SANITY_STATUS_ATTRIBUTE,
+            TIMESTAMP_ATTRIBUTE
+        ]
+    };
     var payloadString = JSON.stringify(payload);
     var headers = {
         'Content-Type': 'application/json',
@@ -96,19 +108,11 @@ function retrieveAllRegions(callback) {
     });
     req.on('error', function (e) {
         logger.error('Error in connection with context broker: ' + e);
+        callback(function () {
+                return [];
+            }
+        );
 
-        // only for testing end-to-end:
-        var fs = require('fs');
-        var json = JSON.parse(fs.readFileSync('test/unit/post1.json', 'utf8'));
-        logger.debug(json);
-        callback(parseRegions(json));
-
-
-        /*        callback(function () {
-         return [];
-         }
-         );
-         */
     });
 
 
