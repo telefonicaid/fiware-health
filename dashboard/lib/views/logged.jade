@@ -25,9 +25,9 @@ block content
                              a( class='#{color}', href='/report/#{filename}') #{region['node']}
                              button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
                              if region['subscribed']
-                                button.btn(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
+                                button.btn.subscribe(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
                              else
-                                button.btn(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
+                                button.btn.subscribe(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
                              div.timestamp
                                |(last updated: #{region['timestamp']})
                       else
@@ -35,9 +35,9 @@ block content
                              | #{region['node']}
                              button.btn(disabled) Refresh
                              if region['subscribed']
-                                button.btn(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
+                                button.btn.subscribe(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
                              else
-                                button.btn(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
+                                button.btn.subscribe(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
                              div.timestamp
                                |(last updated: #{region['timestamp']})
 

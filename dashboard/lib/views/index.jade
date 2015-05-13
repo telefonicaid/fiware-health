@@ -22,8 +22,6 @@ block content
                       if region['status']!='N/A'
                         li.red_and_green
                              a( class='#{color}', href='/report/#{filename}') #{region['node']}
-                             button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
-                             button.btn(disabled style="display: none") Subscribe
                              div.timestamp
                                   |(last updated: #{region['timestamp']})
 
@@ -31,8 +29,6 @@ block content
                       else
                         li.yellow
                              div(style="height:0px",title='Sanity Check in progress') #{region['node']}
-                             button.btn(disabled) Refresh
-                             button.btn(disabled style="display: none") Subscribe
                              div.timestamp
                                   |(last updated: #{region['timestamp']})
 
