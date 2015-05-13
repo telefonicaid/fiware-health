@@ -258,8 +258,12 @@ class FiwareNovaOperations:
         detail = "Server NOT {} after {} seconds".format(expected_status, MAX_WAIT_ITERATIONS * SLEEP_TIME)
         for i in range(MAX_WAIT_ITERATIONS):
             server_data = self.get_server(server_id)
-            if server_data['status'] == expected_status or server_data['status'] == 'ERROR':
-                detail = "Server " + ("NOT " if server_data['status'] == 'ERROR' else "") + expected_status
+            if server_data['status'] == expected_status:
+                detail = "Server %s" % expected_status
+                break
+            elif server_data['status'] == 'ERROR':
+                detail = server_data.get('fault', {'message': "Server NOT %s" % expected_status})['message']
+                self.logger.error(detail)
                 break
 
             self.logger.debug("Waiting (#%d) for status %s of instance %s (current is %s)...",

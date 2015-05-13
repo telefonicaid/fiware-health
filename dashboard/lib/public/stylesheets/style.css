@@ -1,0 +1,132 @@
+body {
+    font-family: Calibri, "Trebuchet MS", sans-serif;
+    background: #eeeeee url("../images/bg.png");
+    margin: 0;
+}
+
+table, td, th, .dataid {
+    border: 1px solid #aaa;
+    border-collapse: collapse;
+    background: #fff;
+    padding: 1px 10px 1px 10px;
+}
+
+th {
+    background-color: #122964;
+    color: #999999;
+}
+
+td.error {
+    background-color: #ff4136;
+    text-align: center;
+    color: rgb(18, 41, 100);
+}
+
+td.skip {
+    background-color: #999999;
+    text-align: center;
+    color: rgb(18, 41, 100);
+}
+
+td.success {
+    background-color: #3d9970;
+    text-align: center;
+    color: rgb(18, 41, 100);
+
+}
+
+td.total {
+    background-color: lightgray;
+    font-weight: bold;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+
+}
+
+section {
+    background: rgba(0, 0, 0, 0.05);
+    margin: 2ex;
+    padding: 1ex;
+    border: 1px solid #999;
+    border-radius: 5px;
+}
+
+h1 {
+    font-size: 100%;
+}
+
+h2 {
+    font-size: 120%;
+}
+
+h3 {
+    font-size: 100%;
+}
+
+h4 {
+    font-size: 85%;
+}
+
+h1, h2, h3, h4, a[href] {
+    cursor: pointer;
+    color: #0074d9;
+    text-decoration: none;
+}
+
+h3 strong, a.failed {
+    color: #ff4136;
+}
+
+a.success {
+    color: #3d9970;
+}
+
+a.skipped {
+    color: #999999;
+    text-decoration: line-through;
+}
+
+pre {
+    font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', 'Monaco', 'Courier New', monospace;
+    white-space: pre-wrap;
+}
+
+.test_details,
+.traceback {
+    display: none;
+    word-wrap: break-word;
+}
+
+section:target .test_details {
+    display: block;
+}
+
+#failure_details {
+    display: none;
+}
+
+.header {
+    background-image: url('../images/logo.png');
+    width: 500px;
+    height: 200px;
+    background-repeat: no-repeat;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.header-content {
+    position: absolute;
+    bottom: 0;
+    font-size: 130%;
+    color: #0074d9;
+    text-decoration: none;
+    text-align: center;
+    left: 0;
+    right: 0;
+    font-weight: bold;
+}
+
+
+

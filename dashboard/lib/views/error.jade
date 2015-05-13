@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  .header
+    .header-content
+      p SANITY CHECK STATUS | #{timestamp}
+
+
+  block container
+      pre #{message}
+      pre #{error.status}

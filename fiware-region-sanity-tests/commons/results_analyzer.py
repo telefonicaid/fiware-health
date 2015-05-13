@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
@@ -28,6 +29,7 @@ from xml.dom import minidom
 from constants import PROPERTIES_FILE, PROPERTIES_CONFIG_KEYTESTCASES
 import json
 import sys
+import re
 
 
 ATTR_TESTS_TOTAL = "tests"
@@ -35,10 +37,13 @@ ATTR_TESTS_SKIP = "skip"
 ATTR_TESTS_ERROR = "errors"
 ATTR_TESTS_FAILURE = "failures"
 
-
 CHILD_NODE_SKIP = "skipped"
 CHILD_NODE_ERROR = "error"
 CHILD_NODE_FAILURE = "failure"
+
+STATUS_NOT_OK = "NOK"
+STATUS_SKIP = "N/A"
+STATUS_OK = "OK"
 
 
 class ResultAnalyzer(object):
@@ -65,13 +70,13 @@ class ResultAnalyzer(object):
 
         # Count errors/failures/skips
         for testcase in doc.getElementsByTagName('testcase'):
-            status = "OK"
+            status = STATUS_OK
             child_node_list = testcase.childNodes
             if child_node_list is not None and len(child_node_list) != 0:
                 if child_node_list[0].localName in [CHILD_NODE_FAILURE, CHILD_NODE_ERROR]:
-                    status = "NOK"
+                    status = STATUS_NOT_OK
                 elif child_node_list[0].localName == CHILD_NODE_SKIP:
-                    status = "N/A"
+                    status = STATUS_SKIP
 
             testpackage = testcase.getAttribute('classname').split(".")[-2]
             testregion = testpackage.replace("test_", "")
@@ -107,14 +112,14 @@ class ResultAnalyzer(object):
             except Exception, e:
                 print 'Error parsing config file: %s' % e
 
-        key_test_cases_list = conf[PROPERTIES_CONFIG_KEYTESTCASES]
+        key_test_cases_patterns = [re.compile(item) for item in conf[PROPERTIES_CONFIG_KEYTESTCASES]]
         for item in self.dict:
             passed = True
             for result_value in self.dict[item]:
                 passed = True
-                for key_test_case in key_test_cases_list:
-                    if key_test_case in result_value['test_name']:
-                        if result_value['status'] != 'OK':
+                for pattern in key_test_cases_patterns:
+                    if pattern.match(result_value['test_name']):
+                        if result_value['status'] != STATUS_OK:
                             passed = False
                             break
                 if not passed:
@@ -123,8 +128,8 @@ class ResultAnalyzer(object):
                 region_ok_list.append(item)
 
         print "\nREGION GLOBAL STATUS\n"
-        print "Key Test Cases list:", str(key_test_cases_list)
-        print "Region list with that test cases as PASSED status:"
+        print "Key test cases:", str(conf[PROPERTIES_CONFIG_KEYTESTCASES])
+        print "Region list with key test cases with PASSED status:"
         if len(region_ok_list) == 0:
             print "NONE!!!!!!!"
         else:

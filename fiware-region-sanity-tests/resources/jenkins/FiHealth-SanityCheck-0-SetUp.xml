@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>&lt;h3&gt;Fiware-Health - Region Sanity Check&lt;/h3&gt;&#xd;
+This Job executes the SetUp procedure for Sanity Check execution&#xd;
+&lt;ul&gt;&#xd;
+  &lt;li&gt;Creates workspace&lt;/li&gt;&#xd;
+  &lt;li&gt;Downloads source code from Fiware-Healt repository&lt;/li&gt;&#xd;
+  &lt;li&gt;Clean all generated test data (*.html, *.txt, *.xml)&lt;/li&gt;&#xd;
+  &lt;li&gt;Creates Virtualen and configures the test environment&lt;/li&gt;&#xd;
+  &lt;li&gt;Install all project requirements&lt;/li&gt;&#xd;
+&lt;/ul&gt;&#xd;
+&#xd;
+&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>7</daysToKeep>
+    <numToKeep>14</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.3.5">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/telefonicaid/fiware-health.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>develop</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># Execute &apos;Prepare&apos; Script
+# https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests/resources/scripts/jenkins.sh
+./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh prepare
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>

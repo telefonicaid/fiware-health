@@ -13,7 +13,7 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-lib/
+# (compatibility with nodejs projects) lib/
 lib64/
 parts/
 sdist/
@@ -64,3 +64,7 @@ fiware-region-sanity-tests/test_results.xml
 # Virtual environment
 fiware-region-sanity-tests/venv/
 
+# Node js
+node_modules/
+coverage/
+htpasswd

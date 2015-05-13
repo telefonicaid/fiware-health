@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sanity Check Result Report- Fiware Region Status</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
+    <script src="../javascripts/dashboard.js"></script>
+</head>
+<body onload="displaySections();changeAllTitles()">
+<div class="box0">
+    <div class="header">
+        <div class="header-content">
+            {% for class, group in report.items() %}
+            <h1 id="subtitle">SANITY CHECK STATUS | Region {{ class }} - {{timestamp}}</h1>
+            {% endfor %}
+        </div>
+    </div>
+    <div style="padding-bottom: 100px;">
+        <h1>Test result stats</h1>
+        <section>
+            <table>
+                <tr>
+                    <th> Fail</th>
+                    <th> Error</th>
+                    <th> Skip</th>
+                    <th> Success</th>
+                    <th> Total</th>
+                </tr>
+                {% for class, group in report.items() %}
+                <tr>
+                    <td class="error"> {{ group.stats.failures }}</td>
+                    <td class="error"> {{ group.stats.errors }}</td>
+                    <td class="skip"> {{ group.stats.skipped }}</td>
+                    <td class="success"> {{ group.stats.passes }}</td>
+                    <td class="total"> {{ group.stats.total }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </section>
+
+        <h1>Performed test cases</h1>
+        {% for class, group in report.items() %}
+        <section>
+            <h2>{{ class }}</h2>
+            <ul>
+                {% for test in group.tests %}
+                <li><a title="{{ test.shortDescription }}" {% if test.failed %}class="{% if test.type == 'skipped' %}skipped{% else %}failed{% endif %}" href="javascript:openFailureDetailsInNewWindow('#{{ class }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endfor %}
+    </div>
+    <div id="failure_details">
+
+        <div id="html_failure_details">
+            <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
+            <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
+            <script src="../javascripts/dashboard.js"></script>
+
+
+            <div class="box0">
+                <div class="header">
+                    <div class="header-content">
+                        {% for class, group in report.items() %}
+                        <h1 id="subtitle2">SANITY CHECK STATUS | Region {{ class }} - {{timestamp}}</h1>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div style="padding-bottom:100px">
+
+                    <h1>Failure details</h1>
+                    {% for class, group in report.items() %}
+                    {% if group.stats.failures or group.stats.errors or group.stats.skipped %}
+                    <section>
+                        <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
+
+                        <div>
+                            {% for test in group.tests %}
+                            {% if test.failed %}
+                            <section id="{{ class }}:{{ test.name }}">
+                                <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
+
+                                <div class="test_details">
+                                    <h4>Details</h4>
+                                    <pre><xmp>{{ test.message }}</xmp></pre>
+                                    <h4>Traceback</h4>
+                                    <pre class="traceback"><xmp>{{ test.tb }}</xmp></pre>
+                                </div>
+                            </section>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+                    {% endfor %}
+                    <script>
+                        displaySections();
+                    </script>
+                </div>
+
+                <div class="footer">
+                    <ul class="unstyled">
+                        <li>2014 ©<a href="http://fiware.org">FIWARE.</a>&nbsp;The use of FIWARE Lab services is subject
+                            to
+                            the
+                            acceptance of the
+                            <a href="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE_LAB_Terms_and_Conditions">
+                                &nbsp; Terms and Conditions,</a>
+                            <a href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-LAB_Personal_Data_Protection_Policy">
+                                &nbsp;Personal Data Protection Policy</a>
+                            &nbsp;and<a
+                                    href="http://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Cookies_Policy_FIWARE_Lab">
+                                &nbsp;Cookies Policy</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <ul class="unstyled">
+            <li>2014 ©<a href="http://fiware.org">FIWARE.</a>&nbsp;The use of FIWARE Lab services is subject to
+                the acceptance of the
+                <a href="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE_LAB_Terms_and_Conditions">
+                    &nbsp; Terms and Conditions,</a>
+                <a href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-LAB_Personal_Data_Protection_Policy">
+                    &nbsp;Personal Data Protection Policy</a>
+                &nbsp;and<a
+                        href="http://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Cookies_Policy_FIWARE_Lab">
+                    &nbsp;Cookies Policy</a>
+            </li>
+        </ul>
+    </div>
+
+
+</div>
+<!-- div box0-->
+</body>
+
+</html>
