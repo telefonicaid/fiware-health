@@ -21,11 +21,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
+__author__ = 'fla'
 
 
-from tests import fiware_region_with_networks_tests
+from tests import fiware_region_with_networks_tests, fiware_region_object_storage_tests
 
 
-class TestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetworkTest):
-    region_name = "Lannion"
+class TestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetworkTest,
+                fiware_region_object_storage_tests.FiwareRegionsObjectStorageTests):
+    region_name = "Lannion2"
