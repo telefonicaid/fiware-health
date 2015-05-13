@@ -23,7 +23,8 @@ var express = require('express'),
     domain = require('domain'),
     logger = require('../logger'),
     http = require('http'),
-    sleep = require('sleep');
+    sleep = require('sleep'),
+    _ = require('underscore');
 
 
 /* GET refresh. */
@@ -84,9 +85,11 @@ router.get('/', function (req, res) {
  */
 function searchSubscription(user, regions, callback) {
 
+    var finished = _.after(regions.length, callback);
     regions.map(function (region) {
 
-        isSubscribed(user, region, callback);
+
+        isSubscribed(user, region, finished);
 
     });
 }
@@ -120,12 +123,15 @@ function isSubscribed(user, region, isSubscribed_callback) {
         });
         mailman_res.on('end', function () {
             logger.info("response mailman: region (" + region.node + ") " + mailman_res.statusCode + " " + responseString);
-            var array = JSON.parse(responseString);
-            logger.debug("all users:" + array);
-            var new_array = array.filter(isMail);
-            logger.debug("new_array:" + new_array);
-            region.subscribed = new_array.length == 1;
-            //console.log(region);
+            try {
+                var array = JSON.parse(responseString);
+                logger.debug("all users:" + array);
+                var new_array = array.filter(isMail);
+                logger.debug("new_array:" + new_array);
+                region.subscribed = new_array.length == 1;
+            } catch (ex) {
+                region.subscribed = false;
+            }
             isSubscribed_callback();
 
 
