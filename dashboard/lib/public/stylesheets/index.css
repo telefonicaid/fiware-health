@@ -7,7 +7,7 @@
 }
 .box2 {
   display: block;
-  background-color: #999;
+  background-color: #122964;
   border: 1px solid #ccc;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -27,7 +27,14 @@
 }
 .region_list {
   list-style-type: none;
-  width: 300px;
+  width: 400px;
+}
+.region_list .timestamp {
+  float: right;
+  color: #fff;
+  padding-right: 20px;
+  font-weight: normal;
+  font-size: 80%;
 }
 a.red {
   color: #f00;

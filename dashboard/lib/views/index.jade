@@ -6,7 +6,7 @@ block content
       div.box0
           .header
               .header-content
-                p SANITY CHECK STATUS | #{timestamp}
+                p SANITY CHECK STATUS | OVERVIEW
 
 
           div.box1
@@ -21,11 +21,17 @@ block content
                              a( class='#{color}', href='/report/#{filename}') #{region['node']}
                              button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
                              button.btn(disabled style="display: none") Subscribe
+                             div.timestamp
+                                  |(last updated: #{region['timestamp']})
+
+
                       else
                         li.yellow
-                             | #{region['node']}
+                             div(style="height:0px",title='Sanity Check in progress') #{region['node']}
                              button.btn(disabled) Refresh
                              button.btn(disabled style="display: none") Subscribe
+                             div.timestamp
+                                  |(last updated: #{region['timestamp']})
 
           div.footer
                  ul.unstyled
