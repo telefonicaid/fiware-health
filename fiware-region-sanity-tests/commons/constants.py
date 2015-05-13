@@ -21,8 +21,9 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
 
+# LOGGING CONFIGURATION
+LOGGING_FILE = "resources/logging.conf"
 
 # CONFIGURATION PROPERTIES
 PROPERTIES_FILE = "resources/settings.json"
@@ -72,6 +73,9 @@ SSH_CONNECTION_TIMEOUT = 8
 # PHONEHOME SERVER (time in seconds)
 PHONEHOME_USERDATA_PATH = "resources/templates/userdata/test.snat.phonehome.template"
 PHONEHOME_TIMEOUT = 175
+PHONEHOME_DBUS_NAME = "org.fiware.fihealth"
+PHONEHOME_DBUS_OBJECT_PATH = "/phonehome"
+PHONEHOME_SIGNAL = "phonehome_signal"
 
 # SERVICES NAMES
 SERVICE_SWIFT_NAME = "object-store"
