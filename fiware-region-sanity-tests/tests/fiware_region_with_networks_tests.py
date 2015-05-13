@@ -412,8 +412,6 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             userdata_content = userdata_file.read()
             userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
             self.logger.debug("Userdata content: %s", userdata_content)
-            phonehome_port = urlparse.urlsplit(phonehome_endpoint).port
-            self.logger.debug("PhoneHome port to be used by server: %d", phonehome_port)
 
         # Create Router with an external network gateway
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -446,7 +444,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.logger.debug("Request received from VM when 'calling home': %s", result)
 
         # Get hostname from data received
-        self.assertIn("hostname", result, "Phone-Home request has been received but 'hostname' param is not in")
+        self.assertIn("hostname", result, "PhoneHome request has been received but 'hostname' param is not in")
         received_hostname = re.match(".*hostname=([\w-]*)", result).group(1)
 
         # Check hostname
