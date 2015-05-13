@@ -25,15 +25,6 @@ var express = require('express'),
     subscribe = require('./subscribe');
 
 
-function searchSubscription(user, regions) {
-    for (var i in regions) {
-        var region = regions[i];
-        region.subscribed = subscribe.isSubscribed(user, region.node);
-        console.log(region.node + " " + region.subscribed);
-    }
-}
-
-
 /* GET home page. */
 router.get('/', function (req, res) {
 
@@ -51,9 +42,14 @@ router.get('/', function (req, res) {
 
             //search for subscription
 
-            searchSubscription(userinfo.email, regions);
+            logger.debug({op: 'index#get'}, "regions: " + regions.constructor.name);
+            subscribe.searchSubscription(userinfo.email, regions, function () {
 
-            res.render('logged', {name: userinfo.displayName, timestamp: req.session.title_timestamp, regions: regions});
+                logger.debug("before render: " + JSON.stringify(regions));
+                res.render('logged', {name: userinfo.displayName, timestamp: req.session.title_timestamp, regions: regions});
+
+            });
+
 
         }
         else {

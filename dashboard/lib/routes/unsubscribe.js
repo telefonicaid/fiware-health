@@ -19,7 +19,7 @@
 var express = require('express'),
     router = express.Router(),
     dateFormat = require('dateformat'),
-    cbroker = require('./cbroker'),
+    config = require('../config'),
     domain = require('domain'),
     logger = require('../logger'),
     http = require('http'),
@@ -44,9 +44,9 @@ router.get('/', function (req, res) {
     };
 
     var options = {
-        host: 'localhost',
-        port: 8000,
-        path: '/' + region,
+        host: config.mailman.host,
+        port: config.mailman.port,
+        path: config.mailman.path + region.toLowerCase(),
         method: 'DELETE',
         headers: headers
     };

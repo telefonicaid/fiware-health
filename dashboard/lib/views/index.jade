@@ -13,8 +13,8 @@ block content
 
 
              #box2.box2
-                button.btn(onclick="window.location.href='/signin'") Sign in
-
+                button.btn(onclick="window.location.href='/signin'") Sign In with FIWARE Account
+                p &nbsp;
                 ul.region_list
                    each region in regions
                       - color = region['status'] == 'OK' ?'green' : region['status'] == 'NOK'?'red':'yellow';

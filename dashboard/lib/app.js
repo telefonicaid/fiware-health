@@ -27,10 +27,11 @@ var express = require('express'),
     index = require('./routes/index'),
     refresh = require('./routes/refresh'),
     subscribe = require('./routes/subscribe'),
+    unsubscribe = require('./routes/unsubscribe'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
-    auth = require('http-auth'),
-    OAuth2 = require('./oauth2').OAuth2;
+    OAuth2 = require('./oauth2').OAuth2,
+    config = require('./config');
 
 
 var app = express();
@@ -79,14 +80,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-var basic = auth.digest({
-    realm: "Private area",
-    file: __dirname + "/htpasswd"
-});
-
-
 app.use('/refresh', function (req, res, next) {
-    logger.debug('Accessing to relaunch')
+    logger.debug('Accessing to relaunch');
     if (req.session.access_token) {
 
         next(); // pass control to the next handler
@@ -96,7 +91,7 @@ app.use('/refresh', function (req, res, next) {
 }, subscribe);
 
 app.use('/subscribe', function (req, res, next) {
-    logger.debug('Accessing to subscribe')
+    logger.debug('Accessing to subscribe');
     if (req.session.access_token) {
 
         next(); // pass control to the next handler
@@ -106,14 +101,14 @@ app.use('/subscribe', function (req, res, next) {
 }, subscribe);
 
 app.use('/unsubscribe', function (req, res, next) {
-    logger.debug('Accessing to unsubscribe')
+    logger.debug('Accessing to unSubscribe');
     if (req.session.access_token) {
 
         next(); // pass control to the next handler
     } else {
         res.redirect('/error');
     }
-}, subscribe);
+}, unsubscribe);
 
 
 app.use('/', index);
@@ -121,12 +116,13 @@ app.use('/', index);
 //configure login with oAuth
 
 // Creates oauth library object with the config data
-var oa = new OAuth2('b52519dc0add48319448b18ab44ffbfc',
-    '72f473984a4c4a529511de6e05618459',
-    'https://account.lab.fiware.org',
+var oa = new OAuth2(config.idm.clientId,
+    config.idm.clientSecret,
+    config.idm.url,
     '/oauth2/authorize',
     '/oauth2/token',
-    'http://fi-health.lab.fiware.org/login');
+    config.idm.callbackURL);
+
 
 // Handles requests to the main page
 app.get('/signin', function (req, res) {

@@ -19,7 +19,7 @@
 var express = require('express'),
     router = express.Router(),
     dateFormat = require('dateformat'),
-    cbroker = require('./cbroker'),
+    config = require('../config'),
     domain = require('domain'),
     logger = require('../logger'),
     http = require('http'),
@@ -44,9 +44,9 @@ router.get('/', function (req, res) {
     };
 
     var options = {
-        host: 'localhost',
-        port: 8000,
-        path: '/' + region,
+        host: config.mailman.host,
+        port: config.mailman.port,
+        path: config.mailman.path + region.toLowerCase(),
         method: 'PUT',
         headers: headers
     };
@@ -59,7 +59,7 @@ router.get('/', function (req, res) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info("response mailman:" + mailman_res.statusCode + " " + mailman_res.statusMessage);
+            logger.info("response mailman: region (" + region.node + ") " + mailman_res.statusCode + " " + responseString);
 
             res.redirect('/');
         });
@@ -76,16 +76,40 @@ router.get('/', function (req, res) {
 
 });
 
+/**
+ *
+ * @param user
+ * @param regions
+ * @param callback
+ */
+function searchSubscription(user, regions, callback) {
 
-function isSubscribed(user, region) {
+    regions.map(function (region) {
 
+        isSubscribed(user, region, callback);
+
+    });
+}
+
+/**
+ * Connect to mailman and check is user is subscribed to region list
+ * @param user
+ * @param region
+ * @param isSubscribed_callback
+ */
+function isSubscribed(user, region, isSubscribed_callback) {
 
     var options = {
-        host: 'localhost',
-        port: 8000,
-        path: '/' + region,
+        host: config.mailman.host,
+        port: config.mailman.port,
+        path: config.mailman.path + region.node.toLowerCase(),
         method: 'GET'
     };
+
+
+    function isMail(value) {
+        return value == user;
+    }
 
     var mailmain_req = http.request(options, function (mailman_res) {
         mailman_res.setEncoding('utf-8');
@@ -95,19 +119,23 @@ function isSubscribed(user, region) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info("response mailman:" + mailman_res.statusCode + " " + mailman_res.statusMessage);
+            logger.info("response mailman: region (" + region.node + ") " + mailman_res.statusCode + " " + responseString);
+            var array = JSON.parse(responseString);
+            logger.debug("all users:" + array);
+            var new_array = array.filter(isMail);
+            logger.debug("new_array:" + new_array);
+            region.subscribed = new_array.length == 1;
+            //console.log(region);
+            isSubscribed_callback();
 
-            logger.debug("all users:" + responseString);
 
         });
     });
     mailmain_req.on('error', function (e) {
         // TODO: handle error.
         logger.error('Error in connection with mailman: ' + e);
-        res.redirect('/');
     });
 
-    mailmain_req.write(payloadString);
     mailmain_req.end();
 }
 
@@ -117,3 +145,4 @@ module.exports = router;
 
 /** @export */
 module.exports.isSubscribed = isSubscribed;
+module.exports.searchSubscription = searchSubscription;

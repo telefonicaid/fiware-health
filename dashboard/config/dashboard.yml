@@ -12,3 +12,30 @@ cbroker:
   host: '127.0.0.1'
   port: 1026
   path: '/NGSI10/queryContext'
+
+
+#---------------------------------------------------------------------
+# idm oauth2 (mandatory)
+#---------------------------------------------------------------------
+idm:
+  clientId: 'f712dba72b2d4d519dd9efde117c0de0'
+  clientSecret: '9661748cfcd947719bb17a2ce89c8b3b'
+  url: 'https://account.lab.fiware.org'
+  callbackURL: 'http://localhost:3001/login'
+
+
+#idm test:
+#  clientId: '1181404dd018468a9ab42de26d961c88'
+#  clientSecret: 'cf7a115b9baa45098b90d764d74dc569'
+#  url: 'https://account.lab.fiware.org'
+#  callbackURL: 'http://fi-health.lab.fiware.org:443/login'
+
+
+
+#---------------------------------------------------------------------
+# mailman-api (mandatory)
+#--------------------------------------------------------------------
+mailman:
+  host: 'localhost'
+  port: 8000
+  path: '/'

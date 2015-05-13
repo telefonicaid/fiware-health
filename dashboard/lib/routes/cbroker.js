@@ -19,7 +19,7 @@
 var http = require('http'),
     domain = require("domain"),
     logger = require('../logger'),
-    config = require('../www');
+    config = require('../config');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
@@ -47,6 +47,7 @@ function parseRegions(entities) {
                 }
             });
             result.push({node: entry.contextElement.id, status: sanity_status});
+
         }
     });
 
@@ -88,16 +89,26 @@ function retrieveAllRegions(callback) {
             responseString += data;
         });
         res.on('end', function () {
+            logger.debug({op: 'retrieveAllRegions'}, "response string:  " + responseString);
             var resultObject = JSON.parse(responseString);
             callback(parseRegions(resultObject));
         });
     });
     req.on('error', function (e) {
         logger.error('Error in connection with context broker: ' + e);
-        callback(function () {
-                return [];
-            }
-        );
+
+        // only for testing end-to-end:
+        var fs = require('fs');
+        var json = JSON.parse(fs.readFileSync('test/unit/post1.json', 'utf8'));
+        logger.debug(json);
+        callback(parseRegions(json));
+
+
+        /*        callback(function () {
+         return [];
+         }
+         );
+         */
     });
 
 
