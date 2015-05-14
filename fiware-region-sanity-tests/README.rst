@@ -25,7 +25,7 @@ __ `Vagrant - Downloads`_
 
 The E2E SNAT test uses DBus tech for communicating process. This one requires:
 
-- `Bbus`_ running and configured on your system
+- `Dbus`_ running and configured on your system
 - `dbus-python`_ (v0.84.0)
 - `pygobject`_ (v2.20.0)
 
@@ -114,7 +114,7 @@ These Test Cases will be common for all federated regions.
   and all params
 * Test whether it is possible to deploy an instance with a new network
   and assign an allocated public IP
-* Test whether it is possible to deploy and instance, assign an allocated
+* Test whether it is possible to deploy an instance, assign an allocated
   public IP and establish a SSH connection
 * Test whether it is possible to deploy an instance with a new network
   and connect to INTERNET (SNAT) without assigning a public IP
@@ -125,9 +125,9 @@ These Test Cases will be common for all federated regions.
 * Test whether it is possible to deploy an instance with new keypair
 * Test whether it is possible to deploy an instance with new security group
 * Test whether it is possible to deploy an instance with all params
-* Test whether it is possible to deploy and instance and assign an allocated
+* Test whether it is possible to deploy an instance and assign an allocated
   public IP
-* Test whether it is possible to deploy and instance, assign an allocated
+* Test whether it is possible to deploy an instance, assign an allocated
   public IP and establish a SSH connection
 * Test whether it is possible to deploy an instance and connect to INTERNET
   (SNAT) without assigning a public IP
@@ -243,7 +243,7 @@ Some E2E test cases have been implemented to check the connection in both
 *Internet -> VM* and *VM -> Internet*.
 This test cases are:
 
-* Test whether it is possible to deploy and instance, assign an allocated
+* Test whether it is possible to deploy an instance, assign an allocated
   public IP and establish a SSH connection *(Internet -> VM)*
 * Test whether it is possible to deploy an instance
   and connect to INTERNET (SNAT) without assigning a public IP *(VM -> Internet)*
@@ -258,7 +258,7 @@ The test uses two components:
 - A DBus client used by test implementation to wait for PhoneHome requests through the HTTP PhoneHome server.
 
 The implemented PhoneHome service uses the DBus system technology to communicate the
-test execution and the HTTP PhoneHome server who receives the PhoneHome request from
+test execution and the HTTP PhoneHome server that is receiving the PhoneHome request from
 deployed VMs.
 
 
@@ -268,19 +268,18 @@ The HTTP PhoneHome server waits for *POST HTTP requests* from VMs.
 This service publishes a DBus object (DBus server) to be used by tests to wait for
 PhoneHome requests.
 
-When any request is received, HTTP PhoneHome server will emit over the published object a
-signal to inform to all connected tests about the event (broadcasting). This signal contains the
-hostname of the VM (the one received in the HTTP POST body). This signal will be take in account by
-tests that waits for a signal with this hostname value; rest of tests will ignore it and they keep on
-listening new signals with the correct data to them.
+When a request is received, HTTP PhoneHome server will inform, through the published object,
+to all connected tests about the event (broadcasting). This signal contains the
+hostname of the VM (the one received in the HTTP POST body). This signal will be take into account by
+tests that are waiting for a signal with this hostname value; the other tests will ignore it and will keep on
+listening new signals with the correct data (correct hostname) to them.
 
 
 **DBus configuration**
 
-The implemented Dbus service uses the *System Bus* for communicating process.
-The name of the bus used by tests is *org.fiware.fihealth*.
-Additional configuration it is needed in ``/etc/dbus-1/system.conf`` to setup
-access policies:
+The implemented Dbus service uses the *System Bus* for communicating processes.
+The bus name used by tests is *org.fiware.fihealth*.
+Additional configuration is needed in ``/etc/dbus-1/system.conf`` to setup the access policies:
 
 ::
 
@@ -316,6 +315,6 @@ Before executing SNAT test you will have to launch the HTTP PhoneHome service li
 .. _pip: https://pypi.python.org/pypi/pip
 .. _NGSI Adapter: https://github.com/telefonicaid/fiware-monitoring/tree/master/ngsi_adapter
 .. _Context Broker: http://catalogue.fiware.org/enablers/publishsubscribe-context-broker-orion-context-broker
-.. _Bbus: http://www.freedesktop.org/wiki/Software/dbus/
+.. _Dbus: http://www.freedesktop.org/wiki/Software/dbus/
 .. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/doc/tutorial.html
 .. _pygobject: http://www.pygtk.org/
