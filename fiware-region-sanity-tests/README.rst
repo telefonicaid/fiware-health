@@ -23,6 +23,16 @@ Test environment
 __ `Python - Downloads`_
 __ `Vagrant - Downloads`_
 
+The E2E SNAT test uses DBus tech for communicating process. This one requires:
+
+- `Bbus`_ running and configured on your system
+- `dbus-python`_ (v0.84.0)
+- `pygobject`_ (v2.20.0)
+
+You will need to provided the Dbus system configuration and these external
+libs in the given environment where tests will be executed. **Dbus and its
+dependencies are not managed by the project requirements file**.
+
 
 **Test case execution using virtualenv**
 
@@ -31,7 +41,7 @@ __ `Vagrant - Downloads`_
 #. Go to main folder in the test project
 #. Install the requirements for the test case execution in the virtual
    environment (``pip install -r requirements.txt --allow-all-external``)
-
+#. Install Dbus requirements.
 
 **Test case execution using Vagrant (optional)**
 
@@ -45,6 +55,7 @@ launching test cases.
 #. After Vagrant provision, your VM is properly configured to launch the
    Sanity Check. You have to access to the VM using ``vagrant ssh`` and change
    to ``/vagrant`` directory that will have mounted your test project workspace.
+#. Install Dbus requirements.
 
 If you need more information about how to use Vagrant, you can see the
 `getting started section`__ of Vagrant documentation.
@@ -225,6 +236,74 @@ provided as part of this component, which has to be installed together with the
 rest of standard parsers bundled in NGSI Adapter package.
 
 
+DBus and HTTP PhoneHome Service for E2E tests
+---------------------------------------------
+
+Some E2E test cases have been implemented to check the connection in both
+*Internet -> VM* and *VM -> Internet*.
+This test cases are:
+
+* Test whether it is possible to deploy and instance, assign an allocated
+  public IP and establish a SSH connection *(Internet -> VM)*
+* Test whether it is possible to deploy an instance
+  and connect to INTERNET (SNAT) without assigning a public IP *(VM -> Internet)*
+
+The later will try to execute a *PhoneHome request* (executed by Cloud-Init in the VM)
+to the *HTTP PhoneHome service* running in the configured HOST:PORT
+(*phonehome_endpoint* configuration). If this value is not set, this test will be skipped.
+
+The test uses two components:
+
+- A HTTP/Dbus PhoneHome server, that is launched as a service in the same host where test is executed (with public IP).
+- A DBus client used by test implementation to wait for PhoneHome requests through the HTTP PhoneHome server.
+
+The implemented PhoneHome service uses the DBus system technology to communicate the
+test execution and the HTTP PhoneHome server who receives the PhoneHome request from
+deployed VMs.
+
+
+**HTTP PhoneHome server**
+
+The HTTP PhoneHome server waits for *POST HTTP requests* from VMs.
+This service publishes a DBus object (DBus server) to be used by tests to wait for
+PhoneHome requests.
+
+When any request is received, HTTP PhoneHome server will emit over the published object a
+signal to inform to all connected tests about the event (broadcasting). This signal contains the
+hostname of the VM (the one received in the HTTP POST body). This signal will be take in account by
+tests that waits for a signal with this hostname value; rest of tests will ignore it and they keep on
+listening new signals with the correct data to them.
+
+
+**DBus configuration**
+
+The implemented Dbus service uses the *System Bus* for communicating process.
+The name of the bus used by tests is *org.fiware.fihealth*.
+Additional configuration it is needed in ``/etc/dbus-1/system.conf`` to setup
+access policies:
+
+::
+
+    <policy>
+        ...
+        <!-- Holes must be punched in service configuration files for
+               name ownership and sending method calls -->
+        <allow own="org.fiware.fihealth"/>
+        ...
+        <!-- Allow anyone to talk to the message bus -->
+        <allow send_destination="org.fiware.fihealth"/>
+    </policy>
+
+
+**Launch HTTP PhoneHome server**
+
+Before executing SNAT test you will have to launch the HTTP PhoneHome service like this:
+
+::
+
+   # export TEST_PHONEHOME_ENDPOINT
+   # python ./commons/http_phonehome_server.py
+
 .. REFERENCES
 
 .. _Python: http://www.python.org/
@@ -237,3 +316,6 @@ rest of standard parsers bundled in NGSI Adapter package.
 .. _pip: https://pypi.python.org/pypi/pip
 .. _NGSI Adapter: https://github.com/telefonicaid/fiware-monitoring/tree/master/ngsi_adapter
 .. _Context Broker: http://catalogue.fiware.org/enablers/publishsubscribe-context-broker-orion-context-broker
+.. _Bbus: http://www.freedesktop.org/wiki/Software/dbus/
+.. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/doc/tutorial.html
+.. _pygobject: http://www.pygtk.org/
