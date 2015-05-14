@@ -51,7 +51,8 @@ var
         mailman: {
             host: 'localhost',
             port: '8000',
-            path: '/'
+            path: '/',
+            email_from: ''
         },
         paths: {
             reports_files: '/var/www/html/RegionSanityCheck',

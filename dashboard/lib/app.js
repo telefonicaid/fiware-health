@@ -57,9 +57,13 @@ app.set('view engine', 'jade');
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 
 app.use(stylus.middleware(
-    { src: __dirname + '/public', compile: compile
+    {
+        src: __dirname + '/stylus',
+        dest: __dirname + "/public/stylesheets",
+        compile: compile
     }
-));
+))
+;
 
 app.use(session({secret: 'ssshhhhh', title_timestamp: ''}));
 

@@ -155,10 +155,10 @@ function notify(region, notify_callback) {
     logger.info({op: 'subscribe#notify'}, 'notify to region: ' + region);
 
 
-    var payloadString = 'name_from= fi-health sanity\n';
-    payloadString += 'email_from=' + region + '@fi-health.lab.fiware.org\n';
-    payloadString += 'subject=Status changed for region ' + region + '\n';
-    payloadString += 'body=Status changed for region ' + region + '\n';
+    var payloadString = 'name_from= fi-health sanity&';
+        payloadString += 'email_from='+config.mailman.email_from+'&';
+        payloadString += 'subject=Status changed for region ' + region + '&';
+        payloadString += 'body=Status changed for region ' + region;
 
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',

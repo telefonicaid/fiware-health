@@ -51,3 +51,4 @@ mailman:
   host: 'localhost'
   port: 8000
   path: '/'
+  email_from: jesus.perezgonzalez@telefonica.com

@@ -48,7 +48,6 @@ function parseRegions(entities) {
                     sanity_status = value.value;
                 }
                 if (value.name === TIMESTAMP_ATTRIBUTE) {
-                    console.log(value.value);
                     timestamp = dateFormat(new Date(parseInt(value.value)), 'UTC:yyyy/mm/dd HH:MM Z');
 
                 }
