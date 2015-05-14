@@ -92,6 +92,10 @@ pre {
     white-space: pre-wrap;
 }
 
+xmp {
+    white-space: pre-wrap;
+}
+
 .test_details,
 .traceback {
     display: none;
