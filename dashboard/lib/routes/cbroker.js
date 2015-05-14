@@ -49,7 +49,7 @@ function parseRegions(entities) {
                 }
                 if (value.name === TIMESTAMP_ATTRIBUTE) {
                     console.log(value.value);
-                    timestamp = dateFormat(new Date(parseInt(value.value)), 'yyyy/mm/dd H:MM');
+                    timestamp = dateFormat(new Date(parseInt(value.value)), 'UTC:yyyy/mm/dd HH:MM Z');
 
                 }
             });
@@ -107,6 +107,7 @@ function retrieveAllRegions(callback) {
         });
     });
     req.on('error', function (e) {
+        // TODO: handle error.
         logger.error('Error in connection with context broker: ' + e);
         callback(function () {
                 return [];

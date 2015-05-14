@@ -44,6 +44,7 @@
 #     test				Sanity Check execution for given region
 #
 # Environment:
+#     JENKINS_HOME			home path of Jenkins CI
 #     JOB_URL				full URL for this build job
 #     FIHEALTH_WORKSPACE		default value for --workspace
 #     FIHEALTH_HTDOCS			default value for --htdocs
@@ -177,6 +178,11 @@ function change_status() {
 }
 
 # Main
+if [ -z "$JENKINS_HOME" ]; then
+	printf "Jenkins variable JENKINS_HOME missing\n" 1>&2
+	exit 2
+fi
+
 if [ -z "$JOB_URL" ]; then
 	printf "Jenkins variable JOB_URL missing (maybe not in a job?)\n" 1>&2
 	exit 2
@@ -226,6 +232,22 @@ prepare)
 	# Install dependencies in virtualenv
 	source $VIRTUALENV/bin/activate
 	pip install -r requirements.txt --allow-all-external
+
+	# Install 'dbus-python' library in virtualenv
+	mkdir -p $VIRTUALENV/src
+	tar -C $VIRTUALENV/src -xzf $JENKINS_HOME/contrib/dbus-python-*.tar.gz
+	cd $VIRTUALENV/src/dbus-python-*
+	./configure --prefix=$VIRTUALENV
+	make
+	make install
+
+	# Install 'pygobject' library in virtualenv
+	mkdir -p $VIRTUALENV/src
+	tar -C $VIRTUALENV/src -xzf $JENKINS_HOME/contrib/pygobject-*.tar.gz
+	cd $VIRTUALENV/src/pygobject-*
+	./configure --prefix=$VIRTUALENV
+	make
+	make install
 	;;
 
 test)

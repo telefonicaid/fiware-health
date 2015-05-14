@@ -29,7 +29,7 @@ from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit, ClientException as NovaClientException
 from neutronclient.common.exceptions import NeutronClientException, IpAddressGenerationFailureClient
 from datetime import datetime
-from commons.http_phonehome_server import HttpPhoneHomeServer, get_phonehome_content, reset_phonehome_content
+from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
 import urlparse
 import re
@@ -40,7 +40,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
     with_networks = True
 
     def __deploy_instance_helper__(self, instance_name,
-                                   network_name=None, network_cidr=None, is_network_new=True,
+                                   network_name=None, is_network_new=True, cidr=None,
                                    keypair_name=None, is_keypair_new=True,
                                    sec_group_name=None, metadata=None, userdata=None):
         """
@@ -51,10 +51,10 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             - Adds metadata to server with teh given metadata dict.
         :param instance_name: Name of the new instance
         :param network_name: Name of the new network
-        :param network_cidr: CIDR to be used by the subnet
         :param is_network_new: If True, a new network will be created; Else, test will suppose the network exists
                               (looking for it by network_name). In this case, the network will no be append to
                               Test World. If new_network is False, is_network_new will not be used.
+        :param cidr: Optional CIDR to use in the subnet (otherwise, one is chosen from default range)
         :param keypair_name: Name of the new keypair
         :param is_keypair_new: If True, a new keypair will be created to be used by Server; Else, test will suppose the
                                 keypair already exists (looking for it by keypair_name). In this case, the keypair will
@@ -77,10 +77,11 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             if network_name:
                 if is_network_new:
                     # Create the given network
-                    cidr = network_cidr or TEST_CIDR_DEFAULT
-                    network = self.neutron_operations.create_network_and_subnet(network_name, cidr=cidr)
+                    network = self.neutron_operations.create_network(network_name)
                     self.test_world['networks'].append(network['id'])
                     network_id_list = [{'net-id': network['id']}]
+                    # Create a subnet
+                    self.neutron_operations.create_subnet(network, cidr)
                 else:
                     # Look for the network id
                     net_list = self.neutron_operations.find_networks(name=network_name)
@@ -177,19 +178,20 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         return router['id']
 
-    def __create_network_and_subnet_test_helper__(self, network_name, network_cidr):
+    def __create_network_and_subnet_test_helper__(self, network_name, cidr=None):
         """
         HELPER. Creates network and subnet.
         :param network_name: Network name
-        :param network_cidr: CIDR to use in the network
+        :param cidr: Optional CIDR to use in the subnet (otherwise, one is chosen from default range)
         :return: (NetworkId, SubnetworkId) (String, String)
         """
-        network = self.neutron_operations.create_network_and_subnet(network_name, cidr=network_cidr)
+        network = self.neutron_operations.create_network(network_name)
         self.assertIsNotNone(network, "Problems creating network")
         self.assertEqual(network['status'], 'ACTIVE', "Network status is not ACTIVE")
         self.test_world['networks'].append(network['id'])
+        network = self.neutron_operations.create_subnet(network, cidr)
+        self.assertIsNotNone(network['subnet']['id'], "Problems creating subnet")
         self.logger.debug("%s", network)
-
         return network['id'], network['subnet']['id']
 
     def test_create_network_and_subnet(self):
@@ -198,8 +200,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         """
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 254
-        self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
+        self.__create_network_and_subnet_test_helper__(network_name)
 
     def test_external_networks(self):
         """
@@ -227,8 +228,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         # Create Network with only one subnet
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 253
-        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
 
         port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
         self.test_world['ports'].append(port_id)
@@ -257,10 +257,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         instance_name = TEST_SERVER_PREFIX + "_network_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 252
         self.__deploy_instance_helper__(instance_name=instance_name,
-                                        network_name=network_name,
-                                        network_cidr=network_cidr)
+                                        network_name=network_name)
 
     def test_deploy_instance_with_new_network_and_metadata(self):
         """
@@ -270,10 +268,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         instance_name = TEST_SERVER_PREFIX + "_network_metadata_" + suffix
         instance_meta = {"test_item": "test_value"}
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 251
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
-                                        network_cidr=network_cidr,
                                         metadata=instance_meta)
 
     def test_deploy_instance_with_new_network_and_keypair(self):
@@ -284,10 +280,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         instance_name = TEST_SERVER_PREFIX + "_network_keypair_" + suffix
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 250
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
-                                        network_cidr=network_cidr,
                                         keypair_name=keypair_name)
 
     def test_deploy_instance_with_new_network_and_sec_group(self):
@@ -298,10 +292,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         instance_name = TEST_SERVER_PREFIX + "_network_sec_group_" + suffix
         sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 249
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
-                                        network_cidr=network_cidr,
                                         sec_group_name=sec_group_name)
 
     def test_deploy_instance_with_new_network_and_all_params(self):
@@ -314,10 +306,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
         sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 248
         self.__deploy_instance_helper__(instance_name=instance_name,
                                         network_name=network_name,
-                                        network_cidr=network_cidr,
                                         metadata=instance_meta,
                                         keypair_name=keypair_name,
                                         sec_group_name=sec_group_name)
@@ -342,8 +332,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         # Create Network
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 247
-        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
 
         # Add interface to router
         port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
@@ -381,8 +370,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         # Create Network
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 246
-        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
 
         # Add interface to router
         port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
@@ -424,8 +412,6 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             userdata_content = userdata_file.read()
             userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
             self.logger.debug("Userdata content: %s", userdata_content)
-            phonehome_port = urlparse.urlsplit(phonehome_endpoint).port
-            self.logger.debug("PhoneHome port to be used by server: %d", phonehome_port)
 
         # Create Router with an external network gateway
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -435,8 +421,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         # Create Network
         network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_cidr = TEST_CIDR_PATTERN % 245
-        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name, network_cidr)
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
 
         # Add interface to router
         port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
@@ -448,20 +433,21 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
                                                     network_name=network_name, is_network_new=False,
                                                     userdata=userdata_content)
 
-        # Create and launch a PhoneHome service listening at <localhost:phonehome_port>. Wait for request from VM
-        http_phonehome_server = HttpPhoneHomeServer(logger=self.logger, port=phonehome_port, timeout=PHONEHOME_TIMEOUT)
-        http_phonehome_server.start()
-        self.assertIsNotNone(get_phonehome_content(), "Phone-Home request not received from VM '%s'" % server_id)
-        call_content = get_phonehome_content()
-        self.logger.debug("Request received from VM when 'calling home': %s", call_content)
+        # VM will have as hostname, the instance_name with "-" instead of "_"
+        expected_instance_name = instance_name.replace("_", "-")
+
+        # Create new new DBus connection and wait for emitted signal from HTTP PhoneHome service
+        client = DbusPhoneHomeClient(self.logger)
+        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
+                                                              expected_instance_name)
+        self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
+        self.logger.debug("Request received from VM when 'calling home': %s", result)
 
         # Get hostname from data received
-        self.assertIn("hostname", call_content, "Phone-Home request has been received but 'hostname' param is not in")
-        hostname_received = re.match(".*hostname=([\w-]*)", call_content).group(1)
+        self.assertIn("hostname", result, "PhoneHome request has been received but 'hostname' param is not in")
+        received_hostname = re.match(".*hostname=([\w-]*)", result).group(1)
 
-        # Check hostname (VM will have as hostname, the instance_name with "-" instead of "_")
-        self.assertEqual(instance_name.replace("_", "-"), hostname_received,
+        # Check hostname
+        self.assertEqual(expected_instance_name, received_hostname,
                          "Received hostname '%s' in PhoneHome request does not match with the expected instance name" %
-                         hostname_received)
-
-        reset_phonehome_content()
+                         received_hostname)

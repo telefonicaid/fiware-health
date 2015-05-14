@@ -21,8 +21,9 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
 
+# LOGGING CONFIGURATION
+LOGGING_FILE = "resources/logging.conf"
 
 # CONFIGURATION PROPERTIES
 PROPERTIES_FILE = "resources/settings.json"
@@ -47,6 +48,7 @@ PROPERTIES_CONFIG_KEYTESTCASES = "key_test_cases"
 DEFAULT_REQUEST_TIMEOUT = 60
 MAX_WAIT_ITERATIONS = 60
 MAX_WAIT_SSH_CONNECT_ITERATIONS = 35
+MAX_CIDR_SUBNET_ITERATIONS = 5
 SLEEP_TIME = 5
 OBJECT_STORE_MAX_RETRIES = 2
 
@@ -55,7 +57,8 @@ BASE_IMAGE_NAME = "CentOS-6.3init"
 DEFAULT_DNS_SERVER = "8.8.8.8"
 TEST_FLAVOR_DEFAULT = "small"
 TEST_CIDR_PATTERN = "10.250.%d.0/24"
-TEST_CIDR_DEFAULT = TEST_CIDR_PATTERN % 0
+TEST_CIDR_DEFAULT = TEST_CIDR_PATTERN % 254
+TEST_CIDR_RANGE = xrange(128, 254)
 TEST_SEC_GROUP_PREFIX = "testing_sec_group"
 TEST_KEYPAIR_PREFIX = "testing_keypair"
 TEST_SERVER_PREFIX = "testing_instance"
@@ -70,6 +73,9 @@ SSH_CONNECTION_TIMEOUT = 8
 # PHONEHOME SERVER (time in seconds)
 PHONEHOME_USERDATA_PATH = "resources/templates/userdata/test.snat.phonehome.template"
 PHONEHOME_TIMEOUT = 175
+PHONEHOME_DBUS_NAME = "org.fiware.fihealth"
+PHONEHOME_DBUS_OBJECT_PATH = "/phonehome"
+PHONEHOME_SIGNAL = "phonehome_signal"
 
 # SERVICES NAMES
 SERVICE_SWIFT_NAME = "object-store"

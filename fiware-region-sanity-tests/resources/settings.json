@@ -13,7 +13,6 @@
     },
     "region_configuration": {
         "external_network_name": {
-            "Spain": "public-ext-net-01",
             "Spain2": "public-ext-net-01",
             "Trento": "public-ext-net-01",
             "Lannion2": "public-ext-net-01",
@@ -27,6 +26,7 @@
             "Karlskrona": "public-ext-net-01",
             "Volos": "public-ext-net-01",
             "Budapest": "public-ext-net-01",
+            "Budapest2": "public-ext-net-01",
             "Stockholm": "public-ext-net-01",
             "SophiaAntipolis": "net04_ext",
             "Poznan": "public-ext-net-01",

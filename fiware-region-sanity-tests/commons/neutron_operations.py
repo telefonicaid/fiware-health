@@ -25,7 +25,9 @@ __author__ = 'jfernandez'
 
 
 from neutronclient.v2_0 import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, TEST_CIDR_DEFAULT, DEFAULT_DNS_SERVER
+from neutronclient.common.exceptions import NeutronClientException
+from commons.constants import *
+import random
 
 
 class FiwareNeutronOperations:
@@ -63,16 +65,16 @@ class FiwareNeutronOperations:
         }
         return body
 
-    def __build_body_create_subnetwork__(self, subnetwork_name, network_id, cidr, ip_version,
-                                         dns_name_server=DEFAULT_DNS_SERVER, enable_dhcp=True):
+    def __build_body_create_subnetwork__(self, subnetwork_name, network_id, ip_version=4, enable_dhcp=True,
+                                         dns_name_server=DEFAULT_DNS_SERVER, cidr=TEST_CIDR_DEFAULT):
         """
         Builds the body to create a new subnetwork
         :param subnetwork_name: Subnetwork name
         :param network_id: Parent network id
-        :param cidr: CIDR
         :param ip_version: IP version. By default: 4
         :param enable_dhcp: If DHCP should be enables. By default: True
         :param dns_name_server: DNS name server to use in the network. By default: DEFAULT_DNS_SERVER
+        :param cidr: CIDR to use for the subnetwork. By default: TEST_CIDR_DEFAULT
         :return: Body to be used in the request
         """
         body = {
@@ -200,28 +202,38 @@ class FiwareNeutronOperations:
 
         return router_list
 
-    def create_network_and_subnet(self, network_name, cidr=TEST_CIDR_DEFAULT):
+    def create_network(self, network_name):
         """
-        Creates a new network with one subnet.
-        :param network_name: Name of the network. (Subnet will be called sub-{network_name})
-        :param cidr: CIDR to be used by subnet
-        :return: Python dict with all created network data
+        Creates a new network.
+        :param network_name: Name of the network.
+        :return: Python dict with created network data
         """
-        # Create network
         body_network = self.__build_body_create_network__(network_name)
         neutron_network_response = self.client.create_network(body_network)
-
-        # Create subnetwork
-        subnetwork_name = "sub-{network_name}".format(network_name=network_name)
-        body_subnetwork = self.__build_body_create_subnetwork__(subnetwork_name=subnetwork_name,
-                                                                network_id=neutron_network_response['network']['id'],
-                                                                cidr=cidr,
-                                                                ip_version="4")
-        neutron_subnetwork_response = self.client.create_subnet(body_subnetwork)
-        neutron_network_response['network'].update(neutron_subnetwork_response)
-
         self.logger.debug("Created network %s", neutron_network_response['network']['id'])
         return neutron_network_response['network']
+
+    def create_subnet(self, network_dict, cidr=None):
+        """
+        Creates a subnet within a given network.
+        :param network_dict: Python dict with created network data
+        :param cidr: Optional CIDR to use for the subnet (otherwise, one is chosen from default range)
+        :return: Python dict updated with created subnet data
+        """
+        subnetwork_name = "sub-{network_name}".format(network_name=network_dict['name'])
+        body_subnetwork = self.__build_body_create_subnetwork__(subnetwork_name=subnetwork_name,
+                                                                network_id=network_dict['id'])
+        for i in range(1 if cidr else MAX_CIDR_SUBNET_ITERATIONS):
+            body_subnetwork['subnet']['cidr'] = cidr or TEST_CIDR_PATTERN % random.choice(TEST_CIDR_RANGE)
+            try:
+                neutron_subnetwork_response = self.client.create_subnet(body_subnetwork)
+                self.logger.debug("Created subnet %s", subnetwork_name)
+                network_dict.update(neutron_subnetwork_response)
+            except NeutronClientException as exc:
+                self.logger.debug("Error #%d creating subnet %s: %s", i, subnetwork_name, exc)
+            else:
+                return network_dict
+        raise exc
 
     def delete_network(self, network_id):
         """
