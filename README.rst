@@ -3,6 +3,8 @@ FIWARE Health
 =============
 
 
+| |Build Status| |Coverage Status|
+
 Description
 -----------
 
@@ -21,6 +23,13 @@ License
 
 \(c) 2015 Telefónica I+D, Apache License 2.0
 
+
+.. IMAGES
+
+.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-health.svg?branch=develop
+   :target: https://travis-ci.org/telefonicaid/fiware-health
+.. |Coverage Status| image:: https://coveralls.io/repos/telefonicaid/fiware-health/badge.png?branch=develop
+   :target: https://coveralls.io/r/telefonicaid/fiware-health
 
 .. REFERENCES
 
