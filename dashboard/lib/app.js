@@ -28,6 +28,7 @@ var express = require('express'),
     refresh = require('./routes/refresh'),
     subscribe = require('./routes/subscribe'),
     unsubscribe = require('./routes/unsubscribe'),
+    cbroker = require('./routes/cbroker'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
     OAuth2 = require('./oauth2').OAuth2,
@@ -203,12 +204,18 @@ app.get('/login', function (req, res) {
 
 // listen request from contextbroker changes
 app.post('/contextbroker', function (req, res) {
-    logger.info("request received from contextbroker: " + req.paraº);
-    subscribe.nofify('spain2', function () {
-        logger.info("post to list ok");
+    try {
+        var region = cbroker.changeReceived(req.body);
+        logger.info('request received from contextbroker for region: ' + region.node);
+        subscribe.nofify(region.node, function () {
+            logger.info("post to list ok");
 
-    });
-    res.status(200).end();
+            res.status(200).end();
+        });
+    } catch (ex) {
+        logger.error("error in contextbroker notification: " + ex);
+        res.status(400).send({ error: 'bad request! ' + ex });
+    }
 });
 
 

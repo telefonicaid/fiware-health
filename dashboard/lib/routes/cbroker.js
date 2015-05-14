@@ -121,9 +121,22 @@ function retrieveAllRegions(callback) {
 
 }
 
+/**
+ * invoked when change is received from context broker
+ * @param entities
+ */
+function changeReceived(entities) {
+    logger.debug("entities to parse" + entities);
+
+    var result = parseRegions(entities);
+    return result[0];
+}
+
 
 /** @export */
 module.exports.retrieveAllRegions = retrieveAllRegions;
 /** @export */
 module.exports.parseRegions = parseRegions;
+/** @export */
+module.exports.changeReceived = changeReceived;
 
