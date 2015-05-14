@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "0.10"
+
+env:
+  global:
+  - COVERALLS_SERVICE_NAME=travis-ci
+  # COVERALLS_REPO_TOKEN (encrypted)
+  - secure: "Z7KuUAYdVxE1fUG6a+ZsZezOA0Ti4IeYCq9Hh988R/ANbkqd36N9HF3ijGBl2ADn9AA4opvMsfPj/77/XcJEhb+CDD3fl6yUskESXxvm3Sa4efBeZWc0a/0nF4kzFs8H2GoYy8ArTewyZZZAg4hrqAKptSImNMyotdTgDA4YQ2U="
+
+install:
+  - cd dashboard 
+  - npm install
+  - npm install -g grunt-cli
+  - npm install coveralls --save 
+
+after_success:
+  - grunt coverage-report && cat report/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
