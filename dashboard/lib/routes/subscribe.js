@@ -145,6 +145,57 @@ function isSubscribed(user, region, isSubscribed_callback) {
     mailmain_req.end();
 }
 
+/**
+ * notify to region list for a change in region
+ * @param region
+ * @param notify_callback
+ */
+function notify(region, notify_callback) {
+
+    logger.info({op: 'subscribe#notify'}, 'notify to region: ' + region);
+
+
+    var payloadString = 'name_from= fi-health sanity\n';
+    payloadString += 'email_from=' + region + '@fi-health.lab.fiware.org\n';
+    payloadString += 'subject=Status changed for region ' + region + '\n';
+    payloadString += 'body=Status changed for region ' + region + '\n';
+
+    var headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': payloadString.length
+
+    };
+
+    var options = {
+        host: config.mailman.host,
+        port: config.mailman.port,
+        path: config.mailman.path + region.toLowerCase() + '/sendmail',
+        method: 'POST',
+        headers: headers
+    };
+
+
+    var mailmain_req = http.request(options, function (mailman_res) {
+        mailman_res.setEncoding('utf-8');
+        var responseString = '';
+
+        mailman_res.on('data', function (data) {
+            responseString += data;
+        });
+        mailman_res.on('end', function () {
+            logger.info("response mailman: region (" + region + ") " + mailman_res.statusCode + " " + responseString);
+            notify_callback();
+
+        });
+    });
+    mailmain_req.on('error', function (e) {
+        logger.error('Error in connection with mailman: ' + e);
+    });
+
+    mailmain_req.write(payloadString);
+    mailmain_req.end();
+}
+
 
 /** @export */
 module.exports = router;
@@ -152,3 +203,5 @@ module.exports = router;
 /** @export */
 module.exports.isSubscribed = isSubscribed;
 module.exports.searchSubscription = searchSubscription;
+module.exports.nofify = notify;
+

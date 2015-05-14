@@ -197,6 +197,17 @@ app.get('/login', function (req, res) {
 })
 ;
 
+// listen request from contextbroker changes
+app.post('/contextbroker', function (req, res) {
+    logger.info("request received from contextbroker: " + req.paraº);
+    subscribe.nofify('spain2', function () {
+        logger.info("post to list ok");
+
+    });
+    res.status(200).end();
+});
+
+
 // Redirection to IDM authentication portal
 app.get('/auth', function (req, res) {
     var path = oa.getAuthorizeUrl();

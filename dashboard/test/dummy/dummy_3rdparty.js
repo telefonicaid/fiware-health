@@ -24,6 +24,11 @@ var express = require('express'),
 //Here we are configuring express to use body-parser as middle-ware.
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.all('*', function (req, res, next) {
+    console.log("new request:");
+    next();
+});
+
 // context broker dummy
 app.post('/NGSI10/*', function (req, res) {
     console.log("POST context broker ");
@@ -31,6 +36,12 @@ app.post('/NGSI10/*', function (req, res) {
     var json = JSON.parse(fs.readFileSync(__dirname + '/../unit/post1.json', 'utf8'));
     res.send(json);
 
+});
+
+// posts an email to the mailing list.
+app.post('/:list/sendmail', function (req, res) {
+    console.log("POST sendmail to list: " + req.params.list + ", body:" + req.body);
+    res.sendStatus(200);
 });
 
 // Returns an array of email addresses.
@@ -49,7 +60,7 @@ app.get('/:list', function (req, res) {
 // subscribe
 app.put('/:list', function (req, res) {
     console.log("PUT, subscribe " + req.params.list + " address:" + req.body.address);
-    res.end();
+    res.status(200).end();
 
 });
 
@@ -66,6 +77,6 @@ var server = app.listen(8000, function () {
     var host = server.address().address;
     var port = server.address().port;
 
-    console.log('Mailman listening at http://%s:%s', host, port);
+    console.log('Mailman/ContextBroker dummy listening at http://%s:%s', host, port);
 
 });
