@@ -22,7 +22,7 @@
 }
 .box2 .username {
   float: right;
-  color: #0d2d64;
+  color: #fff;
 }
 .box2 p {
   font-size: 13px;
@@ -48,11 +48,11 @@ a.green {
 }
 li.yellow {
   color: #ff0;
-  height: 25px;
+  height: 30px;
   font-weight: bold;
 }
 li.red_and_green {
-  height: 25px;
+  height: 30px;
   font-weight: bold;
 }
 .btn {

@@ -46,14 +46,14 @@ router.get('/', function (req, res) {
             subscribe.searchSubscription(userinfo.email, regions, function () {
 
                 logger.debug("before render: " + JSON.stringify(regions));
-                res.render('logged', {name: userinfo.displayName, regions: regions});
+                res.render('logged', {name: userinfo.displayName, regions: regions, refresh: req.session.role});
 
             });
 
 
         }
         else {
-            res.render('index', {name: 'sig in', regions: regions});
+            res.render('index', {name: 'sig in', regions: regions, refresh: req.session.role});
 
         }
     });

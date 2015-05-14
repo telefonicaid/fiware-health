@@ -140,7 +140,11 @@ app.get('/signin', function (req, res) {
             logger.debug("userinfo: " + response);
             if (response != undefined) {
                 var user = JSON.parse(response);
-                req.session.user = user;
+                req.session.user = user
+                if (user.roles.length != 0) {
+                    req.session.role = 'refresh';
+                }
+
             }
             res.redirect('/');
 
@@ -170,9 +174,13 @@ app.get('/login', function (req, res) {
                 if (response != undefined) {
                     var user = JSON.parse(response);
                     req.session.user = user;
+                    if (user.roles.length != 0) {
+                        req.session.role = 'refresh';
+                    }
                 } else {
                     req.session.access_token = undefined;
                     req.session.user = undefined;
+                    req.session.role = undefined;
                 }
                 res.redirect('/');
 
@@ -200,6 +208,7 @@ app.get('/logout', function (req, res) {
 
     req.session.access_token = undefined;
     req.session.user = undefined;
+    req.session.role = undefined;
     res.redirect('/');
 });
 
