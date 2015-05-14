@@ -19,18 +19,16 @@ Test environment
 - `Python 2.7`__ or newer
 - pip_
 - virtualenv_ or Vagrant__
+- `D-Bus`_ running and configured on your system
+- `dbus-python`_ (v0.84.0)
+- `pygobject`_ (v2.20.0)
 
 __ `Python - Downloads`_
 __ `Vagrant - Downloads`_
 
-The E2E SNAT test uses DBus tech for communicating process. This one requires:
 
-- `Dbus`_ running and configured on your system
-- `dbus-python`_ (v0.84.0)
-- `pygobject`_ (v2.20.0)
-
-You will need to provided the Dbus system configuration and these external
-libs in the given environment where tests will be executed. **Dbus and its
+You will need to provided the D-Bus system configuration and these external
+libs in the given environment where tests will be executed. **D-Bus and its
 dependencies are not managed by the project requirements file**.
 
 
@@ -41,7 +39,7 @@ dependencies are not managed by the project requirements file**.
 #. Go to main folder in the test project
 #. Install the requirements for the test case execution in the virtual
    environment (``pip install -r requirements.txt --allow-all-external``)
-#. Install Dbus requirements.
+#. Install D-Bus requirements.
 
 **Test case execution using Vagrant (optional)**
 
@@ -55,7 +53,7 @@ launching test cases.
 #. After Vagrant provision, your VM is properly configured to launch the
    Sanity Check. You have to access to the VM using ``vagrant ssh`` and change
    to ``/vagrant`` directory that will have mounted your test project workspace.
-#. Install Dbus requirements.
+#. Install D-Bus requirements.
 
 If you need more information about how to use Vagrant, you can see the
 `getting started section`__ of Vagrant documentation.
@@ -236,7 +234,7 @@ provided as part of this component, which has to be installed together with the
 rest of standard parsers bundled in NGSI Adapter package.
 
 
-DBus and HTTP PhoneHome Service for E2E tests
+D-Bus and HTTP PhoneHome Service for E2E tests
 ---------------------------------------------
 
 Some E2E test cases have been implemented to check the connection in both
@@ -254,10 +252,10 @@ to the *HTTP PhoneHome service* running in the configured HOST:PORT
 
 The test uses two components:
 
-- A HTTP/Dbus PhoneHome server, that is launched as a service in the same host where test is executed (with public IP).
-- A DBus client used by test implementation to wait for PhoneHome requests through the HTTP PhoneHome server.
+- A HTTP/D-Bus PhoneHome server, that is launched as a service in the same host where test is executed (with public IP).
+- A D-Bus client used by test implementation to wait for PhoneHome requests through the HTTP PhoneHome server.
 
-The implemented PhoneHome service uses the DBus system technology to communicate the
+The implemented PhoneHome service uses the D-Bus system technology to communicate the
 test execution and the HTTP PhoneHome server that is receiving the PhoneHome request from
 deployed VMs.
 
@@ -265,7 +263,7 @@ deployed VMs.
 **HTTP PhoneHome server**
 
 The HTTP PhoneHome server waits for *POST HTTP requests* from VMs.
-This service publishes a DBus object (DBus server) to be used by tests to wait for
+This service publishes a D-Bus object (D-Bus server) to be used by tests to wait for
 PhoneHome requests.
 
 When a request is received, HTTP PhoneHome server will inform, through the published object,
@@ -275,9 +273,9 @@ tests that are waiting for a signal with this hostname value; the other tests wi
 listening new signals with the correct data (correct hostname) to them.
 
 
-**DBus configuration**
+**D-Bus configuration**
 
-The implemented Dbus service uses the *System Bus* for communicating processes.
+The implemented D-Bus service uses the *System Bus* for communicating processes.
 The bus name used by tests is *org.fiware.fihealth*.
 Additional configuration is needed in ``/etc/dbus-1/system.conf`` to setup the access policies:
 
@@ -315,6 +313,6 @@ Before executing SNAT test you will have to launch the HTTP PhoneHome service li
 .. _pip: https://pypi.python.org/pypi/pip
 .. _NGSI Adapter: https://github.com/telefonicaid/fiware-monitoring/tree/master/ngsi_adapter
 .. _Context Broker: http://catalogue.fiware.org/enablers/publishsubscribe-context-broker-orion-context-broker
-.. _Dbus: http://www.freedesktop.org/wiki/Software/dbus/
+.. _D-Bus: http://www.freedesktop.org/wiki/Software/dbus/
 .. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/doc/tutorial.html
 .. _pygobject: http://www.pygtk.org/
