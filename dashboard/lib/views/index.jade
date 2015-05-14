@@ -3,14 +3,9 @@ extends layout
 block content
 
   block container
-      div.box0
-          .header
-              .header-content
-                p SANITY CHECK STATUS | OVERVIEW
 
 
-          div.box1
-
+            div.box1
 
              #box2.box2
                 button.btn(onclick="window.location.href='/signin'") Sign In with FIWARE Account
@@ -31,17 +26,3 @@ block content
                              div(style="height:0px",title='Sanity Check in progress') #{region['node']}
                              div.timestamp
                                |(in progress)
-
-          div.footer
-                 ul.unstyled
-
-                   li 2014 ©
-                    a(href="http://fiware.org", title=FIWARE) FIWARE.
-                    |&nbsp;The use of FIWARE Lab services is subject to the acceptance of the
-                    a(href="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE_LAB_Terms_and_Conditions") &nbsp; Terms and Conditions,
-                    a(href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-LAB_Personal_Data_Protection_Policy") &nbsp;Personal Data Protection Policy
-                    |&nbsp;and
-                    a(href="http://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Cookies_Policy_FIWARE_Lab") &nbsp;Cookies Policy
-
-
-
