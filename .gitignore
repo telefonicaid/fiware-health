@@ -68,3 +68,4 @@ fiware-region-sanity-tests/venv/
 node_modules/
 coverage/
 htpasswd
+index.css
