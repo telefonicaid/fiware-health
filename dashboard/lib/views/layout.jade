@@ -2,18 +2,34 @@ doctype html
 html
   head
     title= title
+    link(rel='stylesheet', href='/stylesheets/style_fi.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-frame.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
+    link(rel='stylesheet', href='/stylesheets/font-awesome.css', media='screen')
     link(rel='shortcut icon', href='https://account.lab.fiware.org/assets/icons/favicon-ec6bdf9204681a820dce0311ee5827e0.ico')
     script(src='/javascripts/dashboard.js')
   body
 
-        div.box0
-            .header
-                .header-content
-                  p SANITY CHECK STATUS | OVERVIEW
+  div.box0
+     .header
+         div.logo
+         .login
+            if name=='sig in'
+               | Log in
+               p.label Sign In with FIWARE Account
 
-    block content
+               button.btn-login(onclick="window.location.href='/signin'") Sign In
+            else
+                | Home
+                p.label #{name} &nbsp;
+                button.btn-login(onclick="window.location.href='/logout'") Log out
+
+         .header-content
+            p SANITY CHECK STATUS | OVERVIEW
+
+
+  block content
 
 
 
