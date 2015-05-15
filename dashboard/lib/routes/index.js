@@ -53,7 +53,7 @@ router.get('/', function (req, res) {
 
         }
         else {
-            res.render('index', {name: 'sig in', regions: regions, refresh: req.session.role});
+            res.render('index', {name: 'sign in', regions: regions, refresh: req.session.role});
 
         }
     });

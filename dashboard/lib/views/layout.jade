@@ -15,15 +15,17 @@ html
      .header
          div.logo
          .login
-            if name=='sig in'
-               | Log in
-               p.label Sign In with FIWARE Account
-
-               button.btn-login(onclick="window.location.href='/signin'") Sign In
+            if name=='sign in'
+               div.fiware_icon
+                 img(src='/images/fiware_ico.png' )
+               button.btn(onclick="window.location.href='/signin'") Sign In
             else
-                | Home
-                p.label #{name} &nbsp;
-                button.btn-login(onclick="window.location.href='/logout'") Log out
+                ul
+                    li
+                      img(src='/images/user.png' )
+                    li
+                      span.user #{name} &nbsp;
+                button.btn(onclick="window.location.href='/logout'") Log out
 
          .header-content
             p SANITY CHECK STATUS | OVERVIEW

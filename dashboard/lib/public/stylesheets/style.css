@@ -113,17 +113,7 @@ section:target .test_details {
     display: none;
 }
 
-.header-content {
-    position: absolute;
-    bottom: 0;
-    font-size: 130%;
-    color: #0074d9;
-    text-decoration: none;
-    text-align: center;
-    left: 0;
-    right: 0;
-    font-weight: bold;
-}
+
 
 
 
