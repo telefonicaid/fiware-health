@@ -5,6 +5,7 @@ body {
     color: #5B5B5F;
     background-color: #fff;
     margin: 0;
+    height: 100%;
 }
 
 table, td, th, .dataid {
@@ -55,10 +56,6 @@ section {
     border-radius: 5px;
 }
 
-h1 {
-    font-size: 100%;
-}
-
 h2 {
     font-size: 120%;
 }
@@ -71,10 +68,16 @@ h4 {
     font-size: 85%;
 }
 
-h1, h2, h3, h4, a[href] {
+h3, h4, a[href] {
     cursor: pointer;
     color: #0074d9;
     text-decoration: none;
+}
+
+h1,h2 {
+    color: #0074d9;
+    text-decoration: none;
+    font-size:130%;
 }
 
 h3 strong, a.failed {

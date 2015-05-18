@@ -4,7 +4,8 @@ block content
 
   block container
 
-          div.box1
+          div#frameContainer(style="height:100%")
+          div.box1#box1
              #box2.box2
                 div.username
 
@@ -16,7 +17,7 @@ block content
                       - region_name= region['node'];
                       if region['status']!='N/A'
                         li.red_and_green
-                             a( class='#{color}', href='/report/#{filename}') #{region['node']}
+                             a( class='#{color}', href='javascript:loadReport("#{filename}")') #{region['node']}
                              if refresh=='refresh'
                                 button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
                              else
