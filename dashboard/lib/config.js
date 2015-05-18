@@ -43,8 +43,8 @@ var
             path: '/NGSI10/queryContext'},
         idm: {
             host: 'account.lab.fiware.org',
-            clientId: '1181404dd018468a9ab42de26d961c88',
-            clientSecret: '/NGSI10/queryContext',
+            clientId: '',
+            clientSecret: '',
             url: 'https://account.lab.fiware.org',
             callbackURL: 'http://fi-health.lab.fiware.org/login'
         },
