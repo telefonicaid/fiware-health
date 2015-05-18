@@ -14,10 +14,11 @@ block content
                       - color = region['status'] == 'OK' ?'green' : region['status'] == 'NOK'?'red':'yellow';
                       - filename= region['node'] + "_results.html";
                       - region_name= region['node'];
+                      - refresh_authorized = region['authorized'];
                       if region['status']!='N/A'
                         li.red_and_green
                              a( class='#{color}', href='javascript:loadReport("#{filename}")') #{region['node']}
-                             if role=='superadmin' || role=='admin'
+                             if role=='superuser' || (role=='admin' && refresh_authorized)
                                 button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
                              else
                                 button.btn(disabled) Refresh

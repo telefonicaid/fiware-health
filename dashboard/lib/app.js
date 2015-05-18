@@ -131,23 +131,7 @@ var oa = new OAuth2(config.idm.clientId,
 
 
 
-function parseRoles(roles) {
-    var hasSuperuser = roles.filter(function(obj) {
-    return obj.name === 'Superuser';
-        });
 
-    var hasAdminUser = roles.filter(function(obj) {
-        return obj.name === 'Admin';
-    });
-
-    if (hasSuperuser.length>0)
-        return 'superuser';
-
-    if (hasAdminUser.length>0)
-        return 'admin';
-
-    return '';
-}
 
 // Handles requests to the main page
 app.get('/signin', function (req, res) {
@@ -166,7 +150,7 @@ app.get('/signin', function (req, res) {
             if (response != undefined) {
                 var user = JSON.parse(response);
                 req.session.user = user;
-                req.session.role = parseRoles(user.roles);
+                req.session.role =common.parseRoles(user.roles);
 
             }
             res.redirect('/');
@@ -197,7 +181,7 @@ app.get('/login', function (req, res) {
                 if (response != undefined) {
                     var user = JSON.parse(response);
                     req.session.user = user;
-                    req.session.role = parseRoles(user.roles);
+                    req.session.role = common.parseRoles(user.roles);
                 } else {
                     req.session.access_token = undefined;
                     req.session.user = undefined;
@@ -288,5 +272,3 @@ app.use(function (err, req, res) {
 /** @export */
 module.exports = app
 
-/** @export */
-module.exports.parseRoles = parseRoles;

@@ -24,7 +24,7 @@
  * @param req
  * @param res
  */
-function notAuthorized(req, res) {
+function notAuthorizedRender(req, res) {
     var err = new Error('Unauthorized');
     err.status = 401;
     res.render('error', {
@@ -35,7 +35,50 @@ function notAuthorized(req, res) {
 }
 
 
+function parseRoles(roles) {
+    var hasSuperuser = roles.filter(function(obj) {
+    return obj.name === 'Superuser';
+        });
+
+    var hasAdminUser = roles.filter(function(obj) {
+        return obj.name === 'Admin';
+    });
+
+    if (hasSuperuser.length>0)
+        return 'superuser';
+
+    if (hasAdminUser.length>0)
+        return 'admin';
+
+    return '';
+}
+
+/**
+ *  check if username is authorized to manage region and introduce a new field in object
+ * @param regions
+ * @param username
+ */
+function addAuthorized(regions,username) {
+
+    regions.filter(function(region) {
+
+        var regionName=(region.node.substring(0,region.node.length-1)).toLowerCase();
+        region.authorized = ((username.indexOf(regionName))!=-1);
+
+    });
+
+    return regions;
+
+}
+
 
 
 /** @export */
-module.exports.notAuthorized = notAuthorized;
+module.exports.notAuthorized = notAuthorizedRender;
+
+/** @export */
+module.exports.parseRoles = parseRoles;
+
+
+/** @export */
+module.exports.addAuthorized = addAuthorized;

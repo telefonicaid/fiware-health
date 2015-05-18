@@ -22,7 +22,8 @@ var express = require('express'),
     cbroker = require('./cbroker'),
     domain = require('domain'),
     logger = require('../logger'),
-    subscribe = require('./subscribe');
+    subscribe = require('./subscribe'),
+    common=require('./common');
 
 
 /* GET home page. */
@@ -42,6 +43,9 @@ router.get('/', function (req, res) {
 
             logger.debug({op: 'index#get'}, "regions: " + regions.constructor.name);
             subscribe.searchSubscription(userinfo.email, regions, function () {
+
+
+                regions=common.addAuthorized(regions,userinfo.displayName);
 
                 logger.debug("before render: " + JSON.stringify(regions));
                 res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role});
