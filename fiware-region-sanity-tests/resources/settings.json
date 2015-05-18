@@ -37,5 +37,6 @@
             "Prague": "tiny"
         }
     },
-    "key_test_cases": [ "test_(.*)" ]
+    "key_test_cases": [ "test_(.*)" ],
+    "opt_test_cases": [ "test_.*container.*" ]
 }
