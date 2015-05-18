@@ -26,7 +26,7 @@
   width: 500px;
   height: 106px;
   float: left;
-  margin: 0 15px;
+  margin: 0px;
 }
 .login {
   margin-top: 30px;
@@ -111,7 +111,11 @@
 }
 .region_list {
   list-style-type: none;
-  width: 500px;
+  width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 .region_list .timestamp {
   float: right;

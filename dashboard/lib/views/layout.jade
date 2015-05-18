@@ -15,7 +15,7 @@ html
      .header
          div.logo
          .login
-            if name=='sign in'
+            if name=='sign in' || name==undefined
                div.fiware_icon
                  img(src='/images/fiware_ico.png' )
                button.btn(onclick="window.location.href='/signin'") Sign In

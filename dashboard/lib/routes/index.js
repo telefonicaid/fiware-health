@@ -28,8 +28,6 @@ var express = require('express'),
 /* GET home page. */
 router.get('/', function (req, res) {
 
-
-    req.session.title_timestamp = dateFormat(new Date(), 'yyyy-mm-dd H:MM:ss');
     cbroker.retrieveAllRegions(function (regions) {
 
         logger.info({op: 'index#get'}, 'regions:' + regions);
@@ -46,14 +44,14 @@ router.get('/', function (req, res) {
             subscribe.searchSubscription(userinfo.email, regions, function () {
 
                 logger.debug("before render: " + JSON.stringify(regions));
-                res.render('logged', {name: userinfo.displayName, regions: regions, refresh: req.session.role});
+                res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role});
 
             });
 
 
         }
         else {
-            res.render('index', {name: 'sign in', regions: regions, refresh: req.session.role});
+            res.render('index', {name: 'sign in', regions: regions, role: req.session.role});
 
         }
     });

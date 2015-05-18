@@ -7,7 +7,6 @@ block content
           div#frameContainer(style="height:100%")
           div.box1#box1
              #box2.box2
-                div.username
 
                 p &nbsp;
                 ul.region_list
@@ -18,7 +17,7 @@ block content
                       if region['status']!='N/A'
                         li.red_and_green
                              a( class='#{color}', href='javascript:loadReport("#{filename}")') #{region['node']}
-                             if refresh=='refresh'
+                             if role=='superadmin' || role=='admin'
                                 button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
                              else
                                 button.btn(disabled) Refresh

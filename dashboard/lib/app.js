@@ -32,7 +32,8 @@ var express = require('express'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
     OAuth2 = require('./oauth2').OAuth2,
-    config = require('./config');
+    config = require('./config'),
+    common=require('./routes/common');
 
 
 var app = express();
@@ -89,19 +90,19 @@ app.use('/refresh', function (req, res, next) {
     logger.debug('Accessing to relaunch');
     if (req.session.access_token) {
 
-        next(); // pass control to the next handler
+        next();
     } else {
-        res.redirect('/error');
+        common.notAuthorized(req,res);
     }
-}, subscribe);
+}, refresh);
 
 app.use('/subscribe', function (req, res, next) {
     logger.debug('Accessing to subscribe');
     if (req.session.access_token) {
 
-        next(); // pass control to the next handler
+        next();
     } else {
-        res.redirect('/error');
+        notAuthorized(req,res);
     }
 }, subscribe);
 
@@ -109,9 +110,9 @@ app.use('/unsubscribe', function (req, res, next) {
     logger.debug('Accessing to unSubscribe');
     if (req.session.access_token) {
 
-        next(); // pass control to the next handler
+        next();
     } else {
-        res.redirect('/error');
+        notAuthorized(req,res);
     }
 }, unsubscribe);
 
@@ -129,6 +130,25 @@ var oa = new OAuth2(config.idm.clientId,
     config.idm.callbackURL);
 
 
+
+function parseRoles(roles) {
+    var hasSuperuser = roles.filter(function(obj) {
+    return obj.name === 'Superuser';
+        });
+
+    var hasAdminUser = roles.filter(function(obj) {
+        return obj.name === 'Admin';
+    });
+
+    if (hasSuperuser.length>0)
+        return 'superuser';
+
+    if (hasAdminUser.length>0)
+        return 'admin';
+
+    return '';
+}
+
 // Handles requests to the main page
 app.get('/signin', function (req, res) {
     logger.debug({op: 'app#get signin'}, "token: " + req.session.access_token);
@@ -145,10 +165,8 @@ app.get('/signin', function (req, res) {
             logger.debug("userinfo: " + response);
             if (response != undefined) {
                 var user = JSON.parse(response);
-                req.session.user = user
-                if (user.roles.length != 0) {
-                    req.session.role = 'refresh';
-                }
+                req.session.user = user;
+                req.session.role = parseRoles(user.roles);
 
             }
             res.redirect('/');
@@ -179,9 +197,7 @@ app.get('/login', function (req, res) {
                 if (response != undefined) {
                     var user = JSON.parse(response);
                     req.session.user = user;
-                    if (user.roles.length != 0) {
-                        req.session.role = 'refresh';
-                    }
+                    req.session.role = parseRoles(user.roles);
                 } else {
                     req.session.access_token = undefined;
                     req.session.user = undefined;
@@ -231,8 +247,14 @@ app.get('/logout', function (req, res) {
     req.session.access_token = undefined;
     req.session.user = undefined;
     req.session.role = undefined;
+
+            res.clearCookie('oauth_token');
+        res.clearCookie('expires_in');
+
     res.redirect('/');
 });
+
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -244,7 +266,6 @@ app.use(function (req, res, next) {
         timestamp: req.session.title_timestamp
     });
 
-    //next(err);
 });
 
 
@@ -262,5 +283,10 @@ app.use(function (err, req, res) {
 });
 
 
+
+
 /** @export */
-module.exports = app;
+module.exports = app
+
+/** @export */
+module.exports.parseRoles = parseRoles;
