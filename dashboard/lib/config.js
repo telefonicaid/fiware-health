@@ -37,6 +37,7 @@ var
     config = {
         config_file: util.format(__dirname + '/../config/%s.yml', prog.name),
         log_level: 'DEBUG',
+        secret:'ssshhh',
         cbroker: {
             host: '',
             port: '',
@@ -79,11 +80,14 @@ try {
     var cfg_parse = yamljs.parse(fs.readFileSync(config.config_file, 'utf8'));
 
     cfg_parser_result = [ 'INFO', 'Read configuration file' ];
-    ['logging', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
+    ['logging','session', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
         switch (key in cfg_parse && key) {
 
             case 'logging':
                 config.log_level = cfg_parse.logging.level;
+                break;
+            case 'session':
+                config.secret = cfg_parse.session.secret;
                 break;
             case 'cbroker':
                 Object.keys(config.cbroker).filter(hasOwnProperty, cfg_parse.cbroker).forEach(function (key) {
@@ -140,3 +144,4 @@ exports.paths = config.paths;
 exports.idm = config.idm;
 exports.mailman = config.mailman;
 exports.log_level = config.log_level;
+exports.secret=config.secret;

@@ -67,7 +67,7 @@ app.use(stylus.middleware(
 ))
 ;
 
-app.use(session({secret: 'ssshhhhh', title_timestamp: ''}));
+app.use(session({secret: config.secret}));
 
 // trace all requests
 app.use(function (req, res, next) {
