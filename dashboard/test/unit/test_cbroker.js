@@ -37,9 +37,9 @@ suite('cbroker', function () {
         var result = cbroker.parseRegions(json);
         //then
         var expected = [
-            {node: 'Region1', status: 'NOK', timestamp: '2015/05/13 13:10'},
-            {node: 'Region2', status: 'OK', timestamp: '2015/05/13 13:10'},
-            {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 13:10'}
+            {node: 'Region1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
+            {node: 'Region2', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
+            {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
 
         ];
 
