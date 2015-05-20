@@ -145,7 +145,7 @@ app.get('/signin', function (req, res) {
         // If auth_token is stored in a session cookie it sends a button to get user info
     } else {
 
-        oa.get('https://account.lab.fiware.org/user/', req.session.access_token, function (e, response) {
+        oa.get(config.idm.url+'/user/', req.session.access_token, function (e, response) {
             logger.debug("userinfo: " + response);
             if (response != undefined) {
                 var user = JSON.parse(response);
@@ -176,7 +176,7 @@ app.get('/login', function (req, res) {
 
             logger.debug({op: 'app#get login'}, "access_token: " + results.access_token);
 
-            oa.get('https://account.lab.fiware.org/user/', results.access_token, function (e, response) {
+            oa.get(config.idm.url+'/user/', results.access_token, function (e, response) {
                 logger.debug({op: 'app#get login'}, "response get userinfo: " + response);
                 if (response != undefined) {
                     var user = JSON.parse(response);

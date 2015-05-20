@@ -50,7 +50,8 @@ function changeTitle(id) {
     var element = document.getElementById(id);
     var subtitle = element.innerText || element.textContent;
     var n = subtitle.search(".TestSuite");
-    var new_subtitle = capitalizeFirstLetter(subtitle.substring(26, n)) + subtitle.substring(n + 10);
+    var underscore_position = subtitle.search('_');
+    var new_subtitle = capitalizeFirstLetter(subtitle.substring(underscore_position+1, n)) + subtitle.substring(n + 10);
     if (element.textContent == undefined) {
         document.getElementById(id).innerText = new_subtitle;
     } else {

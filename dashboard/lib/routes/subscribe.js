@@ -66,7 +66,6 @@ router.get('/', function (req, res) {
         });
     });
     mailmain_req.on('error', function (e) {
-        // TODO: handle error.
         logger.error('Error in connection with mailman: ' + e);
         res.redirect('/');
     });
