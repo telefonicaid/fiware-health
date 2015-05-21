@@ -113,10 +113,12 @@ class ResultAnalyzer(object):
         global_status = {
             GLOBAL_STATUS_OK: {
                 'caption': 'Regions satisfying all key test cases: %s' % conf[PROPERTIES_CONFIG_KEY_TEST_CASES],
+                'empty_msg': 'NONE!!!!!!!',
                 'region_list': []
             },
             GLOBAL_STATUS_PARTIAL_OK: {
                 'caption': 'Regions only failing in optional test cases: %s' % conf[PROPERTIES_CONFIG_OPT_TEST_CASES],
+                'empty_msg': 'N/A',
                 'region_list': []
             }
         }
@@ -144,7 +146,7 @@ class ResultAnalyzer(object):
         for status in [GLOBAL_STATUS_OK, GLOBAL_STATUS_PARTIAL_OK]:
             region_list = global_status[status]['region_list']
             print "\n", global_status[status]['caption']
-            print " >> %s" % ", ".join(region_list) if len(region_list) else " NONE!!!!!!!"
+            print " >> %s" % ", ".join(region_list) if len(region_list) else " %s" % global_status[status]['empty_msg']
 
 
 if __name__ == "__main__":
