@@ -132,7 +132,7 @@ class ResultAnalyzer(object):
                 if any(pattern.match(item['test_name']) for pattern in key_test_cases_patterns)
             ]
             non_opt_test_cases = [
-                item for item in results
+                item for item in key_test_cases
                 if all(not pattern.match(item['test_name']) for pattern in opt_test_cases_patterns)
             ]
 
