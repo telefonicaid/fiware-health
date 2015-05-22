@@ -1,7 +1,11 @@
 body {
-    font-family: Calibri, "Trebuchet MS", sans-serif;
-    background: #eeeeee url("../images/bg.png");
+    font-family: "Verdana", sans-serif;
+    font-size: 13px;
+    line-height: 1.42857;
+    color: #5B5B5F;
+    background-color: #fff;
     margin: 0;
+    height: 100%;
 }
 
 table, td, th, .dataid {
@@ -52,10 +56,6 @@ section {
     border-radius: 5px;
 }
 
-h1 {
-    font-size: 100%;
-}
-
 h2 {
     font-size: 120%;
 }
@@ -68,10 +68,16 @@ h4 {
     font-size: 85%;
 }
 
-h1, h2, h3, h4, a[href] {
+h3, h4, a[href] {
     cursor: pointer;
     color: #0074d9;
     text-decoration: none;
+}
+
+h1,h2 {
+    color: #0074d9;
+    text-decoration: none;
+    font-size:130%;
 }
 
 h3 strong, a.failed {
@@ -110,27 +116,7 @@ section:target .test_details {
     display: none;
 }
 
-.header {
-    background-image: url('../images/logo.png');
-    width: 500px;
-    height: 200px;
-    background-repeat: no-repeat;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-}
 
-.header-content {
-    position: absolute;
-    bottom: 0;
-    font-size: 130%;
-    color: #0074d9;
-    text-decoration: none;
-    text-align: center;
-    left: 0;
-    right: 0;
-    font-weight: bold;
-}
 
 
 

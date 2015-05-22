@@ -121,6 +121,5 @@ exports.main = function () {
 
 if (require.main === module) {
     exports.main();
-    exports.cbroker = config.cbroker;
-    exports.paths = config.paths;
+
 }

@@ -4,15 +4,11 @@
 logging:
   level: DEBUG
 
-
 #---------------------------------------------------------------------
-# Context Broker section (mandatory)
+# HTTP session section (mandatory)
 #---------------------------------------------------------------------
-cbroker:
-  host: '127.0.0.1'
-  port: 1026
-  path: '/NGSI10/queryContext'
-
+session:
+  secret: 'sssshhh'
 
 #---------------------------------------------------------------------
 # Web server paths section (mandatory)
@@ -20,3 +16,30 @@ cbroker:
 paths:
   reports_url: '/check/report'
   reports_files: '/var/www/html/RegionSanityCheck'
+
+#---------------------------------------------------------------------
+# Context Broker section (mandatory)
+#---------------------------------------------------------------------
+cbroker:
+  host: 'localhost'
+  port: 1026
+  path: '/NGSI10/queryContext'
+
+#---------------------------------------------------------------------
+# IdM OAuth2 section (mandatory)
+#---------------------------------------------------------------------
+
+idm:
+  clientId: ''
+  clientSecret: ''
+  url: ''
+  callbackURL: ''
+
+#---------------------------------------------------------------------
+# mailman-api section (mandatory)
+#---------------------------------------------------------------------
+mailman:
+  host: 'localhost'
+  port: 8000
+  path: '/'
+  email_from: ''

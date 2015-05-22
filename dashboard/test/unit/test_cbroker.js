@@ -33,9 +33,6 @@ suite('cbroker', function () {
     test('should_return_a_json_with_all_regions_and_status', function () {
         //given
         var json = JSON.parse(fs.readFileSync('test/unit/post1.json', 'utf8'));
-        //when
-        var result = cbroker.parseRegions(json);
-        //then
         var expected = [
             {node: 'Region1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
             {node: 'Region2', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
@@ -43,8 +40,26 @@ suite('cbroker', function () {
 
         ];
 
+        //when
+        var result = cbroker.parseRegions(json);
+        //then
+
         assert.deepEqual(expected, result);
 
     });
+
+
+    test('should_receive_notify_from_context_broker_and_return_200_ok', function () {
+        //given
+
+        var json = JSON.parse(fs.readFileSync('test/unit/notify_post1.json', 'utf8'));
+        var expected = {'node': 'Region1', 'status': 'OK', 'timestamp': ''};
+
+        //when
+        var result = cbroker.changeReceived(json);
+
+        //then
+        assert.deepEqual(expected, result);
+    })
 
 });

@@ -27,10 +27,14 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     index = require('./routes/index'),
     refresh = require('./routes/refresh'),
+    subscribe = require('./routes/subscribe'),
+    unsubscribe = require('./routes/unsubscribe'),
+    cbroker = require('./routes/cbroker'),
+    common = require('./routes/common'),
     config = require('./config'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
-    auth = require('http-auth');
+    OAuth2 = require('./oauth2').OAuth2;
 
 
 var app = express();
@@ -56,11 +60,15 @@ app.set('view engine', 'jade');
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 
 app.use(stylus.middleware(
-    { src: __dirname + '/public', compile: compile
+    {
+        src: __dirname + '/stylus',
+        dest: __dirname + "/public/stylesheets",
+        compile: compile
     }
-));
+))
+;
 
-app.use(session({secret: 'ssshhhhh', title_timestamp: ''}));
+app.use(session({secret: config.secret}));
 
 // trace all requests
 app.use(function (req, res, next) {
@@ -76,13 +84,158 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-var basic = auth.digest({
-    realm: "Private area",
-    file: __dirname + "/htpasswd"
+app.use('/refresh', function (req, res, next) {
+    logger.debug('Accessing to relaunch');
+    if (req.session.access_token) {
+
+        next();
+    } else {
+        common.notAuthorized(req,res);
+    }
+}, refresh);
+
+app.use('/subscribe', function (req, res, next) {
+    logger.debug('Accessing to subscribe');
+    if (req.session.access_token) {
+
+        next();
+    } else {
+        notAuthorized(req,res);
+    }
+}, subscribe);
+
+app.use('/unsubscribe', function (req, res, next) {
+    logger.debug('Accessing to unSubscribe');
+    if (req.session.access_token) {
+
+        next();
+    } else {
+        notAuthorized(req,res);
+    }
+}, unsubscribe);
+
+
+app.use('/', index);
+
+//configure login with oAuth
+
+// Creates oauth library object with the config data
+var oa = new OAuth2(config.idm.clientId,
+    config.idm.clientSecret,
+    config.idm.url,
+    '/oauth2/authorize',
+    '/oauth2/token',
+    config.idm.callbackURL);
+
+
+
+
+
+// Handles requests to the main page
+app.get('/signin', function (req, res) {
+    logger.debug({op: 'app#get signin'}, "token: " + req.session.access_token);
+
+    // If auth_token is not stored in a session redirect to IDM
+    if (!req.session.access_token) {
+        var path = oa.getAuthorizeUrl();
+        logger.debug({op: 'app#get signin'}, "idm path: " + path);
+        res.redirect(path);
+        // If auth_token is stored in a session cookie it sends a button to get user info
+    } else {
+
+        oa.get(config.idm.url+'/user/', req.session.access_token, function (e, response) {
+            logger.debug("userinfo: " + response);
+            if (response != undefined) {
+                var user = JSON.parse(response);
+                req.session.user = user;
+                req.session.role =common.parseRoles(user.roles);
+
+            }
+            res.redirect('/');
+
+        });
+
+    }
 });
 
-app.use('/refresh', auth.connect(basic), refresh);
-app.use('/', index);
+// Handles requests from IDM with the access code
+app.get('/login', function (req, res) {
+
+    logger.debug({op: 'app#get login'}, "req:" + req.query.code);
+
+    // Using the access code goes again to the IDM to obtain the access_token
+    oa.getOAuthAccessToken(req.query.code, function (e, results) {
+        logger.debug({op: 'app#get login'}, "get access token:" + results);
+
+        if (results != undefined) {
+
+            // Stores the access_token in a session cookie
+            req.session.access_token = results.access_token;
+
+            logger.debug({op: 'app#get login'}, "access_token: " + results.access_token);
+
+            oa.get(config.idm.url+'/user/', results.access_token, function (e, response) {
+                logger.debug({op: 'app#get login'}, "response get userinfo: " + response);
+                if (response != undefined) {
+                    var user = JSON.parse(response);
+                    req.session.user = user;
+                    req.session.role = common.parseRoles(user.roles);
+                } else {
+                    req.session.access_token = undefined;
+                    req.session.user = undefined;
+                    req.session.role = undefined;
+                }
+                res.redirect('/');
+
+            });
+        } else {
+            res.redirect('/');
+
+        }
+
+
+    });
+
+
+})
+;
+
+// listen request from contextbroker changes
+app.post('/contextbroker', function (req, res) {
+    try {
+        var region = cbroker.changeReceived(req.body);
+        logger.info('request received from contextbroker for region: ' + region.node);
+        subscribe.nofify(region.node, function () {
+            logger.info("post to list ok");
+
+            res.status(200).end();
+        });
+    } catch (ex) {
+        logger.error("error in contextbroker notification: " + ex);
+        res.status(400).send({ error: 'bad request! ' + ex });
+    }
+});
+
+
+// Redirection to IDM authentication portal
+app.get('/auth', function (req, res) {
+    var path = oa.getAuthorizeUrl();
+    res.redirect(path);
+});
+
+// Handles logout requests to remove access_token from the session cookie
+app.get('/logout', function (req, res) {
+
+    req.session.access_token = undefined;
+    req.session.user = undefined;
+    req.session.role = undefined;
+
+            res.clearCookie('oauth_token');
+        res.clearCookie('expires_in');
+
+    res.redirect('/');
+});
+
 
 
 // catch 404 and forward to error handler
@@ -95,7 +248,6 @@ app.use(function (req, res, next) {
         timestamp: req.session.title_timestamp
     });
 
-    //next(err);
 });
 
 
@@ -113,5 +265,8 @@ app.use(function (err, req, res) {
 });
 
 
+
+
 /** @export */
-module.exports = app;
+module.exports = app
+

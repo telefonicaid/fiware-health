@@ -1,0 +1,44 @@
+extends layout
+
+block content
+
+  block container
+
+          div#frameContainer(style="height:100%")
+          div.box1#box1
+             #box2.box2
+
+                p &nbsp;
+                ul.region_list
+                   each region in regions
+                      - color = region['status'] == 'OK' ?'green' : region['status'] == 'NOK'?'red':'yellow';
+                      - filename= region['node'] + "_results.html";
+                      - region_name= region['node'];
+                      - refresh_authorized = region['authorized'];
+                      if region['status']!='N/A'
+                        li.red_and_green
+                             a( class='#{color}', href='javascript:loadReport("#{filename}")') #{region['node']}
+                             if role=='superuser' || (role=='admin' && refresh_authorized)
+                                button.btn(onclick="javascript:refresh(this,'#{region['node']}')") Refresh
+                             else
+                                button.btn(disabled) Refresh
+                             if region['subscribed']
+                                button.btn.subscribe(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
+                             else
+                                button.btn.subscribe(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
+                             div.timestamp
+                               |(last updated: #{region['timestamp']})
+                      else
+                        li.yellow
+                             | #{region['node']}
+                             button.btn(disabled) Refresh
+                             if region['subscribed']
+                                button.btn.subscribe(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
+                             else
+                                button.btn.subscribe(onclick="window.location.href='/subscribe?region=#{region_name}'" ) Subscribe
+                             div.timestamp
+                               |(in progress)
+
+
+
+

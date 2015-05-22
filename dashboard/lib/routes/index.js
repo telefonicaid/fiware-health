@@ -21,19 +21,43 @@ var express = require('express'),
     dateFormat = require('dateformat'),
     cbroker = require('./cbroker'),
     domain = require('domain'),
-    logger = require('../logger');
+    logger = require('../logger'),
+    subscribe = require('./subscribe'),
+    common=require('./common');
+
 
 /* GET home page. */
 router.get('/', function (req, res) {
 
-
-    req.session.title_timestamp = dateFormat(new Date(), 'yyyy-mm-dd H:MM:ss');
     cbroker.retrieveAllRegions(function (regions) {
 
         logger.info({op: 'index#get'}, 'regions:' + regions);
 
-        res.render('index', {timestamp: req.session.title_timestamp, regions: regions});
+        var userinfo = req.session.user;
 
+        logger.info({op: 'index#get'}, 'userinfo:' + userinfo);
+
+        if (userinfo != undefined) {
+
+            //search for subscription
+
+            logger.debug({op: 'index#get'}, "regions: " + regions.constructor.name);
+            subscribe.searchSubscription(userinfo.email, regions, function () {
+
+
+                regions=common.addAuthorized(regions,userinfo.displayName);
+
+                logger.debug("before render: " + JSON.stringify(regions));
+                res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role});
+
+            });
+
+
+        }
+        else {
+            res.render('index', {name: 'sign in', regions: regions, role: req.session.role});
+
+        }
     });
 
 });

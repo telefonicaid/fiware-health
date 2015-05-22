@@ -1,0 +1,24 @@
+{
+    "subscriptionId": "51c04a21d714fb3b37d7d5a7",
+    "originator": "localhost",
+    "contextResponses": [
+        {
+            "contextElement": {
+                "attributes": [
+                    {
+                        "name": "sanity_status",
+                        "type": "string",
+                        "value": "OK"
+                    }
+                ],
+                "type": "region",
+                "isPattern": "false",
+                "id": "Region1"
+            },
+            "statusCode": {
+                "code": "200",
+                "reasonPhrase": "OK"
+            }
+        }
+    ]
+}

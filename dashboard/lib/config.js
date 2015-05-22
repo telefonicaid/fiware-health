@@ -37,14 +37,28 @@ var config = {
     config_file: path.join(__dirname, '/../config', name + '.yml'),
     log_level: 'DEBUG',
     listen_port: 3000,
+    secret:'ssshhh',
+    paths: {
+        reports_url: '/check/report',
+        reports_files: '/var/www/html/RegionSanityCheck'
+    },
     cbroker: {
         host: 'localhost',
         port: '1026',
         path: '/NGSI10/queryContext'
     },
-    paths: {
-        reports_url: '/check/report',
-        reports_files: '/var/www/html/RegionSanityCheck'
+    idm: {
+        host: 'account.lab.fiware.org',
+        clientId: '',
+        clientSecret: '',
+        url: 'https://account.lab.fiware.org',
+        callbackURL: 'http://fi-health.lab.fiware.org/login'
+    },
+    mailman: {
+        host: 'localhost',
+        port: '8000',
+        path: '/',
+        email_from: ''
     }
 };
 
@@ -52,7 +66,6 @@ var config = {
 var arg_parser = optimist.demand([])
     .options('h', { 'alias': 'help', 'describe': 'show help message and exit', 'boolean': true })
     .options('v', { 'alias': 'version', 'describe': 'show version and exit', 'boolean': true });
-
 
 // read configuration file if exists (path maybe taken from command line)
 arg_parser
@@ -64,19 +77,32 @@ try {
     var cfg_parser_result;
     var cfg_parse = yamljs.parse(fs.readFileSync(config.config_file, 'utf8'));
     cfg_parser_result = [ 'INFO', 'Read configuration file' ];
-    ['logging', 'cbroker', 'paths'].forEach(function (key) {
+    ['logging', 'session', 'paths', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
         switch (key in cfg_parse && key) {
             case 'logging':
                 config.log_level = cfg_parse.logging.level;
+                break;
+            case 'session':
+                config.secret = cfg_parse.session.secret;
+                break;
+            case 'paths':
+                Object.keys(config.paths).filter(hasOwnProperty, cfg_parse.paths).forEach(function(key) {
+                    config.paths[key] = cfg_parse.paths[key];
+                });
                 break;
             case 'cbroker':
                 Object.keys(config.cbroker).filter(hasOwnProperty, cfg_parse.cbroker).forEach(function(key) {
                     config.cbroker[key] = cfg_parse.cbroker[key];
                 });
                 break;
-            case 'paths':
-                Object.keys(config.paths).filter(hasOwnProperty, cfg_parse.paths).forEach(function(key) {
-                    config.paths[key] = cfg_parse.paths[key];
+            case 'idm':
+                Object.keys(config.idm).filter(hasOwnProperty, cfg_parse.idm).forEach(function (key) {
+                    config.idm[key] = cfg_parse.idm[key];
+                });
+                break;
+            case 'mailman':
+                Object.keys(config.mailman).filter(hasOwnProperty, cfg_parse.mailman).forEach(function (key) {
+                    config.mailman[key] = cfg_parse.mailman[key];
                 });
                 break;
             default:

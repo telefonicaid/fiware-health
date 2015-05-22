@@ -23,7 +23,8 @@ var express = require('express'),
     domain = require('domain'),
     logger = require('../logger'),
     http = require('http'),
-    sleep = require('sleep');
+    sleep = require('sleep'),
+    common=require('./common');
 
 
 /* GET refresh. */
@@ -31,7 +32,14 @@ router.get('/', function (req, res) {
 
     var region = req.param('region');
 
-    logger.info({op: 'refresh#get'}, 'refresh ' + region + ' received');
+    logger.info({op: 'refresh#get'}, 'refresh ' + region + ' received' + ' role: '+req.session.role);
+
+    if (req.session.role==undefined || req.session.role=='') {
+        logger.warn({op: 'refresh#get'},'unauthorized operation, invalid role: '+req.session.role);
+        common.notAuthorized(req,res);
+        return;
+    }
+
     // http://fi-health.lab.fi-ware.eu:8080/login?from=%2Fjob%2FFiHealth-SanityCheck-2-Exec-Region%2FbuildWithParameters%3FOS_REGION_NAME%3DSpain%2520--data%2520token%3DFIHEALTH_TOKEN_123456
     var payload = '';
     var payloadString = 'token=FIHEALTH_TOKEN_123456';
