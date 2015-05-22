@@ -23,8 +23,9 @@ BuildArch: noarch
 # Requires: nodejs (see %pre)
 
 %description
-Blah blah
-Blah blah.
+Frontend for FiHealth Sanity Checks. Publishes an overview
+page about the global status of FIWARE nodes, and provides
+links to all test result reports.
 
 %prep
 # Clean build root directory
