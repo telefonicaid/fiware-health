@@ -1,14 +1,22 @@
 #---------------------------------------------------------------------
-# Log options under "logging" (mandatory)
+# Logging options section (mandatory)
 #---------------------------------------------------------------------
 logging:
   level: DEBUG
 
 
 #---------------------------------------------------------------------
-# context broker connection http (mandatory)
+# Context Broker section (mandatory)
 #---------------------------------------------------------------------
 cbroker:
   host: '127.0.0.1'
   port: 1026
   path: '/NGSI10/queryContext'
+
+
+#---------------------------------------------------------------------
+# Web server paths section (mandatory)
+#---------------------------------------------------------------------
+paths:
+  reports_url: '/check/report'
+  reports_files: '/var/www/html/RegionSanityCheck'

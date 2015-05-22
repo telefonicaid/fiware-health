@@ -1,21 +1,21 @@
 {
-  "name": "dashboard",
+  "name": "fihealth_dashboard",
+  "description": "FiHealth Dashboard",
   "version": "1.0.0",
-  "description": "fiware health dashboard",
   "product": {
     "name": "fiware-health",
     "area": "iotplatform",
     "release": "4.3.2"
   },
-  "author": "Telefónica I+D",
-  "license": "Apache License 2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/telefonicaid/fiware-health.git"
   },
-  "main": "bin/www",
+  "author": "Telefónica I+D",
+  "license": "Apache License 2.0",
+  "main": "lib/www.js",
   "scripts": {
-    "start": "./bin/fihealth-dashboard start",
+    "start": "bin/dashboard",
     "test": "grunt test"
   },
   "engines": {

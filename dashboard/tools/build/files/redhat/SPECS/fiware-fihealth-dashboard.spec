@@ -11,7 +11,7 @@
 %define _node_req_ver %(awk '/"node":/ {split($0,v,/["~=<>]/); print v[6]}' %{_basedir}/package.json)
 
 # Package main attributes (_topdir, _basedir, _version and _release must be given at command line)
-Summary: blah blah.
+Summary: FiHealth Dashboard.
 URL: https://github.com/telefonicaid/fiware-health/tree/master/dashboard
 Name: %{_name}
 Version: %{_version}
@@ -36,9 +36,8 @@ fi
 rm -rf $RPM_BUILD_ROOT
 
 %install
-mkdir -p $RPM_BUILD_ROOT/%{_dashboard_dir}
-set +x
-EXCLUDE='test|report|site|node_modules'
+mkdir -p $RPM_BUILD_ROOT/%{_dashboard_dir}; set +x
+EXCLUDE='test|tools|report|site|node_modules|redhat|Gruntfile.js'
 FILES=$(cd %{_basedir}; for i in *; do echo $i; done | egrep -v "$EXCLUDE")
 for I in $FILES; do cp -R %{_basedir}/$I $RPM_BUILD_ROOT/%{_dashboard_dir}; done
 cp -R %{_sourcedir}/* $RPM_BUILD_ROOT
@@ -183,5 +182,5 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Fri May 15 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
+* Fri May 22 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
 - Initial release of the dashboard
