@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var express = require('express'),
@@ -21,7 +22,7 @@ var express = require('express'),
     stylus = require('stylus'),
     nib = require('nib'),
     path = require('path'),
-// TODO var favicon = require('serve-favicon');
+    // TODO favicon = require('serve-favicon'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     index = require('./routes/index'),
@@ -29,11 +30,11 @@ var express = require('express'),
     subscribe = require('./routes/subscribe'),
     unsubscribe = require('./routes/unsubscribe'),
     cbroker = require('./routes/cbroker'),
+    common = require('./routes/common'),
+    config = require('./config'),
     logger = require('./logger'),
     dateFormat = require('dateformat'),
-    OAuth2 = require('./oauth2').OAuth2,
-    config = require('./config'),
-    common=require('./routes/common');
+    OAuth2 = require('./oauth2').OAuth2;
 
 
 var app = express();
@@ -72,14 +73,11 @@ app.use(session({secret: config.secret}));
 // trace all requests
 app.use(function (req, res, next) {
     logger.debug('%s %s %s', req.method, req.url, req.path);
-
     next();
 });
 
 
-app.use("/report", express.static('/var/www/html/RegionSanityCheckv2/'));
-app.use("/RegionSanityCheck", express.static('/var/www/html/RegionSanityCheck/'));
-
+app.use(config.paths.reports_url, express.static(config.paths.reports_files));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

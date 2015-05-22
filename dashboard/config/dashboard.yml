@@ -1,27 +1,32 @@
 #---------------------------------------------------------------------
-# Log options under "logging" (mandatory)
+# Logging options section (mandatory)
 #---------------------------------------------------------------------
 logging:
   level: DEBUG
 
 #---------------------------------------------------------------------
-# Session configuration
+# HTTP session section (mandatory)
 #---------------------------------------------------------------------
 session:
   secret: 'sssshhh'
 
+#---------------------------------------------------------------------
+# Web server paths section (mandatory)
+#---------------------------------------------------------------------
+paths:
+  reports_url: '/check/report'
+  reports_files: '/var/www/html/RegionSanityCheck'
 
 #---------------------------------------------------------------------
-# context broker connection http (mandatory)
+# Context Broker section (mandatory)
 #---------------------------------------------------------------------
 cbroker:
   host: 'localhost'
-  port: 8000
-  path: '/'
-
+  port: 1026
+  path: '/NGSI10/queryContext'
 
 #---------------------------------------------------------------------
-# idm oauth2 (mandatory)
+# IdM OAuth2 section (mandatory)
 #---------------------------------------------------------------------
 
 idm:
@@ -30,10 +35,9 @@ idm:
   url: ''
   callbackURL: ''
 
-
 #---------------------------------------------------------------------
-# mailman-api (mandatory)
-#--------------------------------------------------------------------
+# mailman-api section (mandatory)
+#---------------------------------------------------------------------
 mailman:
   host: 'localhost'
   port: 8000

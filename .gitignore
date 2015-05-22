@@ -1,71 +1,29 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
+# IDE
+.idea/
+.metadata/
+.settings/
+.project
 
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-# (compatibility with nodejs projects) lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
+# Unit test and coverage reports
+coverage/
 htmlcov/
+report/
+site/
 .tox/
 .coverage
 .cache
 nosetests.xml
 coverage.xml
+sonar*
+
+# Distribution packages
+*.changes
+*.deb
+*.rpm
 
 # Translations
 *.mo
 *.pot
 
-# Django stuff:
+# Logfiles
 *.log
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# IDE
-.idea/
-
-# Temporal executions result
-fiware-region-sanity-tests/resources/test_results.html
-fiware-region-sanity-tests/test_results.html
-fiware-region-sanity-tests/test_results.xml
-
-# Virtual environment
-fiware-region-sanity-tests/venv/
-
-# Node js
-node_modules/
-coverage/
-htpasswd
-index.css

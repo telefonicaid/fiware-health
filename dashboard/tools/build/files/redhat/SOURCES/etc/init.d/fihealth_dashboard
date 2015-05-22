@@ -1,0 +1,107 @@
+#!/bin/sh
+#
+# Init script for starting up FiHealth Dashboard service
+#
+# chkconfig:   2345 91 10
+# description: Frontend for FiHealth Sanity Checks. Publishes an overview \
+#              page about the global status of FIWARE nodes, and provides \
+#              links to all test result reports.
+
+### BEGIN INIT INFO
+# Provides:          fihealth_dashboard
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Init script for starting up FiHealth Dashboard service
+# Description:       Frontend for FiHealth Sanity Checks. Publishes an overview
+#                    page about the global status of FIWARE nodes, and provides
+#                    links to all test result reports.
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="FiHealth Dashboard"
+NAME=fihealth_dashboard
+DAEMON=/opt/fiware/$NAME/bin/dashboard
+DAEMON_ARGS=""
+DAEMON_USER=fiware
+LOGFILE=/var/log/$NAME/$NAME.log
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Exit if the component is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Read configuration variable files, if present
+[ -r /etc/profile ]	      && . /etc/profile
+[ -r /etc/sysconfig/$NAME ]   && . /etc/sysconfig/$NAME
+
+# Check that networking is up
+[ -r /etc/sysconfig/network ] && . /etc/sysconfig/network
+[ "${NETWORKING}" = "no" ] && exit 0
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Function that checks configuration
+do_checkup()
+{
+	local euid=$(id -u)
+	local user=${DAEMON_USER:-none}
+	# check privileges
+	[ $euid -eq 0 ] || action $"Must be superuser to do that action" false
+	[ $? -eq 0 ] || return 1
+	# check DAEMON_USER
+	id $user >/dev/null 2>&1 || action $"User $DAEMON_USER not found" false
+	[ $? -eq 0 ] || return 1
+	# check Node.js V8 engine
+	[ -n "$(node -v 2>/dev/null)" ] || action $"Node engine not found" false
+	[ $? -eq 0 ] || return 1
+}
+
+# Function that starts the daemon/service
+do_start()
+{
+	local pid
+	local startup="$DAEMON $DAEMON_ARGS"
+	do_checkup && action $"Starting $NAME:" daemon \
+		--user=$DAEMON_USER --pidfile=$PIDFILE \
+		"$startup >> $LOGFILE &"
+	RETVAL=$?
+	if [ "$RETVAL" = 0 ]; then
+		pid=$(ps -u$DAEMON_USER -opid,args:250,ppid \
+		      | awk '$(NF-1)=="'$DAEMON'" && $NF==1 {print $1}')
+		echo $pid > $PIDFILE
+	fi
+	echo
+}
+
+# Function that stops the daemon/service
+do_stop()
+{
+	do_checkup && action $"Stopping $NAME:" killproc -p $PIDFILE "$NAME"
+	RETVAL=$?
+	echo
+}
+
+case "$1" in
+	start)
+		do_start
+		;;
+	stop)
+		do_stop
+		;;
+	restart)
+		do_stop
+		do_start
+		;;
+	status)
+		status -p $PIDFILE $NAME
+		;;
+	*)
+		echo $"Usage: $NAME {start|stop|restart|status}" >&2
+		exit 3
+		;;
+esac
+
+:
