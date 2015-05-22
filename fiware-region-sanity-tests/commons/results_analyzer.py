@@ -26,11 +26,10 @@ __author__ = 'jfernandez'
 
 
 from xml.dom import minidom
-from constants import PROPERTIES_FILE, PROPERTIES_CONFIG_KEYTESTCASES
+from constants import PROPERTIES_FILE, PROPERTIES_CONFIG_KEY_TEST_CASES, PROPERTIES_CONFIG_OPT_TEST_CASES
 import json
 import sys
 import re
-
 
 ATTR_TESTS_TOTAL = "tests"
 ATTR_TESTS_SKIP = "skip"
@@ -41,13 +40,16 @@ CHILD_NODE_SKIP = "skipped"
 CHILD_NODE_ERROR = "error"
 CHILD_NODE_FAILURE = "failure"
 
-STATUS_NOT_OK = "NOK"
-STATUS_SKIP = "N/A"
-STATUS_OK = "OK"
+TEST_STATUS_NOT_OK = "NOK"
+TEST_STATUS_SKIP = "N/A"
+TEST_STATUS_OK = "OK"
+
+GLOBAL_STATUS_PARTIAL_OK = "POK"
+GLOBAL_STATUS_NOT_OK = TEST_STATUS_NOT_OK
+GLOBAL_STATUS_OK = TEST_STATUS_OK
 
 
 class ResultAnalyzer(object):
-
     def __init__(self, file='test_results.xml'):
         self.file = file
         self.dict = {}
@@ -56,9 +58,7 @@ class ResultAnalyzer(object):
         """
         Parse report file (xUnit test result report) to get total results per each Region.
         """
-
         doc = minidom.parse(self.file)
-
         testsuite = doc.getElementsByTagName("testsuite")[0]
 
         # Print a summary of the test results
@@ -70,13 +70,13 @@ class ResultAnalyzer(object):
 
         # Count errors/failures/skips
         for testcase in doc.getElementsByTagName('testcase'):
-            status = STATUS_OK
+            status = TEST_STATUS_OK
             child_node_list = testcase.childNodes
             if child_node_list is not None and len(child_node_list) != 0:
                 if child_node_list[0].localName in [CHILD_NODE_FAILURE, CHILD_NODE_ERROR]:
-                    status = STATUS_NOT_OK
+                    status = TEST_STATUS_NOT_OK
                 elif child_node_list[0].localName == CHILD_NODE_SKIP:
-                    status = STATUS_SKIP
+                    status = TEST_STATUS_SKIP
 
             testpackage = testcase.getAttribute('classname').split(".")[-2]
             testregion = testpackage.replace("test_", "")
@@ -97,52 +97,109 @@ class ResultAnalyzer(object):
             for result_value in self.dict[item]:
                 print "  {status}\t {name}".format(name=result_value['test_name'], status=result_value['status'])
 
-    def get_regions_with_key_test_cases_passed(self):
+    def print_global_status(self):
         """
-        This method will parse all test results for each Region and will take in account only test cases defined in the
-        settings.json file to consider is Regions is OK or NOT.
+        This method will parse test results for each Region and will take into account whether all key and/or optional
+        test cases are successful, according to the patterns defined in `settings.json`.
+
+        How it works:
+
+            * Configuration properties:
+
+                key_test_cases_pattern = [a, b]
+                opt_test_cases_pattern = [b, f, g]
+
+            * Logic:
+
+                key_test_cases list: It will have *ANY* test that matches with pattern
+                defined in `key_test_cases_pattern`. If all the tests in this list have got
+                'OK' status, then the region will pass this validation (*OK* status). i.e:
+
+                    If test results are:
+                        OK  a
+                        NOK b
+                        NOK c
+                        OK  d
+                        NOK e
+                        OK  f
+                        OK  g
+
+                    > key_test_cases list will have this values: [a, b].
+                    > Due to b=NOK, global region status is not complying with key test cases.
+
+                non_opt_test_cases list: It will have *ALL* Key tests that do *NOT* match
+                with pattern defined in `opt_test_cases_pattern`: All non-optional 'key' test cases.
+                If all the tests in this list (non optional 'key' tests) have got *OK* status,
+                then the region will paas this validation (*POK* status). This checks are only
+                performed when the former one is not successful. i.e:
+
+                    If test results are:
+                        OK  a
+                        NOK b
+                        NOK c
+                        OK  d
+                        NOK e
+                        OK  f
+                        OK  g
+
+                    > non_opt_test_cases list will have this values: [a]
+                    > Due to a=OK, global region status is complying with this check and it will
+                    have *POK* (partial OK) status.
         :return:
         """
-
-        region_ok_list = []
-
         with open(PROPERTIES_FILE) as config_file:
             try:
                 conf = json.load(config_file)
             except Exception, e:
                 print 'Error parsing config file: %s' % e
 
-        key_test_cases_patterns = [re.compile(item) for item in conf[PROPERTIES_CONFIG_KEYTESTCASES]]
-        for item in self.dict:
-            passed = True
-            for result_value in self.dict[item]:
-                passed = True
-                for pattern in key_test_cases_patterns:
-                    if pattern.match(result_value['test_name']):
-                        if result_value['status'] != STATUS_OK:
-                            passed = False
-                            break
-                if not passed:
-                    break
-            if passed:
-                region_ok_list.append(item)
+        # dict holding global status according either key or optional test cases
+        global_status = {
+            GLOBAL_STATUS_OK: {
+                'caption': 'Regions satisfying all key test cases: %s' % conf[PROPERTIES_CONFIG_KEY_TEST_CASES],
+                'empty_msg': 'NONE!!!!!!!',
+                'region_list': []
+            },
+            GLOBAL_STATUS_PARTIAL_OK: {
+                'caption': 'Regions only failing in optional test cases: %s' % conf[PROPERTIES_CONFIG_OPT_TEST_CASES],
+                'empty_msg': 'N/A',
+                'region_list': []
+            }
+        }
 
-        print "\nREGION GLOBAL STATUS\n"
-        print "Key test cases:", str(conf[PROPERTIES_CONFIG_KEYTESTCASES])
-        print "Region list with key test cases with PASSED status:"
-        if len(region_ok_list) == 0:
-            print "NONE!!!!!!!"
-        else:
-            for region in region_ok_list:
-                print " >> {}".format(region)
+        # check status
+        key_test_cases_patterns = [re.compile(item) for item in conf[PROPERTIES_CONFIG_KEY_TEST_CASES]]
+        opt_test_cases_patterns = [re.compile(item) for item in conf[PROPERTIES_CONFIG_OPT_TEST_CASES]]
+        for region, results in self.dict.iteritems():
+            key_test_cases = [
+                item for item in results
+                if any(pattern.match(item['test_name']) for pattern in key_test_cases_patterns)
+            ]
+            non_opt_test_cases = [
+                item for item in key_test_cases
+                if all(not pattern.match(item['test_name']) for pattern in opt_test_cases_patterns)
+            ]
+
+            if all(item['status'] == TEST_STATUS_OK for item in key_test_cases):
+                global_status[GLOBAL_STATUS_OK]['region_list'].append(region)
+            elif all(item['status'] == TEST_STATUS_OK for item in non_opt_test_cases):
+                global_status[GLOBAL_STATUS_PARTIAL_OK]['region_list'].append(region)
+
+        # print status
+        print "\nREGION GLOBAL STATUS"
+        for status in [GLOBAL_STATUS_OK, GLOBAL_STATUS_PARTIAL_OK]:
+            region_list = global_status[status]['region_list']
+            print "\n", global_status[status]['caption']
+            print " >> %s" % ", ".join(region_list) if len(region_list) else " %s" % global_status[status]['empty_msg']
+
 
 if __name__ == "__main__":
 
     if len(sys.argv) != 2:
-        print " Usage: python {} <xUnitResultFile.xml>".format(sys.argv[0])
+        print "Usage: python {} <xUnitResultFile.xml>".format(sys.argv[0])
         sys.exit(-1)
 
-    checker = ResultAnalyzer(str(sys.argv[1]))
+    checker = ResultAnalyzer(sys.argv[1])
     checker.get_results()
-    checker.get_regions_with_key_test_cases_passed()
+    checker.print_global_status()
     checker.print_results()
