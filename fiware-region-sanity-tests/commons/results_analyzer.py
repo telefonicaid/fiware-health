@@ -101,6 +101,50 @@ class ResultAnalyzer(object):
         """
         This method will parse test results for each Region and will take into account whether all key and/or optional
         test cases are successful, according to the patterns defined in `settings.json`.
+
+        How it works:
+
+            * Configuration properties:
+
+                key_test_cases_pattern = [a, b]
+                opt_test_cases_pattern = [b, f, g]
+
+            * Logic:
+
+                key_test_cases list: It will have *ANY* test that matches with pattern
+                defined in `key_test_cases_pattern`. If all the tests in this list have got
+                'OK' status, then the region will pass this validation (*OK* status). i.e:
+
+                    If test results are:
+                        OK  a
+                        NOK b
+                        NOK c
+                        OK  d
+                        NOK e
+                        OK  f
+                        OK  g
+
+                    > key_test_cases list will have this values: [a, b].
+                    > Due to b=NOK, global region status is not complying with key test cases.
+
+                non_opt_test_cases list: It will have *ALL* Key tests that do *NOT* match
+                with pattern defined in `opt_test_cases_pattern`: All non-optional 'key' test cases.
+                If all the tests in this list (non optional 'key' tests) have got *OK* status,
+                then the region will paas this validation (*POK* status). This checks are only
+                performed when the former one is not successful. i.e:
+
+                    If test results are:
+                        OK  a
+                        NOK b
+                        NOK c
+                        OK  d
+                        NOK e
+                        OK  f
+                        OK  g
+
+                    > non_opt_test_cases list will have this values: [a]
+                    > Due to a=OK, global region status is complying with this check and it will
+                    have *POK* (partial OK) status.
         :return:
         """
         with open(PROPERTIES_FILE) as config_file:
