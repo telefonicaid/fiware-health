@@ -20,7 +20,7 @@ License: Apache
 Group: Applications/Engineering
 Vendor: Telefónica I+D
 BuildArch: noarch
-Requires: mailman python pip
+Requires: mailman python python-pip
 # nodejs dependency handled in 'pre' section (see below)
 
 %description
