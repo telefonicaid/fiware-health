@@ -28,4 +28,4 @@ from tests import fiware_region_with_networks_tests
 
 
 class TestSuite(fiware_region_with_networks_tests.FiwareRegionWithNetworkTest):
-    region_name = "Karlskrona"
+    region_name = "Karlskrona2"
