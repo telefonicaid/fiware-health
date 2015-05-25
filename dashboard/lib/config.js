@@ -37,9 +37,10 @@ var config = {
     config_file: path.join(__dirname, '/../config', name + '.yml'),
     log_level: 'DEBUG',
     listen_port: 3000,
+    web_context: '/',
     secret:'ssshhh',
     paths: {
-        reports_url: '/check/report',
+        reports_url: '/report',
         reports_files: '/var/www/html/RegionSanityCheck'
     },
     cbroker: {
@@ -81,6 +82,7 @@ try {
         switch (key in cfg_parse && key) {
              case 'app':
                 config.listen_port = cfg_parse.app.port;
+                config.web_context = cfg_parse.app.web_context;
                 break;
             case 'logging':
                 config.log_level = cfg_parse.logging.level;

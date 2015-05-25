@@ -61,12 +61,12 @@ router.get('/', function (req, res) {
         mailman_res.on('end', function () {
             logger.info("response mailman:" + mailman_res.statusCode + " " + mailman_res.statusMessage);
 
-            res.redirect('/');
+            res.redirect(config.web_context);
         });
     });
     mailmain_req.on('error', function (e) {
         logger.error('Error in connection with mailman: ' + e);
-        res.redirect('/');
+        res.redirect(config.web_context);
     });
 
     mailmain_req.write(payloadString);
