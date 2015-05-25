@@ -77,8 +77,11 @@ try {
     var cfg_parser_result;
     var cfg_parse = yamljs.parse(fs.readFileSync(config.config_file, 'utf8'));
     cfg_parser_result = [ 'INFO', 'Read configuration file' ];
-    ['logging', 'session', 'paths', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
+    ['app','logging', 'session', 'paths', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
         switch (key in cfg_parse && key) {
+             case 'app':
+                config.listen_port = cfg_parse.app.port;
+                break;
             case 'logging':
                 config.log_level = cfg_parse.logging.level;
                 break;

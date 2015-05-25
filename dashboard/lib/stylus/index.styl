@@ -6,8 +6,10 @@
     margin-left auto
     margin-right auto
     position relative
-    justify-content center
-    display flex
+    display: -webkit-flex; /* Safari */
+    -webkit-justify-content: center; /* Safari*/
+    display: flex;
+    justify-content: center;
 
 .header-content
     position absolute
@@ -127,19 +129,26 @@
 
 
 
-a.red
+a.sanity_nok
     color red
 
-a.green
+a.sanity_ok
     color green
 
-
-li.yellow
+a.sanity_pok
     color yellow
+
+li.sanity_na
+    color white
     height 30px
     font-weight bold
 
-li.red_and_green
+li.sanity_nok_and_sanity_ok
+    height 30px
+    font-weight bold
+
+li.sanity_na
+    color white
     height 30px
     font-weight bold
 
