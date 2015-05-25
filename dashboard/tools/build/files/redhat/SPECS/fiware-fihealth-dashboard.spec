@@ -120,6 +120,9 @@ if [ $1 -eq 1 ]; then
 	npm config set ca=""
 	npm install --production || STATUS=1
 
+	# install pip dependencies (in current python env or virtualenv)
+	pip install mailman-api==0.2.9
+
 	# check FIWARE user
 	if ! getent passwd $FIWARE_USR >/dev/null; then
 		groupadd --force $FIWARE_GRP
