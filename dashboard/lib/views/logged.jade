@@ -40,7 +40,7 @@ block content
                                |(last updated: #{region['timestamp']})
                        else
                           li.sanity_na
-                             | #{region['node']}
+                             div(style="height:0px",title='Sanity Check in progress') #{region['node']}
                              button.btn(disabled) Refresh
                              if region['subscribed']
                                 button.btn.subscribe(onclick="window.location.href='/unsubscribe?region=#{region_name}'" ) Unsubscribe
