@@ -31,13 +31,17 @@ var express = require('express'),
     unsubscribe = require('./routes/unsubscribe'),
     cbroker = require('./routes/cbroker'),
     common = require('./routes/common'),
-    config = require('./config'),
+    config = require('./config').data,
     logger = require('./logger'),
     dateFormat = require('dateformat'),
     OAuth2 = require('./oauth2').OAuth2;
 
 
 var app = express();
+
+
+logger.info('Running app in web context: '+config.web_context);
+app.base=config.web_context;
 
 /**
  * compile stylus css on runtime
@@ -55,6 +59,12 @@ function compile(str, path) {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+
+//globals variables
+app.locals.web_context=config.web_context;
+app.locals.title='Sanity check status';
+
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -81,10 +91,10 @@ app.use(config.paths.reports_url, express.static(config.paths.reports_files));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(config.web_context,express.static(path.join(__dirname, 'public')));
 
 
-app.use('/refresh', function (req, res, next) {
+app.use(config.web_context+'refresh', function (req, res, next) {
     logger.debug('Accessing to relaunch');
     if (req.session.access_token) {
 
@@ -94,7 +104,7 @@ app.use('/refresh', function (req, res, next) {
     }
 }, refresh);
 
-app.use('/subscribe', function (req, res, next) {
+app.use(config.web_context+'subscribe', function (req, res, next) {
     logger.debug('Accessing to subscribe');
     if (req.session.access_token) {
 
@@ -104,7 +114,7 @@ app.use('/subscribe', function (req, res, next) {
     }
 }, subscribe);
 
-app.use('/unsubscribe', function (req, res, next) {
+app.use(config.web_context+'unsubscribe', function (req, res, next) {
     logger.debug('Accessing to unSubscribe');
     if (req.session.access_token) {
 
@@ -115,7 +125,7 @@ app.use('/unsubscribe', function (req, res, next) {
 }, unsubscribe);
 
 
-app.use('/', index);
+app.use(config.web_context, index);
 
 //configure login with oAuth
 
@@ -132,7 +142,7 @@ var oa = new OAuth2(config.idm.clientId,
 
 
 // Handles requests to the main page
-app.get('/signin', function (req, res) {
+app.get(config.web_context+'signin', function (req, res) {
     logger.debug({op: 'app#get signin'}, "token: " + req.session.access_token);
 
     // If auth_token is not stored in a session redirect to IDM
@@ -151,7 +161,7 @@ app.get('/signin', function (req, res) {
                 req.session.role =common.parseRoles(user.roles);
 
             }
-            res.redirect('/');
+            res.redirect(config.web_context);
 
         });
 
@@ -159,7 +169,7 @@ app.get('/signin', function (req, res) {
 });
 
 // Handles requests from IDM with the access code
-app.get('/login', function (req, res) {
+app.get(config.web_context+'login', function (req, res) {
 
     logger.debug({op: 'app#get login'}, "req:" + req.query.code);
 
@@ -185,11 +195,11 @@ app.get('/login', function (req, res) {
                     req.session.user = undefined;
                     req.session.role = undefined;
                 }
-                res.redirect('/');
+                res.redirect(config.web_context);
 
             });
         } else {
-            res.redirect('/');
+            res.redirect(config.web_context);
 
         }
 
@@ -201,7 +211,7 @@ app.get('/login', function (req, res) {
 ;
 
 // listen request from contextbroker changes
-app.post('/contextbroker', function (req, res) {
+app.post(config.web_context+'contextbroker', function (req, res) {
     try {
         var region = cbroker.changeReceived(req.body);
         logger.info('request received from contextbroker for region: ' + region.node);
@@ -218,13 +228,13 @@ app.post('/contextbroker', function (req, res) {
 
 
 // Redirection to IDM authentication portal
-app.get('/auth', function (req, res) {
+app.get(config.web_context+'auth', function (req, res) {
     var path = oa.getAuthorizeUrl();
     res.redirect(path);
 });
 
 // Handles logout requests to remove access_token from the session cookie
-app.get('/logout', function (req, res) {
+app.get(config.web_context+'logout', function (req, res) {
 
     req.session.access_token = undefined;
     req.session.user = undefined;
@@ -233,7 +243,7 @@ app.get('/logout', function (req, res) {
             res.clearCookie('oauth_token');
         res.clearCookie('expires_in');
 
-    res.redirect('/');
+    res.redirect(config.web_context);
 });
 
 

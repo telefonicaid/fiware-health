@@ -19,7 +19,7 @@
 var express = require('express'),
     router = express.Router(),
     dateFormat = require('dateformat'),
-    config = require('../config'),
+    config = require('../config').data,
     domain = require('domain'),
     logger = require('../logger'),
     http = require('http'),
@@ -62,12 +62,12 @@ router.get('/', function (req, res) {
         mailman_res.on('end', function () {
             logger.info("response mailman: region (" + region.node + ") " + mailman_res.statusCode + " " + responseString);
 
-            res.redirect('/');
+            res.redirect(config.web_context);
         });
     });
     mailmain_req.on('error', function (e) {
         logger.error('Error in connection with mailman: ' + e);
-        res.redirect('/');
+        res.redirect(config.web_context);
     });
 
     mailmain_req.write(payloadString);

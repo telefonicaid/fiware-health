@@ -11,7 +11,7 @@ block content
                 p
                 ul.region_list
                    each region in regions
-                      - var filename = region['node'] + '_results.html';
+                      - var filename = web_context+'report/'+region['node'] + '_results.html';
                       - var sanity_status = region['status'];
                       case sanity_status
                         when 'OK'

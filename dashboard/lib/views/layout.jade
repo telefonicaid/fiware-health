@@ -2,13 +2,13 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style_fi.css')
-    link(rel='stylesheet', href='/stylesheets/bootstrap-frame.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='/stylesheets/index.css')
-    link(rel='stylesheet', href='/stylesheets/font-awesome.css', media='screen')
+    link(rel='stylesheet', href='#{web_context}stylesheets/style_fi.css')
+    link(rel='stylesheet', href='#{web_context}stylesheets/bootstrap-frame.css')
+    link(rel='stylesheet', href='#{web_context}stylesheets/style.css')
+    link(rel='stylesheet', href='#{web_context}stylesheets/index.css')
+    link(rel='stylesheet', href='#{web_context}stylesheets/font-awesome.css', media='screen')
     link(rel='shortcut icon', href='https://account.lab.fiware.org/assets/icons/favicon-ec6bdf9204681a820dce0311ee5827e0.ico')
-    script(src='/javascripts/dashboard.js')
+    script(src='#{web_context}javascripts/dashboard.js')
   body
 
   div.box0
@@ -17,15 +17,15 @@ html
          .login
             if name=='sign in' || name==undefined
                div.fiware_icon
-                 img(src='/images/fiware_ico.png' )
-               button.btn(onclick="window.location.href='/signin'") Sign In
+                 img(src='#{web_context}images/fiware_ico.png' )
+               button.btn(onclick="window.location.href='#{web_context}signin'") Sign In
             else
                 ul
                     li
-                      img(src='/images/user.png' )
+                      img(src='#{web_context}images/user.png' )
                     li
                       span.user #{name} &nbsp;
-                button.btn(onclick="window.location.href='/logout'") Log out
+                button.btn(onclick="window.location.href='#{web_context}logout'") Log out
 
          .header-content
             p SANITY CHECK STATUS | OVERVIEW
