@@ -1,54 +1,54 @@
-#---------------------------------------------------------------------
-# app options section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
+# Dashboard application section (mandatory)
+#----------------------------------------------------------------------------
 app:
-  host: 'localhost'
-  port: 3001
-  web_context: '/'
-  settings: 'settings.json'
+  host: 'localhost'			# App listen host
+  port: 3001				# App listen port
+  web_context: '/'			# App context
+  settings: 'settings.json'		# Path of Sanity Checks settings file
 
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # Logging options section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 logging:
-  level: DEBUG
+  level: DEBUG				# Logging level
 
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # HTTP session section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 session:
-  secret: 'sssshhh'
+  secret: 'sssshhh'			# Default key to encrypt sessions
 
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # Web server paths section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 paths:
   reports_url: '/report'
   reports_files: '/var/www/html/RegionSanityCheck'
 
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # Context Broker section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 cbroker:
-  host: 'localhost'
-  port: 1026
-  path: '/NGSI10/queryContext'
+  host: 'localhost'			# ContextBroker listen host
+  port: 1026				# ContextBroker listen port
+  path: '/NGSI10/queryContext'		# QueryContext operation
 
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # IdM OAuth2 section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 
 idm:
-  clientId: ''
-  clientSecret: ''
-  url: ''
-  callbackURL: ''
+  clientId: ''				# Id after registering app in IdM
+  clientSecret: ''			# Secret key of the registered app
+  url: ''				# IdM's authentication URL
+  callbackURL: ''			# App's callback URL after auth
 
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # mailman-api section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 mailman:
-  host: 'localhost'
-  port: 8000
-  path: '/'
-  email_from: ''
+  host: 'localhost'			# mailman-api listen host
+  port: 8000				# mailman-api listen port
+  path: '/'				# mailman-api context
+  email_from: ''			# Sender of email notifications

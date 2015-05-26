@@ -157,9 +157,15 @@ if [ $1 -eq 1 ]; then
 
 		FiHealth Dashboard successfully installed at $DASHBOARD_DIR.
 
-		WARNING: Check configuration file $DASHBOARD_DIR/config/dashboard.yml
-		before starting \`$DASHBOARD_SRV' service. Please read Usage section
-		at README.rst for more details.
+		WARNING: Please check values in the configuration file
+		$DASHBOARD_DIR/config/dashboard.yml before starting the
+		\`$DASHBOARD_SRV' service. This must include the path to
+		the settings file of Sanity Checks.
+
+		In order to use mail notifications, some configuration steps
+		should be done before running the Dashboard: please configure
+		\`mailman' and \`mailman-api' first, and then execute (as
+		superuser) the script $DASHBOARD_DIR/bin/setup.
 
 		EOF
 	else fmt --width=${COLUMNS:-$(tput cols)} 1>&2 <<-EOF
@@ -188,5 +194,5 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Mon May 25 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
+* Fri May 29 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
 - Initial release of the dashboard
