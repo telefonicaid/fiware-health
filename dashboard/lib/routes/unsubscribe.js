@@ -19,7 +19,7 @@
 var express = require('express'),
     router = express.Router(),
     dateFormat = require('dateformat'),
-    config = require('../config'),
+    config = require('../config').data,
     domain = require('domain'),
     logger = require('../logger'),
     http = require('http'),

@@ -31,13 +31,14 @@ var express = require('express'),
     unsubscribe = require('./routes/unsubscribe'),
     cbroker = require('./routes/cbroker'),
     common = require('./routes/common'),
-    config = require('./config'),
+    config = require('./config').data,
     logger = require('./logger'),
     dateFormat = require('dateformat'),
     OAuth2 = require('./oauth2').OAuth2;
 
 
 var app = express();
+
 
 logger.info('Running app in web context: '+config.web_context);
 app.base=config.web_context;

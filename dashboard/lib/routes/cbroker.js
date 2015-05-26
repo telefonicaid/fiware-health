@@ -19,7 +19,7 @@
 var http = require('http'),
     domain = require("domain"),
     logger = require('../logger'),
-    config = require('../config'),
+    config = require('../config').data,
     dateFormat = require('dateformat');
 
 
