@@ -43,6 +43,8 @@ var app = express();
 logger.info('Running app in web context: '+config.web_context);
 app.base=config.web_context;
 
+
+
 /**
  * compile stylus css on runtime
  * @param str
@@ -52,7 +54,10 @@ app.base=config.web_context;
 function compile(str, path) {
     return stylus(str)
         .set('filename', path)
-        .use(nib());
+        .use(nib())
+        .define('logoImage', function(){
+                return new stylus.nodes.Literal('url("'+config.web_context+'images/logo.png")');
+        });
 }
 
 
