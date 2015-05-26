@@ -79,7 +79,7 @@ function refresh(button, region) {
         button.textContent = value;
     }
 
-    window.open('/refresh?region=' + region, '_self');
+    window.open(region, '_self');
 }
 
 
@@ -88,6 +88,6 @@ function loadReport(filename) {
 
   document.getElementById("box1").style.display="none";
   var el=document.getElementById("frameContainer");
-  el.outerHTML="<iframe id='iframe-container' src='/report/"+filename+"' scrolling='no'></iframe>";
+  el.outerHTML="<iframe id='iframe-container' src='"+filename+"' scrolling='no'></iframe>";
 
 }

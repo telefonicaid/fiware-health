@@ -37,9 +37,10 @@ var config = {
     config_file: path.join(__dirname, '/../config', name + '.yml'),
     log_level: 'DEBUG',
     listen_port: 3000,
+    web_context: '/',
     secret:'ssshhh',
     paths: {
-        reports_url: '/check/report',
+        reports_url: '/report',
         reports_files: '/var/www/html/RegionSanityCheck'
     },
     cbroker: {
@@ -59,87 +60,123 @@ var config = {
         port: '8000',
         path: '/',
         email_from: ''
-    }
+    },
+    default: true
 };
 
-// create argument parser
-var arg_parser = optimist.demand([])
-    .options('h', { 'alias': 'help', 'describe': 'show help message and exit', 'boolean': true })
-    .options('v', { 'alias': 'version', 'describe': 'show version and exit', 'boolean': true });
 
-// read configuration file if exists (path maybe taken from command line)
-arg_parser
-    .options('c', { 'alias': 'config-file', 'describe': 'configuration file', 'string': true,
-                    'default': config.config_file })
-    .check(function(argv) { config.config_file = argv['config-file']; })
-    .parse(process.argv);
-try {
-    var cfg_parser_result;
-    var cfg_parse = yamljs.parse(fs.readFileSync(config.config_file, 'utf8'));
-    cfg_parser_result = [ 'INFO', 'Read configuration file' ];
-    ['logging', 'session', 'paths', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
-        switch (key in cfg_parse && key) {
-            case 'logging':
-                config.log_level = cfg_parse.logging.level;
-                break;
-            case 'session':
-                config.secret = cfg_parse.session.secret;
-                break;
-            case 'paths':
-                Object.keys(config.paths).filter(hasOwnProperty, cfg_parse.paths).forEach(function(key) {
-                    config.paths[key] = cfg_parse.paths[key];
-                });
-                break;
-            case 'cbroker':
-                Object.keys(config.cbroker).filter(hasOwnProperty, cfg_parse.cbroker).forEach(function(key) {
-                    config.cbroker[key] = cfg_parse.cbroker[key];
-                });
-                break;
-            case 'idm':
-                Object.keys(config.idm).filter(hasOwnProperty, cfg_parse.idm).forEach(function (key) {
-                    config.idm[key] = cfg_parse.idm[key];
-                });
-                break;
-            case 'mailman':
-                Object.keys(config.mailman).filter(hasOwnProperty, cfg_parse.mailman).forEach(function (key) {
-                    config.mailman[key] = cfg_parse.mailman[key];
-                });
-                break;
-            default:
-                throw new Error(util.format('no "%s" node found', key));
-        }
-    });
-} catch (err) {
-    var msg = err.errno ? 'Could not read configuration file' : util.format('Configuration file: %s', err.message);
-    cfg_parser_result = [ 'WARN', msg ];
+
+function readConfigFile(file) {
+    try {
+        var cfg_parse = yamljs.parse(fs.readFileSync(file, 'utf8'));
+        var cfg_parser_result = [ 'INFO', 'Read configuration file' ];
+        ['app','logging', 'session', 'paths', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
+            switch (key in cfg_parse && key) {
+                 case 'app':
+                    config.listen_port = cfg_parse.app.port;
+                    config.web_context = cfg_parse.app.web_context;
+                    break;
+                case 'logging':
+                    config.log_level = cfg_parse.logging.level;
+                    logger.setLevel(config.log_level)
+                    break;
+                case 'session':
+                    config.secret = cfg_parse.session.secret;
+                    break;
+                case 'paths':
+                    Object.keys(config.paths).filter(hasOwnProperty, cfg_parse.paths).forEach(function(key) {
+                        config.paths[key] = cfg_parse.paths[key];
+                    });
+                    break;
+                case 'cbroker':
+                    Object.keys(config.cbroker).filter(hasOwnProperty, cfg_parse.cbroker).forEach(function(key) {
+                        config.cbroker[key] = cfg_parse.cbroker[key];
+                    });
+                    break;
+                case 'idm':
+                    Object.keys(config.idm).filter(hasOwnProperty, cfg_parse.idm).forEach(function (key) {
+                        config.idm[key] = cfg_parse.idm[key];
+                    });
+                    break;
+                case 'mailman':
+                    Object.keys(config.mailman).filter(hasOwnProperty, cfg_parse.mailman).forEach(function (key) {
+                        config.mailman[key] = cfg_parse.mailman[key];
+                    });
+                    break;
+                default:
+                    throw new Error(util.format('no "%s" node found', key));
+            }
+        });
+        config.default=false;
+    } catch (err) {
+        var msg = err.errno ? 'Could not read configuration file' : util.format('Configuration file: %s', err.message);
+        cfg_parser_result = [ 'WARN', msg ];
+    }
+
+    // show result of configuration processing
+
+    var log_function = logger[cfg_parser_result[0].toLowerCase()],
+    log_message = cfg_parser_result[1];
+    log_function(log_message);
+    return cfg_parser_result;
 }
 
-// process command line arguments
-arg_parser
-    .usage(util.format('Usage: %s [options]\n\n%s', name, prog.description))
-    .options('l', { 'alias': 'log-level', 'describe': 'logging level', 'string': true,
-                    'default': config.log_level })
-    .options('p', { 'alias': 'listen-port', 'describe': 'listen port',
-                    'default': config.listen_port })
-    .check(function(argv) {
-        if (argv.version) {
-            console.error('%s v%s', name, prog.version);
-            process.exit(1);
-        } else if (argv.help) {
-            optimist.showHelp();
-            process.exit(0);
-        } else Object.keys(argv).forEach(function(key) {
-            var attr = key.replace('-','_');
-            if (attr in config) config[attr] = argv[key];
-        });
-    })
-    .parse(process.argv);
 
-// set logging level and show result of configuration processing
-var log_function = logger[cfg_parser_result[0].toLowerCase()],
-    log_message = cfg_parser_result[1];
-logger.setLevel(config.log_level);
-log_function(log_message);
+function main() {
+        // create argument parser
+    var arg_parser = optimist.demand([])
+        .options('h', { 'alias': 'help', 'describe': 'show help message and exit', 'boolean': true })
+        .options('v', { 'alias': 'version', 'describe': 'show version and exit', 'boolean': true });
 
-// export configuration
-module.exports = config;
+
+    // read configuration file if exists (path maybe taken from command line)
+    arg_parser
+        .options('c', {
+            'alias': 'config-file', 'describe': 'configuration file', 'string': true,
+            'default': config.config_file
+        })
+        .check(function (argv) {
+            config.config_file = argv['config-file'];
+        })
+        .parse(process.argv);
+
+    //process config file
+    var cfg_parser_result=readConfigFile(config.config_file);
+
+    // process command line arguments
+    arg_parser
+        .usage(util.format('Usage: %s [options]\n\n%s', name, prog.description))
+        .options('l', {
+            'alias': 'log-level', 'describe': 'logging level', 'string': true,
+            'default': config.log_level
+        })
+        .options('p', {
+            'alias': 'listen-port', 'describe': 'listen port',
+            'default': config.listen_port
+        })
+        .check(function (argv) {
+            if (argv.version) {
+                console.error('%s v%s', name, prog.version);
+                process.exit(1);
+            } else if (argv.help) {
+                optimist.showHelp();
+                process.exit(0);
+            } else Object.keys(argv).forEach(function (key) {
+                var attr = key.replace('-', '_');
+                if (attr in config) config[attr] = argv[key];
+            });
+        })
+        .parse(process.argv);
+
+    return config;
+}
+
+
+main();
+
+
+/** @export */
+module.exports.data = config;
+
+/** @export */
+module.exports.readConfigFile = readConfigFile;

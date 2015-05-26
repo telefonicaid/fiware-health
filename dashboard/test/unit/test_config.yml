@@ -1,17 +1,16 @@
+# only for testing
+
 #---------------------------------------------------------------------
 # app options section (mandatory)
 #---------------------------------------------------------------------
 app:
-  host: 'localhost'
   port: 3001
   web_context: '/'
-  settings: 'settings.json'
-
 #---------------------------------------------------------------------
 # Logging options section (mandatory)
 #---------------------------------------------------------------------
 logging:
-  level: DEBUG
+  level: ERROR
 
 #---------------------------------------------------------------------
 # HTTP session section (mandatory)
@@ -24,14 +23,14 @@ session:
 #---------------------------------------------------------------------
 paths:
   reports_url: '/report'
-  reports_files: '/var/www/html/RegionSanityCheck'
+  reports_files: '/var/www/html/RegionSanityCheckv2'
 
 #---------------------------------------------------------------------
 # Context Broker section (mandatory)
 #---------------------------------------------------------------------
 cbroker:
   host: 'localhost'
-  port: 1026
+  port: 8000
   path: '/NGSI10/queryContext'
 
 #---------------------------------------------------------------------
@@ -39,10 +38,10 @@ cbroker:
 #---------------------------------------------------------------------
 
 idm:
-  clientId: ''
-  clientSecret: ''
-  url: ''
-  callbackURL: ''
+  clientId: 'iiiiiiiii'
+  clientSecret: 'sssssss'
+  url: 'https://domain.com'
+  callbackURL: 'http://host:80/login'
 
 #---------------------------------------------------------------------
 # mailman-api section (mandatory)

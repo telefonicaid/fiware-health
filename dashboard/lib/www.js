@@ -27,7 +27,7 @@ var prog = require('../package.json'),
     debug = require('debug')('dashboard:server'),
     http = require('http'),
     util = require('util'),
-    config = require('./config'),
+    config = require('./config').data,
     logger = require('./logger'),
     app = require('./app');
 

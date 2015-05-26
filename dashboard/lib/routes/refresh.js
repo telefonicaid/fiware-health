@@ -40,7 +40,6 @@ router.get('/', function (req, res) {
         return;
     }
 
-    // http://fi-health.lab.fi-ware.eu:8080/login?from=%2Fjob%2FFiHealth-SanityCheck-2-Exec-Region%2FbuildWithParameters%3FOS_REGION_NAME%3DSpain%2520--data%2520token%3DFIHEALTH_TOKEN_123456
     var payload = '';
     var payloadString = 'token=FIHEALTH_TOKEN_123456';
 
@@ -70,7 +69,7 @@ router.get('/', function (req, res) {
             logger.info("response jenkins:" + jenkins_res.statusCode + " " + jenkins_res.statusMessage);
 
             sleep.sleep(10); //sleep for 10 seconds
-            res.redirect('/');
+            res.redirect(config.web_context);
         });
     });
     jira_req.on('error', function (e) {
@@ -78,8 +77,7 @@ router.get('/', function (req, res) {
         logger.error('Error in connection with jenkins: ' + e);
 
         sleep.sleep(10); //sleep for 10 seconds
-        res.redirect('/');
-        ;
+        res.redirect(config.web_context);
     });
 
     jira_req.write(payloadString);
