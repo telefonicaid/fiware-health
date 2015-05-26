@@ -41,7 +41,7 @@ router.get('/', function (req, res) {
     }
 
     var payload = '';
-    var payloadString = 'token=FIHEALTH_TOKEN_123456';
+    var payloadString = 'token='+config.jenkins.token;
 
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -50,8 +50,8 @@ router.get('/', function (req, res) {
     };
 
     var options = {
-        host: 'localhost',
-        port: 8080,
+        host: config.jenkins.host,
+        port: config.jenkins.port,
         path: '/job/FiHealth-SanityCheck-2-Exec-Region/buildWithParameters?OS_REGION_NAME=' + region,
         method: 'POST',
         headers: headers
