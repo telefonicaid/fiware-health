@@ -41,6 +41,9 @@ suite('config', function () {
         assert.equal(config.data.web_context,'/');
         assert.notEqual(config.data.idm,undefined);
         assert.notEqual(config.data.mailman,undefined);
+        assert.equal(config.data.jenkins.token,'12345678');
+        assert.equal(config.data.jenkins.jobName,'fiware_job1');
+        assert.equal(config.data.jenkins.parameterName,'REGION_NAME');
         assert.equal(config.data.default,false);
 
     });

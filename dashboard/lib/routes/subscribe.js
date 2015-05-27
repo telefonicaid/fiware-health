@@ -84,6 +84,7 @@ router.get('/', function (req, res) {
  */
 function searchSubscription(user, regions, callback) {
 
+    logger.debug('searchSubscription');
     var finished = _.after(regions.length, callback);
     regions.map(function (region) {
 
@@ -137,8 +138,9 @@ function isSubscribed(user, region, isSubscribed_callback) {
         });
     });
     mailmain_req.on('error', function (e) {
-        // TODO: handle error.
-        logger.error('Error in connection with mailman: ' + e);
+        logger.error({op: 'subscribe#isSubscribed'},'Error in connection with mailman: ' + e);
+        region.subscribed = false;
+        isSubscribed_callback();
     });
 
     mailmain_req.end();

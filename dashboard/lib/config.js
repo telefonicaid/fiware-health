@@ -61,6 +61,13 @@ var config = {
         path: '/',
         email_from: ''
     },
+    jenkins: {
+        host: 'localhost',
+        port: '8000',
+        token: '',
+        jobName:'',
+        parameterName:''
+    },
     default: true
 };
 
@@ -70,7 +77,7 @@ function readConfigFile(file) {
     try {
         var cfg_parse = yamljs.parse(fs.readFileSync(file, 'utf8'));
         var cfg_parser_result = [ 'INFO', 'Read configuration file' ];
-        ['app','logging', 'session', 'paths', 'cbroker', 'idm', 'mailman'].forEach(function (key) {
+        ['app','logging', 'session', 'paths', 'cbroker', 'idm', 'mailman','jenkins'].forEach(function (key) {
             switch (key in cfg_parse && key) {
                  case 'app':
                     config.listen_port = cfg_parse.app.port;
@@ -101,6 +108,11 @@ function readConfigFile(file) {
                 case 'mailman':
                     Object.keys(config.mailman).filter(hasOwnProperty, cfg_parse.mailman).forEach(function (key) {
                         config.mailman[key] = cfg_parse.mailman[key];
+                    });
+                    break;
+                case 'jenkins':
+                    Object.keys(config.jenkins).filter(hasOwnProperty, cfg_parse.jenkins).forEach(function (key) {
+                        config.jenkins[key] = cfg_parse.jenkins[key];
                     });
                     break;
                 default:
