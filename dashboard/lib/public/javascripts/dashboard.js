@@ -3,8 +3,8 @@ function calc_height() {
     var D = document;
     console.log("doc.body:"+ D.body + " doc.docElem:"+ D.documentElement);
     var height;
-    if (D.body!=undefined) {
-        //chrome
+    if (is_chrome() || is_firefox()) {
+        //chrome, FF
          height = Math.max(
             D.body.scrollHeight, D.documentElement.scrollHeight,
             D.body.offsetHeight, D.documentElement.offsetHeight,
@@ -19,7 +19,6 @@ function calc_height() {
            D.documentElement.offsetHeight,
            D.documentElement.clientHeight
         );
-        height=height+400;
     }
 
     console.log("resize to height: "+height);
@@ -51,32 +50,51 @@ var strWindowFeatures = "resizable=yes,scrollbars=yes,status=yes";
 function openFailureDetailsInNewWindow(anchor_tag) {
 
     var html = document.getElementById("html_failure_details").innerHTML;
-    window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML=html;
-    window.parent.document.getElementById('iframe-container').contentWindow.location.hash =anchor_tag;
-    displaySections();
 
-    console.log("openFailureDetailsInNewWindow#calc");
+    if ( is_firefox()) {
+        console.log("openFailureDetailsInNewWindow#firefox");
+
+        window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML=html;
+        window.parent.document.getElementById('iframe-container').contentWindow.location.hash =anchor_tag;
+        displaySections();
+        console.log("openFailureDetailsInNewWindow#calc");
+
+    } else {
+        if (is_chrome()) {
+            console.log("openFailureDetailsInNewWindow#chrome_safari");
+
+            var myWindow = window.open(anchor_tag, '_self', strWindowFeatures);
+
+
+            var doc = myWindow.document;
+            doc.open();
+            doc.write(html);
+            doc.close();
+        } else {
+            console.log("openFailureDetailsInNewWindow#safari "+anchor_tag);
+
+            window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML=html;
+            window.parent.document.getElementById('iframe-container').contentWindow.location.hash ='#';
+
+            displaySections();
+            console.log("openFailureDetailsInNewWindow#calc");
+        }
+
+
+    }
     calc_height();
-
 
     console.log("openFailureDetailsInNewWindow#end");
 
 }
 
 
-function pausecomp(millis)
- {
-  var date = new Date();
-  var curDate = null;
-  do { curDate = new Date(); }
-  while(curDate-date < millis);
+function is_firefox() {
+    return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 }
 
-function load() {
-    console.log('load');
-            console.log("openFailureDetailsInNewWindow#calc");
-        calc_height();
-
+function is_chrome() {
+    return navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 }
 
 function changeTitle(id) {
@@ -122,18 +140,6 @@ function loadReport(filename) {
   document.getElementById("box1").style.display="none";
   document.getElementById("header-content").style.display="none";
   var el=document.getElementById("frameContainer");
-  el.outerHTML="<iframe id='iframe-container' src='"+filename+"' scrolling='no'></iframe>";
+  el.outerHTML="<iframe id='iframe-container' src='"+filename+"' scrolling='no' style='margin-top: -40px;'></iframe>";
 
 }
-
-function waitForElementToDisplay(selector, time) {
-        if(document.querySelector(selector)!=null) {
-            alert("The element is displayed, you can put your code instead of this alert.")
-            return;
-        }
-        else {
-            setTimeout(function() {
-                waitForElementToDisplay(selector);
-            }, time);
-        }
-    }

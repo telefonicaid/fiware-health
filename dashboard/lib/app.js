@@ -74,7 +74,7 @@ app.locals.title='Sanity check status';
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 
-app.use(stylus.middleware(
+app.use(config.web_context,stylus.middleware(
     {
         src: __dirname + '/stylus',
         dest: __dirname + "/public/stylesheets",
