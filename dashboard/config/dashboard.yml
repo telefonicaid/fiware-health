@@ -41,7 +41,7 @@ cbroker:
 idm:
   clientId: ''				# Id after registering app in IdM
   clientSecret: ''			# Secret key of the registered app
-  url: ''				    # IdM's authentication URL
+  url: ''				# IdM's authentication URL
   callbackURL: ''			# App's callback URL after auth
 
 #----------------------------------------------------------------------------
@@ -50,17 +50,15 @@ idm:
 mailman:
   host: 'localhost'			# mailman-api listen host
   port: 8000				# mailman-api listen port
-  path: '/'				    # mailman-api context
+  path: '/'				# mailman-api context
   email_from: ''			# Sender of email notifications
 
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # jenkins-api section (mandatory)
-#---------------------------------------------------------------------
+#----------------------------------------------------------------------------
 jenkins:
-  host: 'localhost'         # jenkins-api listen host
-  port: 8080                # jenkins-api listen port
-  token: ''                 # job auth token, configured in job
-  path: ''               # jenkins context with job name
-  parameterName: ''         # jenkins job parameter name for region
-
-
+  host: 'localhost'			# jenkins-api listen host
+  port: 8080				# jenkins-api listen port
+  token: ''				# job auth token, configured in job
+  path: ''				# jenkins context with job name
+  parameterName: ''			# jenkins job parameter name for region

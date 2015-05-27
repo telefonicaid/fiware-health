@@ -90,11 +90,13 @@ eval `cd $BASEDIR; node -p <<-EOF
 	util.format('\
 	SETTINGS=%s \
 	CALLBACK_URL=http://%s:%s/%s/contextbroker \
-	BROKER_URL=http://%s:%s/NGSI10',
+	BROKER_URL=http://%s:%s/NGSI10 \
+	EMAIL_FROM=%s',
 	config.app.settings,
 	config.app.host, config.app.port,
 	config.app.web_context.replace(/^\/|\/$/g, ''),
-	config.cbroker.host, config.cbroker.port);
+	config.cbroker.host, config.cbroker.port,
+	config.mailman.email_from);
 EOF`
 if [ ! -r "$SETTINGS" ]; then
 	printf "Cannot find '%s' settings file\n" "$SETTINGS" 1>&2
@@ -108,7 +110,7 @@ LISTS=$(sed -n '/"external_network_name"/,/}/ { s/.*/\L&/; p}' $SETTINGS \
 	| awk -F\" 'NF==5 {print $2}' | egrep -v $EXCLUDE_LISTS)
 
 # Admin details (ask for admin password, if not given)
-ADMIN_MAIL=admin@$EMAIL_HOST
+ADMIN_MAIL=$EMAIL_FROM
 [ -n "$LISTS" -a -z "$ADMIN_PASS" ] && read -p "Admin password: " ADMIN_PASS
 
 # Create mailing lists
@@ -121,8 +123,10 @@ for LIST in $LISTS; do
 		-u $URL_HOST -e $EMAIL_HOST \
 		$LIST $ADMIN_MAIL $ADMIN_PASS \
 	&& echo "real_name = '$LIST'" > $TMP_FILE \
-	&& echo "anonymous_list = True" >> $TMP_FILE \
 	&& echo "description = '$DESCRIPTION'" >> $TMP_FILE \
+	&& echo "accept_these_nonmembers = ['$EMAIL_FROM']" >> $TMP_FILE \
+	&& echo "send_reminders = False" >> $TMP_FILE \
+	&& echo "anonymous_list = True" >> $TMP_FILE \
 	&& $MAILMANLIB_PATH/bin/config_list -i $TMP_FILE $LIST
 done
 rm -f $TMP_FILE
