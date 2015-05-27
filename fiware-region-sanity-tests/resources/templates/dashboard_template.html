@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
     <script src="../javascripts/dashboard.js"></script>
 </head>
-<body onload="displaySections();changeAllTitles()">
+<body onload="calc_height();displaySections();changeAllTitles()">
 <div class="box0">
     {% for class, group in report.items() %}
     <h1 align="center" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
