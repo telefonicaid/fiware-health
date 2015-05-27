@@ -64,7 +64,9 @@ var config = {
     jenkins: {
         host: 'localhost',
         port: '8000',
-        token: ''
+        token: '',
+        jobName:'',
+        parameterName:''
     },
     default: true
 };

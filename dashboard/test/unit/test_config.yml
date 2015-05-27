@@ -59,3 +59,5 @@ jenkins:
   host: 'localhost'
   port: 8080
   token: '12345678'
+  jobName: 'fiware_job1'
+  parameterName: 'REGION_NAME'

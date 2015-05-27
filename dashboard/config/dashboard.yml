@@ -60,3 +60,5 @@ jenkins:
   host: 'localhost'
   port: 8080
   token: '/'
+  jobName: ''
+  parameterName: ''

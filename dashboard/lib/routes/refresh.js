@@ -53,7 +53,7 @@ router.get('/', function (req, res) {
     var options = {
         host: config.jenkins.host,
         port: config.jenkins.port,
-        path: '/job/FiHealth-SanityCheck-2-Exec-Region/buildWithParameters?OS_REGION_NAME=' + region,
+        path: '/job/'+config.jenkins.jobName+'/buildWithParameters?'+config.jenkins.parameterName+'=' + region,
         method: 'POST',
         headers: headers
     };
