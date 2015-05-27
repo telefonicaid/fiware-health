@@ -1,0 +1,157 @@
+#!/bin/sh
+#
+# Copyright 2015 Telefónica I+D
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+
+#
+# Initial setup of FiHealth Dashboard (create mailing lists and subscriptions)
+#
+# Usage:
+#     $0 [options] [config_file]
+#     $0 --help
+#
+# Options:
+#     -l, --mailman-lib-path=PATH	installation path of mailman
+#     -e, --mailman-email-host=HOST	email host for mailman lists
+#     -p, --admin-password=PASS		admin password for mailman lists
+#     -h, --help			show this help message
+#
+
+NAME=$(basename $0)
+OPTS='h(help)l(mailman-lib-path):e(mailman-email-host):p(admin-password):'
+BASEDIR=$(readlink -f $(dirname $0)/..)
+
+# Command line options (default values)
+CONFIG_FILE=$BASEDIR/config/dashboard.yml
+MAILMANLIB_PATH=/usr/lib/mailman
+EMAIL_HOST=fi-health.lab.fiware.org
+ADMIN_PASS=
+
+# Process command line
+OPTERR=
+OPTSTR=$(echo :-:$OPTS | sed 's/([a-zA-Z0-9]*)//g')
+OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0)
+while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
+case $OPT in
+'l')	MAILMANLIB_PATH=$OPTARG;;
+'e')	EMAIL_HOST=$OPTARG;;
+'p')	ADMIN_PASS=$OPTARG;;
+'h')	OPTERR="$OPTHLP";;
+'?')	OPTERR="Unknown option -$OPTARG";;
+':')	OPTERR="Missing value for option -$OPTARG";;
+'-')	OPTLONG="${OPTARG%=*}";
+	OPT=$(expr $OPTS : ".*\(.\)($OPTLONG):.*" '|' '?');
+	if [ "$OPT" = '?' ]; then
+		OPT=$(expr $OPTS : ".*\(.\)($OPTLONG).*" '|' '?')
+		OPTARG=-$OPTLONG
+	else
+		OPTARG=$(echo =$OPTARG | cut -d= -f3)
+		[ -z "$OPTARG" ] && { OPTARG=-$OPTLONG; OPT=':'; }
+	fi;
+	continue;;
+esac; break; done; done
+shift $(expr $OPTIND - 1)
+[ -z "$OTTERR" -a -n "$1" ] && { CONFIG_FILE="$1"; shift; }
+[ -z "$OPTERR" -a -n "$*" ] && { OPTERR="Too many arguments"; }
+[ -n "$OPTERR" ] && {
+	[ "$OPTERR" != "$OPTHLP" ] && OPTERR="${OPTERR}\nTry \`$NAME --help'"
+	TAB=4; LEN=$(echo "$OPTERR" | awk -F'\t' '/ .+\t/ {print $1}' | wc -L)
+	TABSTOPS=$TAB,$(((2+LEN/TAB)*TAB)); WIDTH=${COLUMNS:-$(tput cols)}
+	printf "$OPTERR" | tr -s '\t' | expand -t$TABSTOPS | fmt -$WIDTH -s 1>&2
+	exit 1
+}
+
+# Main
+if [ $(id -u) -ne 0 ]; then
+	printf "Must be superuser to run this script\n" 1>&2
+	exit 2
+elif [ ! -r "$CONFIG_FILE" ]; then
+	printf "Cannot find '%s' configuration file\n" "$CONFIG_FILE" 1>&2
+	exit 3
+fi
+
+# Parse config file to get settings file (region list) and endpoints
+eval `cd $BASEDIR; node -p <<-EOF
+	var yamljs=require('yamljs'), util=require('util'), fs=require('fs');
+	var config=yamljs.parse(fs.readFileSync('$CONFIG_FILE', 'utf8'));
+	util.format('\
+	SETTINGS=%s \
+	CALLBACK_URL=http://%s:%s/%s/contextbroker \
+	BROKER_URL=http://%s:%s/NGSI10',
+	config.app.settings,
+	config.app.host, config.app.port,
+	config.app.web_context.replace(/^\/|\/$/g, ''),
+	config.cbroker.host, config.cbroker.port);
+EOF`
+if [ ! -r "$SETTINGS" ]; then
+	printf "Cannot find '%s' settings file\n" "$SETTINGS" 1>&2
+	exit 3
+fi
+
+# Mailing lists to be created (one per region, only those not existing yet)
+EXISTING_LISTS=$($MAILMANLIB_PATH/bin/list_lists -b)
+EXCLUDE_LISTS='^('$(echo $EXISTING_LISTS | tr ' ' '|')')$'
+LISTS=$(sed -n '/"external_network_name"/,/}/ { s/.*/\L&/; p}' $SETTINGS \
+	| awk -F\" 'NF==5 {print $2}' | egrep -v $EXCLUDE_LISTS)
+
+# Admin details (ask for admin password, if not given)
+ADMIN_MAIL=admin@$EMAIL_HOST
+[ -n "$LISTS" -a -z "$ADMIN_PASS" ] && read -p "Admin password: " ADMIN_PASS
+
+# Create mailing lists
+LANGUAGE='en'
+URL_HOST=$EMAIL_HOST
+TMP_FILE=/tmp/$NAME_$$
+for LIST in $LISTS; do
+	DESCRIPTION="FiHealth mailing list for region $LIST"
+	$MAILMANLIB_PATH/bin/newlist -q -l $LANGUAGE \
+		-u $URL_HOST -e $EMAIL_HOST \
+		$LIST $ADMIN_MAIL $ADMIN_PASS \
+	&& echo "real_name = '$LIST'" > $TMP_FILE \
+	&& echo "anonymous_list = True" >> $TMP_FILE \
+	&& echo "description = '$DESCRIPTION'" >> $TMP_FILE \
+	&& $MAILMANLIB_PATH/bin/config_list -i $TMP_FILE $LIST
+done
+rm -f $TMP_FILE
+
+# Subscribe to changes in Context Broker
+(curl $BROKER_URL/subscribeContext -s -S -X POST \
+	-H "Content-Type: application/json" -H "Accept: application/json" \
+	-d @- | python -mjson.tool) <<-EOF
+	{
+	    "entities": [
+	        {
+	            "type": "region",
+	            "isPattern": "true",
+	            "id": ".*"
+	        }
+	    ],
+	    "attributes": [
+	        "sanity_status"
+	    ],
+	    "reference": "$CALLBACK_URL",
+	    "duration": "P99Y",
+	    "notifyConditions": [
+	        {
+	            "type": "ONCHANGE",
+	            "condValues": [
+	                "sanity_status"
+	            ]
+	        }
+	    ],
+	    "throttling": "PT5S"
+	}
+EOF

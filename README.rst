@@ -17,6 +17,9 @@ Components
 `Region Sanity Tests <fiware-region-sanity-tests/README.rst>`_
    Tests checking capabilities and global status of lab node (i.e. *region*).
 
+`FiHealth Dashboard <dashboard/README.rst>`_
+   Web server offering a frontend to view tests results and operate on them.
+
 
 License
 -------

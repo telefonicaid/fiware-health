@@ -20,7 +20,8 @@ License: Apache
 Group: Applications/Engineering
 Vendor: Telefónica I+D
 BuildArch: noarch
-# Requires: nodejs (see %pre)
+Requires: mailman python python-pip
+# nodejs dependency handled in 'pre' section (see below)
 
 %description
 Frontend for FiHealth Sanity Checks. Publishes an overview
@@ -38,8 +39,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %install
 mkdir -p $RPM_BUILD_ROOT/%{_dashboard_dir}; set +x
-EXCLUDE='test|tools|report|site|node_modules|redhat|Gruntfile.js'
-FILES=$(cd %{_basedir}; for i in *; do echo $i; done | egrep -v "$EXCLUDE")
+INCLUDE='bin|config|lib|package.json|README.*|.*rc$'
+PATTERN='* .npmrc'
+FILES=$(cd %{_basedir}; for i in $PATTERN; do echo $i; done | egrep "$INCLUDE")
 for I in $FILES; do cp -R %{_basedir}/$I $RPM_BUILD_ROOT/%{_dashboard_dir}; done
 cp -R %{_sourcedir}/* $RPM_BUILD_ROOT
 (cd $RPM_BUILD_ROOT; find . -type f -printf "/%%P\n" >> %{_topdir}/MANIFEST)
@@ -118,6 +120,9 @@ if [ $1 -eq 1 ]; then
 	npm config set ca=""
 	npm install --production || STATUS=1
 
+	# install pip dependencies (in current python env or virtualenv)
+	pip install mailman-api==0.2.9
+
 	# check FIWARE user
 	if ! getent passwd $FIWARE_USR >/dev/null; then
 		groupadd --force $FIWARE_GRP
@@ -152,9 +157,15 @@ if [ $1 -eq 1 ]; then
 
 		FiHealth Dashboard successfully installed at $DASHBOARD_DIR.
 
-		WARNING: Check configuration file $DASHBOARD_DIR/config/dashboard.yml
-		before starting \`$DASHBOARD_SRV' service. Please read Usage section
-		at README.rst for more details.
+		WARNING: Please check values in the configuration file
+		$DASHBOARD_DIR/config/dashboard.yml before starting the
+		\`$DASHBOARD_SRV' service. This must include the path to
+		the settings file of Sanity Checks.
+
+		In order to use mail notifications, some configuration steps
+		should be done before running the Dashboard: please configure
+		\`mailman' and \`mailman-api' first, and then execute (as
+		superuser) the script $DASHBOARD_DIR/bin/setup.
 
 		EOF
 	else fmt --width=${COLUMNS:-$(tput cols)} 1>&2 <<-EOF
@@ -183,5 +194,5 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Fri May 22 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
+* Fri May 29 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
 - Initial release of the dashboard
