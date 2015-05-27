@@ -53,7 +53,7 @@ router.get('/', function (req, res) {
     var options = {
         host: config.jenkins.host,
         port: config.jenkins.port,
-        path: '/job/'+config.jenkins.jobName+'/buildWithParameters?'+config.jenkins.parameterName+'=' + region,
+        path: config.jenkins.path+'/buildWithParameters?'+config.jenkins.parameterName+'=' + region,
         method: 'POST',
         headers: headers
     };

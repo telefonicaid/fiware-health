@@ -60,7 +60,7 @@ jenkins:
   host: 'localhost'         # jenkins-api listen host
   port: 8080                # jenkins-api listen port
   token: ''                 # job auth token, configured in job
-  jobName: ''               # jenkins job name
+  path: ''               # jenkins context with job name
   parameterName: ''         # jenkins job parameter name for region
 
 
