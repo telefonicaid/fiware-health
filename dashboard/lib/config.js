@@ -65,7 +65,7 @@ var config = {
         host: 'localhost',
         port: '8000',
         token: '',
-        jobName:'',
+        path:'',
         parameterName:''
     },
     default: true
