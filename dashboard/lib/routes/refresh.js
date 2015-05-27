@@ -24,6 +24,7 @@ var express = require('express'),
     logger = require('../logger'),
     http = require('http'),
     sleep = require('sleep'),
+    config = require('../config').data,
     common=require('./common');
 
 
