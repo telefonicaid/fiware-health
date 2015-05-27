@@ -51,27 +51,15 @@ var strWindowFeatures = "resizable=yes,scrollbars=yes,status=yes";
 function openFailureDetailsInNewWindow(anchor_tag) {
 
     var html = document.getElementById("html_failure_details").innerHTML;
-    var myWindow = window.open(anchor_tag, '_self', strWindowFeatures);
-    var doc = myWindow.document;
+    window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML=html;
+    window.parent.document.getElementById('iframe-container').contentWindow.location.hash =anchor_tag;
+    displaySections();
 
-    myWindow.onload = function() {
-        "use strict";
-                calc_height();
-
-    }
-    console.log("openFailureDetailsInNewWindow: "+doc);
-        doc.open();
-        pausecomp(5000);
-        doc.write(html);
+    console.log("openFailureDetailsInNewWindow#calc");
+    calc_height();
 
 
-
-        //alert("openFailureDetailsInNewWindow#after write");
-        doc.close();
-
-        console.log("openFailureDetailsInNewWindow#calc");
-        calc_height();
-
+    console.log("openFailureDetailsInNewWindow#end");
 
 }
 
