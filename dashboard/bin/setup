@@ -130,8 +130,23 @@ for LIST in $LISTS; do
 	&& echo "accept_these_nonmembers = ['$EMAIL_FROM']" >> $TMP_FILE \
 	&& echo "send_reminders = False" >> $TMP_FILE \
 	&& echo "anonymous_list = True" >> $TMP_FILE \
-	&& $MAILMANLIB_PATH/bin/config_list -i $TMP_FILE $LIST
+	&& echo "bounce_notify_owner_on_disable = False" >> $TMP_FILE \
+	&& echo "bounce_notify_owner_on_removal = False" >> $TMP_FILE \
+	&& echo "bounce_unrecognized_goes_to_list_owner = False " >> $TMP_FILE \
+	&& $MAILMANLIB_PATH/bin/config_list -i $TMP_FILE $LIST \
+	&& printf "Mailing list %s@%s created.\n" $LIST $EMAIL_HOST
 done
+rm -f $TMP_FILE
+
+# Create site-wide mailing list (mandatory)
+LIST="mailman"
+if echo $LIST | egrep -qv $EXCLUDE_LISTS; then
+	$MAILMANLIB_PATH/bin/newlist -q \
+		-u $URL_HOST -e $EMAIL_HOST \
+		$LIST $ADMIN_MAIL $ADMIN_PASS \
+	&& echo "owner = []" > $TMP_FILE \
+	&& $MAILMANLIB_PATH/bin/config_list -i $TMP_FILE $LIST
+fi
 rm -f $TMP_FILE
 
 # Subscribe to changes in Context Broker
