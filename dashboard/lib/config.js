@@ -22,7 +22,7 @@ var path = require('path'),
     name = path.basename(process.argv[1], '.sh'),
     logger = require('./logger'),
     optimist = require('optimist'),
-    yamljs = require('yamljs'),
+    yaml = require('js-yaml'),
     util = require('util'),
     fs = require('fs');
 
@@ -75,9 +75,9 @@ var config = {
 
 function readConfigFile(file) {
     try {
-        var cfg_parse = yamljs.parse(fs.readFileSync(file, 'utf8'));
+        var cfg_parse = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
         var cfg_parser_result = [ 'INFO', 'Read configuration file' ];
-        ['app','logging', 'session', 'paths', 'cbroker', 'idm', 'mailman','jenkins'].forEach(function (key) {
+        ['app', 'logging', 'session', 'paths', 'cbroker', 'idm', 'mailman', 'jenkins'].forEach(function (key) {
             switch (key in cfg_parse && key) {
                  case 'app':
                     config.listen_port = cfg_parse.app.port;
