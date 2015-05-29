@@ -22,9 +22,9 @@ dependencies are resolved using ``npm`` tool. Upon successful installation,
 a Linux service ``fihealth_dashboard`` is created.
 
 `Mailman`_ and `mailman-api`_ are installed as dependencies of this component,
-given that notifications are sent via mailing lists. Some configuration steps
-are required after installation:
-
+given that notifications are sent via mailing lists. After checking the values
+for configuration options in file ``{installation_path}/config/dashboard.yml``,
+some configuration steps are required after installation:
 
 -  Customize subscription message by editing file
    ``{mailman-lib-path}/templates/en/subscribeack.txt``
@@ -83,7 +83,7 @@ Usage
 =====
 
 Dashboard runs as a standalone web server listening for requests at the given
-endpoint. Once installed, there are two ways of staring the server: manually
+endpoint. Once installed, there are two ways of starting the server: manually
 from the command line or as a system service. It is not recommended to mix both
 ways (e.g. start it manually but using the service scripts to stop it).
 
@@ -114,10 +114,7 @@ Help for command line options:
 As system service
 -----------------
 
-When installed from package distribution, a Linux service ``fihealth_dashboard``
-is configured (but not started). The options defined in configuration file
-``{installation_path}/config/dashboard.yml`` should be checked prior starting
-the service:
+Use the ``fihealth_dashboard`` service:
 
 .. code::
 
@@ -129,8 +126,8 @@ the service:
 Configuration options
 ---------------------
 
-Some of these options can be overriden from the command line, but as a general
-rule the use ``dashboard.yml`` configuration file is preferrable.
+Some of the options can be overriden from the command line, but as a general
+rule the use of ``dashboard.yml`` configuration file is preferrable.
 
 
 Changelog
