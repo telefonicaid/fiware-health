@@ -18,20 +18,22 @@ html
             if name=='sign in' || name==undefined
                div.fiware_icon
                  img(src='#{web_context}images/fiware_ico.png' )
-               button.btn(onclick="window.location.href='#{web_context}signin'") Sign In
+               div.header_buttons
+                   button.btn(onclick="window.location.href='#{web_context}signin'") Sign In
+                   button.btn(onclick="window.location.href='/'") Home
+
             else
                 ul
                     li
                       img(src='#{web_context}images/user.png' )
                     li
                       span.user #{name} &nbsp;
-                button.btn(onclick="window.location.href='#{web_context}logout'") Log out
+                div.header_buttons
+                    button.btn(onclick="window.location.href='#{web_context}logout'") Log out
+                    button.btn(onclick="window.location.href='/'") Home
+
 
          .header-content#header-content
-            ul
-              li
-                button.btn(onclick="window.location.href='/'") Home
-              li
                 p SANITY CHECK STATUS
 
 
