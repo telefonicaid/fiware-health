@@ -135,7 +135,9 @@ Changelog
 
 Version 1.0.0
 
--  Initial release
+-  New overview and details pages.
+-  IdM authentication.
+-  Mail notifications in subscriptions to status changes.
 
 
 License

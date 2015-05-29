@@ -195,4 +195,6 @@ fi
 
 %changelog
 * Fri May 29 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
-- Initial release of the dashboard
+- New overview and details pages.
+- IdM authentication.
+- Mail notifications in subscriptions to status changes.
