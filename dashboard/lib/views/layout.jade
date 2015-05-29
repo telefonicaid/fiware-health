@@ -23,11 +23,12 @@ html
                    button.btn(onclick="window.location.href='/'") Home
 
             else
-                ul
-                    li
-                      img(src='#{web_context}images/user.png' )
-                    li
-                      span.user #{name} &nbsp;
+                div(style="float:left")
+                    ul
+                        li
+                          img(src='#{web_context}images/user.png' )
+                        li
+                          span.user #{name} &nbsp;
                 div.header_buttons
                     button.btn(onclick="window.location.href='#{web_context}logout'") Log out
                     button.btn(onclick="window.location.href='/'") Home
