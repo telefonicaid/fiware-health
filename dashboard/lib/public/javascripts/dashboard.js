@@ -138,8 +138,7 @@ function refresh(button, region) {
 function loadReport(filename) {
 
   document.getElementById("box1").style.display="none";
-  document.getElementById("header-content").style.display="none";
   var el=document.getElementById("frameContainer");
-  el.outerHTML="<iframe id='iframe-container' src='"+filename+"' scrolling='no' style='margin-top: -40px;'></iframe>";
+  el.outerHTML="<iframe id='iframe-container' src='"+filename+"' scrolling='no' style=''></iframe>";
 
 }
