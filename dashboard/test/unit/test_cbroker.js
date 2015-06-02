@@ -37,7 +37,9 @@ suite('cbroker', function () {
             {node: 'Region1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
             {node: 'Region2', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
             {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'Region4', status: 'POK', timestamp: '2015/05/13 11:10 UTC'}
+            {node: 'Region4', status: 'POK', timestamp: '2015/05/13 11:10 UTC'},
+            {node: 'Region5', status: '', timestamp: ''}
+
 
         ];
 

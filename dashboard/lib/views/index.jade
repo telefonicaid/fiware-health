@@ -22,8 +22,10 @@ block content
                             - var color = 'sanity_pok';
                         default
                             - var color = 'sanity_na';
-
-                      if sanity_status!='N/A'
+                      if sanity_status == ''
+                         li.sanity_no_data
+                            div(style="height:0px",title='no data #{sanity_status}') #{region['node']}
+                      else if sanity_status!='N/A'
                         li.sanity_nok_and_sanity_ok
                              a( class='#{color}', href='javascript:loadReport("#{filename}")') #{region['node']}
                              div.timestamp
