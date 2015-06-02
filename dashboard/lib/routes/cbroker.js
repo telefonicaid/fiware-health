@@ -19,8 +19,8 @@
 var http = require('http'),
     domain = require("domain"),
     logger = require('../logger'),
-    dateFormat = require('dateformat'),
-    config = require('../www');
+    config = require('../config').data,
+    dateFormat = require('dateformat');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
@@ -48,7 +48,6 @@ function parseRegions(entities) {
                     sanity_status = value.value;
                 }
                 if (value.name === TIMESTAMP_ATTRIBUTE) {
-                    console.log(value.value);
                     timestamp = dateFormat(new Date(parseInt(value.value)), 'UTC:yyyy/mm/dd HH:MM Z');
 
                 }
@@ -101,6 +100,7 @@ function retrieveAllRegions(callback) {
             responseString += data;
         });
         res.on('end', function () {
+            logger.debug({op: 'retrieveAllRegions'}, "response string:  " + responseString);
             var resultObject = JSON.parse(responseString);
             callback(parseRegions(resultObject));
         });
@@ -113,7 +113,6 @@ function retrieveAllRegions(callback) {
             }
         );
 
-
     });
 
 
@@ -122,9 +121,22 @@ function retrieveAllRegions(callback) {
 
 }
 
+/**
+ * invoked when change is received from context broker
+ * @param entities
+ */
+function changeReceived(entities) {
+    logger.debug("entities to parse" + entities);
+
+    var result = parseRegions(entities);
+    return result[0];
+}
+
 
 /** @export */
 module.exports.retrieveAllRegions = retrieveAllRegions;
 /** @export */
 module.exports.parseRegions = parseRegions;
+/** @export */
+module.exports.changeReceived = changeReceived;
 

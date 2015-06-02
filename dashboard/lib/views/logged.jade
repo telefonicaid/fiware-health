@@ -1,0 +1,54 @@
+extends layout
+
+block content
+
+  block container
+
+          div#frameContainer(style="height:100%")
+          div.box1#box1
+             #box2.box2
+
+                p &nbsp;
+                ul.region_list
+                   each region in regions
+                       - var filename = web_context+'report/'+region['node'] + '_results.html';
+                       - var sanity_status = region['status'];
+                       - var region_name= region['node'];
+                       - var refresh_authorized = region['authorized'];
+                       case sanity_status
+                           when 'OK'
+                             - var color = 'sanity_ok';
+                           when 'NOK'
+                             - var color = 'sanity_nok';
+                           when 'POK'
+                             - var color = 'sanity_pok';
+                           default
+                             - var color = 'sanity_na';
+
+                       if sanity_status!='N/A'
+                          li.sanity_nok_and_sanity_ok
+                             a( class='#{color}', href='javascript:loadReport("#{filename}")') #{region['node']}
+                             if role=='superuser' || (role=='admin' && refresh_authorized)
+                                button.btn(onclick="javascript:refresh(this,'#{web_context}refresh?region=#{region['node']}')") Refresh
+                             else
+                                 button.btn(disabled) Refresh
+                             if region['subscribed']
+                                button.btn.subscribe(onclick="window.location.href='#{web_context}unsubscribe?region=#{region_name}'" ) Unsubscribe
+                             else
+                                button.btn.subscribe(onclick="window.location.href='#{web_context}subscribe?region=#{region_name}'" ) Subscribe
+                             div.timestamp
+                               |(last updated: #{region['timestamp']})
+                       else
+                          li.sanity_na
+                             div(style="height:0px",title='Sanity Check in progress') #{region['node']}
+                             button.btn(disabled) Refresh
+                             if region['subscribed']
+                                button.btn.subscribe(onclick="window.location.href='#{web_context}unsubscribe?region=#{region_name}'" ) Unsubscribe
+                             else
+                                button.btn.subscribe(onclick="window.location.href='#{web_context}subscribe?region=#{region_name}'" ) Subscribe
+                             div.timestamp
+                               |(in progress)
+
+
+
+

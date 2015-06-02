@@ -1,0 +1,63 @@
+# only for testing
+
+#---------------------------------------------------------------------
+# app options section (mandatory)
+#---------------------------------------------------------------------
+app:
+  port: 3001
+  web_context: '/'
+#---------------------------------------------------------------------
+# Logging options section (mandatory)
+#---------------------------------------------------------------------
+logging:
+  level: ERROR
+
+#---------------------------------------------------------------------
+# HTTP session section (mandatory)
+#---------------------------------------------------------------------
+session:
+  secret: 'sssshhh'
+
+#---------------------------------------------------------------------
+# Web server paths section (mandatory)
+#---------------------------------------------------------------------
+paths:
+  reports_url: '/report'
+  reports_files: '/var/www/html/RegionSanityCheckv2'
+
+#---------------------------------------------------------------------
+# Context Broker section (mandatory)
+#---------------------------------------------------------------------
+cbroker:
+  host: 'localhost'
+  port: 8000
+  path: '/NGSI10/queryContext'
+
+#---------------------------------------------------------------------
+# IdM OAuth2 section (mandatory)
+#---------------------------------------------------------------------
+
+idm:
+  clientId: 'iiiiiiiii'
+  clientSecret: 'sssssss'
+  url: 'https://domain.com'
+  callbackURL: 'http://host:80/login'
+
+#---------------------------------------------------------------------
+# mailman-api section (mandatory)
+#---------------------------------------------------------------------
+mailman:
+  host: 'localhost'
+  port: 8000
+  path: '/'
+  email_from: ''
+
+#---------------------------------------------------------------------
+# jenkins-api section (mandatory)
+#---------------------------------------------------------------------
+jenkins:
+  host: 'localhost'
+  port: 8080
+  token: '12345678'
+  path: '/jenkins/job/fiware_job1'
+  parameterName: 'REGION_NAME'

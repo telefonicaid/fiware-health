@@ -8,15 +8,11 @@
     <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
     <script src="../javascripts/dashboard.js"></script>
 </head>
-<body onload="displaySections();changeAllTitles()">
+<body onload="calc_height();displaySections();changeAllTitles()">
 <div class="box0">
-    <div class="header">
-        <div class="header-content">
-            {% for class, group in report.items() %}
-            <h1 id="subtitle">SANITY CHECK STATUS | Region {{ class }} - {{timestamp}}</h1>
-            {% endfor %}
-        </div>
-    </div>
+    {% for class, group in report.items() %}
+    <h1 align="center" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
+    {% endfor %}
     <div style="padding-bottom: 100px;">
         <h1>Test result stats</h1>
         <section>
@@ -61,13 +57,9 @@
 
 
             <div class="box0">
-                <div class="header">
-                    <div class="header-content">
-                        {% for class, group in report.items() %}
-                        <h1 id="subtitle2">SANITY CHECK STATUS | Region {{ class }} - {{timestamp}}</h1>
-                        {% endfor %}
-                    </div>
-                </div>
+                {% for class, group in report.items() %}
+                <h1 align="center" id="subtitle2">Region {{ class }} - {{timestamp}}</h1>
+                {% endfor %}
                 <div style="padding-bottom:100px">
 
                     <h1>Failure details</h1>
@@ -95,46 +87,17 @@
                     </section>
                     {% endif %}
                     {% endfor %}
+                    <br>
+                    <br>
+                    <br>
                     <script>
                         displaySections();
                     </script>
                 </div>
 
-                <div class="footer">
-                    <ul class="unstyled">
-                        <li>2014 ©<a href="http://fiware.org">FIWARE.</a>&nbsp;The use of FIWARE Lab services is subject
-                            to
-                            the
-                            acceptance of the
-                            <a href="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE_LAB_Terms_and_Conditions">
-                                &nbsp; Terms and Conditions,</a>
-                            <a href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-LAB_Personal_Data_Protection_Policy">
-                                &nbsp;Personal Data Protection Policy</a>
-                            &nbsp;and<a
-                                    href="http://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Cookies_Policy_FIWARE_Lab">
-                                &nbsp;Cookies Policy</a>
-                        </li>
-                    </ul>
-
-                </div>
             </div>
         </div>
     </div>
-    <div class="footer">
-        <ul class="unstyled">
-            <li>2014 ©<a href="http://fiware.org">FIWARE.</a>&nbsp;The use of FIWARE Lab services is subject to
-                the acceptance of the
-                <a href="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE_LAB_Terms_and_Conditions">
-                    &nbsp; Terms and Conditions,</a>
-                <a href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-LAB_Personal_Data_Protection_Policy">
-                    &nbsp;Personal Data Protection Policy</a>
-                &nbsp;and<a
-                        href="http://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Cookies_Policy_FIWARE_Lab">
-                    &nbsp;Cookies Policy</a>
-            </li>
-        </ul>
-    </div>
-
 
 </div>
 <!-- div box0-->

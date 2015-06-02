@@ -182,8 +182,8 @@ module.exports = function (grunt) {
 
         exec: {
             istanbul: {
-                cmd: 'bash -c "./node_modules/.bin/istanbul cover --root <%= dirs.lib[0] %>/ ' +
-                    '--dir <%= dirs.reportCoverage[0] %> --include-all-sources -- ' +
+                cmd: 'bash -c "./node_modules/.bin/istanbul cover -x "<%= dirs.test[0] %>" -x "<%= dirs.lib[0] %>/public" -x "<%= dirs.lib[0] %>/oauth2.js"  -x "<%= dirs.lib[0] %>/views" --root <%= dirs.lib[0] %>/ ' +
+                    '--dir <%= dirs.reportCoverage[0] %> -- ' +
                     '\\"`npm root -g`/grunt-cli/bin/grunt\\" test >/dev/null && ' +
                     'mv <%= dirs.reportCoverage[0] %>/lcov-report <%= clean.lcovCoverage[0] %> && ' +
                     './node_modules/.bin/istanbul report --dir <%= dirs.reportCoverage[0] %> text-summary"'
