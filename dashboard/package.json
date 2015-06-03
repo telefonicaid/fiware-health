@@ -29,6 +29,7 @@
     "domain": "0.0.1",
     "express": "~4.12.2",
     "express-session": "^1.11.1",
+    "forever": "^0.14.1",
     "jade": "~1.9.2",
     "logops": "^0.2.0",
     "nib": "^1.1.0",
