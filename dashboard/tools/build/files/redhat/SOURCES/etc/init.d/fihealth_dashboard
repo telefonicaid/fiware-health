@@ -22,26 +22,30 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="FiHealth Dashboard"
 NAME=fihealth_dashboard
-DAEMON=/opt/fiware/$NAME/bin/dashboard
+DAEMON_DIR=/opt/fiware/$NAME
+DAEMON_BIN=bin/dashboard
 DAEMON_ARGS=""
 DAEMON_USER=fiware
+FOREVER_DIR=/var/run/fiware/.forever
 LOGFILE=/var/log/$NAME/$NAME.log
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=$FOREVER_DIR/pids/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
-# Exit if the component is not installed
-[ -x "$DAEMON" ] || exit 0
-
 # Read configuration variable files, if present
-[ -r /etc/profile ]	      && . /etc/profile
-[ -r /etc/sysconfig/$NAME ]   && . /etc/sysconfig/$NAME
+[ -r /etc/profile ]		&& . /etc/profile
+[ -r /etc/sysconfig/$NAME ]	&& . /etc/sysconfig/$NAME
 
 # Check that networking is up
-[ -r /etc/sysconfig/network ] && . /etc/sysconfig/network
-[ "${NETWORKING}" = "no" ] && exit 0
+[ -r /etc/sysconfig/network ]	&& . /etc/sysconfig/network
+[ "${NETWORKING}" = "no" ]	&& exit 0
 
 # Source function library
 . /etc/rc.d/init.d/functions
+
+# Workaround to set forever path for auxiliary files
+FOREVER="HOME=$(dirname $FOREVER_DIR) $DAEMON_DIR/node_modules/.bin/forever"
+FOREVER_OPTS="-p $FOREVER_DIR -l $LOGFILE -o $LOGFILE -e $LOGFILE \
+	--append --silent --no-colors"
 
 # Function that checks configuration
 do_checkup()
@@ -62,24 +66,22 @@ do_checkup()
 # Function that starts the daemon/service
 do_start()
 {
-	local pid
-	local startup="$DAEMON $DAEMON_ARGS"
-	do_checkup && action $"Starting $NAME:" daemon \
-		--user=$DAEMON_USER --pidfile=$PIDFILE \
-		"$startup >> $LOGFILE &"
+	local options="$FOREVER_OPTS --minUptime 1000 --spinSleepTime 1000"
+	local startup="$FOREVER start $options --uid $NAME $DAEMON_BIN"
+	cd $DAEMON_DIR \
+	&& do_checkup \
+	&& action $"Starting $NAME:" daemon --user=$DAEMON_USER "$startup"
 	RETVAL=$?
-	if [ "$RETVAL" = 0 ]; then
-		pid=$(ps -u$DAEMON_USER -opid,args:250,ppid \
-		      | awk '$(NF-1)=="'$DAEMON'" && $NF==1 {print $1}')
-		echo $pid > $PIDFILE
-	fi
 	echo
 }
 
 # Function that stops the daemon/service
 do_stop()
 {
-	do_checkup && action $"Stopping $NAME:" killproc -p $PIDFILE "$NAME"
+	local stop="$FOREVER stop $FOREVER_OPTS $NAME"
+	cd $DAEMON_DIR \
+	&& do_checkup \
+	&& action $"Stopping $NAME:" daemon --user=$DAEMON_USER "$stop"
 	RETVAL=$?
 	echo
 }
