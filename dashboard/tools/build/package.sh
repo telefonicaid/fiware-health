@@ -95,7 +95,7 @@ create_rpm_package() {
 	         --define "_topdir $topdir" \
 	         --define "_basedir $BASEDIR" \
 	         --define "_version ${VERSION:-$pkgversion}" \
-	         --define "_release 2" \
+	         --define "_release 1" \
 	&& rpmbuild_file=$(find RPMS/ -name *.rpm) \
 	&& package=$(basename $rpmbuild_file) \
 	&& mv -f $rpmbuild_file $BASEDIR \
