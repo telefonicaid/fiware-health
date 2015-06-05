@@ -8,6 +8,7 @@
 %define _dashboard_grp %{_fiware_grp}
 %define _dashboard_dir %{_fiware_dir}/%{_dashboard_srv}
 %define _logging_dir /var/log/%{_dashboard_srv}
+%define _forever_dir /var/run/fiware/.forever
 %define _node_req_ver %(awk '/"node":/ {split($0,v,/["~=<>]/); print v[6]}' %{_basedir}/package.json)
 
 # Package main attributes (_topdir, _basedir, _version and _release must be given at command line)
@@ -109,10 +110,12 @@ if [ $1 -eq 1 ]; then
 	DASHBOARD_GRP=%{_dashboard_grp}
 	DASHBOARD_DIR=%{_dashboard_dir}
 	LOGGING_DIR=%{_logging_dir}
+	FOREVER_DIR=%{_forever_dir}
 	STATUS=0
 
 	# create additional directories
 	mkdir -p $LOGGING_DIR
+	mkdir -p $FOREVER_DIR
 
 	# install npm dependencies
 	echo "Installing npm dependencies ..."
@@ -141,6 +144,7 @@ if [ $1 -eq 1 ]; then
 
 	# change ownership
 	chown -R $FIWARE_USR:$FIWARE_GRP $FIWARE_DIR
+	chown -R $FIWARE_USR:$FIWARE_GRP $FOREVER_DIR
 	chown -R $DASHBOARD_USR:$DASHBOARD_GRP $DASHBOARD_DIR
 	chown -R $DASHBOARD_USR:$DASHBOARD_GRP $LOGGING_DIR
 
@@ -189,11 +193,17 @@ if [ $1 -eq 0 ]; then
 	# remove FIWARE parent directory, if empty
 	[ -d %{_fiware_dir} ] && rmdir --ignore-fail-on-non-empty %{_fiware_dir}
 
+	# remove FIWARE Forever directory, if empty
+	[ -d %{_forever_dir} ] && rmdir --ignore-fail-on-non-empty %{_forever_dir}
+
 	# remove log files
 	rm -rf %{_logging_dir}
 fi
 
 %changelog
+* Thu Jun 03 2015 Telefónica I+D <opensource@tid.es> 1.0.0-2
+- Add forever to monitor the execution of the server.
+
 * Fri May 29 2015 Telefónica I+D <opensource@tid.es> 1.0.0-1
 - New overview and details pages.
 - IdM authentication.
