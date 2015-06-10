@@ -17,7 +17,7 @@
 'use strict';
 
 var http = require('http'),
-    domain = require("domain"),
+    domain = require('domain'),
     logger = require('../logger'),
     config = require('../config').data,
     dateFormat = require('dateformat');
@@ -25,7 +25,7 @@ var http = require('http'),
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
     TIMESTAMP_ATTRIBUTE = '_timestamp', // field name for value about timestamp
-    REGION_TYPE = "region";
+    REGION_TYPE = 'region';
 
 
 /**
@@ -38,7 +38,7 @@ function parseRegions(entities) {
 
     var result = [];
 
-    logger.debug("entities to parse" + entities);
+    logger.debug('entities to parse' + entities);
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
@@ -83,7 +83,7 @@ function retrieveAllRegions(callback) {
         'Content-Length': payloadString.length
     };
 
-    logger.debug("using configuration: " + JSON.stringify(config.cbroker));
+    logger.debug('using configuration: ' + JSON.stringify(config.cbroker));
     var options = {
         host: config.cbroker.host,
         port: config.cbroker.port,
@@ -100,7 +100,7 @@ function retrieveAllRegions(callback) {
             responseString += data;
         });
         res.on('end', function () {
-            logger.debug({op: 'retrieveAllRegions'}, "response string:  " + responseString);
+            logger.debug({op: 'retrieveAllRegions'}, 'response string:  ' + responseString);
             var resultObject = JSON.parse(responseString);
             callback(parseRegions(resultObject));
         });
@@ -123,10 +123,10 @@ function retrieveAllRegions(callback) {
 
 /**
  * invoked when change is received from context broker
- * @param entities
+ * @param {[]} entities
  */
 function changeReceived(entities) {
-    logger.debug("entities to parse" + entities);
+    logger.debug('entities to parse' + entities);
 
     var result = parseRegions(entities);
     return result[0];

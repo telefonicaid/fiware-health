@@ -1,7 +1,7 @@
 function calc_height() {
 
     var D = document;
-    console.log("doc.body:"+ D.body + " doc.docElem:"+ D.documentElement);
+    console.log('doc.body:' + D.body + ' doc.docElem:' + D.documentElement);
     var height;
     if (is_chrome() || is_firefox()) {
         //chrome, FF
@@ -13,15 +13,15 @@ function calc_height() {
 
     } else {
         // safari
-        console.log("safari");
-        height= Math.max(
+        console.log('safari');
+        height = Math.max(
            D.documentElement.scrollHeight,
            D.documentElement.offsetHeight,
            D.documentElement.clientHeight
         );
     }
 
-    console.log("resize to height: "+height);
+    console.log('resize to height: ' + height);
     window.parent.document.getElementById('iframe-container').style.height = height + 'px';
 
 }
@@ -39,29 +39,27 @@ function displaySections() {
             }
             calc_height();
 
-
-
-        })
-    })
+        });
+    });
 }
 
 
-var strWindowFeatures = "resizable=yes,scrollbars=yes,status=yes";
+var strWindowFeatures = 'resizable=yes,scrollbars=yes,status=yes';
 function openFailureDetailsInNewWindow(anchor_tag) {
 
-    var html = document.getElementById("html_failure_details").innerHTML;
+    var html = document.getElementById('html_failure_details').innerHTML;
 
     if ( is_firefox()) {
-        console.log("openFailureDetailsInNewWindow#firefox");
+        console.log('openFailureDetailsInNewWindow#firefox');
 
-        window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML=html;
-        window.parent.document.getElementById('iframe-container').contentWindow.location.hash =anchor_tag;
+        window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML = html;
+        window.parent.document.getElementById('iframe-container').contentWindow.location.hash = anchor_tag;
         displaySections();
-        console.log("openFailureDetailsInNewWindow#calc");
+        console.log('openFailureDetailsInNewWindow#calc');
 
     } else {
         if (is_chrome()) {
-            console.log("openFailureDetailsInNewWindow#chrome_safari");
+            console.log('openFailureDetailsInNewWindow#chrome_safari');
 
             var myWindow = window.open(anchor_tag, '_self', strWindowFeatures);
 
@@ -71,20 +69,20 @@ function openFailureDetailsInNewWindow(anchor_tag) {
             doc.write(html);
             doc.close();
         } else {
-            console.log("openFailureDetailsInNewWindow#safari "+anchor_tag);
+            console.log('openFailureDetailsInNewWindow#safari ' + anchor_tag);
 
-            window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML=html;
-            window.parent.document.getElementById('iframe-container').contentWindow.location.hash ='#';
+            window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML = html;
+            window.parent.document.getElementById('iframe-container').contentWindow.location.hash = '#';
 
             displaySections();
-            console.log("openFailureDetailsInNewWindow#calc");
+            console.log('openFailureDetailsInNewWindow#calc');
         }
 
 
     }
     calc_height();
 
-    console.log("openFailureDetailsInNewWindow#end");
+    console.log('openFailureDetailsInNewWindow#end');
 
 }
 
@@ -100,9 +98,9 @@ function is_chrome() {
 function changeTitle(id) {
     var element = document.getElementById(id);
     var subtitle = element.innerText || element.textContent;
-    var n = subtitle.search(".TestSuite");
+    var n = subtitle.search('.TestSuite');
     var underscore_position = subtitle.search('_');
-    var new_subtitle = capitalizeFirstLetter(subtitle.substring(underscore_position+1, n)) + subtitle.substring(n + 10);
+    var new_subtitle = capitalizeFirstLetter(subtitle.substring(underscore_position + 1, n)) + subtitle.substring(n + 10);
     if (element.textContent == undefined) {
         document.getElementById(id).innerText = new_subtitle;
     } else {
@@ -123,7 +121,7 @@ function capitalizeFirstLetter(string) {
 
 function refresh(button, region) {
     button.disabled = true;
-    var value = "waiting..";
+    var value = 'waiting...';
     if (button.textContent == undefined) {
         button.innerText = value;
     } else {
@@ -137,8 +135,8 @@ function refresh(button, region) {
 
 function loadReport(filename) {
 
-  document.getElementById("box1").style.display="none";
-  var el=document.getElementById("frameContainer");
-  el.outerHTML="<iframe id='iframe-container' src='"+filename+"' scrolling='no' style=''></iframe>";
+  document.getElementById('box1').style.display = 'none';
+  var el = document.getElementById('frameContainer');
+  el.outerHTML = '<iframe id="iframe-container" src="' + filename + '" scrolling="no" style=""></iframe>';
 
 }

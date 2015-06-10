@@ -59,7 +59,7 @@ router.get('/', function (req, res) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info("response mailman:" + mailman_res.statusCode + " " + mailman_res.statusMessage);
+            logger.info('response mailman:' + mailman_res.statusCode + ' ' + mailman_res.statusMessage);
 
             res.redirect(config.web_context);
         });

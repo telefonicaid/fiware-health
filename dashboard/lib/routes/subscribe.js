@@ -60,7 +60,7 @@ router.get('/', function (req, res) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info("response mailman: region (" + region.node + ") " + mailman_res.statusCode + " " + responseString);
+            logger.info('response mailman: region (' + region.node + ') ' + mailman_res.statusCode + ' ' + responseString);
 
             res.redirect(config.web_context);
         });
@@ -78,9 +78,9 @@ router.get('/', function (req, res) {
 
 /**
  *
- * @param user
- * @param regions
- * @param callback
+ * @param {Object} user
+ * @param {[]} regions
+ * @param {callback} callback
  */
 function searchSubscription(user, regions, callback) {
 
@@ -96,9 +96,9 @@ function searchSubscription(user, regions, callback) {
 
 /**
  * Connect to mailman and check is user is subscribed to region list
- * @param user
- * @param region
- * @param isSubscribed_callback
+ * @param {Object} user
+ * @param {String} region
+ * @param {isSubscribed_callback} isSubscribed_callback
  */
 function isSubscribed(user, region, isSubscribed_callback) {
 
@@ -122,12 +122,12 @@ function isSubscribed(user, region, isSubscribed_callback) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info("response mailman: region (" + region.node + ") " + mailman_res.statusCode + " " + responseString);
+            logger.info('response mailman: region (' + region.node + ') ' + mailman_res.statusCode + ' ' + responseString);
             try {
                 var array = JSON.parse(responseString);
-                logger.debug("all users:" + array);
+                logger.debug('all users:' + array);
                 var new_array = array.filter(isMail);
-                logger.debug("new_array:" + new_array);
+                logger.debug('new_array:' + new_array);
                 region.subscribed = new_array.length == 1;
             } catch (ex) {
                 region.subscribed = false;
@@ -148,8 +148,8 @@ function isSubscribed(user, region, isSubscribed_callback) {
 
 /**
  * notify to region list for a change in region
- * @param region
- * @param notify_callback
+ * @param {String} region
+ * @param {notify_callback} notify_callback
  */
 function notify(region, notify_callback) {
 
@@ -157,7 +157,7 @@ function notify(region, notify_callback) {
 
 
     var payloadString = 'name_from= fi-health sanity&';
-        payloadString += 'email_from='+config.mailman.email_from+'&';
+        payloadString += 'email_from=' + config.mailman.email_from + '&';
         payloadString += 'subject=Status changed for region ' + region + '&';
         payloadString += 'body=Status changed for region ' + region;
 
@@ -184,7 +184,7 @@ function notify(region, notify_callback) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info("response mailman: region (" + region + ") " + mailman_res.statusCode + " " + responseString);
+            logger.info('response mailman: region (' + region + ') ' + mailman_res.statusCode + ' ' + responseString);
             notify_callback();
 
         });
@@ -203,6 +203,8 @@ module.exports = router;
 
 /** @export */
 module.exports.isSubscribed = isSubscribed;
+/** @export */
 module.exports.searchSubscription = searchSubscription;
+/** @export */
 module.exports.nofify = notify;
 

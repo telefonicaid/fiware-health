@@ -21,8 +21,8 @@
 
 /**
  * redirect to an error page with 401
- * @param req
- * @param res
+ * @param {Object} req
+ * @param {Object} res
  */
 function notAuthorizedRender(req, res) {
     var err = new Error('Unauthorized');
@@ -44,10 +44,10 @@ function parseRoles(roles) {
         return obj.name === 'Admin';
     });
 
-    if (hasSuperuser.length>0)
+    if (hasSuperuser.length > 0)
         return 'superuser';
 
-    if (hasAdminUser.length>0)
+    if (hasAdminUser.length > 0)
         return 'admin';
 
     return '';
@@ -55,15 +55,15 @@ function parseRoles(roles) {
 
 /**
  *  check if username is authorized to manage region and introduce a new field in object
- * @param regions
- * @param username
+ * @param {[]} regions
+ * @param {String} username
  */
-function addAuthorized(regions,username) {
+function addAuthorized(regions, username) {
 
     regions.filter(function(region) {
 
-        var regionName=(region.node.substring(0,region.node.length-1)).toLowerCase();
-        region.authorized = ((username.indexOf(regionName))!=-1);
+        var regionName = (region.node.substring(0, region.node.length - 1)).toLowerCase();
+        region.authorized = ((username.indexOf(regionName)) != -1);
 
     });
 
