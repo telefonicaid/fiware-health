@@ -95,10 +95,10 @@ function searchSubscription(user, regions, callback) {
 }
 
 /**
- * Connect to mailman and check is user is subscribed to region list
+ * Connect to mailman and check if user is subscribed to region list
  * @param {Object} user
  * @param {String} region
- * @param {isSubscribed_callback} isSubscribed_callback
+ * @param {function} isSubscribed_callback
  */
 function isSubscribed(user, region, isSubscribed_callback) {
 
