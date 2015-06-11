@@ -27,15 +27,6 @@ var assert = require('assert'),
 suite('unsubscribe', function () {
 
 
-    suiteSetup(function() {
-        logger.setLevel('ERROR');
-    });
-
-    teardown(function(){
-  //      http.request.restore();
-    });
-
-
     test('should_unsubcribe_user_and_redirect_to_webcontext', function () {
 
         //given

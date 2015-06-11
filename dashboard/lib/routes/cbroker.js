@@ -61,7 +61,7 @@ function parseRegions(entities) {
 }
 
 /**
- * @function postAllRegions
+ * @function retrieveAllRegions
  * Call to context broker and get all regions and status.
  * @param {function} callback
  */
@@ -106,7 +106,6 @@ function retrieveAllRegions(callback) {
         });
     });
     req.on('error', function (e) {
-        // TODO: handle error.
         logger.error('Error in connection with context broker: ' + e);
         callback(function () {
                 return [];
