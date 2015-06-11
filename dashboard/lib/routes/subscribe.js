@@ -27,8 +27,15 @@ var express = require('express'),
     _ = require('underscore');
 
 
-/* GET refresh. */
-router.get('/', function (req, res) {
+/* GET /subcribe: send PUT to mailman*/
+router.get('/', getSubscribe);
+
+/**
+ * router get subscribe
+ * @param {Object} req
+ * @param {Object} res
+ */
+function getSubscribe(req, res) {
 
     var region = req.param('region');
 
@@ -73,8 +80,7 @@ router.get('/', function (req, res) {
     mailmain_req.write(payloadString);
     mailmain_req.end();
 
-
-});
+}
 
 /**
  *
@@ -149,7 +155,7 @@ function isSubscribed(user, region, isSubscribed_callback) {
 /**
  * notify to region list for a change in region
  * @param {String} region
- * @param {notify_callback} notify_callback
+ * @param {function} notify_callback
  */
 function notify(region, notify_callback) {
 
@@ -202,9 +208,11 @@ function notify(region, notify_callback) {
 module.exports = router;
 
 /** @export */
+module.exports.getSubscribe = getSubscribe;
+/** @export */
 module.exports.isSubscribed = isSubscribed;
 /** @export */
 module.exports.searchSubscription = searchSubscription;
 /** @export */
-module.exports.nofify = notify;
+module.exports.notify = notify;
 

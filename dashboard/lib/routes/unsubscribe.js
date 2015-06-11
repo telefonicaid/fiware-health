@@ -26,8 +26,15 @@ var express = require('express'),
     sleep = require('sleep');
 
 
-/* GET refresh. */
-router.get('/', function (req, res) {
+/* GET /unsubcribe: send DELETE to mailman*/
+router.get('/', getUnSubscribe);
+
+/**
+ * router get unSubscribe
+ * @param {Object} req
+ * @param {Object} res
+ */
+function getUnSubscribe(req, res) {
 
     var region = req.param('region');
 
@@ -73,7 +80,10 @@ router.get('/', function (req, res) {
     mailmain_req.end();
 
 
-});
+}
 
 /** @export */
 module.exports = router;
+
+/** @export */
+module.exports.getUnSubscribe = getUnSubscribe;

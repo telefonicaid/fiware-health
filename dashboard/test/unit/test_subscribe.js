@@ -16,12 +16,12 @@
  */
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
 
 var assert = require('assert'),
     subscribe = require('../../lib/routes/subscribe'),
     sinon = require('sinon'),
     http = require('http'),
+    EventEmitter = require('events').EventEmitter,
     logger= require('../../lib/logger');
 
 
@@ -34,7 +34,6 @@ suite('subscribe', function () {
     });
 
     teardown(function(){
-        console.log('teardown');
         http.request.restore();
     });
 
@@ -166,4 +165,82 @@ suite('subscribe', function () {
 
 
     });
+
+    test('should_subcribe_user_and_redirect_to_webcontext', function () {
+
+        //given
+        var req,res,spy;
+        req = sinon.stub();
+        res = {};
+        req.param = sinon.stub();
+        req.param.withArgs('region').returns('region1');
+        spy = res.redirect = sinon.spy();
+        req.session = sinon.stub();
+        req.session.user = {email:'user@mail.com'};
+
+        var request = new EventEmitter;
+
+        request.end = sinon.spy();
+        request.write = sinon.spy();
+        var request_stub = sinon.stub(http, 'request',function(options,callback) {
+
+            var response = new EventEmitter;
+            response.setEncoding=sinon.stub();
+
+            callback(response);
+
+            response.emit('end');
+            return request;
+        });
+
+        //when
+        subscribe.getSubscribe(req,res);
+
+        //then
+        assert(spy.calledOnce);
+        assert(request.write.calledOnce);
+        assert(request.end.calledOnce);
+        assert.equal('PUT',request_stub.getCall(0).args[0].method);
+
+
+    });
+
+
+    test('should_notify_to_list', function () {
+
+        //given
+        var req,res;
+        req = sinon.stub();
+        req.param = sinon.stub();
+        req.param.withArgs('region').returns('region1');
+        req.session = sinon.stub();
+        req.session.user = {email:'user@mail.com'};
+
+        var request = new EventEmitter;
+
+        request.end = sinon.spy();
+        request.write = sinon.spy();
+        var request_stub = sinon.stub(http, 'request',function(options,callback) {
+
+            var response = new EventEmitter;
+            response.setEncoding=sinon.stub();
+
+            callback(response);
+
+            response.emit('end');
+            return request;
+        });
+
+        //when
+        subscribe.notify('region1', function() {
+        });
+
+        //then
+        assert(request.write.calledOnce);
+        assert(request.end.calledOnce);
+        assert.equal('POST',request_stub.getCall(0).args[0].method);
+
+
+    });
+
 });
