@@ -100,17 +100,19 @@ function retrieveAllRegions(callback) {
             responseString += data;
         });
         res.on('end', function () {
-            logger.debug({op: 'retrieveAllRegions'}, 'Response string:  %s', responseString);
-            var resultObject = JSON.parse(responseString);
-            callback(parseRegions(resultObject));
+            logger.debug({op: 'retrieveAllRegions'}, 'Response string: %s', responseString);
+            try {
+                var resultObject = JSON.parse(responseString);
+                callback(parseRegions(resultObject));
+            }catch (ex) {
+                logger.warn({op: 'retrieveAllRegions'}, 'Error in parse response string:  %s %s', responseString, ex);
+                callback([]);
+            }
         });
     });
     req.on('error', function (e) {
         logger.error('Error in connection with context broker: ' + e);
-        callback(function () {
-                return [];
-            }
-        );
+        callback([]);
 
     });
 
