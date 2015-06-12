@@ -33,10 +33,10 @@ router.get('/', function (req, res) {
 
     var region = req.param('region');
 
-    logger.info({op: 'refresh#get'}, 'refresh ' + region + ' received' + ' role: ' + req.session.role);
+    logger.info({op: 'refresh#get'}, 'refresh region: %s, received role: %s', region, req.session.role);
 
     if (req.session.role == undefined || req.session.role == '') {
-        logger.warn({op: 'refresh#get'},'unauthorized operation, invalid role: ' + req.session.role);
+        logger.warn({op: 'refresh#get'},'unauthorized operation, invalid role: %s', req.session.role);
         common.notAuthorized(req, res);
         return;
     }
@@ -67,7 +67,7 @@ router.get('/', function (req, res) {
             responseString += data;
         });
         jenkins_res.on('end', function () {
-            logger.info('response jenkins:' + jenkins_res.statusCode + ' ' + jenkins_res.statusMessage);
+            logger.info('response jenkins: code: %s message: %s', jenkins_res.statusCode, jenkins_res.statusMessage);
 
             sleep.sleep(10); //sleep for 10 seconds
             res.redirect(config.web_context);

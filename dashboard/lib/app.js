@@ -40,7 +40,7 @@ var express = require('express'),
 var app = express();
 
 
-logger.info('Running app in web context: ' + config.web_context);
+logger.info('Running app in web context: %s', config.web_context);
 
 /**
  * base web context in url
@@ -95,7 +95,7 @@ app.use(session({secret: config.secret}));
 
 // trace all requests
 app.use(function (req, res, next) {
-    logger.debug('%s %s %s', req.method, req.url, req.path);
+    logger.debug({op: 'app#use'}, '%s %s %s', req.method, req.url, req.path);
     next();
 });
 
@@ -153,12 +153,12 @@ var oa = new OAuth2(config.idm.clientId,
 
 // Handles requests to the main page
 app.get(config.web_context + 'signin', function (req, res) {
-    logger.debug({op: 'app#get signin'}, 'token: ' + req.session.access_token);
+    logger.debug({op: 'app#get signin'}, 'Token: %s', req.session.access_token);
 
     // If auth_token is not stored in a session redirect to IDM
     if (!req.session.access_token) {
         var path = oa.getAuthorizeUrl();
-        logger.debug({op: 'app#get signin'}, 'idm path: ' + path);
+        logger.debug({op: 'app#get signin'}, 'idm path: %s', path);
         res.redirect(path);
         // If auth_token is stored in a session cookie it sends a button to get user info
     } else {
@@ -221,14 +221,14 @@ app.get(config.web_context + 'login', function (req, res) {
 app.post(config.web_context + 'contextbroker', function (req, res) {
     try {
         var region = cbroker.changeReceived(req.body);
-        logger.info('request received from contextbroker for region: ' + region.node);
+        logger.info('request received from contextbroker for region: %s', region.node);
         subscribe.nofify(region.node, function () {
             logger.info('post to list ok');
 
             res.status(200).end();
         });
     } catch (ex) {
-        logger.error('error in contextbroker notification: ' + ex);
+        logger.error('error in contextbroker notification: %s', ex);
         res.status(400).send({ error: 'bad request! ' + ex });
     }
 });
@@ -247,8 +247,8 @@ app.get(config.web_context + 'logout', function (req, res) {
     req.session.user = undefined;
     req.session.role = undefined;
 
-            res.clearCookie('oauth_token');
-        res.clearCookie('expires_in');
+    res.clearCookie('oauth_token');
+    res.clearCookie('expires_in');
 
     res.redirect(config.web_context);
 });

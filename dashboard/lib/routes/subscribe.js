@@ -190,7 +190,8 @@ function notify(region, notify_callback) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info('response mailman: region (' + region + ') ' + mailman_res.statusCode + ' ' + responseString);
+            logger.info('response mailman: region: %s, code: %s, message: %s', region, mailman_res.statusCode,
+                mailman_res.statusMessage);
             notify_callback();
 
         });

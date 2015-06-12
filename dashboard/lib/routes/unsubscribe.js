@@ -66,7 +66,7 @@ function getUnSubscribe(req, res) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info('response mailman:' + mailman_res.statusCode + ' ' + mailman_res.statusMessage);
+            logger.info('response mailman: code: %s message: %s', mailman_res.statusCode, mailman_res.statusMessage);
 
             res.redirect(config.web_context);
         });

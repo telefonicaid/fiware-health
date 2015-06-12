@@ -31,23 +31,23 @@ router.get('/', function (req, res) {
 
     cbroker.retrieveAllRegions(function (regions) {
 
-        logger.info({op: 'index#get'}, 'regions:' + regions);
+        logger.info({op: 'index#get'}, 'Regions: %j', regions);
 
         var userinfo = req.session.user;
 
-        logger.info({op: 'index#get'}, 'userinfo:' + userinfo);
+        logger.info({op: 'index#get'}, 'User info: %j', userinfo);
 
         if (userinfo != undefined) {
 
             //search for subscription
 
-            logger.debug({op: 'index#get'}, 'regions: ' + regions.constructor.name);
+            logger.debug({op: 'index#get'}, 'Regions: %s', regions.constructor.name);
             subscribe.searchSubscription(userinfo.email, regions, function () {
 
 
                 regions = common.addAuthorized(regions, userinfo.displayName);
 
-                logger.debug('before render: ' + JSON.stringify(regions));
+                logger.debug('before render: %s', JSON.stringify(regions));
                 res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role});
 
             });

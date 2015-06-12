@@ -38,7 +38,7 @@ function parseRegions(entities) {
 
     var result = [];
 
-    logger.debug('entities to parse' + entities);
+    logger.debug('Entities to parse %j', entities);
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
@@ -83,7 +83,7 @@ function retrieveAllRegions(callback) {
         'Content-Length': payloadString.length
     };
 
-    logger.debug('using configuration: ' + JSON.stringify(config.cbroker));
+    logger.debug('Using configuration: %j', config.cbroker);
     var options = {
         host: config.cbroker.host,
         port: config.cbroker.port,
@@ -100,7 +100,7 @@ function retrieveAllRegions(callback) {
             responseString += data;
         });
         res.on('end', function () {
-            logger.debug({op: 'retrieveAllRegions'}, 'response string:  ' + responseString);
+            logger.debug({op: 'retrieveAllRegions'}, 'Response string:  %s', responseString);
             var resultObject = JSON.parse(responseString);
             callback(parseRegions(resultObject));
         });
