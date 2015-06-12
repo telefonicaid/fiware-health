@@ -7,8 +7,8 @@
     position relative
     display: -webkit-flex; /* Safari */
     -webkit-justify-content: center; /* Safari*/
-    display: flex;
-    justify-content: center;
+    display flex
+    justify-content center
 
     .header_buttons
        width 100px
@@ -17,9 +17,8 @@
 .header-content
     position absolute
     bottom 0
-    font-size 130%
     font-family NeoTechRegular
-    color #0074d9
+    color #002d67
     text-decoration none
     text-align center
     left 0
@@ -125,19 +124,19 @@
     padding-bottom 100px
 
 .box2
-    display block
-    background-color #d9edf7
-    border 1px solid #bce8f1
-    -webkit-border-radius 4px
-    -moz-border-radius 4px
-    border-radius 4px
-    -webkit-box-shadow 0 0 0 4px rgba(0,0,0,0.05)
-    -moz-box-shadow 0 0 0 4px rgba(0,0,0,0.05)
-    box-shadow 0 0 0 0px rgba(0,0,0,0.05)
-    width 600px
-    margin-left auto
-    margin-right auto
-    margin-bottom 100px
+    display: block;
+    background-color: #FFF;
+    border: 1px solid #CCC;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.05);
+    -moz-box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.05);
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 100px;
 
     .username
         float right
@@ -151,61 +150,69 @@
 
 
 .region_list
-    list-style-type none
-    width 600px
-    margin-left auto
-    margin-right auto
-    padding-left 20px
-    padding-right 20px
+    list-style-type: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+
+    li
+      padding: 4px 5px 2px;
+      margin: 0 auto 2px;
+      height: 25px;
+      font-weight: bold;
 
     .timestamp
-          float right
-          color  #3a87ad
-          font-weight normal
-          font-size 80%
-          margin-right 10px
+        float: right;
+        color: #A5A5A5;
+        padding-right: 20px;
+        font-weight: normal;
+        font-size: 75%;
+        padding-top: 4px;
 
      button[disabled=disabled], button:disabled
          color grey
 
     .btn
-      background-color rgb(25, 59, 107)
-      color white
-      border 0px
-      margin-left 5px
-      cursor pointer
+        background-color: #FFF;
+        background-image: none;
+        border-radius: 0;
+        border: 1px solid #CCC;
+        color: #898888;
+        margin-top: 2px;
+
+    .btn:hover {
+        cursor: pointer;
+        color: #002d67;
+        border: 1px solid #002d67;
+      }
 
 
 
 a.sanity_nok
-    color red
+    color rgba(144, 2, 2, 0.83)
 
 a.sanity_ok
-    color green
+    color rgba(2, 95, 2, 0.84)
 
 a.sanity_pok
-    color yellow
+    color rgba(140, 128, 3, 0.97);
+
+li.sanity_nok
+    background-color rgba(255, 202, 202, 0.46)
 
 li.sanity_na
-    color  #3a87ad
-    height 30px
-    font-weight bold
+    background-color rgba(223, 223, 223, 0.77)
+    color #949494
 
-li.sanity_nok_and_sanity_ok
-    height 30px
-    font-weight bold
+li.sanity_ok
+    background-color rgba(202, 255, 219, 0.46)
 
-li.sanity_na
-    color  #3a87ad
-    height 30px
-    font-weight bold
+li.sanity_pok
+    background-color rgba(250, 255, 202, 0.46)
 
 li.sanity_no_data
-    color  grey
-    height 30px
-    font-weight bold
-    text-decoration line-through
-
+    background-color #BFD9E7
+    color #5A6E98
 .btn
     float right
 
