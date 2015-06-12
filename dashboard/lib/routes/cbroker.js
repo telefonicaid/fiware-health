@@ -104,7 +104,7 @@ function retrieveAllRegions(callback) {
             try {
                 var resultObject = JSON.parse(responseString);
                 callback(parseRegions(resultObject));
-            }catch (ex) {
+            } catch (ex) {
                 logger.warn({op: 'retrieveAllRegions'}, 'Error in parse response string:  %s %s', responseString, ex);
                 callback([]);
             }
