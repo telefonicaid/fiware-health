@@ -67,7 +67,7 @@ TEST_NETWORK_PREFIX = "testing_network"
 TEST_ROUTER_PREFIX = "testing_router"
 TEST_CONTAINER_PREFIX = "testing_container"
 TEST_TEXT_OBJECT_PREFIX = "testing_text_object"
-TEXT_EXTENSION = ".txt"
+TEST_TEXT_FILE_EXTENSION = ".txt"
 
 # SWIFT CONTANTS
 SWIFT_RESOURCES_PATH = "resources/swift_objects/"
@@ -90,4 +90,4 @@ SERVICE_SWIFT_NAME = "object-store"
 ENDPOINT_TYPE_PUBLIC_URL = "publicURL"
 
 # TYPES
-TEXT_PLAIN = "text/plain"
+TEST_TEXT_CONTENT_TYPE = "text/plain"

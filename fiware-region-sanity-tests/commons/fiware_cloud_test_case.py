@@ -189,7 +189,8 @@ class FiwareTestCase(unittest.TestCase):
             'networks': [],
             'routers': [],
             'allocated_ips': [],
-            'containers': []
+            'containers': [],
+            'swift_objects': []
         })
 
         if suite:
@@ -402,6 +403,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 for object in cls.swift_operations.get_container(container)[-1]:
                     cls.swift_operations.delete_object(container, object["name"])
+                    world['swift_objects'].remove(container + "/" + object["name"])
                 cls.swift_operations.delete_container(container)
                 world['containers'].remove(container)
             except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
