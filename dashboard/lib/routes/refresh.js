@@ -25,7 +25,7 @@ var express = require('express'),
     http = require('http'),
     sleep = require('sleep'),
     config = require('../config').data,
-    common=require('./common');
+    common = require('./common');
 
 
 /* GET refresh. */
@@ -33,16 +33,16 @@ router.get('/', function (req, res) {
 
     var region = req.param('region');
 
-    logger.info({op: 'refresh#get'}, 'refresh ' + region + ' received' + ' role: '+req.session.role);
+    logger.info({op: 'refresh#get'}, 'refresh region: %s, received role: %s', region, req.session.role);
 
-    if (req.session.role==undefined || req.session.role=='') {
-        logger.warn({op: 'refresh#get'},'unauthorized operation, invalid role: '+req.session.role);
-        common.notAuthorized(req,res);
+    if (req.session.role == undefined || req.session.role == '') {
+        logger.warn({op: 'refresh#get'},'unauthorized operation, invalid role: %s', req.session.role);
+        common.notAuthorized(req, res);
         return;
     }
 
     var payload = '';
-    var payloadString = 'token='+config.jenkins.token;
+    var payloadString = 'token=' + config.jenkins.token;
 
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -53,7 +53,7 @@ router.get('/', function (req, res) {
     var options = {
         host: config.jenkins.host,
         port: config.jenkins.port,
-        path: config.jenkins.path+'/buildWithParameters?'+config.jenkins.parameterName+'=' + region,
+        path: config.jenkins.path + '/buildWithParameters?' + config.jenkins.parameterName + '=' + region,
         method: 'POST',
         headers: headers
     };
@@ -67,7 +67,7 @@ router.get('/', function (req, res) {
             responseString += data;
         });
         jenkins_res.on('end', function () {
-            logger.info("response jenkins:" + jenkins_res.statusCode + " " + jenkins_res.statusMessage);
+            logger.info('response jenkins: code: %s message: %s', jenkins_res.statusCode, jenkins_res.statusMessage);
 
             sleep.sleep(10); //sleep for 10 seconds
             res.redirect(config.web_context);

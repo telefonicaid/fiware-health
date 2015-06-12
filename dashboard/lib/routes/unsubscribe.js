@@ -26,8 +26,15 @@ var express = require('express'),
     sleep = require('sleep');
 
 
-/* GET refresh. */
-router.get('/', function (req, res) {
+/* GET /unsubcribe: send DELETE to mailman*/
+router.get('/', getUnSubscribe);
+
+/**
+ * router get unSubscribe
+ * @param {Object} req
+ * @param {Object} res
+ */
+function getUnSubscribe(req, res) {
 
     var region = req.param('region');
 
@@ -59,7 +66,7 @@ router.get('/', function (req, res) {
             responseString += data;
         });
         mailman_res.on('end', function () {
-            logger.info("response mailman:" + mailman_res.statusCode + " " + mailman_res.statusMessage);
+            logger.info('response mailman: code: %s message: %s', mailman_res.statusCode, mailman_res.statusMessage);
 
             res.redirect(config.web_context);
         });
@@ -73,7 +80,10 @@ router.get('/', function (req, res) {
     mailmain_req.end();
 
 
-});
+}
 
 /** @export */
 module.exports = router;
+
+/** @export */
+module.exports.getUnSubscribe = getUnSubscribe;

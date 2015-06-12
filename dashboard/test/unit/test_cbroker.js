@@ -18,6 +18,9 @@
 
 var assert = require('assert'),
     cbroker = require('../../lib/routes/cbroker'),
+    sinon = require('sinon'),
+    EventEmitter = require('events').EventEmitter,
+    http = require('http'),
     fs = require('fs');
 
 
@@ -63,6 +66,49 @@ suite('cbroker', function () {
 
         //then
         assert.deepEqual(expected, result);
-    })
+    });
+
+     test('should_retrieve_data_about_all_regions', function (done) {
+
+        //given
+        var req,res;
+        req = sinon.stub();
+        req.param = sinon.stub();
+        req.param.withArgs('region').returns('region1');
+        req.session = sinon.stub();
+        req.session.user = {email:'user@mail.com'};
+
+        var request = new EventEmitter;
+
+        request.end = sinon.spy();
+        request.write = sinon.spy();
+        var request_stub = sinon.stub(http, 'request',function(options,callback) {
+
+            var response = new EventEmitter;
+            response.setEncoding=sinon.stub();
+
+            callback(response);
+
+            var json = fs.readFileSync('test/unit/notify_post1.json', 'utf8');
+
+            response.emit('data', json);
+            response.emit('end');
+            return request;
+        });
+
+        //when
+        cbroker.retrieveAllRegions(function() {
+
+            //then
+            http.request.restore();
+            done();
+        });
+
+        assert(request.write.calledOnce);
+        assert(request.end.calledOnce);
+        assert.equal('POST',request_stub.getCall(0).args[0].method);
+
+    });
+
 
 });
