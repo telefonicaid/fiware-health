@@ -24,7 +24,7 @@ var http = require('http'),
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
-    TIMESTAMP_ATTRIBUTE = '_timestamp', // field name for value about timestamp
+    TIMESTAMP_ATTRIBUTE = 'sanity_check_timestamp', // field name for value about timestamp
     REGION_TYPE = 'region';
 
 
