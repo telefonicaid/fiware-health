@@ -44,23 +44,15 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         containerName = TEST_CONTAINER_PREFIX + suffix
 
-        try:
-            response = self.swift_operations.create_container(containerName)
-            self.assertIsNone(response)
-            self.test_world['containers'].append(containerName)
-            self.logger.debug("Created %s container was created", containerName)
-        except Exception as ex:
-            self.logger.error("Container %s could not be created: ", containerName)
-            self.fail(ex)
+        response = self.swift_operations.create_container(containerName)
+        self.assertIsNone(response, "Container could not be created")
+        self.test_world['containers'].append(containerName)
+        self.logger.debug("Created %s container was created", containerName)
 
-        try:
-            response = self.swift_operations.get_container(containerName)
-            self.assertEquals('x-container-object-count' in response[0], True)
-            self.assertEquals(len(response[-1]), 0)  # The list of items should be 0.
-            self.logger.debug("Getting %s container details from the object storage", containerName)
-        except Exception as ex:
-            self.logger.error("Container %s could not be listed", containerName)
-            self.fail(ex)
+        response = self.swift_operations.get_container(containerName)
+        self.assertEquals('x-container-object-count' in response[0], True)
+        self.assertEquals(len(response[-1]), 0)  # The list of items should be 0.
+        self.logger.debug("Getting %s container details from the object storage", containerName)
 
     def test_delete_container(self):
         """
@@ -69,21 +61,13 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         containerName = TEST_CONTAINER_PREFIX + suffix
 
-        try:
-            response = self.swift_operations.create_container(containerName)
-            self.assertIsNone(response)
-            self.test_world['containers'].append(containerName)
-        except Exception as ex:
-            self.logger.error("Container %s could not be created: ", containerName)
-            self.fail(ex)
+        response = self.swift_operations.create_container(containerName)
+        self.assertIsNone(response, "Container could not be created")
+        self.test_world['containers'].append(containerName)
 
-        try:
-            response = self.swift_operations.delete_container(containerName)
-            self.assertIsNone(response)
-            self.test_world['containers'].remove(containerName)
-        except Exception as ex:
-            self.logger.error("Container %s could not be deleted: ", containerName)
-            self.fail(ex)
+        response = self.swift_operations.delete_container(containerName)
+        self.assertIsNone(response, "Container could not be deleted")
+        self.test_world['containers'].remove(containerName)
 
         try:
             self.swift_operations.get_container(containerName)
@@ -101,7 +85,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         textObjectName = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(containerName)
-        self.assertIsNone(response)
+        self.assertIsNone(response, "Container could not be created")
         self.test_world['containers'].append(containerName)
         self.logger.debug("Created %s container was created", containerName)
 
@@ -113,7 +97,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
             origin = hashlib.md5(open(SWIFT_RESOURCES_PATH + TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION, 'rb')
                               .read()).hexdigest()
 
-            self.assertIsNotNone(response)
+            self.assertIsNotNone(response, "Object could not be created")
             self.test_world['swift_objects'].append(containerName + "/" + textObjectName)
             self.logger.debug("Created %s object was created", textObjectName)
         except Exception as ex:
@@ -124,7 +108,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         try:
             response = self.swift_operations.get_text_object(containerName, textObjectName,
                                                              SWIFT_RESOURCES_PATH)
-            self.assertTrue(response)
+            self.assertTrue(response, "Object could not be downloaded")
 
             remote = hashlib.md5(open(SWIFT_RESOURCES_PATH + textObjectName, 'rb')
                               .read()).hexdigest()
@@ -149,7 +133,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         textObjectName = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(containerName)
-        self.assertIsNone(response)
+        self.assertIsNone(response, "Container could not be created")
         self.test_world['containers'].append(containerName)
         self.logger.debug("Created %s container was created", containerName)
 
@@ -158,7 +142,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
             response = self.swift_operations.create_text_object(containerName, SWIFT_RESOURCES_PATH
                                                                 + TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION,
                                                                 textObjectName)
-            self.assertIsNotNone(response)
+            self.assertIsNotNone(response, "Object could not be created")
             self.test_world['swift_objects'].append(containerName + "/" + textObjectName)
             self.logger.debug("Created %s object was created", textObjectName)
         except Exception as ex:
@@ -169,7 +153,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         try:
             os.remove(SWIFT_RESOURCES_PATH + textObjectName)
             response = self.swift_operations.delete_object(containerName, textObjectName)
-            self.assertIsNone(response)
+            self.assertIsNone(response, "Container could not be deleted")
             self.test_world['swift_objects'].remove(containerName + "/" + textObjectName)
         except Exception as ex:
             self.logger.error("Object %s has not been deleted: ", textObjectName)
