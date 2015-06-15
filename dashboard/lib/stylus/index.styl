@@ -5,8 +5,8 @@
     margin-left auto
     margin-right auto
     position relative
-    display: -webkit-flex; /* Safari */
-    -webkit-justify-content: center; /* Safari*/
+    display -webkit-flex /* Safari */
+    -webkit-justify-content center /* Safari*/
     display flex
     justify-content center
 
@@ -52,7 +52,7 @@
       margin-top 2px
       margin-bottom auto
       box-sizing border-box
-      margin-right 0px
+      margin-right 0
 
 .logo
   background-repeat no-repeat
@@ -124,19 +124,19 @@
     padding-bottom 100px
 
 .box2
-    display: block;
-    background-color: #FFF;
-    border: 1px solid #CCC;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    -webkit-box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.05);
-    -moz-box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.05);
-    box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.05);
-    width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 100px;
+    display block
+    background-color #FFF
+    border 1px solid #CCC
+    -webkit-border-radius 4px
+    -moz-border-radius 4px
+    border-radius 4px
+    -webkit-box-shadow 0 0 4px 1px rgba(0, 0, 0, 0.05)
+    -moz-box-shadow 0 0 4px 1px rgba(0, 0, 0, 0.05)
+    box-shadow 0 0 4px 1px rgba(0, 0, 0, 0.05)
+    width 500px
+    margin-left auto
+    margin-right auto
+    margin-bottom 100px
 
     .username
         float right
@@ -150,41 +150,47 @@
 
 
 .region_list
-    list-style-type: none;
-    width: auto;
-    margin: 0;
-    padding: 0;
+    list-style-type none
+    width auto
+    margin 0
+    padding 0
 
     li
-      padding: 4px 5px 2px;
-      margin: 0 auto 2px;
-      height: 25px;
-      font-weight: bold;
+      padding 4px 5px 2px
+      margin 0 auto 2px
+      height 30px
+      font-weight bold
 
     .timestamp
-        float: right;
-        color: #A5A5A5;
-        padding-right: 20px;
-        font-weight: normal;
-        font-size: 75%;
-        padding-top: 4px;
-
-     button[disabled=disabled], button:disabled
-         color grey
+        float right
+        color #A5A5A5
+        padding-right 20px
+        font-weight normal
+        font-size 75%
+        padding-top 4px
 
     .btn
-        background-color: #FFF;
-        background-image: none;
-        border-radius: 0;
-        border: 1px solid #CCC;
-        color: #898888;
-        margin-top: 2px;
+        background-color #FFF
+        background-image none
+        border-radius 0
+        border 1px solid #CCC
+        color #898888
+        margin-top 2px
 
-    .btn:hover {
-        cursor: pointer;
-        color: #002d67;
-        border: 1px solid #002d67;
-      }
+    button[disabled=disabled], button:disabled
+         color #DAD6D6
+    button[disabled=disabled]:hover, button:disabled:hover
+         color #DAD6D6
+         border 1px solid #CCC
+         cursor default
+
+    .btn:hover
+        cursor pointer
+        color #002d67
+        border 1px solid #002d67
+
+
+
 
 
 
@@ -195,7 +201,7 @@ a.sanity_ok
     color rgba(2, 95, 2, 0.84)
 
 a.sanity_pok
-    color rgba(140, 128, 3, 0.97);
+    color rgba(140, 128, 3, 0.97)
 
 li.sanity_nok
     background-color rgba(255, 202, 202, 0.46)
