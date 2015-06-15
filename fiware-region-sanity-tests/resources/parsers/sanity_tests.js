@@ -51,11 +51,11 @@ var parser = Object.create(require('./common/base').parser);
  * @function parseRequest
  * @memberof parser
  * @param {http.IncomingMessage} request    The HTTP request to this server.
- * @returns {EntityData} An object with `status` and `summary` members.
+ * @returns {EntityData} An object with `status`, `summary` and `timestamp` members.
  */
 parser.parseRequest = function(request) {
     var items = request.body.split(/^\*+$/m);
-    return { status: items[0], summary: items[1] };
+    return { status: items[0], summary: items[1], timestamp: request.timestamp };
 };
 
 
@@ -171,6 +171,9 @@ parser.getContextAttrs = function(probeEntityData) {
     } else if (opt_status_line.match(/>>\s+\b\w+\b/)) {
         attrs['sanity_status'] = GLOBAL_STATUS_PARTIAL_OK;
     }
+
+    // Timestamp for tests results
+    attrs['sanity_check_timestamp'] = probeEntityData.timestamp;
 
     // Individual tests results
     summary.map(function(item) {
