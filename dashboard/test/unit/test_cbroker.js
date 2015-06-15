@@ -97,10 +97,11 @@ suite('cbroker', function () {
         });
 
         //when
-        cbroker.retrieveAllRegions(function() {
+        cbroker.retrieveAllRegions(function(result) {
 
             //then
             http.request.restore();
+            assert.deepEqual('Region1',result[0].node);
             done();
         });
 
@@ -109,6 +110,50 @@ suite('cbroker', function () {
         assert.equal('POST',request_stub.getCall(0).args[0].method);
 
     });
+
+    test('should_return_empty_collection_when_an_error_occurs', function (done) {
+        //given
+
+        var req = sinon.stub();
+        req.param = sinon.stub();
+        req.param.withArgs('region').returns('region1');
+        req.session = sinon.stub();
+        req.session.user = {email:'user@mail.com'};
+
+        var request = new EventEmitter;
+
+        request.end = sinon.spy();
+        request.write = sinon.spy();
+        var request_stub = sinon.stub(http, 'request',function(options,callback) {
+
+            var response = new EventEmitter;
+            response.setEncoding=sinon.stub();
+
+            callback(response);
+
+            var resultString = '{ "errorCode" : { "reasonPhrase" : "Internal Server Error", ' +
+                '"details" : "collection: .... exception: socket exception [FAILED_STATE] for localhost:27017"} }';
+
+            response.emit('data', resultString);
+            response.emit('end');
+            return request;
+        });
+
+        //when
+        cbroker.retrieveAllRegions(function(result) {
+
+            //then
+            http.request.restore();
+            assert.deepEqual([],result);
+            done();
+        });
+
+        assert(request.write.calledOnce);
+        assert(request.end.calledOnce);
+        assert.equal('POST',request_stub.getCall(0).args[0].method);
+     });
+
+
 
 
 });
