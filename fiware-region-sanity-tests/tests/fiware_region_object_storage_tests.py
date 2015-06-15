@@ -44,15 +44,23 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         containerName = TEST_CONTAINER_PREFIX + suffix
 
-        response = self.swift_operations.create_container(containerName)
-        self.assertIsNone(response)
-        self.test_world['containers'].append(containerName)
-        self.logger.debug("Created %s container was created" % containerName)
+        try:
+            response = self.swift_operations.create_container(containerName)
+            self.assertIsNone(response)
+            self.test_world['containers'].append(containerName)
+            self.logger.debug("Created %s container was created", containerName)
+        except Exception as ex:
+            self.logger.error("Container %s could not be created: ", containerName)
+            self.fail(ex)
 
-        response = self.swift_operations.get_container(containerName)
-        self.assertEquals('x-container-object-count' in response[0], True)
-        self.assertEquals(len(response[-1]), 0)  # The list of items should be 0.
-        self.logger.debug("Getting %s container details from the object storage" % containerName)
+        try:
+            response = self.swift_operations.get_container(containerName)
+            self.assertEquals('x-container-object-count' in response[0], True)
+            self.assertEquals(len(response[-1]), 0)  # The list of items should be 0.
+            self.logger.debug("Getting %s container details from the object storage", containerName)
+        except Exception as ex:
+            self.logger.error("Container %s could not be listed", containerName)
+            self.fail(ex)
 
     def test_delete_container(self):
         """
@@ -61,19 +69,27 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
         containerName = TEST_CONTAINER_PREFIX + suffix
 
-        response = self.swift_operations.create_container(containerName)
-        self.assertIsNone(response)
-        self.test_world['containers'].append(containerName)
+        try:
+            response = self.swift_operations.create_container(containerName)
+            self.assertIsNone(response)
+            self.test_world['containers'].append(containerName)
+        except Exception as ex:
+            self.logger.error("Container %s could not be created: ", containerName)
+            self.fail(ex)
 
-        response = self.swift_operations.delete_container(containerName)
-        self.assertIsNone(response)
-        self.test_world['containers'].remove(containerName)
+        try:
+            response = self.swift_operations.delete_container(containerName)
+            self.assertIsNone(response)
+            self.test_world['containers'].remove(containerName)
+        except Exception as ex:
+            self.logger.error("Container %s could not be deleted: ", containerName)
+            self.fail(ex)
 
         try:
             self.swift_operations.get_container(containerName)
         except SwiftClientException as e:
             self.assertRaises(e)
-            self.logger.debug("%s container was successfully removed from the object storage" % containerName)
+            self.logger.debug("%s container was successfully removed from the object storage", containerName)
 
     def test_create_text_object_and_download_it(self):
         """
@@ -87,7 +103,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         response = self.swift_operations.create_container(containerName)
         self.assertIsNone(response)
         self.test_world['containers'].append(containerName)
-        self.logger.debug("Created %s container was created" % containerName)
+        self.logger.debug("Created %s container was created", containerName)
 
         ## Uploading the object
         try:
@@ -135,7 +151,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         response = self.swift_operations.create_container(containerName)
         self.assertIsNone(response)
         self.test_world['containers'].append(containerName)
-        self.logger.debug("Created %s container was created" % containerName)
+        self.logger.debug("Created %s container was created", containerName)
 
         ## Uploading the object
         try:
@@ -164,4 +180,4 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
                                                              SWIFT_RESOURCES_PATH)
         except SwiftClientException as e:
             self.assertRaises(e)
-            self.logger.debug("%s object was successfully removed from the object storage" % textObjectName)
+            self.logger.debug("%s object was successfully removed from the object storage", textObjectName)
