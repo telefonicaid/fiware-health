@@ -50,8 +50,8 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.logger.debug("Created %s container was created", containerName)
 
         response = self.swift_operations.get_container(containerName)
-        self.assertEquals('x-container-object-count' in response[0], True)
-        self.assertEquals(len(response[-1]), 0)  # The list of items should be 0.
+        self.assertEquals('x-container-object-count' in response[0], True, "There is no container header in response")
+        self.assertEquals(len(response[-1]), 0, "The container is not empty")  # The list of items should be 0.
         self.logger.debug("Getting %s container details from the object storage", containerName)
 
     def test_delete_container(self):
@@ -118,7 +118,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         ## Checking original file with remote file
         try:
-            self.assertEqual(origin, remote)
+            self.assertEqual(origin, remote, "The original file and the downloaded file are different")
         except AssertionError as e:
             self.logger.error("Object uploaded and object downloaded are different (%s)", textObjectName)
             self.fail(e)
