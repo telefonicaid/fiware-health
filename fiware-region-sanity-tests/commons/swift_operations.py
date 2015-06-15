@@ -27,7 +27,7 @@ __author__ = 'gjp'
 from swiftclient import client
 from commons.constants import DEFAULT_REQUEST_TIMEOUT, OBJECT_STORE_MAX_RETRIES, PROPERTIES_CONFIG_CRED_KEYSTONE_URL, \
     PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID, SERVICE_SWIFT_NAME, \
-    ENDPOINT_TYPE_PUBLIC_URL, PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME
+    ENDPOINT_TYPE_PUBLIC_URL, PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME, TEST_TEXT_CONTENT_TYPE
 import keystoneclient.v2_0.client as keystoneClient
 import keystoneclient.v3.client as keystoneclientv3
 
@@ -85,13 +85,47 @@ class FiwareSwiftOperations:
 
         return container_list
 
-    def create_container(self, containerName):
+    def create_container(self, container_name):
         """
         Creates a new Container
         :param container_name: Name of the container
         :return: None if container was created and the error message if something failed.
         """
-        response = self.client.put_container(containerName)
+        response = self.client.put_container(container_name)
+        return response
+
+    def create_text_object(self, container_name, local_file, object_name):
+        """
+        Creates a new text object into a container
+        :param container_name: Name of the container
+        :return: None if container was created and the error message if something failed.
+        """
+        with open(local_file, 'r') as test_file:
+            response = self.client.put_object(container_name, object_name,
+                                        contents=test_file.read(),
+                                        content_type=TEST_TEXT_CONTENT_TYPE)
+            return response
+
+    def get_text_object(self, container_name, object_name, download_path):
+        """
+        Downloads a text object from a container
+        :param container_name: Name of the container
+        :param object_name: Name of the object
+        :param download_path: Path to download folder
+        :return: returns True when the object was downloaded.
+        """
+        obj = self.client.get_object(container_name, object_name)
+        with open(download_path + object_name, 'w') as test_file:
+            test_file.write(obj[1])
+        return True
+
+    def delete_object(self, container_name, object_name):
+        """
+        Deletes an Object
+        :param container_name: Name of the container
+        :return: None if container was deleted and the error message if something failed.
+        """
+        response = self.client.delete_object(container_name, object_name)
         return response
 
     def get_container(self, containerName):
