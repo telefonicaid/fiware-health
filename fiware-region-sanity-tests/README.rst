@@ -136,6 +136,7 @@ These Test Cases will be common for all federated regions.
 * Test whether it is possible to delete a container.
 * Test whether it is possible to upload a text file and download it.
 * Test whether it is possible to delete an object from a container.
+* Test whether it is possible to upload a big file and download it (More than 5Mb).
 
 
 Configuration

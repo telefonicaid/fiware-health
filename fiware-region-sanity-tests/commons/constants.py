@@ -67,10 +67,15 @@ TEST_NETWORK_PREFIX = "testing_network"
 TEST_ROUTER_PREFIX = "testing_router"
 TEST_CONTAINER_PREFIX = "testing_container"
 TEST_TEXT_OBJECT_PREFIX = "testing_text_object"
+TEST_BIG_OBJECT_PREFIX = "test_big_file"
 TEST_TEXT_FILE_EXTENSION = ".txt"
+TEST_BIG_FILE_EXTENSION = ".zip"
 
 # SWIFT CONTANTS
 SWIFT_RESOURCES_PATH = "resources/swift_objects/"
+BIG_FILE_URL_1 = "https://github.com/telefonicaid/fiware-paas/archive/1.1.0.zip"
+BIG_FILE_URL_2 = "https://github.com/telefonicaid/fiware-paas/archive/1.3.4.zip"
+
 
 # SSH CONNECTION (timeouts in seconds)
 SSH_CONNECTION_PORT = 22
@@ -88,6 +93,3 @@ SERVICE_SWIFT_NAME = "object-store"
 
 # ENDPOINTS
 ENDPOINT_TYPE_PUBLIC_URL = "publicURL"
-
-# TYPES
-TEST_TEXT_CONTENT_TYPE = "text/plain"
