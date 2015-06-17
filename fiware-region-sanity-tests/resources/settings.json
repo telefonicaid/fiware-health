@@ -9,11 +9,11 @@
         "password": ""
     },
     "test_configuration": {
-        "phonehome_endpoint": ""
-    },
-    "swift_configuration": {
-        "big_file_url_1": "https://github.com/telefonicaid/fiware-paas/archive/1.1.0.zip",
-        "big_file_url_2": "https://github.com/telefonicaid/fiware-paas/archive/1.3.4.zip"
+        "phonehome_endpoint": "",
+        "swift_configuration": {
+            "big_file_url_1": "https://github.com/telefonicaid/fiware-paas/archive/1.1.0.zip",
+            "big_file_url_2": "https://github.com/telefonicaid/fiware-paas/archive/1.3.4.zip"
+        }
     },
     "region_configuration": {
         "external_network_name": {

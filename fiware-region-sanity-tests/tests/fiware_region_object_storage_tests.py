@@ -26,7 +26,7 @@ __author__ = 'gjp'
 from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import TEST_CONTAINER_PREFIX, TEST_TEXT_OBJECT_PREFIX, TEST_TEXT_FILE_EXTENSION, \
     SWIFT_RESOURCES_PATH, TEST_BIG_OBJECT_PREFIX, TEST_BIG_FILE_EXTENSION, PROPERTIES_CONFIG_SWIFT,\
-    PROPERTIES_CONFIG_SWIFT_BIG_FILE_1, PROPERTIES_CONFIG_SWIFT_BIG_FILE_2
+    PROPERTIES_CONFIG_SWIFT_BIG_FILE_1, PROPERTIES_CONFIG_SWIFT_BIG_FILE_2, PROPERTIES_CONFIG_TEST
 from swiftclient.exceptions import ClientException as SwiftClientException
 from datetime import datetime
 import hashlib
@@ -168,7 +168,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.logger.debug("Created %s container was created", containerName)
 
         # Creating a new big object
-        big_file_url_1 = self.conf[PROPERTIES_CONFIG_SWIFT][PROPERTIES_CONFIG_SWIFT_BIG_FILE_1]
+        big_file_url_1 = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_SWIFT][PROPERTIES_CONFIG_SWIFT_BIG_FILE_1]
         f = urllib2.urlopen(big_file_url_1)
         data = f.read()
         with open(SWIFT_RESOURCES_PATH + TEST_BIG_OBJECT_PREFIX + TEST_BIG_FILE_EXTENSION, "wb") as code:
@@ -200,7 +200,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         # Downloading a second big file to check that is different
         suffix2 = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
-        big_file_url_2 = self.conf[PROPERTIES_CONFIG_SWIFT][PROPERTIES_CONFIG_SWIFT_BIG_FILE_2]
+        big_file_url_2 = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_SWIFT][PROPERTIES_CONFIG_SWIFT_BIG_FILE_2]
         f2 = urllib2.urlopen(big_file_url_2)
         data = f2.read()
         with open(SWIFT_RESOURCES_PATH + TEST_BIG_OBJECT_PREFIX + suffix2 + TEST_BIG_FILE_EXTENSION, "wb") as code2:
