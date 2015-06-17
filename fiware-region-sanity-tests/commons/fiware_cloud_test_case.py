@@ -421,7 +421,7 @@ class FiwareTestCase(unittest.TestCase):
         """
         if suite and cls.with_storage:
             # get pre-existing test local files list (ideally, empty when starting the tests)
-            files = [ f for f in listdir(SWIFT_RESOURCES_PATH) if isfile(join(SWIFT_RESOURCES_PATH, f)) ]
+            files = [f for f in listdir(SWIFT_RESOURCES_PATH) if isfile(join(SWIFT_RESOURCES_PATH, f))]
             for file in files:
                 cls.logger.debug("init_world() found local object '%s' not deleted", file)
                 if file != TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION:
@@ -431,7 +431,6 @@ class FiwareTestCase(unittest.TestCase):
         for local_file in list(world['local_objects']):
                 os.remove(SWIFT_RESOURCES_PATH + local_file)
                 world['local_objects'].remove(local_file)
-
 
     @classmethod
     def setUpClass(cls):
