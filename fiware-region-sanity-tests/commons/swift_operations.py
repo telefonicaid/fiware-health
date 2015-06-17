@@ -101,8 +101,7 @@ class FiwareSwiftOperations:
         :return: None if container was created and the error message if something failed.
         """
         with open(local_file, 'r') as test_file:
-            response = self.client.put_object(container_name, object_name,
-                                        contents=test_file.read())
+            response = self.client.put_object(container_name, object_name, contents=test_file.read())
             return response
 
     def get_object(self, container_name, object_name, download_path):

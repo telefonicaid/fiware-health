@@ -201,3 +201,8 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         if self.test_world.get('containers'):
             self.logger.debug("Tearing down containers...")
             self.reset_world_containers(self.test_world)
+
+        if self.test_world.get('local_objects'):
+            self.logger.debug("Tearing down local objects...")
+            self.reset_world_local_objects(self.test_world)
+

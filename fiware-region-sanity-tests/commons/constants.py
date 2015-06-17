@@ -44,6 +44,9 @@ PROPERTIES_CONFIG_REGION_EXTERNAL_NET = "external_network_name"
 PROPERTIES_CONFIG_REGION_TEST_FLAVOR = "test_flavor"
 PROPERTIES_CONFIG_KEY_TEST_CASES = "key_test_cases"
 PROPERTIES_CONFIG_OPT_TEST_CASES = "opt_test_cases"
+PROPERTIES_CONFIG_SWIFT = "swift_configuration"
+PROPERTIES_CONFIG_SWIFT_BIG_FILE_1 = "big_file_url_1"
+PROPERTIES_CONFIG_SWIFT_BIG_FILE_2 = "big_file_url_2"
 
 # TASK TIMERS AND TIMEOUTS (in seconds)
 DEFAULT_REQUEST_TIMEOUT = 60
@@ -73,9 +76,6 @@ TEST_BIG_FILE_EXTENSION = ".zip"
 
 # SWIFT CONTANTS
 SWIFT_RESOURCES_PATH = "resources/swift_objects/"
-BIG_FILE_URL_1 = "https://github.com/telefonicaid/fiware-paas/archive/1.1.0.zip"
-BIG_FILE_URL_2 = "https://github.com/telefonicaid/fiware-paas/archive/1.3.4.zip"
-
 
 # SSH CONNECTION (timeouts in seconds)
 SSH_CONNECTION_PORT = 22
