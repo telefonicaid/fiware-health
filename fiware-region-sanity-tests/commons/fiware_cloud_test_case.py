@@ -38,11 +38,14 @@ from commons.neutron_operations import FiwareNeutronOperations
 from commons.swift_operations import FiwareSwiftOperations
 from commons.constants import *
 from os import environ
+from os import listdir
+from os.path import isfile, join
 import unittest
 import urlparse
 import logging
 import json
 import time
+import os
 
 
 class FiwareTestCase(unittest.TestCase):
@@ -190,7 +193,8 @@ class FiwareTestCase(unittest.TestCase):
             'routers': [],
             'allocated_ips': [],
             'containers': [],
-            'swift_objects': []
+            'swift_objects': [],
+            'local_objects': []
         })
 
         if suite:
@@ -202,6 +206,7 @@ class FiwareTestCase(unittest.TestCase):
             cls.reset_world_routers(world, suite)
             cls.reset_world_allocated_ips(world, suite)
             cls.reset_world_containers(world, suite)
+            cls.reset_world_local_objects(world, suite)
 
     @classmethod
     def reset_world_servers(cls, world, suite=False):
@@ -408,6 +413,24 @@ class FiwareTestCase(unittest.TestCase):
                 world['containers'].remove(container)
             except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
                 cls.logger.error("Failed to delete container %s: %s", container, e)
+
+    @classmethod
+    def reset_world_local_objects(cls, world, suite=False):
+        """
+        Init the world['containers'] entry (after deleting existing resources)
+        """
+        if suite and cls.with_storage:
+            # get pre-existing test local files list (ideally, empty when starting the tests)
+            files = [f for f in listdir(SWIFT_RESOURCES_PATH) if isfile(join(SWIFT_RESOURCES_PATH, f))]
+            for file in files:
+                cls.logger.debug("init_world() found local object '%s' not deleted", file)
+                if file != TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION:
+                    world['local_objects'].append(file)
+
+        # release resources to ensure a clean world
+        for local_file in list(world['local_objects']):
+                os.remove(SWIFT_RESOURCES_PATH + local_file)
+                world['local_objects'].remove(local_file)
 
     @classmethod
     def setUpClass(cls):
