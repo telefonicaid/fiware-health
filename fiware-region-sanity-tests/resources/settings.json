@@ -34,7 +34,8 @@
             "SophiaAntipolis": "net04_ext",
             "Poznan": "public-ext-net-01",
             "Gent": "public-ext-net-03",
-            "Crete": "public-ext-net-01"
+            "Crete": "public-ext-net-01",
+            "SaoPaulo": "public-ext-net-01"
         },
         "test_flavor": {
             "Prague": "tiny"
