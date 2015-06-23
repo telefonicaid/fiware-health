@@ -30,6 +30,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 import gobject
 from commons.constants import PHONEHOME_DBUS_NAME, PHONEHOME_TIMEOUT, PHONEHOME_SIGNAL
 import re
+import json
 
 
 class DbusPhoneHomeClient():
@@ -81,7 +82,6 @@ class DbusPhoneHomeClient():
         hostname = re.match(".*hostname=([\w-]*)", phonehome_http_data)
         hostname = hostname.group(1) if hostname is not None else hostname
         if hostname is None:
-            import json
             metadata = json.loads(str(phonehome_http_data))["meta"]
             DbusPhoneHomeClient.logger.debug("Received metadata: '%s'. Expected metadata: '%s'",
                                              metadata, DbusPhoneHomeClient.expected_signal_data)
