@@ -34,7 +34,7 @@ import re
 
 class DbusPhoneHomeClient():
 
-    expected_signal_hostname = None
+    expected_signal_data = None
     mainloop = None
     data_received = None
     logger = None
@@ -73,16 +73,23 @@ class DbusPhoneHomeClient():
     def phonehome_signal_handler(phonehome_http_data):
         """
         Handler for the signal 'phonehome_signal'.
-        :param hostname: Receives the hostname of the VM emitted in the signal. If matches with the expected one,
+        :param phonehome_http_data: Receives the data of the VM emitted in the signal. If matches with the expected one,
          main loop will be finished.
         :return: None
         """
         DbusPhoneHomeClient.logger.debug("Signal received with data '%s'", phonehome_http_data)
         hostname = re.match(".*hostname=([\w-]*)", phonehome_http_data)
         hostname = hostname.group(1) if hostname is not None else hostname
-        DbusPhoneHomeClient.logger.debug("Received hostname: '%s'. Expected hostname: '%s'",
-                                         hostname, DbusPhoneHomeClient.expected_signal_hostname)
-        if DbusPhoneHomeClient.expected_signal_hostname == hostname:
+        if hostname is None:
+            import json
+            metadata = json.loads(str(phonehome_http_data))["meta"]
+            DbusPhoneHomeClient.logger.debug("Received metadata: '%s'. Expected metadata: '%s'",
+                                             metadata, DbusPhoneHomeClient.expected_signal_data)
+        else:
+            DbusPhoneHomeClient.logger.debug("Received hostname: '%s'. Expected hostname: '%s'",
+                                             hostname, DbusPhoneHomeClient.expected_signal_data)
+        if DbusPhoneHomeClient.expected_signal_data == hostname or \
+                        DbusPhoneHomeClient.expected_signal_data == metadata:
             DbusPhoneHomeClient.logger.debug("Matches! Finishing main loop...")
             DbusPhoneHomeClient.data_received = phonehome_http_data
             DbusPhoneHomeClient.mainloop.quit()
@@ -90,7 +97,7 @@ class DbusPhoneHomeClient():
             DbusPhoneHomeClient.logger.debug("Signal data received is not the expected one. "
                                              "Waiting for valid signal...")
 
-    def connect_and_wait_for_phonehome_signal(self, bus_name, object_path, hostname):
+    def connect_and_wait_for_phonehome_signal(self, bus_name, object_path, data_expected):
         """
         Connects to Bus and get the published object (PhoneHome DBus object). The proxy are translated into
          method calls on the remote object.
@@ -100,14 +107,14 @@ class DbusPhoneHomeClient():
                 named_service is a deprecated alias for this. PhoneHome DBus service.
         :param object_path: str
                 The object path of the desired PhoneHome Object.
-        :param hostname: The PhoneHome client will wait for a 'phonehome signal' with this hostname value.
+        :param data_expected: The PhoneHome client will wait for a 'phonehome signal' with this data value.
          When received, main loop will be finished and data received from the signal will be returned.
         :return: None if signal has not been received after the timewait; Else, the content received in the signal
         """
 
         self.logger.debug("Connecting to PhoneHome DBus Service in bus '%s' and getting PhoneHome object "
                           "with path '%s'", bus_name, object_path)
-        DbusPhoneHomeClient.expected_signal_hostname = hostname
+        DbusPhoneHomeClient.expected_signal_data = data_expected
 
         try:
             object = self.bus.get_object(bus_name, object_path)
@@ -125,12 +132,12 @@ class DbusPhoneHomeClient():
         DbusPhoneHomeClient.mainloop = gobject.MainLoop()
 
         # Setup timeout and start main loop
-        phonehome_timeout = PHONEHOME_TIMEOUT*1000
+        phonehome_timeout = PHONEHOME_TIMEOUT * 1000
         self.logger.debug("Setting time out to: %d", phonehome_timeout)
         gobject.timeout_add(phonehome_timeout, self.timeout, DbusPhoneHomeClient.mainloop, self.logger, priority=100)
 
-        self.logger.debug("Waiting for signal '%s' with value 'hostname=%s'. Timeout set to %s seconds",
-                          PHONEHOME_SIGNAL, hostname, PHONEHOME_TIMEOUT)
+        self.logger.debug("Waiting for signal '%s' with value 'hostname=' or 'metadata value' '%s' ."
+                          " Timeout set to %s seconds", PHONEHOME_SIGNAL, data_expected, PHONEHOME_TIMEOUT)
         DbusPhoneHomeClient.mainloop.run()
         self.logger.debug("Dbus PhoneHome Service stopped")
 
@@ -208,11 +215,11 @@ class DbusPhoneHomeServer():
     def emit_phonehome_signal(self, phonehome_data):
         """
         This method emits the phonehome signal to all clients connected to the bus,
-         with the given hostname as value.
+         with the given data as value.
         :param phonehome_data: PhoneHome data (HTTP POST request)
         :return: None
         """
-        self.logger.debug("Emitting phonehome signal with param: hostname=%s", phonehome_data)
+        self.logger.debug("Emitting phonehome signal with data: %s", phonehome_data)
         self.dbus_phonehome_object.phonehome_signal(phonehome_data)
 
     def remove_object(self):

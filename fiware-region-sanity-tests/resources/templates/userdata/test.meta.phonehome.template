@@ -1,0 +1,18 @@
+#cloud-config
+
+# phone_home: if this dictionary is present, then the phone_home
+# cloud-config module will post specified data back to given url
+#
+runcmd:
+ - curl "http://169.254.169.254/openstack/latest/meta_data.json" > /tmp/metadata.json
+ - curl -X POST -d @/tmp/metadata.json {{ phonehome_endpoint }}
+
+# Capture all subprocess output into a logfile
+# Useful for troubleshooting cloud-init issues
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
+
+# final_message
+# default: cloud-init boot finished at $TIMESTAMP. Up $UPTIME seconds
+# this message is written by cloud-final when the system is finished
+# its first boot
+final_message: "The system is finally up, after $UPTIME seconds"

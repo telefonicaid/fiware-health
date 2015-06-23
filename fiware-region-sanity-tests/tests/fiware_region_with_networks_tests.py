@@ -33,6 +33,7 @@ from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
 import urlparse
 import re
+import json
 
 
 class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
@@ -451,3 +452,70 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.assertEqual(expected_instance_name, received_hostname,
                          "Received hostname '%s' in PhoneHome request does not match with the expected instance name" %
                          received_hostname)
+
+    def test_deploy_instance_with_networks_and_check_metadata_service(self):
+        """
+        Test whether it is possible to deploy an instance with new network and check that metadata service
+         is working properly (PhoneHome service)
+        """
+
+        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
+        if self.suite_world['allocated_ips']:
+            self.skipTest("There were pre-existing, not deallocated IPs")
+
+        # skip test if no PhoneHome service endpoint was given by configuration (either in settings or by environment)
+        phonehome_endpoint = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
+        if not phonehome_endpoint:
+            self.skipTest("No value found for '{}.{}' setting".format(
+                PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
+
+        # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
+        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_METADATA_PATH)
+        with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
+            userdata_content = userdata_file.read()
+            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
+            self.logger.debug("Userdata content: %s", userdata_content)
+
+        # Create Router with an external network gateway
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        router_name = TEST_ROUTER_PREFIX + "_meta_" + suffix
+        external_network_id = self.__get_external_network_test_helper__()
+        router_id = self.__create_router_test_helper__(router_name, external_network_id)
+
+        # Create Network
+        network_name = TEST_NETWORK_PREFIX + "_" + suffix
+        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
+
+        # Add interface to router
+        port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
+        self.test_world['ports'].append(port_id)
+
+        # Create Metadata
+        metadata = {"region": self.region_name, "foo": "bar"}
+        self.logger.debug("Esto vale metadata': %s", metadata)
+
+        # Deploy VM
+        instance_name = TEST_SERVER_PREFIX + "_meta_" + suffix
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
+                                                    network_name=network_name, is_network_new=False,
+                                                    metadata=metadata,
+                                                    userdata=userdata_content)
+
+        # VM should have this metadata associated
+        expected_metadata = {'region': self.region_name, 'foo': 'bar'}
+
+        # Create new DBus connection and wait for emitted signal from HTTP PhoneHome service
+        client = DbusPhoneHomeClient(self.logger)
+        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
+                                                              expected_metadata)
+        self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
+        self.logger.debug("Request received from VM when 'calling home': %s", result)
+
+        # Get metadata from data received
+        self.assertIn("meta", result, "PhoneHome request has been received but 'meta' param is not in")
+        received_metadata = json.loads(str(result))["meta"]
+
+        # Check metadata
+        self.assertEqual(expected_metadata, received_metadata,
+                         "Received metadata '%s' in PhoneHome request does not match with the expected metadata" %
+                         received_metadata)

@@ -83,6 +83,7 @@ SSH_CONNECTION_TIMEOUT = 8
 
 # PHONEHOME SERVER (timeouts in seconds)
 PHONEHOME_USERDATA_PATH = "resources/templates/userdata/test.snat.phonehome.template"
+PHONEHOME_USERDATA_METADATA_PATH = "resources/templates/userdata/test.meta.phonehome.template"
 PHONEHOME_TIMEOUT = 175
 PHONEHOME_DBUS_NAME = "org.fiware.fihealth"
 PHONEHOME_DBUS_OBJECT_PATH = "/phonehome"

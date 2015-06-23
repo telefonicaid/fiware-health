@@ -52,13 +52,13 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         content = self.rfile.read(content_length)
 
-        # Get Hostname from body
+        # Get data from body
         if content:
             dbus_server.emit_phonehome_signal(str(content))
             self.send_response(200)
         else:
             # Bad Request
-            self.send_response(400, message="Invalid hostname received in HTTP PhoneHome request")
+            self.send_response(400, message="Invalid data received in HTTP PhoneHome request")
 
 
 class HttpPhoneHomeServer():
