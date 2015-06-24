@@ -9,30 +9,38 @@ block content
 
              #box2.box2
                 ul.region_list
+                   li.header_row
+                      | SANITY CHECK STATUS
+                   - var i  = 0;
                    each region in regions
                       - var filename = web_context+'report/'+region['node'] + '_results.html';
                       - var sanity_status = region['status'];
+                      - var background = (i % 2 == 0)? 'even':'odd';
+                      - i=i+1;
+
                       case sanity_status
                         when ''
-                           li.sanity_no_data
+                           li(class='sanity_no_data #{background}')
                             div(style="height:0px",title='no data #{sanity_status}') #{region['node']}
                         when 'OK'
-                            li.sanity_ok
-                             a( class='sanity_ok', href='javascript:loadReport("#{filename}")') #{region['node']}
+                            li(class='sanity_ok #{background}')
+                             a(class='sanity_ok', href='javascript:loadReport("#{filename}")') #{region['node']}
                              div.timestamp
                                   |(last updated: #{region['timestamp']})
                         when 'NOK'
-                            li.sanity_nok
+                            li(class='sanity_nok #{background}')
                                 a( class='sanity_nok', href='javascript:loadReport("#{filename}")') #{region['node']}
                                 div.timestamp
                                     | (last updated: #{region['timestamp']})
                         when 'POK'
-                            li.sanity_pok
+                            li(class='sanity_pok #{background}')
                                 a( class='sanity_pok', href='javascript:loadReport("#{filename}")') #{region['node']}
                                 div.timestamp
                                     | (last updated: #{region['timestamp']})
                         default
-                             li.sanity_na
+                             li(class='sanity_na #{background}')
                                  div(style="height:0px",title='Sanity Check in progress') #{region['node']}
                                  div.timestamp
                                     |(in progress)
+                   li.footer_row
+                      p
