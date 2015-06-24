@@ -4,7 +4,7 @@
 # cloud-config module will post specified data back to given url
 #
 phone_home:
- url: {{ phonehome_endpoint }}
+ url: {{ phonehome_endpoint }}{{ path_resource }}
  post: [ hostname, instance_id ]
  tries: 10
 

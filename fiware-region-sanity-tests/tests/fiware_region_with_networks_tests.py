@@ -31,7 +31,6 @@ from neutronclient.common.exceptions import NeutronClientException, IpAddressGen
 from datetime import datetime
 from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
-import urlparse
 import re
 import json
 
@@ -407,11 +406,14 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             self.skipTest("No value found for '{}.{}' setting".format(
                 PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
 
-        # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
+        path_resource = PHONEHOME_DBUS_OBJECT_PATH
+
+        # Load userdata from file and compile the template (replacing variable values)
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
         with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
+            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
+                                                           path_resource=path_resource)
             self.logger.debug("Userdata content: %s", userdata_content)
 
         # Create Router with an external network gateway
@@ -440,7 +442,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         # Create new new DBus connection and wait for emitted signal from HTTP PhoneHome service
         client = DbusPhoneHomeClient(self.logger)
         result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
-                                                              expected_instance_name)
+                                                              PHONEHOME_SIGNAL, expected_instance_name)
         self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
         self.logger.debug("Request received from VM when 'calling home': %s", result)
 
@@ -469,11 +471,17 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             self.skipTest("No value found for '{}.{}' setting".format(
                 PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
 
-        # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
+        path_resource = PHONEHOME_DBUS_OBJECT_METADATA_PATH
+        metadata_service_url = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_METADATA_SERVICE_URL]
+
+       # Load userdata from file and compile the template (replacing variable values)
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_METADATA_PATH)
         with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
+            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
+                                                           path_resource=path_resource,
+                                                           openstack_metadata_service_url=metadata_service_url)
+
             self.logger.debug("Userdata content: %s", userdata_content)
 
         # Create Router with an external network gateway
@@ -492,7 +500,6 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         # Create Metadata
         metadata = {"region": self.region_name, "foo": "bar"}
-        self.logger.debug("Esto vale metadata': %s", metadata)
 
         # Deploy VM
         instance_name = TEST_SERVER_PREFIX + "_meta_" + suffix
@@ -506,8 +513,9 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         # Create new DBus connection and wait for emitted signal from HTTP PhoneHome service
         client = DbusPhoneHomeClient(self.logger)
-        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
-                                                              expected_metadata)
+
+        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_METADATA_PATH,
+                                                              PHONEHOME_METADATA_SIGNAL, expected_metadata)
         self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
         self.logger.debug("Request received from VM when 'calling home': %s", result)
 

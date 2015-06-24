@@ -47,6 +47,7 @@ PROPERTIES_CONFIG_OPT_TEST_CASES = "opt_test_cases"
 PROPERTIES_CONFIG_SWIFT = "swift_configuration"
 PROPERTIES_CONFIG_SWIFT_BIG_FILE_1 = "big_file_url_1"
 PROPERTIES_CONFIG_SWIFT_BIG_FILE_2 = "big_file_url_2"
+PROPERTIES_CONFIG_METADATA_SERVICE_URL = "openstack_metadata_service_url"
 
 # TASK TIMERS AND TIMEOUTS (in seconds)
 DEFAULT_REQUEST_TIMEOUT = 60
@@ -87,7 +88,9 @@ PHONEHOME_USERDATA_METADATA_PATH = "resources/templates/userdata/test.meta.phone
 PHONEHOME_TIMEOUT = 175
 PHONEHOME_DBUS_NAME = "org.fiware.fihealth"
 PHONEHOME_DBUS_OBJECT_PATH = "/phonehome"
+PHONEHOME_DBUS_OBJECT_METADATA_PATH = "/metadata"
 PHONEHOME_SIGNAL = "phonehome_signal"
+PHONEHOME_METADATA_SIGNAL = "phonehome_metadata_signal"
 
 # SERVICES NAMES
 SERVICE_SWIFT_NAME = "object-store"

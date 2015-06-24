@@ -27,7 +27,7 @@ import json
 from os import environ
 import sys
 from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
-    LOGGING_FILE, PHONEHOME_DBUS_OBJECT_PATH
+    LOGGING_FILE, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH
 import urlparse
 from dbus_phonehome_service import DbusPhoneHomeServer
 import logging.config
@@ -54,7 +54,10 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
 
         # Get data from body
         if content:
-            dbus_server.emit_phonehome_signal(str(content))
+            if self.path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
+                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH)
+            elif self.path == PHONEHOME_DBUS_OBJECT_PATH:
+                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH)
             self.send_response(200)
         else:
             # Bad Request
@@ -128,8 +131,10 @@ if __name__ == '__main__':
 
     # Create global DBus server
     logger.info("Creating DBus PhoneHome service with object: %s", PHONEHOME_DBUS_OBJECT_PATH)
+    logger.info("Creating DBus PhoneHome service with object: %s", PHONEHOME_DBUS_OBJECT_METADATA_PATH)
     dbus_server = DbusPhoneHomeServer(logger)
     dbus_server.register_phonehome_object(PHONEHOME_DBUS_OBJECT_PATH)
+    dbus_server.register_phonehome_object(PHONEHOME_DBUS_OBJECT_METADATA_PATH)
 
     # Create and start server
     logger.info("Creating and starting PhoneHome Server")
