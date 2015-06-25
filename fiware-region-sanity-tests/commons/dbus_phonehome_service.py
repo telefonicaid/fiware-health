@@ -93,7 +93,7 @@ class DbusPhoneHomeClient():
                                              "Waiting for valid signal...")
 
     @staticmethod
-    def phonehome_signal_handler_metadata( phonehome_http_data, hostname):
+    def phonehome_signal_handler_metadata(phonehome_http_data, hostname):
         """
         Handler for the signal 'phonehome_signal'.
         :param phonehome_http_data: Receives the metadata of the VM emitted in the signal.
@@ -200,7 +200,8 @@ class DbusPhoneHomeObject(dbus.service.Object):
         :return : None
         """
 
-        self.logger.debug("PhoneHome Metadata signal emitted with data: %s for the hostname %s", str(phonehome_http_data), hostname)
+        self.logger.debug("PhoneHome Metadata signal emitted with data: %s for the hostname %s",
+                          str(phonehome_http_data), hostname)
 
     def remove_object(self):
         """

@@ -457,8 +457,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
     def test_deploy_instance_with_networks_and_check_metadata_service(self):
         """
-        Test whether it is possible to deploy an instance with new network and check that metadata service
-         is working properly (PhoneHome service)
+        Test whether it is possible to deploy an instance and check if metadata service is working properly (phonehome)
         """
 
         # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
@@ -474,7 +473,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         path_resource = PHONEHOME_DBUS_OBJECT_METADATA_PATH
         metadata_service_url = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_METADATA_SERVICE_URL]
 
-       # Load userdata from file and compile the template (replacing variable values)
+        # Load userdata from file and compile the template (replacing variable values)
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_METADATA_PATH)
         with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
@@ -509,7 +508,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
                                                     userdata=userdata_content)
 
         # VM should have this metadata associated
-        expected_metadata = {'region': self.region_name, 'foo': 'bar-' + suffix }
+        expected_metadata = {'region': self.region_name, 'foo': 'bar-' + suffix}
         expected_instance_name = instance_name.replace("_", "-")
 
         # Create new DBus connection and wait for emitted signal from HTTP PhoneHome service
