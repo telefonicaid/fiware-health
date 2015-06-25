@@ -76,10 +76,7 @@
                             {% for test in group.tests %}
                             {% if test.failed %}
                             <section style="padding-right: 14px; padding-left: 14px;" id="{{ class }}:{{ test.name }}">
-                                <div class="test_details_title">
-                                    <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
-                                </div>
-
+                                <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
                                 <div class="test_details">
                                     <h4>Details</h4>
                                     <pre><xmp>{{ test.message }}</xmp></pre>
