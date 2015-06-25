@@ -137,6 +137,6 @@ function loadReport(filename) {
 
   document.getElementById('box1').style.display = 'none';
   var el = document.getElementById('frameContainer');
-  el.outerHTML = '<iframe id="iframe-container" src="' + filename + '" scrolling="no" style=""></iframe>';
+  el.outerHTML = '<iframe id="iframe-container" src="' + filename + '" scrolling="no" style="padding-left: 40px;padding-right: 40px;"></iframe>';
 
 }
