@@ -36,7 +36,7 @@ import json
 
 class DbusPhoneHomeClient():
 
-    expected_signal_data = None
+    expected_signal_hostname = None
     mainloop = None
     data_received = None
     logger = None
@@ -83,8 +83,8 @@ class DbusPhoneHomeClient():
         hostname = re.match(".*hostname=([\w-]*)", phonehome_http_data)
         hostname = hostname.group(1) if hostname is not None else hostname
         DbusPhoneHomeClient.logger.debug("Received hostname: '%s'. Expected hostname: '%s'",
-                                             hostname, DbusPhoneHomeClient.expected_signal_data)
-        if DbusPhoneHomeClient.expected_signal_data == hostname:
+                                             hostname, DbusPhoneHomeClient.expected_signal_hostname)
+        if DbusPhoneHomeClient.expected_signal_hostname == hostname:
             DbusPhoneHomeClient.logger.debug("Matches! Finishing main loop...")
             DbusPhoneHomeClient.data_received = phonehome_http_data
             DbusPhoneHomeClient.mainloop.quit()
@@ -93,24 +93,24 @@ class DbusPhoneHomeClient():
                                              "Waiting for valid signal...")
 
     @staticmethod
-    def phonehome_signal_handler_metadata(phonehome_http_data):
+    def phonehome_signal_handler_metadata( phonehome_http_data, hostname):
         """
         Handler for the signal 'phonehome_signal'.
-        :param phonehome_http_data: Receives the data of the VM emitted in the signal. If matches with the expected one,
+        :param phonehome_http_data: Receives the metadata of the VM emitted in the signal.
+        :param hostname: Receives the name of the host. If matches with the expected one,
          main loop will be finished.
         :return: None
         """
         DbusPhoneHomeClient.logger.debug("Signal received with data '%s'", phonehome_http_data)
-        metadata = json.loads(str(phonehome_http_data))["meta"]
-        DbusPhoneHomeClient.logger.debug("Received metadata: '%s'. Expected metadata: '%s'",
-                                         metadata, DbusPhoneHomeClient.expected_signal_data)
+        DbusPhoneHomeClient.logger.debug("Received hostname: '%s'. Expected hostname: '%s'",
+                                         hostname, DbusPhoneHomeClient.expected_signal_hostname)
 
-        if DbusPhoneHomeClient.expected_signal_data == metadata:
+        if DbusPhoneHomeClient.expected_signal_hostname == hostname:
             DbusPhoneHomeClient.logger.debug("Matches! Finishing main loop...")
             DbusPhoneHomeClient.data_received = phonehome_http_data
             DbusPhoneHomeClient.mainloop.quit()
         else:
-            DbusPhoneHomeClient.logger.debug("Signal data received is not the expected one. "
+            DbusPhoneHomeClient.logger.debug("Signal hostname received is not the expected one. "
                                              "Waiting for valid signal...")
 
     def connect_and_wait_for_phonehome_signal(self, bus_name, object_path, phonehome_signal, data_expected):
@@ -130,7 +130,7 @@ class DbusPhoneHomeClient():
 
         self.logger.debug("Connecting to PhoneHome DBus Service in bus '%s' and getting PhoneHome object "
                           "with path '%s'", bus_name, object_path)
-        DbusPhoneHomeClient.expected_signal_data = data_expected
+        DbusPhoneHomeClient.expected_signal_hostname = data_expected
 
         try:
             object = self.bus.get_object(bus_name, object_path)
@@ -154,7 +154,7 @@ class DbusPhoneHomeClient():
         self.logger.debug("Setting time out to: %d", phonehome_timeout)
         gobject.timeout_add(phonehome_timeout, self.timeout, DbusPhoneHomeClient.mainloop, self.logger, priority=100)
 
-        self.logger.debug("Waiting for signal '%s' with value 'hostname=' or 'metadata value' '%s' ."
+        self.logger.debug("Waiting for signal '%s' with value or header 'hostname=%s' ."
                           " Timeout set to %s seconds", phonehome_signal, data_expected, PHONEHOME_TIMEOUT)
         DbusPhoneHomeClient.mainloop.run()
         self.logger.debug("Dbus PhoneHome Service stopped")
@@ -191,15 +191,16 @@ class DbusPhoneHomeObject(dbus.service.Object):
 
         self.logger.debug("PhoneHome signal emitted with data: %s", str(phonehome_http_data))
 
-    @dbus.service.signal(dbus_interface=PHONEHOME_DBUS_NAME, signature='s')
-    def phonehome_metadata_signal(self, phonehome_http_data):
+    @dbus.service.signal(dbus_interface=PHONEHOME_DBUS_NAME, signature='ss')
+    def phonehome_metadata_signal(self, phonehome_http_data, hostname):
         """
         This method is used to emit the signal "phonehome_metadata_signal" with the given http data
         :param phonehome_http_data: String with all BODY data of the POST request
+        :param hostname: String with the header hostname value.
         :return : None
         """
 
-        self.logger.debug("PhoneHome Metadata signal emitted with data: %s", str(phonehome_http_data))
+        self.logger.debug("PhoneHome Metadata signal emitted with data: %s for the hostname %s", str(phonehome_http_data), hostname)
 
     def remove_object(self):
         """
@@ -241,15 +242,16 @@ class DbusPhoneHomeServer():
         self.dbus_phonehome_objects[phonehome_object_path] = DbusPhoneHomeObject(self.logger, bus,
                                                                                  phonehome_object_path)
 
-    def emit_phonehome_signal(self, phonehome_data, phonehome_object_path):
+    def emit_phonehome_signal(self, phonehome_data, phonehome_object_path, hostname):
         """
         This method emits the phonehome signal to all clients connected to the bus,
          with the given data as value.
         :param phonehome_data: PhoneHome data (HTTP POST request)
+        :param hostname: String with the header Hostname value
         :return: None
         """
         if phonehome_object_path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
-            self.dbus_phonehome_objects[phonehome_object_path].phonehome_metadata_signal(phonehome_data)
+            self.dbus_phonehome_objects[phonehome_object_path].phonehome_metadata_signal(phonehome_data, hostname)
         elif phonehome_object_path == PHONEHOME_DBUS_OBJECT_PATH:
             self.dbus_phonehome_objects[phonehome_object_path].phonehome_signal(phonehome_data)
 

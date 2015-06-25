@@ -5,7 +5,7 @@
 #
 runcmd:
  - curl "{{ openstack_metadata_service_url }}" > /tmp/metadata.json
- - curl -X POST -d @/tmp/metadata.json {{ phonehome_endpoint }}{{ path_resource }}
+ - 'curl -X POST -d @/tmp/metadata.json -H "Hostname: $(hostname)" {{ phonehome_endpoint }}{{ path_resource }}'
 
 # Capture all subprocess output into a logfile
 # Useful for troubleshooting cloud-init issues

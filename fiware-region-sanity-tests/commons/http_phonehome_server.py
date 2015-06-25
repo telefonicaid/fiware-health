@@ -55,10 +55,15 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
         # Get data from body
         if content:
             if self.path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
-                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH)
+                if "Hostname" in self.headers:
+                    dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH, self.headers['Hostname'])
+                    self.send_response(200)
+                else:
+                    self.send_response(400, message="Hostname header is not present in HTTP PhoneHome request")
+
             elif self.path == PHONEHOME_DBUS_OBJECT_PATH:
-                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH)
-            self.send_response(200)
+                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None)
+                self.send_response(200)
         else:
             # Bad Request
             self.send_response(400, message="Invalid data received in HTTP PhoneHome request")

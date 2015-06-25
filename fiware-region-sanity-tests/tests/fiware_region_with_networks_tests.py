@@ -499,7 +499,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.test_world['ports'].append(port_id)
 
         # Create Metadata
-        metadata = {"region": self.region_name, "foo": "bar"}
+        metadata = {"region": self.region_name, "foo": "bar-" + suffix}
 
         # Deploy VM
         instance_name = TEST_SERVER_PREFIX + "_meta_" + suffix
@@ -509,13 +509,14 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
                                                     userdata=userdata_content)
 
         # VM should have this metadata associated
-        expected_metadata = {'region': self.region_name, 'foo': 'bar'}
+        expected_metadata = {'region': self.region_name, 'foo': 'bar-' + suffix }
+        expected_instance_name = instance_name.replace("_", "-")
 
         # Create new DBus connection and wait for emitted signal from HTTP PhoneHome service
         client = DbusPhoneHomeClient(self.logger)
 
         result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_METADATA_PATH,
-                                                              PHONEHOME_METADATA_SIGNAL, expected_metadata)
+                                                              PHONEHOME_METADATA_SIGNAL, expected_instance_name)
         self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
         self.logger.debug("Request received from VM when 'calling home': %s", result)
 
