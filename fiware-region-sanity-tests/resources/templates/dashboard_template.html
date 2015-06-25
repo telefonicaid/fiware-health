@@ -4,17 +4,19 @@
     <title>Sanity Check Result Report- Fiware Region Status</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
-    <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
-    <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
+    <link rel="stylesheet" href="../../stylesheets/style_fi.css">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/index.css">
+    <link rel="stylesheet" href="../../stylesheets/font-awesome.css" media="screen">
     <script src="../javascripts/dashboard.js"></script>
 </head>
 <body onload="calc_height();displaySections();changeAllTitles()">
 <div class="box0">
     {% for class, group in report.items() %}
-    <h1 align="center" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
+    <h1 align="left" class="subtitle" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
     {% endfor %}
     <div style="padding-bottom: 100px;">
-        <h1>Test result stats</h1>
+        <div class="test_result">Test result stats</div>
         <section>
             <table>
                 <tr>
@@ -35,14 +37,13 @@
                 {% endfor %}
             </table>
         </section>
-
-        <h1>Performed test cases</h1>
+        <div class="test_result">Performed test cases</div>
         {% for class, group in report.items() %}
         <section>
-            <h2>{{ class }}</h2>
-            <ul>
+            <ul class="results">
+                <li class="header_table">{{ class }}</li>
                 {% for test in group.tests %}
-                <li><a title="{{ test.shortDescription }}" {% if test.failed %}class="{% if test.type == 'skipped' %}skipped{% else %}failed{% endif %}" href="javascript:openFailureDetailsInNewWindow('#{{ class }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
+                <li class="results"><a title="{{ test.shortDescription }}" {% if test.failed %}class="{% if test.type == 'skipped' %}skipped{% else %}failed{% endif %}" href="javascript:openFailureDetailsInNewWindow('#{{ class }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
                 {% endfor %}
             </ul>
         </section>
@@ -51,29 +52,31 @@
     <div id="failure_details">
 
         <div id="html_failure_details">
-            <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
-            <link rel="stylesheet" type="text/css" href="../stylesheets/index.css">
+            <link rel="stylesheet" href="../stylesheets/style_fi.css"/>
+            <link rel="stylesheet" type="text/css" href="../stylesheets/style.css"/>
+            <link rel="stylesheet" type="text/css" href="../stylesheets/index.css"/>
+            <link rel="stylesheet" href="../../stylesheets/font-awesome.css" media="screen">
             <script src="../javascripts/dashboard.js"></script>
 
 
-            <div class="box0">
+            <div>
                 {% for class, group in report.items() %}
-                <h1 align="center" id="subtitle2">Region {{ class }} - {{timestamp}}</h1>
+                <h1 align="left" class="subtitle" id="subtitle2">Region {{ class }} - {{timestamp}}</h1>
                 {% endfor %}
                 <div style="padding-bottom:100px">
 
-                    <h1>Failure details</h1>
+                    <div class="test_title">Failure details</div>
                     {% for class, group in report.items() %}
                     {% if group.stats.failures or group.stats.errors or group.stats.skipped %}
                     <section>
-                        <h2>{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</h2>
 
-                        <div>
+                        <div style="background-color: #f5f5f5;">
+                            <div class="header_table">{{ class }} ({{ group.stats.failures }} failures, {{ group.stats.errors }} errors)</div>
+
                             {% for test in group.tests %}
                             {% if test.failed %}
-                            <section id="{{ class }}:{{ test.name }}">
+                            <section style="padding-right: 14px; padding-left: 14px;" id="{{ class }}:{{ test.name }}">
                                 <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
-
                                 <div class="test_details">
                                     <h4>Details</h4>
                                     <pre><xmp>{{ test.message }}</xmp></pre>

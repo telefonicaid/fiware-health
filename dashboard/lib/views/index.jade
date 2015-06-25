@@ -8,32 +8,41 @@ block content
             div.box1#box1
 
              #box2.box2
-                p
                 ul.region_list
+                   li.header_row
+                      | SANITY CHECK STATUS
+                   - var i  = 0;
                    each region in regions
                       - var filename = web_context+'report/'+region['node'] + '_results.html';
                       - var sanity_status = region['status'];
+                      - var background = (i % 2 == 0)? 'even':'odd';
+                      - i=i+1;
+
                       case sanity_status
-                        when 'OK'
-                            - var color = 'sanity_ok';
-                        when 'NOK'
-                            - var color = 'sanity_nok';
-                        when 'POK'
-                            - var color = 'sanity_pok';
-                        default
-                            - var color = 'sanity_na';
-                      if sanity_status == ''
-                         li.sanity_no_data
+                        when ''
+                           li(class='sanity_no_data #{background}')
                             div(style="height:0px",title='no data #{sanity_status}') #{region['node']}
-                      else if sanity_status!='N/A'
-                        li.sanity_nok_and_sanity_ok
-                             a( class='#{color}', href='javascript:loadReport("#{filename}")') #{region['node']}
+                        when 'OK'
+                            li(class='sanity_ok #{background}')
+                             a(class='sanity_ok', href='javascript:loadReport("#{filename}")') #{region['node']}
                              div.timestamp
                                   |(last updated: #{region['timestamp']})
+                        when 'NOK'
+                            li(class='sanity_nok #{background}')
+                                a( class='sanity_nok', href='javascript:loadReport("#{filename}")') #{region['node']}
+                                div.timestamp
+                                    | (last updated: #{region['timestamp']})
+                        when 'POK'
+                            li(class='sanity_pok #{background}')
+                                a( class='sanity_pok', href='javascript:loadReport("#{filename}")') #{region['node']}
+                                div.timestamp
+                                    | (last updated: #{region['timestamp']})
+                        default
+                             li(class='sanity_na #{background}')
+                                 div(style="height:0px",title='Sanity Check in progress') #{region['node']}
+                                 div.timestamp
+                                    |(in progress)
+                   - var background = (i % 2 == 0)? 'even':'odd';
+                   li(class='footer_row #{background}')
+                      p
 
-
-                      else
-                        li.sanity_na
-                             div(style="height:0px",title='Sanity Check in progress') #{region['node']}
-                             div.timestamp
-                               |(in progress)
