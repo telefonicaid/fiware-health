@@ -65,7 +65,7 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
                 dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None)
                 self.send_response(200)
             else:
-                self.send_response(400, message="Invalid path in HTTP PhoneHome request")
+                self.send_response(404, message=" Path not found for HTTP PhoneHome request")
 
         else:
             # Bad Request
