@@ -41,7 +41,7 @@
         {% for class, group in report.items() %}
         <section>
             <ul class="results">
-                <li class="header_table">{{ class }}></li>
+                <li class="header_table">{{ class }}</li>
                 {% for test in group.tests %}
                 <li class="results"><a title="{{ test.shortDescription }}" {% if test.failed %}class="{% if test.type == 'skipped' %}skipped{% else %}failed{% endif %}" href="javascript:openFailureDetailsInNewWindow('#{{ class }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
                 {% endfor %}
@@ -75,7 +75,7 @@
 
                             {% for test in group.tests %}
                             {% if test.failed %}
-                            <section style="padding-left: 10px;" id="{{ class }}:{{ test.name }}">
+                            <section style="padding-right: 14px; padding-left: 14px;" id="{{ class }}:{{ test.name }}">
                                 <div class="test_details_title">
                                     <h3>{{ test.name }}: <strong>{{ test.errtype }}</strong></h3>
                                 </div>
