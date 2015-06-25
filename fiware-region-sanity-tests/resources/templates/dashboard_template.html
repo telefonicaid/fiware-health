@@ -13,7 +13,7 @@
 <body onload="calc_height();displaySections();changeAllTitles()">
 <div class="box0">
     {% for class, group in report.items() %}
-    <h1 align="left" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
+    <h1 align="left" class="subtitle" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
     {% endfor %}
     <div style="padding-bottom: 100px;">
         <div class="test_result">Test result stats</div>
@@ -59,7 +59,7 @@
             <script src="../javascripts/dashboard.js"></script>
 
 
-            <div class="box0">
+            <div>
                 {% for class, group in report.items() %}
                 <h1 align="left" class="subtitle" id="subtitle2">Region {{ class }} - {{timestamp}}</h1>
                 {% endfor %}
