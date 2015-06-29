@@ -260,10 +260,10 @@ There is another test implemented:
 
 * Test whether it is possible to deploy an instance and check that metadata service is working properly.
 
-This test is checking if openstack metadata service is working. It gets the metadata information about
-the VM deployed and return to the HTTP phonehome server.
+This test is checking if openstack metadata service is working and sends metadata back to the PhoneHome server
+to check whether is it correct.
 
-Those test cases should return the information to the HTTP phonehome server and each one return that information
+Both test cases should return the information to the HTTP phonehome server and each one return that information
 to a different path.
 First test cases, are expected to attack "/phonehome" path.
 The last test is expected to attack "/metadata" path.
@@ -288,6 +288,7 @@ When a request is received, HTTP PhoneHome server will inform all connected test
 about the event (broadcasting). This signal contains the
 hostname of the VM (the one received in the HTTP POST body or the one received in the HTTP Header).
 Server is waiting in two different resources.
+
 - "/phonehome" to receive the hostname of the VM in the HTTP POST body.
 - "/metadata" to receive the metadata information in the HTTP POST body.
 
