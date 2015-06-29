@@ -245,7 +245,7 @@ D-Bus and HTTP PhoneHome Service for E2E tests
 
 Some E2E test cases have been implemented to check the connection in both
 *Internet -> VM* and *VM -> Internet*.
-This test cases are:
+These test cases are:
 
 * Test whether it is possible to deploy an instance, assign an allocated
   public IP and establish a SSH connection *(Internet -> VM)*
@@ -255,6 +255,18 @@ This test cases are:
 The later will try to execute a *PhoneHome request* (executed by Cloud-Init in the VM)
 to the *HTTP PhoneHome service* running in the configured HOST:PORT
 (*phonehome_endpoint* configuration). If this value is not set, this test will be skipped.
+
+There is another test implemented:
+
+* Test whether it is possible to deploy an instance and check that metadata service is working properly.
+
+This test is checking if openstack metadata services is working. These tests get the metadata information about
+the VM deployed and return to the HTTP phonehome server.
+
+Those test cases should return the information to the HTTP phonehome server and each one return that information
+to a different path.
+First test cases, are expected to attack "/phonehome" path.
+The last test is expected to attack "/metadata" path.
 
 The test uses two components:
 
@@ -272,11 +284,17 @@ The HTTP PhoneHome server waits for *POST HTTP requests* from VMs.
 This service publishes a D-Bus object (D-Bus server) to be used by tests to wait for
 PhoneHome requests.
 
-When a request is received, HTTP PhoneHome server will inform, through the published object,
-to all connected tests about the event (broadcasting). This signal contains the
-hostname of the VM (the one received in the HTTP POST body). This signal will be take into account by
-tests that are waiting for a signal with this hostname value; the other tests will ignore it and will keep on
-listening new signals with the correct data (correct hostname) to them.
+When a request is received, HTTP PhoneHome server will inform all connected tests , through the published object,
+about the event (broadcasting). This signal contains the
+hostname of the VM (the one received in the HTTP POST body or the one received in the HTTP Header).
+Server is waiting in two different resources.
+ /phonehome to receive the hostname of the VM in the HTTP POST body.
+ /metadata to receive the metadata information in the HTTP POST body.
+
+If the server receives a HTTP POST to the second resource, hostname should be included into the Hostname header.
+This signal will be take into account by
+tests that are waiting for a signal with the hostname value in ; the other tests will ignore it and will keep on
+listening for new signals with the correct data (correct hostname) to them.
 
 
 **D-Bus configuration**
