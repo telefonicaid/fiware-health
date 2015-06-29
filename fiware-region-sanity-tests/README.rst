@@ -252,7 +252,7 @@ These test cases are:
 * Test whether it is possible to deploy an instance
   and connect to INTERNET (SNAT) without assigning a public IP *(VM -> Internet)*
 
-The later will try to execute a *PhoneHome request* (executed by Cloud-Init in the VM)
+The latter will try to execute a *PhoneHome request* (executed by Cloud-Init in the VM)
 to the *HTTP PhoneHome service* running in the configured HOST:PORT
 (*phonehome_endpoint* configuration). If this value is not set, this test will be skipped.
 
