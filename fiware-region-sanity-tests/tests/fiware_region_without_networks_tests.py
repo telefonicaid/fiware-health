@@ -246,9 +246,9 @@ class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
         path_resource = PHONEHOME_DBUS_OBJECT_METADATA_PATH
         metadata_service_url = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_METADATA_SERVICE_URL]
 
-        # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
-        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
-        with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
+        # Load userdata from file and compile the template (replacing variable values)
+        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_METADATA_PATH)
+        with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
             userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
                                                            path_resource=path_resource,
