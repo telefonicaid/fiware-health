@@ -117,7 +117,7 @@ These Test Cases will be common for all federated regions.
 * Test whether it is possible to deploy an instance with a new network
   and connect to INTERNET (SNAT) without assigning a public IP
 * Test whether it is possible to deploy an instance with new network
- and check that metadata service is working properly (PhoneHome service)
+  and check that metadata service is working properly (PhoneHome service)
 
 **Regions without an OpenStack network service**
 
@@ -241,7 +241,7 @@ rest of standard parsers bundled in NGSI Adapter package.
 
 
 D-Bus and HTTP PhoneHome Service for E2E tests
----------------------------------------------
+----------------------------------------------
 
 Some E2E test cases have been implemented to check the connection in both
 *Internet -> VM* and *VM -> Internet*.
@@ -260,7 +260,7 @@ There is another test implemented:
 
 * Test whether it is possible to deploy an instance and check that metadata service is working properly.
 
-This test is checking if openstack metadata services is working. These tests get the metadata information about
+This test is checking if openstack metadata service is working. It gets the metadata information about
 the VM deployed and return to the HTTP phonehome server.
 
 Those test cases should return the information to the HTTP phonehome server and each one return that information
@@ -288,8 +288,8 @@ When a request is received, HTTP PhoneHome server will inform all connected test
 about the event (broadcasting). This signal contains the
 hostname of the VM (the one received in the HTTP POST body or the one received in the HTTP Header).
 Server is waiting in two different resources.
- /phonehome to receive the hostname of the VM in the HTTP POST body.
- /metadata to receive the metadata information in the HTTP POST body.
+- "/phonehome" to receive the hostname of the VM in the HTTP POST body.
+- "/metadata" to receive the metadata information in the HTTP POST body.
 
 If the server receives a HTTP POST to the second resource, hostname should be included into the Hostname header.
 This signal will be take into account by
