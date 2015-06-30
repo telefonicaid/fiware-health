@@ -202,7 +202,7 @@ class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
 
         path_resource = PHONEHOME_DBUS_OBJECT_PATH
 
-        # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
+        # Load userdata from file and compile the template (replacing variable values)
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
         with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
