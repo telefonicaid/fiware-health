@@ -101,7 +101,6 @@ class DbusPhoneHomeClient():
          main loop will be finished.
         :return: None
         """
-        DbusPhoneHomeClient.logger.debug("Signal received with data '%s'", phonehome_http_data)
         DbusPhoneHomeClient.logger.debug("Received hostname: '%s'. Expected hostname: '%s'",
                                          hostname, DbusPhoneHomeClient.expected_signal_hostname)
 
