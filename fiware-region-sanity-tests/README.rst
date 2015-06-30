@@ -287,7 +287,8 @@ PhoneHome requests.
 When a request is received, HTTP PhoneHome server will inform all connected tests , through the published object,
 about the event (broadcasting). This signal contains the
 hostname of the VM (the one received in the HTTP POST body or the one received in the HTTP Header).
-Server is waiting in two different resources.
+
+Server is waiting in two different resources:
 
 - "/phonehome" to receive the hostname of the VM in the HTTP POST body.
 - "/metadata" to receive the metadata information in the HTTP POST body.
