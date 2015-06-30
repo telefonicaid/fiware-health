@@ -200,11 +200,14 @@ class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
             self.skipTest("No value found for '{}.{}' setting".format(
                 PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
 
+        path_resource = PHONEHOME_DBUS_OBJECT_PATH
+
         # Load userdata from file and compile the template (replacing {{phonehome_endpoint}} value)
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
         with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint)
+            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
+                                                           path_resource=path_resource)
             self.logger.debug("Userdata content: %s", userdata_content)
 
         # Deploy VM
