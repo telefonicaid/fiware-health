@@ -38,7 +38,7 @@ var config = {
     log_level: 'DEBUG',
     listen_port: 3000,
     web_context: '/',
-    secret:'ssshhh',
+    secret: 'ssshhh',
     paths: {
         reports_url: '/report',
         reports_files: '/var/www/html/RegionSanityCheck'
@@ -65,8 +65,8 @@ var config = {
         host: 'localhost',
         port: '8000',
         token: '',
-        path:'',
-        parameterName:''
+        path: '',
+        parameterName: ''
     },
     default: true
 };
@@ -85,7 +85,7 @@ function readConfigFile(file) {
                     break;
                 case 'logging':
                     config.log_level = cfg_parse.logging.level;
-                    logger.setLevel(config.log_level)
+                    logger.setLevel(config.log_level);
                     break;
                 case 'session':
                     config.secret = cfg_parse.session.secret;
@@ -119,7 +119,7 @@ function readConfigFile(file) {
                     throw new Error(util.format('no "%s" node found', key));
             }
         });
-        config.default=false;
+        config.default = false;
     } catch (err) {
         var msg = err.errno ? 'Could not read configuration file' : util.format('Configuration file: %s', err.message);
         cfg_parser_result = [ 'WARN', msg ];
@@ -153,7 +153,7 @@ function main() {
         .parse(process.argv);
 
     //process config file
-    var cfg_parser_result=readConfigFile(config.config_file);
+    var cfg_parser_result = readConfigFile(config.config_file);
 
     // process command line arguments
     arg_parser

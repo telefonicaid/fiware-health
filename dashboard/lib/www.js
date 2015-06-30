@@ -32,6 +32,9 @@ var prog = require('../package.json'),
     app = require('./app');
 
 
+/**
+ * export main function
+ */
 exports.main = function () {
 
     /**
@@ -58,8 +61,9 @@ exports.main = function () {
 
     /**
      * Normalize a port into a number, string, or false.
+     * @param {int|string} val
+     * @returns {*}
      */
-
     function normalizePort(val) {
         var port = parseInt(val, 10);
 
@@ -78,16 +82,14 @@ exports.main = function () {
 
     /**
      * Event listener for HTTP server "error" event.
+     * @param {*} error
      */
-
     function onError(error) {
         if (error.syscall !== 'listen') {
             throw error;
         }
 
-        var bind = typeof port === 'string'
-            ? 'Pipe ' + port
-            : 'Port ' + port;
+        var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
         // handle specific listen errors with friendly messages
         switch (error.code) {
@@ -110,9 +112,7 @@ exports.main = function () {
 
     function onListening() {
         var addr = server.address();
-        var bind = typeof addr === 'string'
-            ? 'pipe ' + addr
-            : util.format('%s:%s', addr.address, addr.port);
+        var bind = typeof addr === 'string' ? 'pipe ' + addr : util.format('%s:%s', addr.address, addr.port);
         logger.info('Listening on %s', bind);
     }
 

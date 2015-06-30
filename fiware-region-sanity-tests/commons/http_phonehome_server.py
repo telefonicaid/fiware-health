@@ -27,7 +27,7 @@ import json
 from os import environ
 import sys
 from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
-    LOGGING_FILE, PHONEHOME_DBUS_OBJECT_PATH
+    LOGGING_FILE, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH
 import urlparse
 from dbus_phonehome_service import DbusPhoneHomeServer
 import logging.config
@@ -52,13 +52,24 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         content = self.rfile.read(content_length)
 
-        # Get Hostname from body
+        # Get data from body
         if content:
-            dbus_server.emit_phonehome_signal(str(content))
-            self.send_response(200)
+            if self.path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
+                if "Hostname" in self.headers:
+                    dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH, self.headers['Hostname'])
+                    self.send_response(200)
+                else:
+                    self.send_response(400, message="Hostname header is not present in HTTP PhoneHome request")
+
+            elif self.path == PHONEHOME_DBUS_OBJECT_PATH:
+                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None)
+                self.send_response(200)
+            else:
+                self.send_response(404, message=" Path not found for HTTP PhoneHome request")
+
         else:
             # Bad Request
-            self.send_response(400, message="Invalid hostname received in HTTP PhoneHome request")
+            self.send_response(400, message="Invalid data received in HTTP PhoneHome request")
 
 
 class HttpPhoneHomeServer():
@@ -128,8 +139,10 @@ if __name__ == '__main__':
 
     # Create global DBus server
     logger.info("Creating DBus PhoneHome service with object: %s", PHONEHOME_DBUS_OBJECT_PATH)
+    logger.info("Creating DBus PhoneHome service with object: %s", PHONEHOME_DBUS_OBJECT_METADATA_PATH)
     dbus_server = DbusPhoneHomeServer(logger)
     dbus_server.register_phonehome_object(PHONEHOME_DBUS_OBJECT_PATH)
+    dbus_server.register_phonehome_object(PHONEHOME_DBUS_OBJECT_METADATA_PATH)
 
     # Create and start server
     logger.info("Creating and starting PhoneHome Server")

@@ -40,23 +40,38 @@ var express = require('express'),
 var app = express();
 
 
-logger.info('Running app in web context: '+config.web_context);
-app.base=config.web_context;
+logger.info('Running app in web context: %s', config.web_context);
 
+/**
+ * base web context in url
+ * @type {string}
+ */
+app.base = config.web_context;
+
+/**
+ * web context
+ * @type {string}
+ */
+app.locals.web_context = config.web_context;
+/**
+ * contain title of web page
+ * @type {string}
+ */
+app.locals.title = 'Sanity check status';
 
 
 /**
  * compile stylus css on runtime
- * @param str
- * @param path
+ * @param {String} str
+ * @param {String} path
  * @return {*|Function}
  */
 function compile(str, path) {
     return stylus(str)
         .set('filename', path)
         .use(nib())
-        .define('logoImage', function(){
-                return new stylus.nodes.Literal('url("'+config.web_context+'images/logo.png")');
+        .define('logoImage', function() {
+                return new stylus.nodes.Literal('url("' + config.web_context + 'images/logo.png")');
         });
 }
 
@@ -65,29 +80,22 @@ function compile(str, path) {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-
-//globals variables
-app.locals.web_context=config.web_context;
-app.locals.title='Sanity check status';
-
-
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 
-app.use(config.web_context,stylus.middleware(
+app.use(config.web_context, stylus.middleware(
     {
         src: __dirname + '/stylus',
-        dest: __dirname + "/public/stylesheets",
+        dest: __dirname + '/public/stylesheets',
         compile: compile
     }
-))
-;
+));
 
 app.use(session({secret: config.secret}));
 
 // trace all requests
 app.use(function (req, res, next) {
-    logger.debug('%s %s %s', req.method, req.url, req.path);
+    logger.debug({op: 'app#use'}, '%s %s %s', req.method, req.url, req.path);
     next();
 });
 
@@ -96,36 +104,36 @@ app.use(config.paths.reports_url, express.static(config.paths.reports_files));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(config.web_context,express.static(path.join(__dirname, 'public')));
+app.use(config.web_context, express.static(path.join(__dirname, 'public')));
 
 
-app.use(config.web_context+'refresh', function (req, res, next) {
+app.use(config.web_context + 'refresh', function (req, res, next) {
     logger.debug('Accessing to relaunch');
     if (req.session.access_token) {
 
         next();
     } else {
-        common.notAuthorized(req,res);
+        common.notAuthorized(req, res);
     }
 }, refresh);
 
-app.use(config.web_context+'subscribe', function (req, res, next) {
+app.use(config.web_context + 'subscribe', function (req, res, next) {
     logger.debug('Accessing to subscribe');
     if (req.session.access_token) {
 
         next();
     } else {
-        notAuthorized(req,res);
+        notAuthorized(req, res);
     }
 }, subscribe);
 
-app.use(config.web_context+'unsubscribe', function (req, res, next) {
+app.use(config.web_context + 'unsubscribe', function (req, res, next) {
     logger.debug('Accessing to unSubscribe');
     if (req.session.access_token) {
 
         next();
     } else {
-        notAuthorized(req,res);
+        notAuthorized(req, res);
     }
 }, unsubscribe);
 
@@ -143,27 +151,24 @@ var oa = new OAuth2(config.idm.clientId,
     config.idm.callbackURL);
 
 
-
-
-
 // Handles requests to the main page
-app.get(config.web_context+'signin', function (req, res) {
-    logger.debug({op: 'app#get signin'}, "token: " + req.session.access_token);
+app.get(config.web_context + 'signin', function (req, res) {
+    logger.debug({op: 'app#get signin'}, 'Token: %s', req.session.access_token);
 
     // If auth_token is not stored in a session redirect to IDM
     if (!req.session.access_token) {
         var path = oa.getAuthorizeUrl();
-        logger.debug({op: 'app#get signin'}, "idm path: " + path);
+        logger.debug({op: 'app#get signin'}, 'idm path: %s', path);
         res.redirect(path);
         // If auth_token is stored in a session cookie it sends a button to get user info
     } else {
 
-        oa.get(config.idm.url+'/user/', req.session.access_token, function (e, response) {
-            logger.debug("userinfo: " + response);
+        oa.get(config.idm.url + '/user/', req.session.access_token, function (e, response) {
+            logger.debug('userinfo: ' + response);
             if (response != undefined) {
                 var user = JSON.parse(response);
                 req.session.user = user;
-                req.session.role =common.parseRoles(user.roles);
+                req.session.role = common.parseRoles(user.roles);
 
             }
             res.redirect(config.web_context);
@@ -174,23 +179,23 @@ app.get(config.web_context+'signin', function (req, res) {
 });
 
 // Handles requests from IDM with the access code
-app.get(config.web_context+'login', function (req, res) {
+app.get(config.web_context + 'login', function (req, res) {
 
-    logger.debug({op: 'app#get login'}, "req:" + req.query.code);
+    logger.debug({op: 'app#get login'}, 'req:' + req.query.code);
 
     // Using the access code goes again to the IDM to obtain the access_token
     oa.getOAuthAccessToken(req.query.code, function (e, results) {
-        logger.debug({op: 'app#get login'}, "get access token:" + results);
+        logger.debug({op: 'app#get login'}, 'get access token:' + results);
 
         if (results != undefined) {
 
             // Stores the access_token in a session cookie
             req.session.access_token = results.access_token;
 
-            logger.debug({op: 'app#get login'}, "access_token: " + results.access_token);
+            logger.debug({op: 'app#get login'}, 'access_token: ' + results.access_token);
 
-            oa.get(config.idm.url+'/user/', results.access_token, function (e, response) {
-                logger.debug({op: 'app#get login'}, "response get userinfo: " + response);
+            oa.get(config.idm.url + '/user/', results.access_token, function (e, response) {
+                logger.debug({op: 'app#get login'}, 'response get userinfo: ' + response);
                 if (response != undefined) {
                     var user = JSON.parse(response);
                     req.session.user = user;
@@ -208,49 +213,45 @@ app.get(config.web_context+'login', function (req, res) {
 
         }
 
-
     });
 
-
-})
-;
+});
 
 // listen request from contextbroker changes
-app.post(config.web_context+'contextbroker', function (req, res) {
+app.post(config.web_context + 'contextbroker', function (req, res) {
     try {
         var region = cbroker.changeReceived(req.body);
-        logger.info('request received from contextbroker for region: ' + region.node);
+        logger.info('request received from contextbroker for region: %s', region.node);
         subscribe.nofify(region.node, function () {
-            logger.info("post to list ok");
+            logger.info('post to list ok');
 
             res.status(200).end();
         });
     } catch (ex) {
-        logger.error("error in contextbroker notification: " + ex);
+        logger.error('error in contextbroker notification: %s', ex);
         res.status(400).send({ error: 'bad request! ' + ex });
     }
 });
 
 
 // Redirection to IDM authentication portal
-app.get(config.web_context+'auth', function (req, res) {
+app.get(config.web_context + 'auth', function (req, res) {
     var path = oa.getAuthorizeUrl();
     res.redirect(path);
 });
 
 // Handles logout requests to remove access_token from the session cookie
-app.get(config.web_context+'logout', function (req, res) {
+app.get(config.web_context + 'logout', function (req, res) {
 
     req.session.access_token = undefined;
     req.session.user = undefined;
     req.session.role = undefined;
 
-            res.clearCookie('oauth_token');
-        res.clearCookie('expires_in');
+    res.clearCookie('oauth_token');
+    res.clearCookie('expires_in');
 
     res.redirect(config.web_context);
 });
-
 
 
 // catch 404 and forward to error handler
@@ -280,8 +281,5 @@ app.use(function (err, req, res) {
 });
 
 
-
-
 /** @export */
-module.exports = app
-
+module.exports = app;

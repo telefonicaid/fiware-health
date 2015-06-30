@@ -31,7 +31,7 @@ paths:
 #----------------------------------------------------------------------------
 cbroker:
   host: 'localhost'			# ContextBroker listen host
-  port: 1026				# ContextBroker listen port
+  port: 1000				# ContextBroker listen port
   path: '/NGSI10/queryContext'		# QueryContext operation
 
 #----------------------------------------------------------------------------

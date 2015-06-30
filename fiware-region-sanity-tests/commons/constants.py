@@ -44,6 +44,10 @@ PROPERTIES_CONFIG_REGION_EXTERNAL_NET = "external_network_name"
 PROPERTIES_CONFIG_REGION_TEST_FLAVOR = "test_flavor"
 PROPERTIES_CONFIG_KEY_TEST_CASES = "key_test_cases"
 PROPERTIES_CONFIG_OPT_TEST_CASES = "opt_test_cases"
+PROPERTIES_CONFIG_SWIFT = "swift_configuration"
+PROPERTIES_CONFIG_SWIFT_BIG_FILE_1 = "big_file_url_1"
+PROPERTIES_CONFIG_SWIFT_BIG_FILE_2 = "big_file_url_2"
+PROPERTIES_CONFIG_METADATA_SERVICE_URL = "openstack_metadata_service_url"
 
 # TASK TIMERS AND TIMEOUTS (in seconds)
 DEFAULT_REQUEST_TIMEOUT = 60
@@ -66,6 +70,13 @@ TEST_SERVER_PREFIX = "testing_instance"
 TEST_NETWORK_PREFIX = "testing_network"
 TEST_ROUTER_PREFIX = "testing_router"
 TEST_CONTAINER_PREFIX = "testing_container"
+TEST_TEXT_OBJECT_PREFIX = "testing_text_object"
+TEST_BIG_OBJECT_PREFIX = "test_big_file"
+TEST_TEXT_FILE_EXTENSION = ".txt"
+TEST_BIG_FILE_EXTENSION = ".zip"
+
+# SWIFT CONTANTS
+SWIFT_RESOURCES_PATH = "resources/swift_objects/"
 
 # SSH CONNECTION (timeouts in seconds)
 SSH_CONNECTION_PORT = 22
@@ -73,10 +84,13 @@ SSH_CONNECTION_TIMEOUT = 8
 
 # PHONEHOME SERVER (timeouts in seconds)
 PHONEHOME_USERDATA_PATH = "resources/templates/userdata/test.snat.phonehome.template"
+PHONEHOME_USERDATA_METADATA_PATH = "resources/templates/userdata/test.meta.phonehome.template"
 PHONEHOME_TIMEOUT = 175
 PHONEHOME_DBUS_NAME = "org.fiware.fihealth"
 PHONEHOME_DBUS_OBJECT_PATH = "/phonehome"
+PHONEHOME_DBUS_OBJECT_METADATA_PATH = "/metadata"
 PHONEHOME_SIGNAL = "phonehome_signal"
+PHONEHOME_METADATA_SIGNAL = "phonehome_metadata_signal"
 
 # SERVICES NAMES
 SERVICE_SWIFT_NAME = "object-store"

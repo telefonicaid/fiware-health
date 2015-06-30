@@ -5,21 +5,53 @@
     margin-left auto
     margin-right auto
     position relative
-    display: -webkit-flex; /* Safari */
-    -webkit-justify-content: center; /* Safari*/
-    display: flex;
-    justify-content: center;
+    display -webkit-flex /* Safari */
+    -webkit-justify-content center /* Safari*/
+    display flex
+    justify-content center
 
-.header-content
-    position absolute
-    bottom 0
-    font-size 130%
-    color #0074d9
-    text-decoration none
-    text-align center
-    left 0
-    right 0
-    font-weight bold
+    .header_buttons
+       width 100px
+       float left
+
+
+       .btn
+          float right
+          font-family "Verdana", sans-serif
+          padding 4px 7px 6px
+          border-top-right-radius 0
+          border-top-left-radius 0
+          border-bottom-right-radius 0
+          border-bottom-left-radius 0
+          color #fff
+          background-color #193b6b
+          font-size 13px
+          line-height 1.42857
+          -webkit-user-select none
+          font-weight normal
+          cursor pointer
+          border 1px solid transparent
+          white-space nowrap
+          -webkit-appearance button
+          text-transform none
+          margin-top 2px
+          margin-bottom auto
+          box-sizing border-box
+          margin-right 0
+          width 80px
+
+       .btn:hover
+              color #fff
+              background-color #0f2442
+              border-color #0f2442
+
+
+
+    ul
+        list-style-type none
+
+
+
 
 .logo
   background-repeat no-repeat
@@ -40,33 +72,11 @@
   background-color #fff
   margin-left 50px
 
-  .btn
-    font-family "Verdana", sans-serif
-    padding 4px 7px 6px
-    border-top-right-radius 0
-    border-top-left-radius 0
-    border-bottom-right-radius 0
-    border-bottom-left-radius 0
-    color #fff
-    background-color #193b6b
-    border-color #193b6b
-    font-size 13px
-    line-height 1.42857
-    -webkit-user-select none
-    font-weight normal
-    cursor pointer
-    border 1px solid transparent
-    white-space nowrap
-    -webkit-appearance button
-    text-transform none
-    margin-top 2px
-    margin-bottom auto
-    box-sizing border-box
-    margin-right 0px
-
   .fiware_icon
     margin-top -7px
     margin-bottom auto
+    float left
+
   .user
     color #b6b6b6
     font-family "Verdana", sans-serif
@@ -75,30 +85,27 @@
     white-space nowrap
   ul
     list-style-type none
-    padding-top 5px
+    padding-top 50px
+    margin-top 0
+    margin-bottom 0
 
   li
-    margin-top -10px
+    margin-top 0
     width 40px
 
+.box0
+    width 660px
+    padding-left 61px
 
 .box1
     padding-bottom 100px
 
 .box2
-    display block
-    background-color #122964
-    border 1px solid #cccccc
-    -webkit-border-radius 4px
-    -moz-border-radius 4px
-    border-radius 4px
-    -webkit-box-shadow 0 0 0 4px rgba(0,0,0,0.05)
-    -moz-box-shadow 0 0 0 4px rgba(0,0,0,0.05)
-    box-shadow 0 0 0 4px rgba(0,0,0,0.05)
-    width 600px
+    display block 0 0 4px 1px rgba(0, 0, 0, 0.05)
     margin-left auto
     margin-right auto
-    margin-bottom 100px
+    background-color #f1f1f1
+    width 660px
 
     .username
         float right
@@ -113,45 +120,93 @@
 
 .region_list
     list-style-type none
-    width 600px
+    margin 0
+    padding 0
+    font-family "Verdana", sans-serif
     margin-left auto
     margin-right auto
-    padding-left 20px
-    padding-right 20px
+
+    li
+      padding-top 5px
+      height 32px
+      margin-bottom 1px
+      padding-left 40px
+      padding-right 40px
+
+    .header_row
+      height 60px
+      font-family NeoTechRegular
+      color #002d67
+      text-decoration none
+      background-color #f1f1f2
+      vertical-align middle
+      display table-cell
+      font-size medium
+
+    .footer_row
+      height 32px
+      text-decoration none
+
+    .even
+      background-color #e6e6e6
+    .odd
+      background-color #f1f1f1
 
     .timestamp
-          float right
-          color white
-          font-weight normal
-          font-size 80%
-          margin-right 10px
+        float right
+        color #A5A5A5
+        padding-right 20px
+        font-weight normal
+        font-size 75%
+        padding-top 4px
+
+    .btn
+        background-color #FFF
+        background-image none
+        border-radius 0
+        border 1px solid #CCC
+        color #898888
+
+    button[disabled=disabled], button:disabled
+         color #DAD6D6
+    button[disabled=disabled]:hover, button:disabled:hover
+         color #DAD6D6
+         border 1px solid #CCC
+         cursor default
+
+    .btn:hover
+        cursor pointer
+        color #002d67
+        border 1px solid #002d67
+
+
+
 
 
 
 a.sanity_nok
-    color red
+    color #ca3334
 
 a.sanity_ok
-    color green
+    color #2d9a56
 
 a.sanity_pok
-    color yellow
+    color #d7be35
+
+li.sanity_nok
+    color #ca3334
 
 li.sanity_na
-    color white
-    height 30px
-    font-weight bold
+    color #676767
 
-li.sanity_nok_and_sanity_ok
-    height 30px
-    font-weight bold
+li.sanity_ok
+    color #2d9a56
 
-li.sanity_na
-    color white
-    height 30px
-    font-weight bold
+li.sanity_pok
+    color #d7be35
 
-
+li.sanity_no_data
+    color #002759
 .btn
     float right
 
@@ -166,13 +221,13 @@ li.sanity_na
   height 50px
   font-size 12px
   border-top 1px solid #48b9c9
-  padding-top 1px
   left 0
   right 0
   color #193B6B
 
   a
       text-decoration underline
+      color #193B6B
 
 iframe
   width 100%
@@ -184,6 +239,8 @@ iframe
 .footer
   border-top 1px solid #F2E826
   box-sizing border-box
+  border-bottom 1px solid #193B6B
+  height 0
 
 
   .cred

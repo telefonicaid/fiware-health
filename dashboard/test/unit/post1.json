@@ -4,7 +4,7 @@
             "contextElement": {
                 "attributes": [
                     {
-                        "name": "_timestamp",
+                        "name": "sanity_check_timestamp",
                         "type": "string",
                         "value": "1431515409572"
                     },
@@ -27,7 +27,7 @@
             "contextElement": {
                 "attributes": [
                     {
-                        "name": "_timestamp",
+                        "name": "sanity_check_timestamp",
                         "type": "string",
                         "value": "1431515409572"
                     },
@@ -50,7 +50,7 @@
             "contextElement": {
                 "attributes": [
                     {
-                        "name": "_timestamp",
+                        "name": "sanity_check_timestamp",
                         "type": "string",
                         "value": "1431515409572"
                     },
@@ -73,7 +73,7 @@
             "contextElement": {
                 "attributes": [
                     {
-                        "name": "_timestamp",
+                        "name": "sanity_check_timestamp",
                         "type": "string",
                         "value": "1431515409572"
                     },
@@ -91,7 +91,20 @@
                 "code": "200",
                 "reasonPhrase": "OK"
             }
+        },
+        {
+            "contextElement": {
+                "attributes": [],
+                "id": "Region5",
+                "isPattern": "false",
+                "type": "region"
+            },
+            "statusCode": {
+                "code": "200",
+                "reasonPhrase": "OK"
+            }
         }
+
 
 
     ]
