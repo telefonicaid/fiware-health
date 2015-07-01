@@ -77,7 +77,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
             self.assertRaises(e)
             self.logger.debug("%s container was successfully removed from the object storage", containerName)
 
-    def test_create_text_object_and_download_it(self):
+    def test_create_text_object_and_download_it_from_container(self):
         """
         Test whether it is possible to upload a text file and download it.
         """
@@ -153,7 +153,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
             self.assertRaises(e)
             self.logger.debug("%s object was successfully removed from the object storage", textObjectName)
 
-    def test_create_big_object_and_download_it(self):
+    def test_create_big_object_and_download_it_from_container(self):
         """
         Test whether it is possible to upload a big file and download it (More than 5Mb).
         """
