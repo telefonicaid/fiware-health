@@ -72,6 +72,7 @@ TEST_ROUTER_PREFIX = "testing_router"
 TEST_CONTAINER_PREFIX = "testing_container"
 TEST_TEXT_OBJECT_PREFIX = "testing_text_object"
 TEST_BIG_OBJECT_PREFIX = "test_big_file"
+TEST_BIG_OBJECT_REMOTE_PREFIX = "remote_"
 TEST_TEXT_FILE_EXTENSION = ".txt"
 TEST_BIG_FILE_EXTENSION = ".zip"
 
