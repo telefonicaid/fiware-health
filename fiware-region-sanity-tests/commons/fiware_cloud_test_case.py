@@ -411,7 +411,8 @@ class FiwareTestCase(unittest.TestCase):
                     try:
                         world['swift_objects'].remove(container + "/" + object["name"])
                     except ValueError:
-                        cls.logger.warn("This object was removed and it came from an older execution: %s", container + "/" + object["name"])
+                        cls.logger.warn("This object was removed and it came from an older execution: %s",
+                                        container + "/" + object["name"])
                 cls.swift_operations.delete_container(container)
                 world['containers'].remove(container)
             except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
