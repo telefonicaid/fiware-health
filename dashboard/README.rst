@@ -12,10 +12,9 @@ Installation
 
 Dashboard is distributed as a CentOS (.rpm) package. Assuming FIWARE package
 repositories are configured, just use the proper tool (such as ``yum``) to
-install ``fiware-fihealth-dashboard`` package. These distributions are
-currently supported:
+install ``fiware-fihealth-dashboard`` package. The RPM package has two dependencies, python and python-pip (must be installed manually). These distributions are currently supported:
 
--  CentOS 6.3
+-  CentOS 6.3/6.5
 
 During installation process, Node.js engine version is checked and package
 dependencies are resolved using ``npm`` tool. Upon successful installation,
