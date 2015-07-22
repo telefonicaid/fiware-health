@@ -431,7 +431,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.test_world['ports'].append(port_id)
 
         # Deploy VM
-        instance_name = TEST_SERVER_PREFIX + "_snat_" + suffix
+        instance_name = self.region_name + "_" + TEST_SERVER_PREFIX + "_snat_" + suffix
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
                                                     network_name=network_name, is_network_new=False,
                                                     userdata=userdata_content)
@@ -501,7 +501,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         metadata = {"region": self.region_name, "foo": "bar-" + suffix}
 
         # Deploy VM
-        instance_name = TEST_SERVER_PREFIX + "_meta_" + suffix
+        instance_name = self.region_name + "_" + TEST_SERVER_PREFIX + "_meta_" + suffix
         server_id = self.__deploy_instance_helper__(instance_name=instance_name,
                                                     network_name=network_name, is_network_new=False,
                                                     metadata=metadata,
