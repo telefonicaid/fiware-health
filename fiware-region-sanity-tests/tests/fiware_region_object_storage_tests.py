@@ -85,7 +85,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
         containerName = TEST_CONTAINER_PREFIX + suffix
-        textObjectName = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
+        textObjectName = self.region_name + TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(containerName)
         self.assertIsNone(response, "Container could not be created")
@@ -126,7 +126,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
         containerName = TEST_CONTAINER_PREFIX + suffix
-        textObjectName = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
+        textObjectName = self.region_name + TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(containerName)
         self.assertIsNone(response, "Container could not be created")
