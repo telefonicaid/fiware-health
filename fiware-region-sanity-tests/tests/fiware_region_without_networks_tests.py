@@ -221,6 +221,7 @@ class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
 
         # Create new new DBus connection and wait for emitted signal from HTTP PhoneHome service
         client = DbusPhoneHomeClient(self.logger)
+        client.data_received = None
         result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
                                                               PHONEHOME_SIGNAL, expected_instance_name)
         self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
@@ -275,7 +276,7 @@ class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
 
         # Create new DBus connection and wait for emitted signal from HTTP PhoneHome service
         client = DbusPhoneHomeClient(self.logger)
-
+        client.data_received = None
         result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_METADATA_PATH,
                                                               PHONEHOME_METADATA_SIGNAL, expected_instance_name)
         self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
