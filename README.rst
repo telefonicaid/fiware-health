@@ -14,7 +14,7 @@ This is a set of tools to check the status of each `FIWARE Lab`_ node.
 Components
 ----------
 
-`Region Sanity Tests <fiware-region-sanity-tests/README.rst>`_
+`FiHealth Sanity Checks <fiware-region-sanity-tests/README.rst>`_
    Tests checking capabilities and global status of lab node (i.e. *region*).
 
 `FiHealth Dashboard <dashboard/README.rst>`_
