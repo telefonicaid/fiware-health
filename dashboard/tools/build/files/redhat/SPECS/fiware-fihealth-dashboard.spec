@@ -201,6 +201,13 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Aug 04 2015 Telefónica I+D <opensource@tid.es> 1.1.1-1
+- Required libs
+
+* Tue Jun 30 2015 Telefónica I+D <opensource@tid.es> 1.1.0-1
+- New css/style
+- Add home button
+
 * Thu Jun 03 2015 Telefónica I+D <opensource@tid.es> 1.0.0-2
 - Add forever to monitor the execution of the server.
 

@@ -74,6 +74,146 @@ function compile(str, path) {
                 return new stylus.nodes.Literal('url("' + config.web_context + 'images/logo.png")');
         });
 }
+/**
+ * called when /contextbroker get
+ * @param {*} req
+ * @param {*} res
+ */
+function post_contextbroker(req, res) {
+     try {
+        var region = cbroker.changeReceived(req.body);
+        logger.info('request received from contextbroker for region: %s', region.node);
+        subscribe.notify(region.node, function () {
+            logger.info('post to list ok');
+
+            res.status(200).end();
+        });
+    } catch (ex) {
+        logger.error('error in contextbroker notification: %s', ex);
+        res.status(400).send({ error: 'bad request! ' + ex });
+    }
+
+}
+
+/**
+ * called when /logout get
+ * @param req
+ * @param res
+ */
+function get_logout(req, res) {
+    req.session.access_token = undefined;
+    req.session.user = undefined;
+    req.session.role = undefined;
+
+    res.clearCookie('oauth_token');
+    res.clearCookie('expires_in');
+
+    res.redirect(config.web_context);
+}
+
+/**
+ * called when /signin get
+ * @param req
+ * @param res
+ */
+function get_signin(req, res, oauth2) {
+    logger.debug({op: 'app#get signin'}, 'Token: %s', req.session.access_token);
+
+    // If auth_token is not stored in a session redirect to IDM
+    if (!req.session.access_token) {
+        var path = oauth2.getAuthorizeUrl();
+        logger.debug({op: 'app#get signin'}, 'idm path: %s', path);
+        res.redirect(path);
+        // If auth_token is stored in a session cookie it sends a button to get user info
+    } else {
+
+        oauth2.get(config.idm.url + '/user/', req.session.access_token, function (e, response) {
+            oauth_get_callback(response,req, res);
+
+        });
+
+    }
+}
+
+/**
+ * check access token
+ * @param req
+ * @param res
+ * @param next
+ * @param debug_message
+ */
+function check_token(req, res, next, debug_message) {
+    logger.debug(debug_message);
+    if (req.session.access_token) {
+
+        next();
+    } else {
+        common.notAuthorized(req, res);
+    }
+}
+
+/**
+ *
+ * @param response
+ * @param req
+ * @param res
+ */
+function oauth_get_callback(response, req, res) {
+    logger.debug({op: 'app#get login'}, 'response get userinfo: ' + response);
+    if (response != undefined) {
+        var user = JSON.parse(response);
+        req.session.user = user;
+        req.session.role = common.parseRoles(user.roles);
+    } else {
+        req.session.access_token = undefined;
+        req.session.user = undefined;
+        req.session.role = undefined;
+    }
+    res.redirect(config.web_context);
+}
+
+/**
+ *
+ * @param results
+ * @param req
+ * @param res
+ * @param oauth2
+ */
+
+function getOAuthAccessToken_callback(results, req, res, oauth2) {
+    logger.debug({op: 'app#get login'}, 'get access token:' + results);
+
+        if (results != undefined) {
+
+            // Stores the access_token in a session cookie
+            req.session.access_token = results.access_token;
+
+            logger.debug({op: 'app#get login'}, 'access_token: ' + results.access_token);
+
+            oauth2.get(config.idm.url + '/user/', results.access_token, function (e, response) {
+                oauth_get_callback(response, req, res);
+            });
+        } else {
+            res.redirect(config.web_context);
+
+        }
+}
+
+/**
+ * Handles requests from IDM with the access code
+ *
+ */
+function get_login(req, res, oauth2) {
+
+    logger.debug({op: 'app#get login'}, 'req:' + req.query.code);
+
+    // Using the access code goes again to the IDM to obtain the access_token
+    oauth2.getOAuthAccessToken(req.query.code, function (e, results) {
+
+        getOAuthAccessToken_callback(results, req, res, oauth2);
+
+    });
+}
 
 
 // view engine setup
@@ -107,34 +247,18 @@ app.use(cookieParser());
 app.use(config.web_context, express.static(path.join(__dirname, 'public')));
 
 
-app.use(config.web_context + 'refresh', function (req, res, next) {
-    logger.debug('Accessing to relaunch');
-    if (req.session.access_token) {
-
-        next();
-    } else {
-        common.notAuthorized(req, res);
-    }
+app.use(config.web_context + 'refresh',function (req, res, next) {
+    check_token(req, res, next, 'Accessing to refresh');
 }, refresh);
 
 app.use(config.web_context + 'subscribe', function (req, res, next) {
-    logger.debug('Accessing to subscribe');
-    if (req.session.access_token) {
+    check_token(req, res, next, 'Accessing to subscribe');
 
-        next();
-    } else {
-        notAuthorized(req, res);
-    }
 }, subscribe);
 
 app.use(config.web_context + 'unsubscribe', function (req, res, next) {
-    logger.debug('Accessing to unSubscribe');
-    if (req.session.access_token) {
+    check_token(req, res, next, 'Accessing to unSubscribe');
 
-        next();
-    } else {
-        notAuthorized(req, res);
-    }
 }, unsubscribe);
 
 
@@ -151,86 +275,21 @@ var oa = new OAuth2(config.idm.clientId,
     config.idm.callbackURL);
 
 
-// Handles requests to the main page
+
 app.get(config.web_context + 'signin', function (req, res) {
-    logger.debug({op: 'app#get signin'}, 'Token: %s', req.session.access_token);
-
-    // If auth_token is not stored in a session redirect to IDM
-    if (!req.session.access_token) {
-        var path = oa.getAuthorizeUrl();
-        logger.debug({op: 'app#get signin'}, 'idm path: %s', path);
-        res.redirect(path);
-        // If auth_token is stored in a session cookie it sends a button to get user info
-    } else {
-
-        oa.get(config.idm.url + '/user/', req.session.access_token, function (e, response) {
-            logger.debug('userinfo: ' + response);
-            if (response != undefined) {
-                var user = JSON.parse(response);
-                req.session.user = user;
-                req.session.role = common.parseRoles(user.roles);
-
-            }
-            res.redirect(config.web_context);
-
-        });
-
-    }
+    get_signin(req, res, oa);
 });
 
-// Handles requests from IDM with the access code
+
 app.get(config.web_context + 'login', function (req, res) {
 
-    logger.debug({op: 'app#get login'}, 'req:' + req.query.code);
-
-    // Using the access code goes again to the IDM to obtain the access_token
-    oa.getOAuthAccessToken(req.query.code, function (e, results) {
-        logger.debug({op: 'app#get login'}, 'get access token:' + results);
-
-        if (results != undefined) {
-
-            // Stores the access_token in a session cookie
-            req.session.access_token = results.access_token;
-
-            logger.debug({op: 'app#get login'}, 'access_token: ' + results.access_token);
-
-            oa.get(config.idm.url + '/user/', results.access_token, function (e, response) {
-                logger.debug({op: 'app#get login'}, 'response get userinfo: ' + response);
-                if (response != undefined) {
-                    var user = JSON.parse(response);
-                    req.session.user = user;
-                    req.session.role = common.parseRoles(user.roles);
-                } else {
-                    req.session.access_token = undefined;
-                    req.session.user = undefined;
-                    req.session.role = undefined;
-                }
-                res.redirect(config.web_context);
-
-            });
-        } else {
-            res.redirect(config.web_context);
-
-        }
-
-    });
+  get_login(req, res, oa);
 
 });
 
 // listen request from contextbroker changes
 app.post(config.web_context + 'contextbroker', function (req, res) {
-    try {
-        var region = cbroker.changeReceived(req.body);
-        logger.info('request received from contextbroker for region: %s', region.node);
-        subscribe.nofify(region.node, function () {
-            logger.info('post to list ok');
-
-            res.status(200).end();
-        });
-    } catch (ex) {
-        logger.error('error in contextbroker notification: %s', ex);
-        res.status(400).send({ error: 'bad request! ' + ex });
-    }
+   post_contextbroker(req,res);
 });
 
 
@@ -243,14 +302,8 @@ app.get(config.web_context + 'auth', function (req, res) {
 // Handles logout requests to remove access_token from the session cookie
 app.get(config.web_context + 'logout', function (req, res) {
 
-    req.session.access_token = undefined;
-    req.session.user = undefined;
-    req.session.role = undefined;
+    get_logout(req,res);
 
-    res.clearCookie('oauth_token');
-    res.clearCookie('expires_in');
-
-    res.redirect(config.web_context);
 });
 
 
@@ -283,3 +336,25 @@ app.use(function (err, req, res) {
 
 /** @export */
 module.exports = app;
+
+
+/** @export */
+module.exports.post_contextbroker = post_contextbroker;
+
+/** @export */
+module.exports.get_logout = get_logout;
+
+/** @export */
+module.exports.get_signin = get_signin;
+
+/** @export */
+module.exports.get_login = get_login;
+
+/** @export */
+module.exports.check_token = check_token;
+
+/** @export */
+module.exports.getOAuthAccessToken_callback = getOAuthAccessToken_callback;
+
+/** @export */
+module.exports.oauth_get_callback = oauth_get_callback;

@@ -132,7 +132,16 @@ rule the use of ``dashboard.yml`` configuration file is preferrable.
 Changelog
 =========
 
-Version 1.0.0
+*Version 1.1.1* 
+
+- Required libs
+
+*Version 1.1.0*
+
+- New css/style
+- Add home button
+
+*Version 1.0.0*
 
 -  New overview and details pages.
 -  IdM authentication.
