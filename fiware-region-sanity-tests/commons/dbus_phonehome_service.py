@@ -126,6 +126,7 @@ class DbusPhoneHomeClient():
          When received, main loop will be finished and data received from the signal will be returned.
         :return: None if signal has not been received after the timewait; Else, the content received in the signal
         """
+        DbusPhoneHomeClient.data_received
 
         self.logger.debug("Connecting to PhoneHome DBus Service in bus '%s' and getting PhoneHome object "
                           "with path '%s'", bus_name, object_path)
