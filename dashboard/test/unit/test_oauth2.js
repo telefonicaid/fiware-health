@@ -25,7 +25,7 @@ var assert = require('assert'),
 
 
 /* jshint multistr: true */
-suite('app', function () {
+suite('oauth2', function () {
 
 
     test('should_return_token_url', function () {
