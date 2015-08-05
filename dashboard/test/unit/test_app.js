@@ -18,7 +18,6 @@
 
 var assert = require('assert'),
     sinon = require('sinon'),
-    EventEmitter = require('events').EventEmitter,
     app = require('../../lib/app'),
     cbroker = require('../../lib/routes/cbroker'),
     subscribe = require('../../lib/routes/subscribe'),
