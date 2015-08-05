@@ -132,6 +132,33 @@ exports.OAuth2.prototype.getAuthorizeUrl = function () {
 };
 
 /**
+ *
+ * @param error
+ * @param callback
+ * @param data
+ * @private
+ */
+exports.OAuth2.prototype._getOAuthAccessToken_request = function (error, callback, data) {
+    if (error)  callback(error);
+    else {
+        var results;
+        try {
+            // As of http://tools.ietf.org/html/draft-ietf-oauth-v2-07
+            // responses should be in JSON
+            results = JSON.parse(data);
+        }
+        catch (e) {
+            // .... However both Facebook + Github currently use rev05 of the spec
+            // and neither seem to specify a content-type correctly in their response headers :(
+            // clients of these services will suffer a *minor* performance cost of the exception
+            // being thrown
+            results = querystring.parse(data);
+        }
+
+        callback(null, results);
+    }
+};
+/**
  * get OAuthAccessToken
  * @param {String} code
  * @param {function} callback
@@ -146,24 +173,10 @@ exports.OAuth2.prototype.getOAuthAccessToken = function (code, callback) {
         'Content-Length': post_data.length
     };
 
+    var process_data = this._getOAuthAccessToken_request;
+
     this._request('POST', this._getAccessTokenUrl(), post_headers, post_data, null, function (error, data, response) {
-        if (error)  callback(error);
-        else {
-            var results;
-            try {
-                // As of http://tools.ietf.org/html/draft-ietf-oauth-v2-07
-                // responses should be in JSON
-                results = JSON.parse(data);
-            }
-            catch (e) {
-                // .... However both Facebook + Github currently use rev05 of the spec
-                // and neither seem to specify a content-type correctly in their response headers :(
-                // clients of these services will suffer a *minor* performance cost of the exception
-                // being thrown
-                results = querystring.parse(data);
-            }
-            callback(null, results);
-        }
+        process_data(error, callback, data);
     });
 };
 
