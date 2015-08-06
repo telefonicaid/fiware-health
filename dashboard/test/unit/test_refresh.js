@@ -75,3 +75,4 @@ suite('refresh', function () {
 
     });
 });
+
