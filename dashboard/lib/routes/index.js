@@ -27,9 +27,22 @@ var express = require('express'),
 
 
 /* GET home page. */
-router.get('/', function (req, res) {
+router.get('/', get_index);
 
-    cbroker.retrieveAllRegions(function (regions) {
+
+
+/**
+ *
+ * @param req
+ * @param res
+ */
+function get_index (req, res) {
+
+    /**
+     * callback for cbroker.retrieveAllRegions
+     * @param regions
+     */
+    function callback_retrieveRegions(regions) {
 
         logger.info({op: 'index#get'}, 'Regions: %j', regions);
 
@@ -42,15 +55,18 @@ router.get('/', function (req, res) {
             //search for subscription
 
             logger.debug({op: 'index#get'}, 'Regions: %s', regions.constructor.name);
-            subscribe.searchSubscription(userinfo.email, regions, function () {
 
+            var after_search_callback = function () {
 
                 regions = common.addAuthorized(regions, userinfo.displayName);
 
                 logger.debug('before render: %s', JSON.stringify(regions));
+                console.log({name: userinfo.displayName, regions: regions, role: req.session.role});
                 res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role});
 
-            });
+            };
+
+            subscribe.searchSubscription(userinfo.email, regions, after_search_callback);
 
 
         }
@@ -58,9 +74,16 @@ router.get('/', function (req, res) {
             res.render('index', {name: 'sign in', regions: regions, role: req.session.role});
 
         }
-    });
+    }
 
-});
+    cbroker.retrieveAllRegions(callback_retrieveRegions);
+
+}
 
 /** @export */
 module.exports = router;
+
+/** @export */
+module.exports.get_index = get_index;
+
+

@@ -29,7 +29,14 @@ var express = require('express'),
 
 
 /* GET refresh. */
-router.get('/', function (req, res) {
+router.get('/', get_refresh);
+
+/**
+ *
+ * @param req
+ * @param res
+ */
+function get_refresh (req, res) {
 
     var region = req.param('region');
 
@@ -85,7 +92,11 @@ router.get('/', function (req, res) {
     jira_req.end();
 
 
-});
+};
 
 /** @export */
 module.exports = router;
+
+
+/** @export */
+module.exports.get_refresh = get_refresh;

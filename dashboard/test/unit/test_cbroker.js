@@ -68,11 +68,10 @@ suite('cbroker', function () {
         assert.deepEqual(expected, result);
     });
 
-     test('should_retrieve_data_about_all_regions', function (done) {
+    test('should_retrieve_data_about_all_regions', function (done) {
 
         //given
-        var req,res;
-        req = sinon.stub();
+        var req = sinon.stub();
         req.param = sinon.stub();
         req.param.withArgs('region').returns('region1');
         req.session = sinon.stub();
