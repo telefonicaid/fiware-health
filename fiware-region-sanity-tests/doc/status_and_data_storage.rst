@@ -19,33 +19,39 @@ An example of the generated ``test_results.txt`` for an specific region
 
 ::
 
-    [Tests: 20, Errors: 0, Failures: 0, Skipped: 1]
+    [Tests: 26, Errors: 0, Failures: 0, Skipped: 0]
 
     REGION GLOBAL STATUS
 
-    Regions satisfying all key test cases: [u'test_(.*)']
-     >> my_region
+    Regions satisfying all key test cases: ['test_(.*)']
+     NONE!!!!!!!
 
-    Regions only failing in optional test cases: [u'test_.*container.*']
-     N/A
+    Regions only failing in optional test cases: ['test_.*container.*']
+     >> my_region
 
     *********************************
 
     REGION TEST SUMMARY REPORT:
 
-     >> qa_ok
+     >> my_region
       OK	 test_allocate_ip
       OK	 test_base_image_for_testing_exists
       OK	 test_cloud_init_aware_images
+      NOK	 test_create_big_object_and_download_it_from_container
+      OK	 test_create_container
       OK	 test_create_keypair
       OK	 test_create_network_and_subnet
       OK	 test_create_router_external_network
       OK	 test_create_router_no_external_network
       OK	 test_create_router_no_external_network_and_add_network_port
-      NOK	 test_create_security_group_and_rules
+      OK	 test_create_security_group_and_rules
+      N/A	 test_create_text_object_and_download_it_from_container
+      OK	 test_delete_an_object_from_a_container
+      OK	 test_delete_container
       OK	 test_deploy_instance_with_network_and_associate_public_ip
+      OK	 test_deploy_instance_with_networks_and_check_metadata_service
       OK	 test_deploy_instance_with_networks_and_e2e_connection_using_public_ip
-      N/A	 test_deploy_instance_with_networks_and_e2e_snat_connection
+      OK	 test_deploy_instance_with_networks_and_e2e_snat_connection
       OK	 test_deploy_instance_with_new_network
       OK	 test_deploy_instance_with_new_network_and_all_params
       OK	 test_deploy_instance_with_new_network_and_keypair
