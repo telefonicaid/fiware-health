@@ -71,12 +71,13 @@ the `phoneHome architecture <./doc/phonehome_architecture.rst>`_
 
 **Using virtualenv** (recommended)
 
-1. Create a virtual environment somewhere (``virtualenv $WORKON_HOME/venv``)
-#. Activate the virtual environment (``source $WORKON_HOME/venv/bin/activate``)
+1. Install D-Bus requirements for your system (*D-Bus* and *dbus-python*).
+#. Create a virtual environment somewhere (``virtualenv $WORKON_HOME/venv/fihealth_sanitycheks
+   --system-site-packages``)
+#. Activate the virtual environment (``source $WORKON_HOME/venv/fihealth_sanitycheks/bin/activate``)
 #. Go to main folder in the *FiHealth - Sanity Checks* project (``$SANITYCHECK_PROJECT``)
 #. Install the requirements for the test case execution in the virtual
    environment (``pip install -r requirements.txt --allow-all-external``)
-#. Install D-Bus requirements for your system (*D-Bus* and *dbus-python*).
 
 
 **Using Vagrant** (optional)
