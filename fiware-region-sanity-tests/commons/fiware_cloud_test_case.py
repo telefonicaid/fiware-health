@@ -428,7 +428,8 @@ class FiwareTestCase(unittest.TestCase):
             files = [f for f in listdir(SWIFT_RESOURCES_PATH) if isfile(join(SWIFT_RESOURCES_PATH, f))]
             for file in files:
                 cls.logger.debug("init_world() found local object '%s' not deleted", file)
-                if file != TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION:
+                if (file != TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION) \
+                        and (file not in list(world['local_objects'])):
                     world['local_objects'].append(file)
 
         # release resources to ensure a clean world
