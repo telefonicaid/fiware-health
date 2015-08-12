@@ -280,7 +280,12 @@ are required:
             "password": "MyPassword"
         },
         "test_configuration": {
-            "phonehome_endpoint": "http://LocalHostPublicAddress:SomePort"
+            "phonehome_endpoint": "http://LocalHostPublicAddress:SomePort",
+            "swift_configuration": {
+                "big_file_url_1": "http://RemotePublicAddress1/File1.dat",
+                "big_file_url_2": "http://RemotePublicAddress2/File2.dat"
+            },
+            "openstack_metadata_service_url": "http://169.254.169.254/openstack/latest/meta_data.json"
         },
         "region_configuration": {
             "external_network_name": {
