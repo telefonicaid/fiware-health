@@ -1,32 +1,94 @@
-=============================================
-FIWARE Health - Sanity Check Status Dashboard
-=============================================
+===============================================
+ FIWARE Health - Sanity Check Status Dashboard
+===============================================
+
+This is the code repository for **FiHealth - Dashboard**, an overview page with
+a summary of the status of the regions in `FIWARE Lab`_ including links to the
+reports showing detailed information about the problems found.
+
+The dashboard is one of the components of `FiHealth </README.rst>`_, which is
+part of the `FIWARE Ops`_ suite of tools for the operation of FIWARE Lab.
+
+This project is part of FIWARE_.
+
+Any feedback on this documentation is highly welcome, including bugs, typos or
+things you think should be included but aren't. You can use `github issues`__
+to provide feedback.
+
+__ `FiHealth - GitHub issues`_
 
 
-Overview page with a summary of the status of the regions in FIWARE Lab, with
-links to reports showing detailed information about the problems found.
+Overall description
+===================
+
+This dashboard is a tool to graphically monitor the *health* of the nodes in
+FIWARE Lab. It allows users and node administrators to know which capabilities
+of a region are working.
+
+As the frontend for `Sanity Checks </fiware-region-sanity-tests/README.rst>`_,
+the dashboard shows all test results of each execution and the sanity check
+status of each region. It makes possible to browse through executed test cases
+and their results; in case of failure, detailed logs are shown.
+
+Additionaly, it allows administrators to re-launch the Sanity Checks execution
+(this requires to sign in using FIWARE Account credentials) and to subscribe
+to mail notifications about changes in a region status.
+
+
+Build and Install
+=================
+
+Dashboard is distributed as a CentOS (.rpm) package ready to be installed. For
+details about building from sources and packaging, please check `this document
+<doc/build_source.rst>`_.
+
+
+Requirements
+------------
+
+- Operating systems: CentOS (or RedHat), being CentOS 6.3 the reference version
+- RPM dependencies: some required packages may not be present in the official
+  repositories, or their versions are too old (for example, ``nodejs``). In any
+  case, checking for such dependencies and configuration of alternative sources
+  is automatically managed by the package installation scripts when using the
+  proper tool (i.e. ``yum``)
 
 
 Installation
-============
+------------
 
-Dashboard is distributed as a CentOS (.rpm) package. Assuming FIWARE package
-repositories are configured, just use the proper tool (such as ``yum``) to
-install ``fiware-fihealth-dashboard`` package. The RPM package has two dependencies, python and python-pip (must be installed manually). These distributions are currently supported:
+Using FIWARE package repository (recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  CentOS 6.3/6.5
+Refer to the documentation of your Linux distribution to set up the URL of the
+repository where FIWARE packages are available (and update cache, if needed).
+Currently, ``http://repositories.testbed.fiware.org/repo/rpm/x86_64``
 
-During installation process, Node.js engine version is checked and package
-dependencies are resolved using ``npm`` tool. Upon successful installation,
-a Linux service ``fihealth_dashboard`` is created.
+Then, use the package tool to install ``fiware-fihealth-dashboard``::
 
-`Mailman`_ and `mailman-api`_ are installed as dependencies of this component,
+    $ sudo yum install fiware-fihealth-dashboard
+
+
+Using a downloaded RPM file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Download the package file and install it. Take into account that you may need
+to manually install dependencies, as some tools aren't able to manage them when
+installing from file::
+
+    $ sudo rpm -i fiware-fihealth-dashboard-X.Y.Z-1.noarch.rpm
+
+
+Post-installation
+-----------------
+
+Mailman_ and mailman-api_ are installed as dependencies of this component,
 given that notifications are sent via mailing lists. After checking the values
 for configuration options in file ``{installation_path}/config/dashboard.yml``,
-some configuration steps are required after installation:
+some additional steps are required after installation:
 
 -  Customize subscription message by editing file
-   ``{mailman-lib-path}/templates/en/subscribeack.txt``
+   ``{mailman-lib-path}/templates/en/subscribeack.txt``:
 
 .. code::
 
@@ -42,7 +104,7 @@ some configuration steps are required after installation:
    DEFAULT_EMAIL_HOST = 'myhost.mydomain.tld'
    DEFAULT_HOST_NAME  = 'myhost.mydomain.tld'
 
--  Set mail transport agent (many supported, but `Postfix`_ recommended) at
+-  Set mail transport agent (many supported, but Postfix_ recommended) at
    ``{mailman-lib-path}/Mailman/mm_cfg.py`` (some further configuration steps
    could be required: please follow directions at `Mailman documentation`__):
 
@@ -78,13 +140,26 @@ some configuration steps are required after installation:
    $ setup
 
 
-Usage
-=====
+Upgrading from a previous version
+---------------------------------
+
+Unless explicitly stated, no migration steps are required to upgrade to a
+newer version of the Monitoring components:
+
+- When using the package repositories, just follow the same directions
+  described in the Installation_ section (the ``install`` subcommand also
+  performs upgrades).
+- When upgrading from downloaded package files, use ``rpm -U``.
+
+
+Running
+=======
 
 Dashboard runs as a standalone web server listening for requests at the given
 endpoint. Once installed, there are two ways of starting the server: manually
-from the command line or as a system service. It is not recommended to mix both
-ways (e.g. start it manually but using the service scripts to stop it).
+from the command line or as a system service ``fihealth_dashboard`` created by
+the package installation (preferred). It is not recommended to mix both ways
+(e.g. start it manually but using the service scripts to stop it).
 
 
 From the command line
@@ -119,44 +194,45 @@ Use the ``fihealth_dashboard`` service:
 
    $ sudo service fihealth_dashboard start
    $ sudo service fihealth_dashboard stop
+
+
+Configuration file
+------------------
+
+Some of the options can be overriden from the command line, but as a general
+rule the use of ``config/dashboard.yml`` configuration file is preferable.
+Such `file <config/dashboard.yml>`_ is self-documented, so there you will
+find a description of every configuration option.
+
+
+Testing
+=======
+
+End-to-end tests
+----------------
+
+In order to test the status of the dashboard, first check whether the server is
+running and then try accessing the main page from a browser:
+
+.. code::
+
    $ service fihealth_dashboard status
 
 
-Configuration options
----------------------
+Unit tests
+----------
 
-Some of the options can be overriden from the command line, but as a general
-rule the use of ``dashboard.yml`` configuration file is preferrable.
-
-
-Changelog
-=========
-
-*Version 1.1.1* 
-
-- Required libs
-
-*Version 1.1.0*
-
-- New css/style
-- Add home button
-
-*Version 1.0.0*
-
--  New overview and details pages.
--  IdM authentication.
--  Mail notifications in subscriptions to status changes.
-
-
-License
-=======
-
-\(c) 2015 Telefónica I+D, Apache License 2.0
+Please refer to `building from sources documentation <doc/build_source.rst>`_:
+the ``test`` target is used for running the unit tests for the dashboard.
 
 
 .. REFERENCES
 
+.. _FIWARE: http://www.fiware.org/
+.. _FIWARE Lab: https://www.fiware.org/lab/
+.. _FIWARE Ops: https://www.fiware.org/fiware-operations/
+.. _FiHealth - GitHub issues: https://github.com/telefonicaid/fiware-health/issues/new
+.. _Postfix: http://www.postfix.org/
 .. _mailman-api: http://mailman-api.readthedocs.org/en/stable/
 .. _Mailman: http://www.gnu.org/software/mailman/
 .. _Mailman - Set up your mail server: http://www.gnu.org/software/mailman/mailman-install/mail-server.html
-.. _Postfix: http://www.postfix.org/

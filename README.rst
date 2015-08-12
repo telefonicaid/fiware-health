@@ -1,28 +1,29 @@
-=============
-FIWARE Health
-=============
+===============
+ FIWARE Health
+===============
+
+|Build Status| |Coverage Status|
 
 
-| |Build Status| |Coverage Status|
+This is the code repository for **FiHealth**, a tool to check the status of
+each `FIWARE Lab`_ node, and part of the `FIWARE Ops`_ suite of tools for the
+operation of FIWARE Lab.
 
-Description
------------
-
-This is a set of tools to check the status of each `FIWARE Lab`_ node.
+This project is part of FIWARE_.
 
 
 Components
-----------
+==========
 
 `FiHealth Sanity Checks <fiware-region-sanity-tests/README.rst>`_
-   Tests checking capabilities and global status of lab node (i.e. *region*).
+   Tests checking capabilities and global status of nodes (i.e. *regions*).
 
 `FiHealth Dashboard <dashboard/README.rst>`_
-   Web server offering a frontend to view tests results and operate on them.
+   Web server offering a frontend to view tests results and operate on nodes.
 
 
 License
--------
+=======
 
 \(c) 2015 Telefónica I+D, Apache License 2.0
 
@@ -31,9 +32,14 @@ License
 
 .. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-health.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-health
-.. |Coverage Status| image:: https://coveralls.io/repos/telefonicaid/fiware-health/badge.png?branch=develop
+   :alt: Build Status
+.. |Coverage Status| image:: https://img.shields.io/coveralls/telefonicaid/fiware-health/develop.svg
    :target: https://coveralls.io/r/telefonicaid/fiware-health
+   :alt: Coverage Status
+
 
 .. REFERENCES
 
-.. _FIWARE Lab: http://www.fiware.org/lab/
+.. _FIWARE: http://www.fiware.org/
+.. _FIWARE Lab: https://www.fiware.org/lab/
+.. _FIWARE Ops: https://www.fiware.org/fiware-operations/
