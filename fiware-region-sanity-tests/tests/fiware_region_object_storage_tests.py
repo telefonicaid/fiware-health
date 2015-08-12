@@ -160,9 +160,9 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         """
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
-        containerName = TEST_CONTAINER_PREFIX + suffix
+        containerName = self.region_name + TEST_CONTAINER_PREFIX + suffix
         big_object_name = self.region_name + TEST_BIG_OBJECT_PREFIX + suffix + TEST_BIG_FILE_EXTENSION
-        remote_big_object_name = TEST_BIG_OBJECT_REMOTE_PREFIX + TEST_BIG_OBJECT_PREFIX + suffix \
+        remote_big_object_name = self.region_name + TEST_BIG_OBJECT_REMOTE_PREFIX + TEST_BIG_OBJECT_PREFIX + suffix \
                                  + TEST_BIG_FILE_EXTENSION
 
         response = self.swift_operations.create_container(containerName)
