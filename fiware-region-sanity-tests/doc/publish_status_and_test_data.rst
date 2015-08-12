@@ -1,20 +1,27 @@
-============================================
-FI-Health Sanity Checks | Status and Storage
-============================================
+===================================================
+ FiHealth Sanity Checks | Publishing Sanity Status
+===================================================
 
 Results included in summary report ``test_results.txt`` can be published through
-a `Context Broker`_ (and therefore stored in a database). To do that, a request
-to the `NGSI Adapter`_ adaptation layer will be issued, which in turn extracts
-attributes from the report and invokes Context Broker.
+a `Context Broker`_ (therefore, available for querying and stored in database).
 
-Such extraction is done by a custom parser ``resources/parsers/sanity_tests.js``
-provided as part of this component, which has to be installed together with the
-rest of standard parsers bundled in NGSI Adapter package.
+To do that, a request to the `NGSI Adapter`_ component must be issued. The name
+of the probe originating source data will be ``sanity_tests``::
 
-This parser is the responsible for calculating the **Sanity Check Status** using
-all data in the summary report, and send it as a new Context Broker attribute.
+    $ curl "{adapter_endpoint}/sanity_tests?id={myregion}&type=region" -s -S --header 'Content-Type: text/plain' -X POST -d @test_results.txt
 
-An example of the generated ``test_results.txt`` for an specific region
+Please note that the invocation to the NGSI Adapter once summary report has been
+generated is **only** automated when running the Sanity Checks within Jenkins.
+
+As a prerequisite, custom parser ``resources/parsers/sanity_tests.js`` (provided
+as part of this component) has to be installed together with the rest of parsers
+bundled in NGSI Adapter package.
+
+Such parser will extract NGSI attributes from the summary report and then invoke
+Context Broker to update region context. In this process the **Sanity Status**
+is calculated depending the results of individual tests
+
+Here is an example of the generated ``test_results.txt`` for an specific region
 (*my_region*) is the following:
 
 ::
@@ -62,7 +69,6 @@ An example of the generated ``test_results.txt`` for an specific region
       OK	 test_images_not_empty
 
 
-
 Sanity Check Status and Test Execution Status
 ---------------------------------------------
 
@@ -75,8 +81,8 @@ the former) is generated from the given template (or the default found at
 The script ``commons/result_analyzer.py`` is invoked to create a summary
 report ``test_results.txt``. It will analyze the status of each region using
 the *key_test_cases* and *opt_test_cases* information configured in the
-``resources/settings.json`` file: a region is considered **OK** if all its test cases
-with names matching the regular expressions defined in the first property
+``resources/settings.json`` file: a region is considered **OK** if all its test
+cases with names matching the regular expressions defined in the first property
 have been *PASSED*. If some of these *key test cases* are failed but these ones
 are defined in the second property, the status of the region will
 be **Partial OK**.
@@ -88,9 +94,9 @@ one for each executed sanity test with their result (**sanity_check_***).
 
 So that, we have two type of statuses:
 
-* **Sanity Check Status**. The responsible for calculating the *Sanity Check Status*
-  is the custom parser for the NGSI-Adapter mentioned before, whose input is
-  the  summary report ``test_results.txt`` that has been shown:
+- **Sanity Check Status**. The responsible for calculating this value is the
+  custom parser for the NGSI Adapter aforementioned, whose input is the summary
+  report ``test_results.txt`` that has been shown:
 
   +---------------+---------------------------------------------+
   | Sanity Status | Description                                 |
@@ -110,7 +116,7 @@ So that, we have two type of statuses:
   +---------------+---------------------------------------------+
 
 
-* **Test status**. The ``commons/result_analyzer.py`` script only generates
+- **Test status**. The ``commons/result_analyzer.py`` script only generates
   the ``test_results.txt`` report with the list of executed test cases and their
   results, and also 'mark' the region considering the *key_test_cases*
   and *opt_test_cases*. Result of tests could be:
@@ -130,8 +136,7 @@ So that, we have two type of statuses:
   +-------------+---------------------------------------------+
 
 
-
 .. REFERENCES
 
 .. _NGSI Adapter: https://github.com/telefonicaid/fiware-monitoring/tree/master/ngsi_adapter
-.. _Context Broker: http://catalogue.fiware.org/enablers/publishsubscribe-context-broker-orion-context-broker
+.. _Context Broker: http://github.com/telefonicaid/fiware-orion/

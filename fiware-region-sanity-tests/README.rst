@@ -1,49 +1,53 @@
-=============================
-FIWARE Health - Sanity Checks
-=============================
+===============================
+ FIWARE Health - Sanity Checks
+===============================
 
-This is the code repository for the **FiHealth - Sanity Checks**, the FIWARE Ops tool
-used to execute *sanity* test cases over each FIWARE federated node (regions)
-to validate their capabilities and get the *Status* of them.
+This is the code repository for **FiHealth - Sanity Checks**, a comprehensive
+collection of *sanity* test cases over each region in `FIWARE Lab`_ in order
+to validate the capabilities of the regions and get their *status*.
 
-This sub-project is part of the **FiHealth** component, being a generic/configurable
-tool that can be used over any OpenStack-based architecture.
+The sanity checks are one of the components of `FiHealth </README.rst>`_, which
+is part of the `FIWARE Ops`_ suite of tools for the operation of FIWARE Lab.
 
-Any feedback about this component is highly welcome, including bugs,
-doc typos or things/features you think should be included or improved.
-You can use `GitHub issues`_ to provide feedback or report defects.
+This project is part of FIWARE_.
+
+Any feedback on this documentation is highly welcome, including bugs, typos or
+things you think should be included but aren't. You can use `github issues`__
+to provide feedback.
+
+__ `FiHealth - GitHub issues`_
+
 
 Overall description
--------------------
+===================
 
-The main objective of *Sanity Checks* is provide a way to know the *region Status*
-of each federated node in FIWARE platform. To get this one, *Sanity Checks* engine
-runs some tests against each node, testing its main features using a final-user
-perspective (E2E testing). These set of test cases cover the main functionalities
-for:
+The main objective of these *Sanity Checks* is to provide a way to know the
+*region Status* of each federated node in FIWARE Lab. To do so, *Sanity Checks*
+framework runs some tests against each node, testing its main features using a
+final-user perspective (E2E testing). This collection of test cases cover these
+main features:
 
-* Compute operations.
-* Networking operations.
-* Image management operations.
-* Object storage operations.
+- Compute operations.
+- Networking operations.
+- Image management operations.
+- Object storage operations.
 
-
-Test case implementation has been performed using Python_ and its
-testing__ framework.
+Test cases implementation relies on  Python_ and its testing__ framework.
 
 __ `Python - Unittest`_
 
 
 Build and Install
------------------
-The recommended procedure is to use a Jenkins platform for building
-and running the *Sanity Checks*. We are providing all necessary scripts
-to deploy, build and execute the runtime using a standard OpenStack
-configuration properties and Jenkins' environment variables
-for credentials management and environment configuration.
+=================
 
-If you don't have a Jenkins platform for executing the *Sanity Checks*,
-you can launch them from command-line through ``nosetests.sh`` script.
+The recommended procedure to run the checks is using `Jenkins CI`_ tool. We
+provide all scripts needed to prepare the testing environment, configure *jobs*
+and run the sanity checks using standard OpenStack configuration properties and
+Jenkins environment variables for credentials management and configuration.
+
+Alternatively, you can launch the sanity checks from command line using the
+``nosetests.sh`` script.
+
 
 **Requirements**
 
@@ -57,210 +61,189 @@ you can launch them from command-line through ``nosetests.sh`` script.
 __ `Python - Downloads`_
 __ `Vagrant - Downloads`_
 
-The required python libs and their versions are specify in ``requirements.txt``
-file.
+As usual, ``requirements.txt`` file includes the required Python packages and
+their versions.
 
-You will need to provided the D-Bus system configuration and its external
-libs in the given environment where tests will be executed. **D-Bus system, its
-dependencies and installation are not managed by the project requirements file**.
-Please, check `D-Bus`_ web page to know how to install it on your system and the
-`dbus-python`_ tutorial to install and configure D-Bus python libs. To know how
-to configure the required *bus* for *Sanity Checks* (**PhoneHome bus**) take a look at
-the `phoneHome architecture <./doc/phonehome_architecture.rst>`_
+Some sanity checks require inter-process communication, and Linux `D-Bus`_ is
+used for that purpose. D-Bus system and its dependencies have to be previously
+installed and configured in the testing environment. Please refer to the
+`D-Bus documentation`__ for details and check `dbus-python`_ tutorial to
+install and configure D-Bus Python libs. To configure the required *bus*
+for *Sanity Checks* (**PhoneHome bus**), please take a look at the
+`PhoneHome architecture <doc/phonehome_architecture.rst>`_.
+
+__ `D-Bus`_
 
 
 **Using virtualenv** (recommended)
 
 1. Install D-Bus requirements for your system (*D-Bus* and *dbus-python*).
-#. Create a virtual environment somewhere (``virtualenv $WORKON_HOME/venv/fihealth_sanitycheks
-   --system-site-packages``)
-#. Activate the virtual environment (``source $WORKON_HOME/venv/fihealth_sanitycheks/bin/activate``)
-#. Go to main folder in the *FiHealth - Sanity Checks* project (``$SANITYCHECK_PROJECT``)
-#. Install the requirements for the test case execution in the virtual
-   environment (``pip install -r requirements.txt --allow-all-external``)
+
+#. Create a virtual environment somewhere::
+
+   $ virtualenv $WORKON_HOME/venv/fihealth_sanitychecks --system-site-packages
+
+#. Activate the virtual environment::
+
+   $ source $WORKON_HOME/venv/fihealth_sanitychecks/bin/activate
+
+#. Go to main folder in the *FiHealth - Sanity Checks* project::
+
+   $ cd fiware-health/fiware-region-sanity-tests
+
+#. Install requirements for the test case execution in the virtual environment::
+
+   $ pip install -r requirements.txt --allow-all-external
 
 
 **Using Vagrant** (optional)
 
-Instead of using virtualenv, you can use the provided Vagrantfile to deploy a
-local VM using Vagrant_, that will provide all environment configurations for
-launching test cases (except the D-Bus configuration).
+Instead of using ``virtualenv``, you can use Vagrant_ to deploy a local VM from
+the given *Vagrantfile*, providing all environment configurations to launch the
+test cases.
 
-1. Download and install Vagrant
-#. Go to main folder in the test project
-#. Execute ``vagrant up`` to launch a VM based on Vagrantfile provided.
-#. After Vagrant provision, your VM is properly configured to launch the
-   Sanity Check. You have to access to the VM using ``vagrant ssh`` and change
-   to ``/vagrant`` directory that will have mounted your test project workspace.
-#. Install D-Bus requirements.
+As a prerequisite, first download and install Vagrant (see Requirements). Then:
 
-If you need more information about how to use Vagrant, you can see the
-`getting started section`__ of Vagrant documentation.
+1. Go to the root folder of the project::
+
+    $ cd fiware-health/fiware-region-sanity-tests
+
+#. Launch a VM from the provided *Vagrantfile*::
+
+    $ vagrant up
+
+#. After Vagrant provision, your VM is properly configured to launch acceptance
+   tests. You have to access the VM and change to the Vagrant directory mapping
+   the testing workspace::
+
+    $ vagrant ssh
+    $ cd /vagrant
+
+For more information about how to use Vagrant, please check `this document`__.
 
 __ `Vagrant - Getting Started`_
 
 
-**Using Jenkins' jobs** (recommended)
+Jenkins jobs
+------------
 
-.. _Building and Installing on Jenkins:
+Please use the `Jenkins CI Remote Access API`__ to submit the following files
+to create the corresponding jobs:
 
-The *Sanity Checks* engine has been designed to be executed over a Jenkins
-platform. The script ``resources/scripts/jenkins.sh`` implements the logic
-for installing, building and executing Sanity Checks. This script accept
-two actions:
+- ``resources/jenkins/FiHealth-SanityCheck-0-SetUp.xml``
+- ``resources/jenkins/FiHealth-SanityCheck-1-Flow.xml``
+- ``resources/jenkins/FiHealth-SanityCheck-2-Exec-Region.xml``
 
-- ``prepare`` Sanity Check preparation process: Build and install.
-- ``test`` Sanity Check execution for the given region (``$OS_REGION_NAME``)
-
-::
-
-    # ./resources/scripts/jenkins.sh --help
-    # ./resources/scripts/jenkins.sh prepare
+__ `Jenkins CI - API`_
 
 
-This script requires following environment configurations:
+The following environment variables should be defined either in the global
+configuration of Jenkins or as part of the jobs:
 
-* ``JENKINS_HOME`` is the home path of Jenkins CI
-  (available when executing jobs on Jenkins)
-* ``JOB_URL`` is the full URL for this build job
-  (available when executing jobs on Jenkins)
-* ``FIHEALTH_WORKSPACE`` is the absolute path of Jenkins job workspace
-  (should be defined in the job or Jenkins global configuration)
-* ``FIHEALTH_HTDOCS`` is the absolute path where to publish HTML
-  (should be defined in the job or Jenkins global configuration)
-* ``FIHEALTH_ADAPTER_URL`` is the endpoint of NGSI Adapter
-  (should be defined in the job or Jenkins global configuration)
-* ``FIHEALTH_CB_URL`` is the endpoint of ContextBroker
-  (should be defined in the job or Jenkins global configuration)
-* ``WORKON_HOME`` is the optional base path for virtualenv
-  (should be defined in the job or Jenkins global configuration)
-* ``OS_REGION_NAME`` is the optional region to restrict tests to
-  (should be defined in the job or Jenkins global configuration)
-* ``OS_AUTH_URL`` is the OpenStack auth_url
-  (should be defined in the job or Jenkins global configuration)
-* ``OS_USERNAME`` is the OpenStack username
-  (should be defined in the job or Jenkins global configuration)
-* ``OS_PASSWORD`` is the OpenStack password
-  (should be defined in the job or Jenkins global configuration)
-* ``OS_TENANT_ID`` is the OpenStack tenant_id
-  (should be defined in the job or Jenkins global configuration)
-* ``OS_TENANT_NAME`` is the OpenStack tenant_name
-  (should be defined in the job or Jenkins global configuration)
-* ``OS_USER_DOMAIN_NAME`` is the OpenStack user_domain_name (to
-  replace the former if Identity API v3 (should be defined in the
-  job or Jenkins global configuration)
-
-
-The full Jenkins' job configuration to build and install the
-*Fi-Health Sanity Checks* component has been exported as XML to this file
-``resources/jenkins/FiHealth-SanityCheck-0-SetUp.xml``. Environment variables
-are not in this XML because they have been defined as part of the Global Jenkins
-Configuration.
-
+- **FIHEALTH_WORKSPACE**: The absolute path of Jenkins job workspace
+- **FIHEALTH_HTDOCS**: The absolute path where to publish HTML reports
+- **FIHEALTH_ADAPTER_URL**: The endpoint of NGSI Adapter
+- **FIHEALTH_CB_URL**: The endpoint of Context Broker
+- **WORKON_HOME**: The optional base path for virtualenv
+- **OS_REGION_NAME**: The optional region to restrict tests to
+- **OS_AUTH_URL**: The URL of OpenStack Identity Service for authentication
+- **OS_USERNAME**: The username for authentication
+- **OS_PASSWORD**: The password for authentication
+- **OS_TENANT_ID**: The tenant identifier for authentication
+- **OS_TENANT_NAME**: The tenant name for authentication
+- **OS_USER_DOMAIN_NAME**: (Only in Identity v3) The user domain name for
+  authentication
 
 
 Running
--------
+=======
 
 **Launch HTTP PhoneHome server**
 
 Some tests need a HTTP server waiting for requests from deployed VMs to check
-the E2E behaviour. Before executing these tests you will
-have to launch the implemented **HTTP PhoneHome service** like this:
+network connectivity (part of the E2E behaviour). Before executing them, you
+will have to manually launch the **HTTP PhoneHome service**::
 
-::
+    $ export TEST_PHONEHOME_ENDPOINT
+    $ python commons/http_phonehome_server.py
 
-   # export TEST_PHONEHOME_ENDPOINT
-   # python commons/http_phonehome_server.py
-
-If ``$TEST_PHONEHOME_ENDPOINT`` is not configured or this value is not set in
+If ``$TEST_PHONEHOME_ENDPOINT`` is not configured or its value is not set in
 the configuration file, the related tests will be skipped.
 
-The host where PhoneHome service is running must be accessible
-from deployed VMs. This endpoint should be configured in the
-``phonehome_endpoint`` property of configuration file or
-``$TEST_PHONEHOME_ENDPOINT`` env variable to be used by Sanity Checks.
+The host where PhoneHome service is running must be accessible from the VMs
+deployed. This endpoint should be configured in the ``phonehome_endpoint``
+property of configuration file or ``$TEST_PHONEHOME_ENDPOINT`` environment
+variable to be used by Sanity Checks.
 
 The PhoneHome server is managed independently of the *Sanity Checks* runtime.
 
 To know more about the D-Bus architecture and the HTTP PhoneHome service,
-please take a look at the
-`PhoneHome architecture documentation <./doc/phonehome_architecture.rst>`_
+please take a look at the `PhoneHome architecture
+<doc/phonehome_architecture.rst>`_.
 
 
-**Running SanityChecks from main script**
+**Running Sanity Checks from command line**
 
-* Go to the root folder of the project and configure the ``resources/settings.json``
-  and/or export env variables (see `Configuration`_).
-* Run ``./nosetests.sh``. This command will execute all
-  Sanity Checks in all nodes found under ``tests/regions/`` folder:
+- Go to the root folder of the project and edit ``resources/settings.json``
+  (or set environment variables, see above).
+- Run ``./nosetests.sh``. This command will execute all Sanity Checks in all
+  nodes found under ``tests/regions/`` folder:
 
-  - It is possible to provide a list of regions as argument to restrict the
+  * It is possible to provide a list of regions as argument to restrict the
     execution to them.
-  - Verbose logging may be enabled by adding ``--verbose`` option.
+  * Verbose logging may be enabled by adding ``--verbose`` option.
 
-::
+  Examples::
 
-  # ./nosetests.sh --help
-  # ./nosetests.sh
-  # ./nosetests.sh --verbose Region2 Region7 Region8
-
-
-**Running SanityChecks from Jenkins' job**
-
-After `Building and Installing on Jenkins`_ the *FiHealth Sanity Checks*
-component, we can create another job to execute it. This job must launch
-the ``jenkins.sh`` script (with all required configuration), but
-passing by params the action *test*:
-
-::
-
-    # export OS_REGION_NAME="Region0"
-    # ./resources/scripts/jenkins.sh test
+  $ ./nosetests.sh
+  $ ./nosetests.sh --verbose Region2 Region7 Region8
 
 
-The full Jenkins' job configuration to run *Fi-Health Sanity Checks* has been exported
-as XML to this file ``resources/jenkins/FiHealth-SanityCheck-2-Exec-Region.xml``.
-Environment variables are not in this XML because they have been defined as part
-of the Global Jenkins Configuration.
+**Running Sanity Checks from Jenkins**
+
+Jobs submitted during `installation <#Jenkins jobs>`_ run the script found at
+``resources/scripts/jenkins.sh`` to perform one of these actions:
+
+- ``prepare`` as a required step prior running the tests (this performs some
+  preparation tasks that are common to subsequent test executions)
+- ``test``: the actual Sanity Check execution for a single region (given by the
+  environment variable ``$OS_REGION_NAME``)
 
 
-
-Configuration
--------------
+Configuration file
+------------------
 
 Some configuration is needed before test execution (Sanity Checks execution).
-This configuration may come from the file ``resources/settings.json`` or from
-the following environment variables (which override values from such file):
+This may come from the file ``resources/settings.json``:
 
-* ``credentials``: data needed for authorization
+- ``credentials``: data needed for authorization
 
-  - ``OS_AUTH_URL`` is the OpenStack auth URL
-  - ``OS_USERNAME`` is the OpenStack username
-  - ``OS_PASSWORD`` is the OpenStack password
-  - ``OS_TENANT_ID`` is the OpentSack tenant_id
-  - ``OS_TENANT_NAME`` is the OpenStack tenant_name
-  - ``OS_USER_DOMAIN_NAME`` is the OpenStack user_domain_name (to
-    replace the former if Identity API v3
+  * ``keystone_url`` is the OpenStack auth URL
+  * ``user`` is the OpenStack username
+  * ``password`` is the OpenStack password
+  * ``tenant_id`` is the OpentSack tenant_id
+  * ``tenant_name`` is the OpenStack tenant_name
+  * ``user_domain_name`` is the OpenStack user_domain_name (Identity v3)
 
-* ``test_configuration``: other configuration values
+- ``test_configuration``: other configuration values
 
-  - ``TEST_PHONEHOME_ENDPOINT`` is the PhoneHome Server endpoint to be used
-    in some E2E tests. See the `PhoneHome architecture <./doc/phonehome_architecture.rst>`_
+  * ``phonehome_endpoint`` is the PhoneHome Server endpoint (see above)
+  * ``swift_configuration`` includes configuration related to Swift checks
+  * ``openstack_metadata_service_url`` is the OpenStack Metadata Service
 
 Apart from the former data, it is also possible to provide some per-region
 configuration values under ``region_configuration``:
 
-* ``external_network_name`` is the network for external floating IP addresses
-* ``test_flavor`` let us customize the flavor of instances launched in tests
+- ``external_network_name`` is the network for external floating IP addresses
+- ``test_flavor`` let us customize the flavor of instances launched in tests
 
-As we have mention above, it is needed to specify these properties:
+Finally, in order to calculate the global status of a region, these properties
+are required:
 
-* ``key_test_cases`` is a list of patterns to be matched with the name
-  of test cases to consider them mandatorily PASSED.
-* ``opt_test_cases`` is a list of patterns to be matched with the name
-  of test cases to consider some of the key test cases as optional.
-
+- ``key_test_cases`` is a list of patterns to be matched with the name
+  of test cases considered mandatory (i.e. their result must be "PASSED").
+- ``opt_test_cases`` is a list of patterns to be matched with the name
+  of test cases considered optional (i.e. they may fail).
 
 
 **Sanity Checks configuration example** ::
@@ -275,7 +258,12 @@ As we have mention above, it is needed to specify these properties:
             "password": "MyPassword"
         },
         "test_configuration": {
-            "phonehome_endpoint": "http://LocalHostPublicAddress:SomePort"
+            "phonehome_endpoint": "http://LocalHostPublicAddress:SomePort",
+            "swift_configuration": {
+                "big_file_url_1": "http://RemotePublicAddress1/File1.dat",
+                "big_file_url_2": "http://RemotePublicAddress2/File2.dat"
+            },
+            "openstack_metadata_service_url": "http://169.254.169.254/openstack/latest/meta_data.json"
         },
         "region_configuration": {
             "external_network_name": {
@@ -292,7 +280,6 @@ As we have mention above, it is needed to specify these properties:
     }
 
 
-
 Results of Sanity Check executions
 ----------------------------------
 
@@ -307,35 +294,31 @@ report ``test_results.txt``. It will analyze the status of each region using
 the *key_test_cases* and *opt_test_cases* information configured in the
 ``resources/settings.json`` file.
 
-Take a look at
-`Sanity Status and Data Storage documentation <./doc/status_and_data_storage.rst>`_
-to know more about *Sanity and Test Status* and the Context Broker integration
-with *FiHealth - Sanity Checks*
-
+Take a look at `Sanity Status and Data Storage documentation
+<doc/status_and_data_storage.rst>`_ to know more about *Sanity and Test Status*
+and the Context Broker integration with *FiHealth - Sanity Checks*
 
 
 Testing
--------
+=======
 
-This component is an amount of test cases itself. We are not providing
-test cases to check the implemented test cases. We are validating them
-running the Sanity Checks on a Jenkins platform against an OpenStack
-platform for testing/developer purposes.
-
+This component itself is a set of test cases, so testing it does not apply.
 
 
 Advanced topics
----------------
+===============
 
-* `More about implemented test cases <./doc/test_cases.rst>`_
-* `PhoneHome architecture <./doc/phonehome_architecture.rst>`_
-* `Region Status (Sanity Status) and test data storage <./doc/status_and_data_storage.rst>`_
-
+- `More about implemented test cases <doc/test_cases.rst>`_
+- `PhoneHome architecture <doc/phonehome_architecture.rst>`_
+- `Publishing of region sanity status and tests data <doc/publish_status_and_test_data.rst>`_
 
 
 .. REFERENCES
 
-.. _GitHub issues: https://github.com/telefonicaid/fiware-health/issues
+.. _FIWARE: http://www.fiware.org/
+.. _FIWARE Lab: https://www.fiware.org/lab/
+.. _FIWARE Ops: https://www.fiware.org/fiware-operations/
+.. _FiHealth - GitHub issues: https://github.com/telefonicaid/fiware-health/issues/new
 .. _Python: http://www.python.org/
 .. _Python - Downloads: https://www.python.org/downloads/
 .. _Python - Unittest: https://docs.python.org/2/library/unittest.html
@@ -347,3 +330,5 @@ Advanced topics
 .. _D-Bus: http://www.freedesktop.org/wiki/Software/dbus/
 .. _dbus-python: http://dbus.freedesktop.org/doc/dbus-python/doc/tutorial.html
 .. _pygobject: http://www.pygtk.org/
+.. _Jenkins CI: https://jenkins-ci.org/
+.. _Jenkins CI - API: https://wiki.jenkins-ci.org/display/JENKINS/Remote+access+API
