@@ -79,19 +79,19 @@ __ `D-Bus`_
 
 1. Install D-Bus requirements for your system (*D-Bus* and *dbus-python*).
 
-#. Create a virtual environment somewhere
+#. Create a virtual environment somewhere::
 
    $ virtualenv $WORKON_HOME/venv/fihealth_sanitychecks --system-site-packages
 
-#. Activate the virtual environment
+#. Activate the virtual environment::
 
    $ source $WORKON_HOME/venv/fihealth_sanitychecks/bin/activate
 
-#. Go to main folder in the *FiHealth - Sanity Checks* project
+#. Go to main folder in the *FiHealth - Sanity Checks* project::
 
    $ cd fiware-health/fiware-region-sanity-tests
 
-#. Install requirements for the test case execution in the virtual environment
+#. Install requirements for the test case execution in the virtual environment::
 
    $ pip install -r requirements.txt --allow-all-external
 
@@ -140,41 +140,19 @@ __ `Jenkins CI - API`_
 The following environment variables should be defined either in the global
 configuration of Jenkins or as part of the jobs:
 
-FIHEALTH_WORKSPACE
-    The absolute path of Jenkins job workspace
-
-FIHEALTH_HTDOCS
-    The absolute path where to publish HTML reports
-
-FIHEALTH_ADAPTER_URL
-    The endpoint of NGSI Adapter
-
-FIHEALTH_CB_URL
-    The endpoint of Context Broker
-
-WORKON_HOME
-    The optional base path for virtualenv
-
-OS_REGION_NAME
-    The optional region to restrict tests to
-
-OS_AUTH_URL
-    The URL of OpenStack Identity Service for authentication
-
-OS_USERNAME
-    The username for authentication
-
-OS_PASSWORD
-    The password for authentication
-
-OS_TENANT_ID
-    The tenant identifier for authentication
-
-OS_TENANT_NAME
-    The tenant name for authentication
-
-OS_USER_DOMAIN_NAME
-    (Only in Identity v3) The user domain name for authentication
+- **FIHEALTH_WORKSPACE**: The absolute path of Jenkins job workspace
+- **FIHEALTH_HTDOCS**: The absolute path where to publish HTML reports
+- **FIHEALTH_ADAPTER_URL**: The endpoint of NGSI Adapter
+- **FIHEALTH_CB_URL**: The endpoint of Context Broker
+- **WORKON_HOME**: The optional base path for virtualenv
+- **OS_REGION_NAME**: The optional region to restrict tests to
+- **OS_AUTH_URL**: The URL of OpenStack Identity Service for authentication
+- **OS_USERNAME**: The username for authentication
+- **OS_PASSWORD**: The password for authentication
+- **OS_TENANT_ID**: The tenant identifier for authentication
+- **OS_TENANT_NAME**: The tenant name for authentication
+- **OS_USER_DOMAIN_NAME**: (Only in Identity v3) The user domain name for
+  authentication
 
 
 Running
@@ -332,7 +310,7 @@ Advanced topics
 
 - `More about implemented test cases <doc/test_cases.rst>`_
 - `PhoneHome architecture <doc/phonehome_architecture.rst>`_
-- `Region Status (Sanity Status) and test data storage <doc/status_and_data_storage.rst>`_
+- `Publishing of region sanity status and tests data <doc/publish_status_and_test_data.rst>`_
 
 
 .. REFERENCES
