@@ -33,18 +33,20 @@ import re
 
 class FiwareNovaOperations:
 
-    def __init__(self, logger, region_name, test_flavor, **kwargs):
+    def __init__(self, logger, region_name, test_flavor, test_image, **kwargs):
         """
         Initializes Nova-Client.
         :param logger: Logger object
         :param region_name: Fiware Region name
         :param test_flavor: Flavor for new test instances
+        :param test_image: Image for new test instances
         :param auth_session: Keystone auth session object
         :param auth_url: Keystone auth URL (needed if no session is given)
         :param auth_token: Keystone auth token (needed if no session is given)
         """
 
         self.logger = logger
+        self.test_image = test_image or TEST_IMAGE_DEFAULT
         self.test_flavor_regex = re.compile("(.+\.)?%s$" % (test_flavor or TEST_FLAVOR_DEFAULT))
         self.client = client.Client(session=kwargs.get('auth_session'),
                                     auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),

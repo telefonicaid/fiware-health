@@ -89,11 +89,16 @@ class FiwareTestCase(unittest.TestCase):
         # Check for environment variables related to credentials and update configuration
         cls.auth_cred = cls.conf[PROPERTIES_CONFIG_CRED]
         env_cred = {
-            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL', cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
-            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
-            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
-            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
-            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+            PROPERTIES_CONFIG_CRED_KEYSTONE_URL:
+                environ.get('OS_AUTH_URL', cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
+            PROPERTIES_CONFIG_CRED_USER:
+                environ.get('OS_USERNAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
+            PROPERTIES_CONFIG_CRED_PASS:
+                environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
+            PROPERTIES_CONFIG_CRED_TENANT_ID:
+                environ.get('OS_TENANT_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
+            PROPERTIES_CONFIG_CRED_TENANT_NAME:
+                environ.get('OS_TENANT_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
         }
 
         # Check Identity API version from auth_url (v3 requires additional properties)
@@ -101,8 +106,8 @@ class FiwareTestCase(unittest.TestCase):
             cls.auth_url = env_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
             cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
             if cls.auth_api == 'v3':
-                user_domain_name = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
-                env_cred.update({PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: user_domain_name})
+                domain = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
+                env_cred.update({PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: domain})
         except IndexError:
             assert False, "Invalid setting {}.{}".format(PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_KEYSTONE_URL)
 
@@ -165,12 +170,12 @@ class FiwareTestCase(unittest.TestCase):
         return cls.auth_token
 
     @classmethod
-    def init_clients(cls, tenant_id, test_flavor):
+    def init_clients(cls, tenant_id, test_flavor, test_image):
         """
         Init the OpenStack API clients
         """
 
-        cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor,
+        cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor, test_image,
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
@@ -455,10 +460,11 @@ class FiwareTestCase(unittest.TestCase):
         # Get properties from global config
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
         test_flavor = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_FLAVOR].get(cls.region_name)
+        test_image = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_IMAGE].get(cls.region_name)
 
         # Initialize session trying to get auth token; on success, continue with initialization
         if cls.init_auth():
-            cls.init_clients(tenant_id, test_flavor)
+            cls.init_clients(tenant_id, test_flavor, test_image)
             cls.init_world(cls.suite_world, suite=True)
             cls.logger.debug("suite_world = %s", cls.suite_world)
 

@@ -35,11 +35,13 @@ import socket
 class FiwareRegionsBaseTests(FiwareTestCase):
 
     region_conf = None
+    glance_conf = None
 
     @classmethod
     def setUpClass(cls):
         super(FiwareRegionsBaseTests, cls).setUpClass()
         cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION]
+        cls.glance_conf = cls.conf[PROPERTIES_CONFIG_GLANCE]
 
     def setUp(self):
         super(FiwareRegionsBaseTests, self).setUp()
@@ -120,21 +122,32 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         """
         image_list = self.nova_operations.get_image_list()
 
-        # Filter out images with 'init' in its name
-        image_list = [image for image in image_list if 'init' in image.name]
-
-        # Filter out images with 'sdc_aware' metadata attribute set to True
+        # Filter out images with 'sdc_aware' metadata (named this way for historical reasons) attribute set to True
         image_list = [image for image in image_list if image.metadata.get('sdc_aware', "false").lower() == "true"]
 
         self.assertNotEqual(len(image_list), 0, "Cloud-init-aware image list is empty")
         self.logger.debug("Found %d images", len(image_list))
 
+    def test_required_images(self):
+        """
+        Test whether region has all required base images (as specified in settings)
+        """
+        image_list = self.nova_operations.get_image_list()
+        required_list = self.glance_conf.get(PROPERTIES_CONFIG_GLANCE_IMAGES, [])
+
+        # Filter out required images not found in image list
+        image_list = [image for image in required_list if not image in image_list]
+
+        self.assertEqual(len(image_list), 0, "Required images %s not found" % image_list)
+        self.logger.debug("Found required images %s", required_list)
+
     def test_base_image_for_testing_exists(self):
         """
         Test whether region has the image used for testing
         """
-        image_id = self.nova_operations.find_image_id_by_name(BASE_IMAGE_NAME)
-        self.assertIsNotNone(image_id, "Problems retrieving image '%s'" % BASE_IMAGE_NAME)
+        base_image_name = self.nova_operations.test_image
+        image_id = self.nova_operations.find_image_id_by_name(base_image_name)
+        self.assertIsNotNone(image_id, "Problems retrieving image '%s'" % base_image_name)
 
     def test_create_security_group_and_rules(self):
         """
