@@ -68,8 +68,9 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         flavor_id = self.nova_operations.get_any_flavor_id()
         self.assertIsNotNone(flavor_id, "Problems retrieving a flavor")
 
-        image_id = self.nova_operations.find_image_id_by_name(image_name=BASE_IMAGE_NAME)
-        self.assertIsNotNone(image_id, "Problems retrieving the image '{}'".format(BASE_IMAGE_NAME))
+        base_image_name = self.nova_operations.test_image
+        image_id = self.nova_operations.find_image_id_by_name(image_name=base_image_name)
+        self.assertIsNotNone(image_id, "Problems retrieving the image '{}'".format(base_image_name))
 
         # instance prerequisites
         try:

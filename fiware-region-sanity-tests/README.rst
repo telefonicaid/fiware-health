@@ -52,8 +52,8 @@ Alternatively, you can launch the sanity checks from command line using the
 **Requirements**
 
 * `Python 2.7`__ or newer
-* pip_
-* virtualenv_ or Vagrant__
+* `pip`_
+* `virtualenv`_ or `Vagrant`__
 * `D-Bus`_ running and configured on your system
 * `dbus-python`_ (v0.84.0)
 * `pygobject`_ (v2.20.0)
@@ -228,6 +228,7 @@ This may come from the file ``resources/settings.json``:
 - ``test_configuration``: other configuration values
 
   * ``phonehome_endpoint`` is the PhoneHome Server endpoint (see above)
+  * ``glance_configuration`` includes configuration related to Glance checks
   * ``swift_configuration`` includes configuration related to Swift checks
   * ``openstack_metadata_service_url`` is the OpenStack Metadata Service
 
@@ -235,7 +236,8 @@ Apart from the former data, it is also possible to provide some per-region
 configuration values under ``region_configuration``:
 
 - ``external_network_name`` is the network for external floating IP addresses
-- ``test_flavor`` let us customize the flavor of instances launched in tests
+- ``test_flavor`` specifies the flavor of instances launched in tests
+- ``test_image`` specifies the base image of instances launched in tests
 
 Finally, in order to calculate the global status of a region, these properties
 are required:
@@ -259,6 +261,9 @@ are required:
         },
         "test_configuration": {
             "phonehome_endpoint": "http://LocalHostPublicAddress:SomePort",
+            "glance_configuration": {
+                "required_images": [ "base_image1", "base_image2" ]
+            },
             "swift_configuration": {
                 "big_file_url_1": "http://RemotePublicAddress1/File1.dat",
                 "big_file_url_2": "http://RemotePublicAddress2/File2.dat"
@@ -272,7 +277,11 @@ are required:
                 ...
             },
             "test_flavor": {
-                "RegionN": "tiny"
+                "RegionX": "tiny"
+            },
+            "test_image": {
+                "RegionY": "base_image1",
+                "RegionZ": "base_image2"
             }
         },
         "key_test_cases": [ "test_(.*)" ],
