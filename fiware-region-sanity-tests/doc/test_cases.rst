@@ -33,6 +33,7 @@ These Test Cases will be common for all federated regions.
 
 * Test whether region has flavors.
 * Test whether region has images.
+* Test whether region has all required base images (as specified in settings).
 * Test whether region has 'cloud-init-aware' images (suitable for blueprints).
 * Test whether region has the image used for testing.
 * Test creation of a new security group with rules.
