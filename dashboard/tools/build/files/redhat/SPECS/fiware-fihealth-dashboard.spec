@@ -201,6 +201,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Sep 08 2015 Telefónica I+D <opensource@tid.es> 1.1.2-1
+- Documentation
+
 * Tue Aug 04 2015 Telefónica I+D <opensource@tid.es> 1.1.1-1
 - Required libs
 
