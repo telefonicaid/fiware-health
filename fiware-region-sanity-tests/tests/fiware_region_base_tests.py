@@ -132,7 +132,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         """
         Test whether region has all required base images (as specified in settings)
         """
-        image_list = self.nova_operations.get_image_list()
+        image_list = [image.name for image in self.nova_operations.get_image_list()]
         required_list = self.glance_conf.get(PROPERTIES_CONFIG_GLANCE_IMAGES, [])
 
         # Filter out required images not found in image list
