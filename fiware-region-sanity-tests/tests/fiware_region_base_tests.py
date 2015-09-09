@@ -41,7 +41,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
     def setUpClass(cls):
         super(FiwareRegionsBaseTests, cls).setUpClass()
         cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION]
-        cls.glance_conf = cls.conf[PROPERTIES_CONFIG_GLANCE]
+        cls.glance_conf = cls.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_GLANCE]
 
     def setUp(self):
         super(FiwareRegionsBaseTests, self).setUp()
