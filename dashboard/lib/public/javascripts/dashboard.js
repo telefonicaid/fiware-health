@@ -140,3 +140,23 @@ function loadReport(filename) {
   el.outerHTML = '<iframe id="iframe-container" src="' + filename + '" scrolling="no" style="padding-left: 40px;padding-right: 40px;"></iframe>';
 
 }
+
+
+function logout(redirect_url) {
+    console.log('after logout, go to: '+redirect_url);
+    url = 'https://account.lab.fiware.org/auth/logout';
+
+    $.ajax({
+      url:url,
+        async: false,
+      xhrFields: { withCredentials: true }
+
+    }).fail(function(jqXHR, textStatus) {
+        console.log( "Request failed: " + textStatus );
+        return window.location.href=redirect_url;
+    }).done(function (data) {
+        console.log(" Logout Done ! ");
+        return window.location.href=redirect_url;
+    });
+
+}
