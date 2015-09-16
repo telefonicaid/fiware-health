@@ -39,6 +39,7 @@ ATTR_TESTS_FAILURE = "failures"
 CHILD_NODE_SKIP = "skipped"
 CHILD_NODE_ERROR = "error"
 CHILD_NODE_FAILURE = "failure"
+CHILD_NODE_OTHER = None
 
 TEST_STATUS_NOT_OK = "NOK"
 TEST_STATUS_SKIP = "N/A"
@@ -73,7 +74,7 @@ class ResultAnalyzer(object):
             status = TEST_STATUS_OK
             child_node_list = testcase.childNodes
             if child_node_list is not None and len(child_node_list) != 0:
-                if child_node_list[0].localName in [CHILD_NODE_FAILURE, CHILD_NODE_ERROR, None]:
+                if child_node_list[0].localName in [CHILD_NODE_FAILURE, CHILD_NODE_ERROR, CHILD_NODE_OTHER]:
                     status = TEST_STATUS_NOT_OK
                 elif child_node_list[0].localName == CHILD_NODE_SKIP:
                     status = TEST_STATUS_SKIP
