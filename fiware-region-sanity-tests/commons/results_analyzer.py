@@ -73,18 +73,20 @@ class ResultAnalyzer(object):
             status = TEST_STATUS_OK
             child_node_list = testcase.childNodes
             if child_node_list is not None and len(child_node_list) != 0:
-                if child_node_list[0].localName in [CHILD_NODE_FAILURE, CHILD_NODE_ERROR]:
+                if child_node_list[0].localName in [CHILD_NODE_FAILURE, CHILD_NODE_ERROR, None]:
                     status = TEST_STATUS_NOT_OK
                 elif child_node_list[0].localName == CHILD_NODE_SKIP:
                     status = TEST_STATUS_SKIP
 
-            testpackage = testcase.getAttribute('classname').split(".")[-2]
-            testregion = testpackage.replace("test_", "")
-            info_test = {"test_name": testcase.getAttribute('name'), "status": status}
-            if testregion in self.dict:
-                self.dict[testregion].append(info_test)
-            else:
-                self.dict.update({testregion: [info_test]})
+            testclass = testcase.getAttribute('classname')
+            if re.match(testclass, "\.test_.+\.TestSuite$"):
+                testpackage = testclass.split(".")[-2]
+                testregion = testpackage.replace("test_", "")
+                info_test = {"test_name": testcase.getAttribute('name'), "status": status}
+                if testregion in self.dict:
+                    self.dict[testregion].append(info_test)
+                else:
+                    self.dict.update({testregion: [info_test]})
 
     def print_results(self):
         """
