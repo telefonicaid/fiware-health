@@ -41,8 +41,8 @@ cbroker:
 idm:
   clientId: ''				# Id after registering app in IdM
   clientSecret: ''			# Secret key of the registered app
-  url: ''				    # IdM's authentication URL
-  logoutURL: ''             # Idm's logout URL
+  url: ''				# IdM's authentication URL
+  logoutURL: ''				# Idm's logout URL
   callbackURL: ''			# App's callback URL after auth
 
 #----------------------------------------------------------------------------
