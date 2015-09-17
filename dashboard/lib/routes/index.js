@@ -63,7 +63,8 @@ function get_index (req, res) {
 
                 logger.debug('before render: %s', JSON.stringify(regions));
                 console.log({name: userinfo.displayName, regions: regions, role: req.session.role});
-                res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role,logout_url: config.idm.logoutURL});
+                res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role,
+                    logout_url: config.idm.logoutURL});
 
             };
 
@@ -72,7 +73,8 @@ function get_index (req, res) {
 
         }
         else {
-            res.render('index', {name: 'sign in', regions: regions, role: req.session.role, logout_url: config.idm.logoutURL});
+            res.render('index', {name: 'sign in', regions: regions, role: req.session.role,
+                logout_url: config.idm.logoutURL});
 
         }
     }
