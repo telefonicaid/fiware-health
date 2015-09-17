@@ -142,12 +142,11 @@ function loadReport(filename) {
 }
 
 
-function logout(redirect_url) {
+function logout(redirect_url, logout_url) {
     console.log('after logout, go to: '+redirect_url);
-    url = 'https://account.lab.fiware.org/auth/logout';
 
     $.ajax({
-      url:url,
+      url:logout_url,
         async: false,
       xhrFields: { withCredentials: true }
 
