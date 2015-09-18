@@ -53,6 +53,7 @@ var config = {
         clientId: '',
         clientSecret: '',
         url: 'https://account.lab.fiware.org',
+        logoutURL: 'https://account.lab.fiware.org/auth/logout',
         callbackURL: 'http://fi-health.lab.fiware.org/login'
     },
     mailman: {
