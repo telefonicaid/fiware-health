@@ -47,6 +47,9 @@
             "Crete": "public-ext-net-01",
             "SaoPaulo": "public-ext-net-01"
         },
+        "shared_network_name": {
+            "Spain2": "node-int-net-01"
+        },
         "test_flavor": {
             "Prague": "tiny"
         },
