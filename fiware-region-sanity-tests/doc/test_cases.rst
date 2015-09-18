@@ -62,9 +62,13 @@ These Test Cases will be common for all federated regions.
 * Test whether it is possible to deploy an instance, assign an allocated
   public IP and establish a SSH connection
 * Test whether it is possible to deploy an instance with a new network
-  and connect to INTERNET (SNAT) without assigning a public IP
-* Test whether it is possible to deploy an instance with new network
+  and connect to the internet (SNAT) without assigning a public IP
+* Test whether it is possible to deploy an instance using the existing shared
+  network and connect to the internet (SNAT) without assigning a public IP
+* Test whether it is possible to deploy an instance with a new network
   and check that metadata service is working properly (PhoneHome service)
+* Test whether it is possible to deploy an instance using the exiting shared
+  network and check that metadata service is working properly
 
 **Regions without an OpenStack network service**
 
