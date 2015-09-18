@@ -166,7 +166,6 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         shared_network_conf = self.conf[PROPERTIES_CONFIG_REGION].get(PROPERTIES_CONFIG_REGION_SHARED_NET)
         if shared_network_conf:
             shared_network_name = shared_network_conf.get(self.region_name, TEST_SHARED_NET_DEFAULT)
-        self.assertIsNotNone(shared_network_name, "No shared network found")
 
         return shared_network_name
 
