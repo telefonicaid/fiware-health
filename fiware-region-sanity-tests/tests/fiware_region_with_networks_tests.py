@@ -44,22 +44,19 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
                                    keypair_name=None, is_keypair_new=True,
                                    sec_group_name=None, metadata=None, userdata=None):
         """
-        HELPER. Creates an instance with the given data. If param is None, that one will not passed to Nova.
-            - Creates network if network_name is not None
-            - Creates Keypair if keypair_name is not None
-            - Creates Sec. Group if sec_group_name is not None
-            - Adds metadata to server with teh given metadata dict.
+        HELPER. Creates a new instance according to the given parameters:
+        - If a network name is given, a new network (`is_network_new==True`) or an existing one is associated.
+        - If a keypair name is given, a new keypair (`is_keypair_new==True`) or an existing one is associated.
+        - If a security group name is given, a new sec_group is created and associated to the instance.
+        - Optional metadata and userdata may also be associated.
+
         :param instance_name: Name of the new instance
-        :param network_name: Name of the new network
-        :param is_network_new: If True, a new network will be created; Else, test will suppose the network exists
-                              (looking for it by network_name). In this case, the network will no be append to
-                              Test World. If new_network is False, is_network_new will not be used.
-        :param cidr: Optional CIDR to use in the subnet (otherwise, one is chosen from default range)
-        :param keypair_name: Name of the new keypair
-        :param is_keypair_new: If True, a new keypair will be created to be used by Server; Else, test will suppose the
-                                keypair already exists (looking for it by keypair_name). In this case, the keypair will
-                                not be append to Test World.
-        :param sec_group_name: Name of the new Sec. Group
+        :param network_name: Name of the network to use (either existing or a new one)
+        :param is_network_new: If True, a new network should be created and appended to the `TestWorld`
+        :param cidr: Optional CIDR to use in the network's subnet (otherwise, one is chosen from default range)
+        :param keypair_name: Name of the keypair to use (either existing or a new one)
+        :param is_keypair_new: If True, a new keypair should be created and appended to the `TestWorld`
+        :param sec_group_name: Name of the new security group that will be created
         :param metadata: Python dict with metadata info {"key": "value"}
         :param userdata: userdata file content (String)
         :return: Server ID (String)
@@ -142,7 +139,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
     def __get_external_network_test_helper__(self):
         """
-        HELPER. Finds and returns the external network id
+        HELPER. Finds and returns the external network id of current region
         :return: External network id
         """
         external_network_id = None
@@ -159,6 +156,141 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.assertIsNotNone(external_network_id, "No external networks found")
 
         return external_network_id
+
+    def __get_shared_network_test_helper__(self):
+        """
+        HELPER. Finds and returns the shared network name of current region
+        :return: Shared network name
+        """
+        shared_network_name = TEST_SHARED_NET_DEFAULT
+        shared_network_conf = self.conf[PROPERTIES_CONFIG_REGION].get(PROPERTIES_CONFIG_REGION_SHARED_NET)
+        if shared_network_conf:
+            shared_network_name = shared_network_conf.get(self.region_name, TEST_SHARED_NET_DEFAULT)
+
+        return shared_network_name
+
+    def __e2e_connection_using_public_ip_test_helper__(self, use_shared_network=True):
+        """
+        HELPER. Test whether it is possible to deploy an instance, assign an allocated public IP and establish
+        a SSH connection
+
+        :param use_shared_network: If True, use the existing shared network associated to the new instance
+        """
+
+        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
+        if self.suite_world['allocated_ips']:
+            self.skipTest("There were pre-existing, not deallocated IPs")
+
+        # Allocate an IP
+        allocated_ip = self.__allocate_ip_test_helper__()
+
+        # Create Keypair
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
+        private_keypair_value = self.__create_keypair_test_helper__(keypair_name)
+
+        # Network
+        if use_shared_network:
+            network_name = self.__get_shared_network_test_helper__()
+        else:
+            # Create Router with an external network gateway
+            router_name = TEST_ROUTER_PREFIX + "_e2e_" + suffix
+            external_network_id = self.__get_external_network_test_helper__()
+            router_id = self.__create_router_test_helper__(router_name, external_network_id)
+
+            # Create Network
+            network_name = TEST_NETWORK_PREFIX + "_" + suffix
+            network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
+
+            # Add interface to router
+            port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
+            self.test_world['ports'].append(port_id)
+
+        # Deploy VM (it will have only one IP from the Public Pool)
+        instance_name = TEST_SERVER_PREFIX + "_e2e_" + suffix
+        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
+        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
+                                                    network_name=network_name, is_network_new=False,
+                                                    keypair_name=keypair_name, is_keypair_new=False,
+                                                    sec_group_name=sec_group_name)
+
+        # Associate the public IP to Server
+        self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
+
+        # SSH Connection
+        self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)
+
+    def __e2e_snat_connection_test_helper__(self, use_shared_network=True):
+        """
+        HELPER. Test whether it is possible to deploy an instance and connect to the internet (PhoneHome service)
+
+        :param use_shared_network: If True, use the existing shared network associated to the new instance
+        """
+
+        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
+        if self.suite_world['allocated_ips']:
+            self.skipTest("There were pre-existing, not deallocated IPs")
+
+        # skip test if no PhoneHome service endpoint was given by configuration (either in settings or by environment)
+        phonehome_endpoint = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
+        if not phonehome_endpoint:
+            self.skipTest("No value found for '{}.{}' setting".format(
+                PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
+
+        path_resource = PHONEHOME_DBUS_OBJECT_PATH
+
+        # Load userdata from file and compile the template (replacing variable values)
+        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
+        with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
+            userdata_content = userdata_file.read()
+            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
+                                                           path_resource=path_resource)
+            self.logger.debug("Userdata content: %s", userdata_content)
+
+        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+
+        # Network
+        if use_shared_network:
+            network_name = self.__get_shared_network_test_helper__()
+        else:
+            # Create Router with an external network gateway
+            router_name = TEST_ROUTER_PREFIX + "_snat_" + suffix
+            external_network_id = self.__get_external_network_test_helper__()
+            router_id = self.__create_router_test_helper__(router_name, external_network_id)
+
+            # Create Network
+            network_name = TEST_NETWORK_PREFIX + "_" + suffix
+            network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
+
+            # Add interface to router
+            port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
+            self.test_world['ports'].append(port_id)
+
+        # Deploy VM
+        instance_name = self.region_name.lower() + "_" + TEST_SERVER_PREFIX + "_snat_" + suffix
+        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
+                                                    network_name=network_name, is_network_new=False,
+                                                    userdata=userdata_content)
+
+        # VM will have as hostname, the instance_name with "-" instead of "_"
+        expected_instance_name = instance_name.replace("_", "-")
+
+        # Create new new DBus connection and wait for emitted signal from HTTP PhoneHome service
+        client = DbusPhoneHomeClient(self.logger)
+        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
+                                                              PHONEHOME_SIGNAL, expected_instance_name)
+        self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
+        self.logger.debug("Request received from VM when 'calling home': %s", result)
+
+        # Get hostname from data received
+        self.assertIn("hostname", result, "PhoneHome request has been received but 'hostname' param is not in")
+        received_hostname = re.match(".*hostname=([\w-]*)", result).group(1)
+
+        # Check hostname
+        self.assertEqual(expected_instance_name, received_hostname,
+                         "Received hostname '%s' in PhoneHome request does not match with the expected instance name" %
+                         received_hostname)
 
     def __create_router_test_helper__(self, router_name, external_network_id=None):
         """
@@ -313,7 +445,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
                                         keypair_name=keypair_name,
                                         sec_group_name=sec_group_name)
 
-    def test_deploy_instance_with_network_and_associate_public_ip(self):
+    def test_deploy_instance_with_new_network_and_associate_public_ip(self):
         """
         Test whether it is possible to deploy an instance with a new network and assign an allocated public IP
         """
@@ -347,116 +479,37 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         # Associate Public IP to Server
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
 
-    def test_deploy_instance_with_networks_and_e2e_connection_using_public_ip(self):
+    def test_deploy_instance_with_new_network_and_e2e_connection_using_public_ip(self):
         """
-        Test whether it is possible to deploy and instance, assign an allocated public IP and establish a SSH connection
-        """
-
-        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
-        if self.suite_world['allocated_ips']:
-            self.skipTest("There were pre-existing, not deallocated IPs")
-
-        # Allocate an IP
-        allocated_ip = self.__allocate_ip_test_helper__()
-
-        # Create Keypair
-        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
-        private_keypair_value = self.__create_keypair_test_helper__(keypair_name)
-
-        # Create Router with an external network gateway
-        router_name = TEST_ROUTER_PREFIX + "_e2e_" + suffix
-        external_network_id = self.__get_external_network_test_helper__()
-        router_id = self.__create_router_test_helper__(router_name, external_network_id)
-
-        # Create Network
-        network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
-
-        # Add interface to router
-        port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
-        self.test_world['ports'].append(port_id)
-
-        # Deploy VM (it will have only one IP from the Public Pool)
-        instance_name = TEST_SERVER_PREFIX + "_e2e_" + suffix
-        keypair_name = TEST_KEYPAIR_PREFIX + "_" + suffix
-        sec_group_name = TEST_SEC_GROUP_PREFIX + "_" + suffix
-        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
-                                                    network_name=network_name, is_network_new=False,
-                                                    keypair_name=keypair_name, is_keypair_new=False,
-                                                    sec_group_name=sec_group_name)
-
-        # Associate the public IP to Server
-        self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
-
-        # SSH Connection
-        self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)
-
-    def test_deploy_instance_with_networks_and_e2e_snat_connection(self):
-        """
-        Test whether it is possible to deploy an instance with new network and connect to INTERNET (PhoneHome service)
+        Test whether it is possible to deploy an instance with new network, assign an allocated public IP
+        and establish a SSH connection
         """
 
-        # skip test if suite couldn't start from an empty, clean list of allocated IPs (to avoid cascading failures)
-        if self.suite_world['allocated_ips']:
-            self.skipTest("There were pre-existing, not deallocated IPs")
+        self.__e2e_connection_using_public_ip_test_helper__(use_shared_network=False)
 
-        # skip test if no PhoneHome service endpoint was given by configuration (either in settings or by environment)
-        phonehome_endpoint = self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
-        if not phonehome_endpoint:
-            self.skipTest("No value found for '{}.{}' setting".format(
-                PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
+    def test_deploy_instance_with_shared_network_and_e2e_connection_using_public_ip(self):
+        """
+        Test whether it is possible to deploy an instance with shared network, assign an allocated public IP
+        and establish a SSH connection
+        """
 
-        path_resource = PHONEHOME_DBUS_OBJECT_PATH
+        self.__e2e_connection_using_public_ip_test_helper__(use_shared_network=True)
 
-        # Load userdata from file and compile the template (replacing variable values)
-        self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
-        with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
-            userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
-                                                           path_resource=path_resource)
-            self.logger.debug("Userdata content: %s", userdata_content)
+    def test_deploy_instance_with_new_network_and_e2e_snat_connection(self):
+        """
+        Test whether it is possible to deploy an instance with new network and connect to the internet (PhoneHome)
+        """
 
-        # Create Router with an external network gateway
-        suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-        router_name = TEST_ROUTER_PREFIX + "_snat_" + suffix
-        external_network_id = self.__get_external_network_test_helper__()
-        router_id = self.__create_router_test_helper__(router_name, external_network_id)
+        self.__e2e_snat_connection_test_helper__(use_shared_network=False)
 
-        # Create Network
-        network_name = TEST_NETWORK_PREFIX + "_" + suffix
-        network_id, subnet_id = self.__create_network_and_subnet_test_helper__(network_name)
+    def test_deploy_instance_with_shared_network_and_e2e_snat_connection(self):
+        """
+        Test whether it is possible to deploy an instance with shared network and connect to the internet
+        """
 
-        # Add interface to router
-        port_id = self.neutron_operations.add_interface_router(router_id, subnet_id)
-        self.test_world['ports'].append(port_id)
+        self.__e2e_snat_connection_test_helper__(use_shared_network=True)
 
-        # Deploy VM
-        instance_name = self.region_name.lower() + "_" + TEST_SERVER_PREFIX + "_snat_" + suffix
-        server_id = self.__deploy_instance_helper__(instance_name=instance_name,
-                                                    network_name=network_name, is_network_new=False,
-                                                    userdata=userdata_content)
-
-        # VM will have as hostname, the instance_name with "-" instead of "_"
-        expected_instance_name = instance_name.replace("_", "-")
-
-        # Create new new DBus connection and wait for emitted signal from HTTP PhoneHome service
-        client = DbusPhoneHomeClient(self.logger)
-        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
-                                                              PHONEHOME_SIGNAL, expected_instance_name)
-        self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
-        self.logger.debug("Request received from VM when 'calling home': %s", result)
-
-        # Get hostname from data received
-        self.assertIn("hostname", result, "PhoneHome request has been received but 'hostname' param is not in")
-        received_hostname = re.match(".*hostname=([\w-]*)", result).group(1)
-
-        # Check hostname
-        self.assertEqual(expected_instance_name, received_hostname,
-                         "Received hostname '%s' in PhoneHome request does not match with the expected instance name" %
-                         received_hostname)
-
-    def test_deploy_instance_with_networks_and_check_metadata_service(self):
+    def test_deploy_instance_with_new_network_and_check_metadata_service(self):
         """
         Test whether it is possible to deploy an instance and check if metadata service is working properly (phonehome)
         """

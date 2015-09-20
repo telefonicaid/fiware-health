@@ -79,7 +79,7 @@ class ResultAnalyzer(object):
                 elif child_node_list[0].localName == CHILD_NODE_SKIP:
                     status = TEST_STATUS_SKIP
 
-            # Filter out "regular" test cases (...test_<region>.TestSuite)
+            # Filter out the "regular" test cases (...test_<region>.TestSuite)
             testclass = testcase.getAttribute('classname')
             if re.match(".*\.test_.+\.TestSuite$", testclass):
                 testpackage = testclass.split(".")[-2]
