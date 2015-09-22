@@ -26,7 +26,7 @@ Here is an example of the generated ``test_results.txt`` for an specific region
 
 ::
 
-    [Tests: 26, Errors: 0, Failures: 0, Skipped: 0]
+    [Tests: 28, Errors: 0, Failures: 0, Skipped: 0]
 
     REGION GLOBAL STATUS
 
@@ -55,15 +55,17 @@ Here is an example of the generated ``test_results.txt`` for an specific region
       N/A	 test_create_text_object_and_download_it_from_container
       OK	 test_delete_an_object_from_a_container
       OK	 test_delete_container
-      OK	 test_deploy_instance_with_network_and_associate_public_ip
-      OK	 test_deploy_instance_with_networks_and_check_metadata_service
-      OK	 test_deploy_instance_with_networks_and_e2e_connection_using_public_ip
-      OK	 test_deploy_instance_with_networks_and_e2e_snat_connection
       OK	 test_deploy_instance_with_new_network
       OK	 test_deploy_instance_with_new_network_and_all_params
+      OK	 test_deploy_instance_with_new_network_and_associate_public_ip
+      OK	 test_deploy_instance_with_new_network_and_check_metadata_service
+      OK	 test_deploy_instance_with_new_network_and_e2e_connection_using_public_ip
+      OK	 test_deploy_instance_with_new_network_and_e2e_snat_connection
       OK	 test_deploy_instance_with_new_network_and_keypair
       OK	 test_deploy_instance_with_new_network_and_metadata
       OK	 test_deploy_instance_with_new_network_and_sec_group
+      OK	 test_deploy_instance_with_shared_network_and_e2e_connection_using_public_ip
+      OK	 test_deploy_instance_with_shared_network_and_e2e_snat_connection
       OK	 test_external_networks
       OK	 test_flavors_not_empty
       OK	 test_images_not_empty
