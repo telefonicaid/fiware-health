@@ -64,7 +64,7 @@
 #     virtualenv			Python package 'virtualenv'
 #
 # OpenStack credentials:
-#     Override those defined in 'settings.json', used by 'nosetests.sh' script.
+#     Override those defined in 'settings.json', used by 'sanity_checks' script.
 #
 
 NAME=$(basename $0)
@@ -264,7 +264,7 @@ test)
 	# Execute tests
 	export OS_AUTH_URL OS_USERNAME OS_PASSWORD
 	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
-	./nosetests.sh --verbose \
+	./sanity_checks --verbose \
 		--output-name=$OUTPUT_NAME \
 		--template-name="dashboard_template.html" \
 		$REGIONS

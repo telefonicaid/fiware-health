@@ -46,7 +46,7 @@ and run the sanity checks using standard OpenStack configuration properties and
 Jenkins environment variables for credentials management and configuration.
 
 Alternatively, you can launch the sanity checks from command line using the
-``nosetests.sh`` script.
+``sanity_checks`` script.
 
 
 **Requirements**
@@ -186,7 +186,7 @@ please take a look at the `PhoneHome architecture
 
 - Go to the root folder of the project and edit ``resources/settings.json``
   (or set environment variables, see above).
-- Run ``./nosetests.sh``. This command will execute all Sanity Checks in all
+- Run ``./sanity_checks``. This command will execute all Sanity Checks in all
   nodes found under ``tests/regions/`` folder:
 
   * It is possible to provide a list of regions as argument to restrict the
@@ -195,8 +195,8 @@ please take a look at the `PhoneHome architecture
 
   Examples::
 
-  $ ./nosetests.sh
-  $ ./nosetests.sh --verbose Region2 Region7 Region8
+  $ ./sanity_checks
+  $ ./sanity_checks --verbose Region2 Region7 Region8
 
 
 **Running Sanity Checks from Jenkins**
