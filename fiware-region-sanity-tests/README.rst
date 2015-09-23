@@ -236,6 +236,7 @@ Apart from the former data, it is also possible to provide some per-region
 configuration values under ``region_configuration``:
 
 - ``external_network_name`` is the network for external floating IP addresses
+- ``shared_network_name`` is the shared network to use in E2E tests
 - ``test_flavor`` specifies the flavor of instances launched in tests
 - ``test_image`` specifies the base image of instances launched in tests
 
@@ -274,6 +275,10 @@ are required:
             "external_network_name": {
                 "Region1": "public-ext-net-01",
                 "Region2": "my-ext-net",
+                ...
+            },
+            "shared_network_name": {
+                "Region3": "my-shared-net",
                 ...
             },
             "test_flavor": {
