@@ -142,16 +142,20 @@ function change_status() {
 	# Finish if no region is set
 	[ -n "$region" ] || return 0
 
+	# Change region status
 	if [ -r "$report" ]; then
 		# Adjust status according to results report
 		local resource="sanity_tests?id=$region&type=region"
+		printf "Request to NGSI Adapter to change region status ..."
 		curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
-		--write-out "%{url_effective} returned status %{http_code}\n" \
+		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 		--header 'Content-Type: text/plain' --data-binary @$report
 	else
 		# Update region entity in ContextBroker
+		local status_desc="'test in progress' (value="$status")"
+		printf "Change region %s status to %s ... " $region $status_desc
 		curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
-		--write-out "%{url_effective} returned status %{http_code}\n" \
+		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 		--header 'Content-Type: application/json' \
 		--header 'Accept: application/json' --data @- <<-EOF
 		{
