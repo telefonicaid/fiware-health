@@ -57,6 +57,7 @@
 #     $REGIONS
 #
 
+VERSION=1.1.3
 NAME=$(basename $0)
 OPTS=`tr -d '\n ' <<END
       h(help)
@@ -138,9 +139,12 @@ done
 TESTS=${TESTS:-tests/regions}
 
 # Main
+printf "FiHealth Sanity Checks v%s...\n" $VERSION
 nosetests $TESTS $NOSEOPTS -v --exe \
 	--with-xunit --xunit-file=$OUTPUT_NAME.xml \
 	--with-html --html-report=$OUTPUT_NAME.html \
 	--html-report-template=resources/templates/$TEMPLATE_NAME
 
+printf "Generating summary report... "
 commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
+printf "%s\n" $OUTPUT_NAME.txt
