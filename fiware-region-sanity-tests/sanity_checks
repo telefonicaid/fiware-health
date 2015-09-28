@@ -21,10 +21,11 @@
 #
 # Usage:
 #     $0 [options] [region ...]
-#     $0 --help
+#     $0 --help|--version
 #
 # Options:
 #     -h, --help			show this help message
+#     -V, --version			show version number
 #     -v, --verbose			enable logging with verbose details
 #     -o, --output-name=NAME		basename for generated report files
 #     -t, --template-name=NAME		filename of the HTML report template
@@ -35,7 +36,7 @@
 #     -i, --os-tenant-id=ID		optional OpenStack tenant_id
 #     -n, --os-tenant-name=NAME		optional OpenStack tenant_name
 #     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name (to
-#					replace the former if Identity API v3)
+#     					replace the former if Identity API v3)
 #
 # Environment:
 #     TEST_PHONEHOME_ENDPOINT		default value for --phonehome-endpoint
@@ -57,9 +58,11 @@
 #     $REGIONS
 #
 
+VERSION=1.1.3
 NAME=$(basename $0)
 OPTS=`tr -d '\n ' <<END
       h(help)
+      V(version)
       v(verbose)
       o(output-name):
       t(template-name):
@@ -107,9 +110,10 @@ case $OPT in
 'i')	OS_TENANT_ID=$OPTARG;;
 'n')	OS_TENANT_NAME=$OPTARG;;
 'd')	OS_USER_DOMAIN_NAME=$OPTARG;;
-'h')	OPTERR="$OPTHLP";;
 '?')	OPTERR="Unknown option -$OPTARG";;
 ':')	OPTERR="Missing value for option -$OPTARG";;
+'h')	OPTERR="$OPTHLP";;
+'V')	OPTHLP="FiHealth Sanity Checks v$VERSION"; OPTERR="$OPTHLP";;
 '-')	OPTLONG="${OPTARG%=*}";
 	OPT=$(expr $OPTS : ".*\(.\)($OPTLONG):.*" '|' '?');
 	if [ "$OPT" = '?' ]; then
@@ -143,4 +147,6 @@ nosetests $TESTS $NOSEOPTS -v --exe \
 	--with-html --html-report=$OUTPUT_NAME.html \
 	--html-report-template=resources/templates/$TEMPLATE_NAME
 
+printf "Generating summary report ... "
 commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
+printf "%s\n" $OUTPUT_NAME.txt

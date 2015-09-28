@@ -46,6 +46,7 @@ import logging
 import json
 import time
 import os
+import re
 
 
 class FiwareTestCase(unittest.TestCase):
@@ -480,3 +481,9 @@ class FiwareTestCase(unittest.TestCase):
         # skip test if no auth token could be retrieved
         if not self.auth_token:
             self.skipTest("No auth token could be retrieved")
+
+    def shortDescription(self):
+        """
+        Returns test description (even if comprising multiple lines) as a single string
+        """
+        return re.sub(r"\n\s*", " ", self._testMethodDoc)

@@ -64,7 +64,7 @@
 #     virtualenv			Python package 'virtualenv'
 #
 # OpenStack credentials:
-#     Override those defined in 'settings.json', used by 'nosetests.sh' script.
+#     Override those defined in 'settings.json', used by 'sanity_checks' script.
 #
 
 NAME=$(basename $0)
@@ -142,16 +142,20 @@ function change_status() {
 	# Finish if no region is set
 	[ -n "$region" ] || return 0
 
+	# Change region status
 	if [ -r "$report" ]; then
 		# Adjust status according to results report
 		local resource="sanity_tests?id=$region&type=region"
+		printf "Request to NGSI Adapter to change region status ... "
 		curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
-		--write-out "%{url_effective} returned status %{http_code}\n" \
+		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 		--header 'Content-Type: text/plain' --data-binary @$report
 	else
 		# Update region entity in ContextBroker
+		local strstatus="'maintenance' (value="$status")"
+		printf "Change region %s status to %s ... " $region "$strstatus"
 		curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
-		--write-out "%{url_effective} returned status %{http_code}\n" \
+		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 		--header 'Content-Type: application/json' \
 		--header 'Accept: application/json' --data @- <<-EOF
 		{
@@ -222,6 +226,9 @@ cd $PROJECT_DIR
 # Perform action
 case $ACTION in
 prepare)
+	# Start prepare action
+	printf "Starting FiHealth Sanity Checks environment preparation ...\n"
+
 	# Clean previous reports
 	rm -f *_results.html *_results.xml *_results.txt
 
@@ -251,11 +258,14 @@ prepare)
 	;;
 
 test)
+	# Start test action
+	printf "Running %s ...\n" "$(./sanity_checks --version 2>&1)"
+
 	# Optionally restrict tests to a region (leave empty for all)
 	REGIONS=$OS_REGION_NAME
 	OUTPUT_NAME=${OS_REGION_NAME:-test}_results
 
-	# In single region tests, change status to Maintenance
+	# In single region tests, change status to 'Maintenance'
 	change_status
 
 	# Activate virtualenv
@@ -264,7 +274,7 @@ test)
 	# Execute tests
 	export OS_AUTH_URL OS_USERNAME OS_PASSWORD
 	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
-	./nosetests.sh --verbose \
+	./sanity_checks --verbose \
 		--output-name=$OUTPUT_NAME \
 		--template-name="dashboard_template.html" \
 		$REGIONS
