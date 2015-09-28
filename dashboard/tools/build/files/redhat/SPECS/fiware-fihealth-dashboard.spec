@@ -201,8 +201,8 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Thu Oct 01 2015 Telefónica I+D <opensource@tid.es> 1.1.3-1
-- TODO
+* Thu Sep 28 2015 Telefónica I+D <opensource@tid.es> 1.1.3-1
+- Bugfixing
 
 * Tue Sep 08 2015 Telefónica I+D <opensource@tid.es> 1.1.2-1
 - Documentation
