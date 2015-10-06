@@ -13,15 +13,15 @@ block content
                       | SANITY CHECK STATUS
                    - var i  = 0;
                    each region in regions
-                      - var filename = web_context+'report/'+region['node'] + '_results.html';
-                      - var sanity_status = region['status'];
+                      - var filename = webContext+'report/'+region['node'] + '_results.html';
+                      - var sanityStatus = region['status'];
                       - var background = (i % 2 == 0)? 'even':'odd';
                       - i=i+1;
 
-                      case sanity_status
+                      case sanityStatus
                         when ''
                            li(class='sanity_no_data #{background}')
-                            div(style="height:0px",title='no data #{sanity_status}') #{region['node']}
+                            div(style="height:0px",title='no data #{sanityStatus}') #{region['node']}
                         when 'OK'
                             li(class='sanity_ok #{background}')
                              a(class='sanity_ok', href='javascript:loadReport("#{filename}")') #{region['node']}

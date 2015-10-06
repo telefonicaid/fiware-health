@@ -33,26 +33,25 @@ var express = require('express'),
     common = require('./routes/common'),
     config = require('./config').data,
     logger = require('./logger'),
-    dateFormat = require('dateformat'),
     OAuth2 = require('./oauth2').OAuth2;
 
 
 var app = express();
 
 
-logger.info('Running app in web context: %s', config.web_context);
+logger.info('Running app in web context: %s', config.webContext);
 
 /**
  * base web context in url
  * @type {string}
  */
-app.base = config.web_context;
+app.base = config.webContext;
 
 /**
  * web context
  * @type {string}
  */
-app.locals.web_context = config.web_context;
+app.locals.webContext = config.webContext;
 /**
  * contain title of web page
  * @type {string}
@@ -71,7 +70,7 @@ function compile(str, path) {
         .set('filename', path)
         .use(nib())
         .define('logoImage', function() {
-                return new stylus.nodes.Literal('url("' + config.web_context + 'images/logo.png")');
+                return new stylus.nodes.Literal('url("' + config.webContext + 'images/logo.png")');
         });
 }
 /**
@@ -79,7 +78,7 @@ function compile(str, path) {
  * @param {*} req
  * @param {*} res
  */
-function post_contextbroker(req, res) {
+function postContextbroker(req, res) {
      try {
         var region = cbroker.changeReceived(req.body);
         logger.info('request received from contextbroker for region: %s', region.node);
@@ -97,38 +96,60 @@ function post_contextbroker(req, res) {
 
 /**
  * called when /logout get
- * @param req
- * @param res
+ * @param {*} req
+ * @param {*} res
  */
-function get_logout(req, res) {
-    req.session.access_token = undefined;
+function getLogout(req, res) {
+    req.session.accessToken = undefined;
     req.session.user = undefined;
     req.session.role = undefined;
 
     res.clearCookie('oauth_token');
     res.clearCookie('expires_in');
 
-    res.redirect(config.web_context);
+    res.redirect(config.webContext);
+}
+
+
+/**
+ *
+ * @param {*} response
+ * @param {*} req
+ * @param {*} res
+ */
+function oauthGetCallback(response, req, res) {
+    logger.debug({op: 'app#get login'}, 'response get userinfo: ' + response);
+    if (response !== undefined) {
+        var user = JSON.parse(response);
+        req.session.user = user;
+        req.session.role = common.parseRoles(user.roles);
+    } else {
+        req.session.accessToken = undefined;
+        req.session.user = undefined;
+        req.session.role = undefined;
+    }
+    res.redirect(config.webContext);
 }
 
 /**
  * called when /signin get
- * @param req
- * @param res
+ * @param {*} req
+ * @param {*} res
+ * @param {*} oauth2
  */
-function get_signin(req, res, oauth2) {
-    logger.debug({op: 'app#get signin'}, 'Token: %s', req.session.access_token);
+function getSignin(req, res, oauth2) {
+    logger.debug({op: 'app#get signin'}, 'Token: %s', req.session.accessToken);
 
     // If auth_token is not stored in a session redirect to IDM
-    if (!req.session.access_token) {
+    if (!req.session.accessToken) {
         var path = oauth2.getAuthorizeUrl();
         logger.debug({op: 'app#get signin'}, 'idm path: %s', path);
         res.redirect(path);
         // If auth_token is stored in a session cookie it sends a button to get user info
     } else {
 
-        oauth2.get(config.idm.url + '/user/', req.session.access_token, function (e, response) {
-            oauth_get_callback(response,req, res);
+        oauth2.get(config.idm.url + '/user/', req.session.accessToken, function (e, response) {
+            oauthGetCallback(response, req, res);
 
         });
 
@@ -137,14 +158,14 @@ function get_signin(req, res, oauth2) {
 
 /**
  * check access token
- * @param req
- * @param res
- * @param next
- * @param debug_message
+ * @param {*} req
+ * @param {*} res
+ * @param {function} next
+ * @param {String} debugMessage
  */
-function check_token(req, res, next, debug_message) {
-    logger.debug(debug_message);
-    if (req.session.access_token) {
+function checkToken(req, res, next, debugMessage) {
+    logger.debug(debugMessage);
+    if (req.session.accessToken) {
 
         next();
     } else {
@@ -154,63 +175,46 @@ function check_token(req, res, next, debug_message) {
 
 /**
  *
- * @param response
- * @param req
- * @param res
- */
-function oauth_get_callback(response, req, res) {
-    logger.debug({op: 'app#get login'}, 'response get userinfo: ' + response);
-    if (response != undefined) {
-        var user = JSON.parse(response);
-        req.session.user = user;
-        req.session.role = common.parseRoles(user.roles);
-    } else {
-        req.session.access_token = undefined;
-        req.session.user = undefined;
-        req.session.role = undefined;
-    }
-    res.redirect(config.web_context);
-}
-
-/**
- *
- * @param results
- * @param req
- * @param res
- * @param oauth2
+ * @param {Object} results
+ * @param {*} req
+ * @param {*} res
+ * @param {*} oauth2
  */
 
-function getOAuthAccessToken_callback(results, req, res, oauth2) {
+function getOAuthAccessTokenCallback(results, req, res, oauth2) {
     logger.debug({op: 'app#get login'}, 'get access token:' + results);
 
-        if (results != undefined) {
+        if (results !== undefined) {
 
-            // Stores the access_token in a session cookie
-            req.session.access_token = results.access_token;
+            // Stores the accessToken in a session cookie
+            /*jshint camelcase: false */
+            req.session.accessToken = results.access_token;
 
-            logger.debug({op: 'app#get login'}, 'access_token: ' + results.access_token);
+            logger.debug({op: 'app#get login'}, 'accessToken: ' + results.access_token);
 
             oauth2.get(config.idm.url + '/user/', results.access_token, function (e, response) {
-                oauth_get_callback(response, req, res);
+                oauthGetCallback(response, req, res);
             });
         } else {
-            res.redirect(config.web_context);
+            res.redirect(config.webContext);
 
         }
 }
 
 /**
  * Handles requests from IDM with the access code
- *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} oauth2
  */
-function get_login(req, res, oauth2) {
+function getLogin(req, res, oauth2) {
 
     logger.debug({op: 'app#get login'}, 'req:' + req.query.code);
 
-    // Using the access code goes again to the IDM to obtain the access_token
+    // Using the access code goes again to the IDM to obtain the accessToken
     oauth2.getOAuthAccessToken(req.query.code, function (e, results) {
 
-        getOAuthAccessToken_callback(results, req, res, oauth2);
+        getOAuthAccessTokenCallback(results, req, res, oauth2);
 
     });
 }
@@ -223,7 +227,7 @@ app.set('view engine', 'jade');
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 
-app.use(config.web_context, stylus.middleware(
+app.use(config.webContext, stylus.middleware(
     {
         src: __dirname + '/stylus',
         dest: __dirname + '/public/stylesheets',
@@ -240,29 +244,29 @@ app.use(function (req, res, next) {
 });
 
 
-app.use(config.paths.reports_url, express.static(config.paths.reports_files));
+app.use(config.paths.reportsUrl, express.static(config.paths.reportsFiles));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(config.web_context, express.static(path.join(__dirname, 'public')));
+app.use(config.webContext, express.static(path.join(__dirname, 'public')));
 
 
-app.use(config.web_context + 'refresh',function (req, res, next) {
-    check_token(req, res, next, 'Accessing to refresh');
+app.use(config.webContext + 'refresh', function (req, res, next) {
+    checkToken(req, res, next, 'Accessing to refresh');
 }, refresh);
 
-app.use(config.web_context + 'subscribe', function (req, res, next) {
-    check_token(req, res, next, 'Accessing to subscribe');
+app.use(config.webContext + 'subscribe', function (req, res, next) {
+    checkToken(req, res, next, 'Accessing to subscribe');
 
 }, subscribe);
 
-app.use(config.web_context + 'unsubscribe', function (req, res, next) {
-    check_token(req, res, next, 'Accessing to unSubscribe');
+app.use(config.webContext + 'unsubscribe', function (req, res, next) {
+    checkToken(req, res, next, 'Accessing to unSubscribe');
 
 }, unsubscribe);
 
 
-app.use(config.web_context, index);
+app.use(config.webContext, index);
 
 //configure login with oAuth
 
@@ -276,45 +280,45 @@ var oa = new OAuth2(config.idm.clientId,
 
 
 
-app.get(config.web_context + 'signin', function (req, res) {
-    get_signin(req, res, oa);
+app.get(config.webContext + 'signin', function (req, res) {
+    getSignin(req, res, oa);
 });
 
 
-app.get(config.web_context + 'login', function (req, res) {
+app.get(config.webContext + 'login', function (req, res) {
 
-  get_login(req, res, oa);
+  getLogin(req, res, oa);
 
 });
 
 // listen request from contextbroker changes
-app.post(config.web_context + 'contextbroker', function (req, res) {
-   post_contextbroker(req,res);
+app.post(config.webContext + 'contextbroker', function (req, res) {
+   postContextbroker(req, res);
 });
 
 
 // Redirection to IDM authentication portal
-app.get(config.web_context + 'auth', function (req, res) {
+app.get(config.webContext + 'auth', function (req, res) {
     var path = oa.getAuthorizeUrl();
     res.redirect(path);
 });
 
-// Handles logout requests to remove access_token from the session cookie
-app.get(config.web_context + 'logout', function (req, res) {
+// Handles logout requests to remove accessToken from the session cookie
+app.get(config.webContext + 'logout', function (req, res) {
 
-    get_logout(req,res);
+    getLogout(req, res);
 
 });
 
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use(function (req, res) {
     var err = new Error('Not Found');
     err.status = 404;
     res.render('error', {
         message: err.message,
         error: err,
-        timestamp: req.session.title_timestamp
+        timestamp: req.session.titleTimestamp
     });
 
 });
@@ -327,7 +331,7 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.render('error', {
-        timestamp: req.session.title_timestamp,
+        timestamp: req.session.titleTimestamp,
         message: err.message,
         error: {}
     });
@@ -339,22 +343,22 @@ module.exports = app;
 
 
 /** @export */
-module.exports.post_contextbroker = post_contextbroker;
+module.exports.postContextbroker = postContextbroker;
 
 /** @export */
-module.exports.get_logout = get_logout;
+module.exports.getLogout = getLogout;
 
 /** @export */
-module.exports.get_signin = get_signin;
+module.exports.getSignin = getSignin;
 
 /** @export */
-module.exports.get_login = get_login;
+module.exports.getLogin = getLogin;
 
 /** @export */
-module.exports.check_token = check_token;
+module.exports.checkToken = checkToken;
 
 /** @export */
-module.exports.getOAuthAccessToken_callback = getOAuthAccessToken_callback;
+module.exports.getOAuthAccessTokenCallback = getOAuthAccessTokenCallback;
 
 /** @export */
-module.exports.oauth_get_callback = oauth_get_callback;
+module.exports.oauthGetCallback = oauthGetCallback;

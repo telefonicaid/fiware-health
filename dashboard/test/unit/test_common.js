@@ -26,10 +26,10 @@ suite('common', function () {
 
     test('should_return_superuser_after_parse_roles_for_superuser_user', function () {
         //Given
-        var roles=[{"name": "provider", "id": "1"}, {"name": "Superuser", "id": "xxxxxxxxxxxxxxx"}];
+        var roles = [{name: 'provider', id: '1'}, {name: 'Superuser', id: 'xxxxxxxxxxxxxxx'}];
 
         //When
-        var result=common.parseRoles(roles);
+        var result = common.parseRoles(roles);
 
         //Then
         assert.equal('superuser', result);
@@ -39,10 +39,10 @@ suite('common', function () {
 
     test('should_return_read_only_after_parse_roles_for_common_user', function () {
         //Given
-        var roles=[];
+        var roles = [];
 
         //When
-        var result=common.parseRoles(roles);
+        var result = common.parseRoles(roles);
 
         //Then
         assert.equal('', result);
@@ -52,10 +52,10 @@ suite('common', function () {
 
     test('should_return_admin_region_after_parse_roles_for_admin_user', function () {
         //Given
-        var roles=[{"name": "Admin", "id": "xxxxxxxxxxxxxxxxxxxx"}];
+        var roles = [{name: 'Admin', id: 'xxxxxxxxxxxxxxxxxxxx'}];
 
         //When
-        var result=common.parseRoles(roles);
+        var result = common.parseRoles(roles);
 
         //Then
         assert.equal('admin', result);
@@ -71,16 +71,16 @@ suite('common', function () {
             {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
         ];
         var expected = [
-            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized:true},
-            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized:false},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized:false}
+            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
+            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: false},
+            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
         ];
 
         //When
-        regions=common.addAuthorized(regions, 'admin-regionone');
+        regions = common.addAuthorized(regions, 'admin-regionone');
 
         //Then
-        assert.deepEqual(expected,regions);
+        assert.deepEqual(expected, regions);
 
     });
 
@@ -93,16 +93,16 @@ suite('common', function () {
             {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
         ];
         var expected = [
-            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized:true},
-            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized:true},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized:false}
+            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
+            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
+            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
         ];
 
         //When
-        regions=common.addAuthorized(regions, 'admin-regionone');
+        regions = common.addAuthorized(regions, 'admin-regionone');
 
         //Then
-        assert.deepEqual(expected,regions);
+        assert.deepEqual(expected, regions);
 
     });
 
@@ -118,17 +118,17 @@ suite('common', function () {
         ];
 
         var expected = [
-            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC',authorized:false},
-            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC',authorized:false},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC',authorized:false}
+            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: false},
+            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: false},
+            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
 
         ];
 
         //When
-        regions=common.addAuthorized(regions, 'admin-regionfour');
+        regions = common.addAuthorized(regions, 'admin-regionfour');
 
         //Then
-        assert.deepEqual(expected,regions);
+        assert.deepEqual(expected, regions);
     });
 
 

@@ -1,9 +1,20 @@
-function calc_height() {
+/*jslint browser: true*/
+/*jshint unused:false*/
+
+function isFirefox() {
+    return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+}
+
+function isChrome() {
+    return navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+}
+
+function calcHeight() {
 
     var D = document;
     console.log('doc.body:' + D.body + ' doc.docElem:' + D.documentElement);
     var height;
-    if (is_chrome() || is_firefox()) {
+    if (isChrome() || isFirefox()) {
         //chrome, FF
          height = Math.max(
             D.body.scrollHeight, D.documentElement.scrollHeight,
@@ -32,12 +43,12 @@ function displaySections() {
     Array.prototype.forEach.call(document.querySelectorAll('h3, h4'), function (el) {
         el.addEventListener('click', function () {
 
-            if (document.defaultView.getComputedStyle(el.nextElementSibling).display == 'none') {
+            if (document.defaultView.getComputedStyle(el.nextElementSibling).display === 'none') {
                 el.nextElementSibling.style.display = 'block';
             } else {
                 el.nextElementSibling.style.display = 'none';
             }
-            calc_height();
+            calcHeight();
 
         });
     });
@@ -45,23 +56,24 @@ function displaySections() {
 
 
 var strWindowFeatures = 'resizable=yes,scrollbars=yes,status=yes';
-function openFailureDetailsInNewWindow(anchor_tag) {
+
+function openFailureDetailsInNewWindow(anchorTag) {
 
     var html = document.getElementById('html_failure_details').innerHTML;
 
-    if ( is_firefox()) {
+    if ( isFirefox()) {
         console.log('openFailureDetailsInNewWindow#firefox');
 
         window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML = html;
-        window.parent.document.getElementById('iframe-container').contentWindow.location.hash = anchor_tag;
+        window.parent.document.getElementById('iframe-container').contentWindow.location.hash = anchorTag;
         displaySections();
         console.log('openFailureDetailsInNewWindow#calc');
 
     } else {
-        if (is_chrome()) {
+        if (isChrome()) {
             console.log('openFailureDetailsInNewWindow#chrome_safari');
 
-            var myWindow = window.open(anchor_tag, '_self', strWindowFeatures);
+            var myWindow = window.open(anchorTag, '_self', strWindowFeatures);
 
 
             var doc = myWindow.document;
@@ -69,7 +81,7 @@ function openFailureDetailsInNewWindow(anchor_tag) {
             doc.write(html);
             doc.close();
         } else {
-            console.log('openFailureDetailsInNewWindow#safari ' + anchor_tag);
+            console.log('openFailureDetailsInNewWindow#safari ' + anchorTag);
 
             window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML = html;
             window.parent.document.getElementById('iframe-container').contentWindow.location.hash = '#';
@@ -80,31 +92,28 @@ function openFailureDetailsInNewWindow(anchor_tag) {
 
 
     }
-    calc_height();
+    calcHeight();
 
     console.log('openFailureDetailsInNewWindow#end');
 
 }
 
 
-function is_firefox() {
-    return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function is_chrome() {
-    return navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-}
 
 function changeTitle(id) {
     var element = document.getElementById(id);
     var subtitle = element.innerText || element.textContent;
     var n = subtitle.search('.TestSuite');
-    var underscore_position = subtitle.search('_');
-    var new_subtitle = capitalizeFirstLetter(subtitle.substring(underscore_position + 1, n)) + subtitle.substring(n + 10);
-    if (element.textContent == undefined) {
-        document.getElementById(id).innerText = new_subtitle;
+    var underscorePosition = subtitle.search('_');
+    var newSubtitle = capitalizeFirstLetter(subtitle.substring(underscorePosition + 1, n)) + subtitle.substring(n + 10);
+    if (element.textContent === undefined) {
+        document.getElementById(id).innerText = newSubtitle;
     } else {
-        document.getElementById(id).textContent = new_subtitle;
+        document.getElementById(id).textContent = newSubtitle;
     }
 
 }
@@ -114,15 +123,11 @@ function changeAllTitles() {
     changeTitle('subtitle2');
 }
 
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 
 function refresh(button, region) {
     button.disabled = true;
     var value = 'waiting...';
-    if (button.textContent == undefined) {
+    if (button.textContent === undefined) {
         button.innerText = value;
     } else {
         button.textContent = value;
@@ -137,25 +142,28 @@ function loadReport(filename) {
 
   document.getElementById('box1').style.display = 'none';
   var el = document.getElementById('frameContainer');
-  el.outerHTML = '<iframe id="iframe-container" src="' + filename + '" scrolling="no" style="padding-left: 40px;padding-right: 40px;"></iframe>';
+  el.outerHTML = '<iframe id="iframe-container" src="' + filename +
+      '" scrolling="no" style="padding-left: 40px;padding-right: 40px;"></iframe>';
 
 }
 
 
-function logout(redirect_url, logout_url) {
-    console.log('after logout, go to: '+redirect_url);
+function logout(redirectUrl, logoutUrl) {
+    console.log('after logout, go to: ' + redirectUrl);
 
     $.ajax({
-      url:logout_url,
+      url: logoutUrl,
         async: false,
       xhrFields: { withCredentials: true }
 
     }).fail(function(jqXHR, textStatus) {
-        console.log( "Request failed: " + textStatus );
-        return window.location.href=redirect_url;
+        console.log('Request failed: ' + textStatus );
+        window.location.href = redirectUrl;
+        return window.location.href;
     }).done(function (data) {
-        console.log(" Logout Done ! ");
-        return window.location.href=redirect_url;
+        console.log('Logout Done !');
+        window.location.href = redirectUrl;
+        return window.location.href;
     });
 
 }

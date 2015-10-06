@@ -21,6 +21,7 @@
         "suiteTeardown": false,
         "setup": false,
         "teardown": false,
-        "test": false
+        "test": false,
+        "$": false
     }
 }

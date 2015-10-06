@@ -1,8 +1,21 @@
+/* jshint ignore:start */
+
 var querystring = require('querystring'),
     https = require('https'),
     http = require('http'),
     URL = require('url');
 
+/**
+ *
+ * @param {String} clientId
+ * @param {String} clientSecret
+ * @param {String} baseSite
+ * @param {String} authorizePath
+ * @param {String} accessTokenPath
+ * @param {String} callbackURL
+ * @param {*} customHeaders
+ * @constructor
+ */
 exports.OAuth2 = function (clientId, clientSecret, baseSite, authorizePath, accessTokenPath, callbackURL, customHeaders) {
     this._clientId = clientId;
     this._clientSecret = clientSecret;
@@ -16,26 +29,47 @@ exports.OAuth2 = function (clientId, clientSecret, baseSite, authorizePath, acce
 };
 
 // This 'hack' method is required for sites that don't use
-// 'access_token' as the name of the access token (for requests).
+// 'accessToken' as the name of the access token (for requests).
 // ( http://tools.ietf.org/html/draft-ietf-oauth-v2-16#section-7 )
 // it isn't clear what the correct value should be atm, so allowing
 // for specific (temporary?) override for now.
+/**
+ *
+ * @param {String} name
+ */
 exports.OAuth2.prototype.setAccessTokenName = function (name) {
     this._accessTokenName = name;
 };
 
+/**
+ *
+ * @returns {*}
+ */
 exports.OAuth2.prototype._getAccessTokenUrl = function () {
     return this._baseSite + this._accessTokenUrl;
 };
 
-// Build the authorization header. In particular, build the part after the colon.
-// e.g. Authorization: Bearer <token>  # Build "Bearer <token>"
+/**
+ * Build the authorization header. In particular, build the part after the colon.
+ * e.g. Authorization: Bearer <token>  # Build "Bearer <token>"
+ *
+ * @returns {string}
+ */
 exports.OAuth2.prototype.buildAuthHeader = function () {
     var key = this._clientId + ':' + this._clientSecret;
     var base64 = (new Buffer(key)).toString('base64');
     return this._authMethod + ' ' + base64;
 };
 
+/**
+ *
+ * @param {*} method
+ * @param {String} url
+ * @param {*} headers
+ * @param {*} post_body
+ * @param {String} access_token
+ * @param {function} callback
+ */
 exports.OAuth2.prototype._request = function (method, url, headers, post_body, access_token, callback) {
 
     var http_library = https;
@@ -79,6 +113,13 @@ exports.OAuth2.prototype._request = function (method, url, headers, post_body, a
     this._executeRequest(http_library, options, post_body, callback);
 };
 
+/**
+ *
+ * @param {*} http_library
+ * @param {Object} options
+ * @param {*} post_body
+ * @param {function} callback
+ */
 exports.OAuth2.prototype._executeRequest = function (http_library, options, post_body, callback) {
     // Some hosts *cough* google appear to close the connection early / send no content-length header
     // allow this behaviour.
@@ -133,10 +174,9 @@ exports.OAuth2.prototype.getAuthorizeUrl = function () {
 
 /**
  *
- * @param error
- * @param callback
- * @param data
- * @private
+ * @param {String} error
+ * @param {function} callback
+ * @param {Object} data
  */
 exports.OAuth2.prototype._getOAuthAccessToken_request = function (error, callback, data) {
     if (error)  callback(error);

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Copyright 2015 Telefónica I+D
  * All Rights Reserved.
@@ -23,9 +22,7 @@
  * Module dependencies.
  */
 
-var prog = require('../package.json'),
-    debug = require('debug')('dashboard:server'),
-    http = require('http'),
+var http = require('http'),
     util = require('util'),
     config = require('./config').data,
     logger = require('./logger'),
@@ -37,27 +34,6 @@ var prog = require('../package.json'),
  */
 exports.main = function () {
 
-    /**
-     * Get listen port and store in Express.
-     */
-
-    var port = normalizePort(config.listen_port);
-    app.set('port', port);
-
-
-    /**
-     * Create HTTP server.
-     */
-
-    var server = http.createServer(app);
-
-    /**
-     * Listen on provided port, on all network interfaces.
-     */
-
-    server.listen(port);
-    server.on('error', onError);
-    server.on('listening', onListening);
 
     /**
      * Normalize a port into a number, string, or false.
@@ -115,6 +91,29 @@ exports.main = function () {
         var bind = typeof addr === 'string' ? 'pipe ' + addr : util.format('%s:%s', addr.address, addr.port);
         logger.info('Listening on %s', bind);
     }
+
+    /**
+     * Get listen port and store in Express.
+     */
+
+    var port = normalizePort(config.listenPort);
+    app.set('port', port);
+
+
+    /**
+     * Create HTTP server.
+     */
+
+    var server = http.createServer(app);
+
+    /**
+     * Listen on provided port, on all network interfaces.
+     */
+
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+
 
 
 };

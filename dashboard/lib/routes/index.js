@@ -18,32 +18,26 @@
 
 var express = require('express'),
     router = express.Router(),
-    dateFormat = require('dateformat'),
     cbroker = require('./cbroker'),
-    domain = require('domain'),
     logger = require('../logger'),
     subscribe = require('./subscribe'),
     config = require('../config').data,
     common = require('./common');
 
 
-/* GET home page. */
-router.get('/', get_index);
-
-
 
 /**
  *
- * @param req
- * @param res
+ * @param {*} req
+ * @param {*} res
  */
-function get_index (req, res) {
+function getIndex (req, res) {
 
     /**
      * callback for cbroker.retrieveAllRegions
-     * @param regions
+     * @param {[]} regions
      */
-    function callback_retrieveRegions(regions) {
+    function callbackRetrieveRegions(regions) {
 
         logger.info({op: 'index#get'}, 'Regions: %j', regions);
 
@@ -51,42 +45,46 @@ function get_index (req, res) {
 
         logger.info({op: 'index#get'}, 'User info: %j', userinfo);
 
-        if (userinfo != undefined) {
+        if (userinfo !== undefined) {
 
             //search for subscription
 
             logger.debug({op: 'index#get'}, 'Regions: %s', regions.constructor.name);
 
-            var after_search_callback = function () {
+            var afterSearchCallback = function () {
 
                 regions = common.addAuthorized(regions, userinfo.displayName);
 
                 logger.debug('before render: %s', JSON.stringify(regions));
                 console.log({name: userinfo.displayName, regions: regions, role: req.session.role});
                 res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role,
-                    logout_url: config.idm.logoutURL});
+                    logoutUrl: config.idm.logoutURL});
 
             };
 
-            subscribe.searchSubscription(userinfo.email, regions, after_search_callback);
+            subscribe.searchSubscription(userinfo.email, regions, afterSearchCallback);
 
 
         }
         else {
             res.render('index', {name: 'sign in', regions: regions, role: req.session.role,
-                logout_url: config.idm.logoutURL});
+                logoutUrl: config.idm.logoutURL});
 
         }
     }
 
-    cbroker.retrieveAllRegions(callback_retrieveRegions);
+    cbroker.retrieveAllRegions(callbackRetrieveRegions);
 
 }
+
+
+/* GET home page. */
+router.get('/', getIndex);
 
 /** @export */
 module.exports = router;
 
 /** @export */
-module.exports.get_index = get_index;
+module.exports.getIndex = getIndex;
 
 

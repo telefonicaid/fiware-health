@@ -18,16 +18,10 @@
 
 var express = require('express'),
     router = express.Router(),
-    dateFormat = require('dateformat'),
     config = require('../config').data,
-    domain = require('domain'),
     logger = require('../logger'),
-    http = require('http'),
-    sleep = require('sleep');
+    http = require('http');
 
-
-/* GET /unsubcribe: send DELETE to mailman*/
-router.get('/', getUnSubscribe);
 
 /**
  * router get unSubscribe
@@ -58,29 +52,34 @@ function getUnSubscribe(req, res) {
         headers: headers
     };
 
-    var mailmain_req = http.request(options, function (mailman_res) {
-        mailman_res.setEncoding('utf-8');
+    var mailmainRequest = http.request(options, function (mailmanResponse) {
+        mailmanResponse.setEncoding('utf-8');
         var responseString = '';
 
-        mailman_res.on('data', function (data) {
+        mailmanResponse.on('data', function (data) {
             responseString += data;
         });
-        mailman_res.on('end', function () {
-            logger.info('response mailman: code: %s message: %s', mailman_res.statusCode, mailman_res.statusMessage);
+        mailmanResponse.on('end', function () {
+            logger.info('response mailman: code: %s message: %s',
+                mailmanResponse.statusCode, mailmanResponse.statusMessage);
 
-            res.redirect(config.web_context);
+            res.redirect(config.webContext);
         });
     });
-    mailmain_req.on('error', function (e) {
+    mailmainRequest.on('error', function (e) {
         logger.error('Error in connection with mailman: ' + e);
-        res.redirect(config.web_context);
+        res.redirect(config.webContext);
     });
 
-    mailmain_req.write(payloadString);
-    mailmain_req.end();
+    mailmainRequest.write(payloadString);
+    mailmainRequest.end();
 
 
 }
+
+
+/* GET /unsubcribe: send DELETE to mailman*/
+router.get('/', getUnSubscribe);
 
 /** @export */
 module.exports = router;

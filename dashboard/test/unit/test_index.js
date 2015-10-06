@@ -18,9 +18,7 @@
 
 var assert = require('assert'),
     sinon = require('sinon'),
-    http = require('http'),
     cbroker = require('../../lib/routes/cbroker'),
-    subscribe = require('../../lib/routes/subscribe'),
     index = require('../../lib/routes/index');
 
 
@@ -36,15 +34,15 @@ suite('index', function () {
 
          var req = sinon.stub();
          var res = sinon.stub();
-         var cbroker_stub = sinon.stub(cbroker, 'retrieveAllRegions');
+         var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions');
 
 
         //when
-        index.get_index(req, res);
+        index.getIndex(req, res);
 
         //then
-         assert(cbroker_stub.calledOnce);
-         cbroker_stub.restore();
+         assert(cbrokerStub.calledOnce);
+         cbrokerStub.restore();
 
 
     });

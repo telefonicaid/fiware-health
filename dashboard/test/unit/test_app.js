@@ -29,8 +29,8 @@ var assert = require('assert'),
 suite('app', function () {
 
     test('should_have_some_methods', function () {
-        assert.equal(app.post_contextbroker.name, 'post_contextbroker');
-        assert.equal(app.get_logout.name, 'get_logout');
+        assert.equal(app.postContextbroker.name, 'postContextbroker');
+        assert.equal(app.getLogout.name, 'getLogout');
 
     });
 
@@ -39,22 +39,22 @@ suite('app', function () {
 
         var req = sinon.stub();
         var res = sinon.stub();
-        var send_stub = sinon.stub();
+        var sendStub = sinon.stub();
 
-        res.status=sinon.stub();
-        res.status.withArgs(400).returns(send_stub);
-        send_stub.send=sinon.spy();
+        res.status = sinon.stub();
+        res.status.withArgs(400).returns(sendStub);
+        sendStub.send = sinon.spy();
 
-        var cbroker_stub = sinon.stub(cbroker, 'changeReceived');
-        cbroker_stub.throws();
+        var cbrokerStub = sinon.stub(cbroker, 'changeReceived');
+        cbrokerStub.throws();
 
         //when
-        app.post_contextbroker(req,res);
+        app.postContextbroker(req, res);
 
         //then
         assert(res.status.withArgs(400).calledOnce);
-        assert(send_stub.send.calledOnce);
-        cbroker_stub.restore();
+        assert(sendStub.send.calledOnce);
+        cbrokerStub.restore();
 
     });
 
@@ -64,20 +64,20 @@ suite('app', function () {
         var req = sinon.stub();
         var res = sinon.stub();
 
-        var cbroker_stub = sinon.stub(cbroker, 'changeReceived',function(body) {
+        var cbrokerStub = sinon.stub(cbroker, 'changeReceived', function() {
 
             return {'node': 'Region1', 'status': 'OK', 'timestamp': ''};
         });
 
-        var subscribe_stub = sinon.stub(subscribe,'notify');
+        var subscribeStub = sinon.stub(subscribe, 'notify');
 
         //when
-        app.post_contextbroker(req,res);
+        app.postContextbroker(req, res);
 
         //then
-        cbroker_stub.restore();
-        subscribe_stub.restore();
-        assert(subscribe_stub.calledOnce);
+        cbrokerStub.restore();
+        subscribeStub.restore();
+        assert(subscribeStub.calledOnce);
 
     });
 
@@ -92,7 +92,7 @@ suite('app', function () {
         res.clearCookie = sinon.spy();
 
         //when
-        app.get_logout(req,res);
+        app.getLogout(req, res);
 
         //then
         assert(res.redirect.calledOnce);
@@ -110,14 +110,14 @@ suite('app', function () {
         var res = sinon.stub();
 
         req.session = sinon.stub();
-        req.session.access_token = '756cfb31e062216544215f54447e2716';
+        req.session.accessToken = '756cfb31e062216544215f54447e2716';
 
         var oa = sinon.stub();
-        oa.get=sinon.stub();
+        oa.get = sinon.stub();
 
 
         //when
-        app.get_signin(req,res,oa);
+        app.getSignin(req, res, oa);
 
         //then
         assert(oa.get.calledOnce);
@@ -134,12 +134,12 @@ suite('app', function () {
         res.redirect = sinon.stub();
 
         var oa = sinon.stub();
-        var path= 'http://localhost/oauth2';
+        var path = 'http://localhost/oauth2';
         oa.getAuthorizeUrl = sinon.stub().returns(path);
 
 
         //when
-        app.get_signin(req,res,oa);
+        app.getSignin(req, res, oa);
 
         //then
         assert(oa.getAuthorizeUrl.calledOnce);
@@ -155,10 +155,10 @@ suite('app', function () {
         var next = sinon.stub();
 
         req.session = sinon.stub();
-        req.session.access_token = '12123123123123';
+        req.session.accessToken = '12123123123123';
 
         //when
-        app.check_token(req, res, next, "debug message")
+        app.checkToken(req, res, next, 'debug message');
 
         //then
 
@@ -174,16 +174,16 @@ suite('app', function () {
         var next = sinon.stub();
 
         req.session = sinon.stub();
-        req.session.access_token = undefined;
-        var common_stub = sinon.stub(common, 'notAuthorized');
+        req.session.accessToken = undefined;
+        var commonStub = sinon.stub(common, 'notAuthorized');
 
 
         //when
-        app.check_token(req, res, next, "debug message");
+        app.checkToken(req, res, next, 'debug message');
 
         //then
-        assert(common_stub.calledOnce);
-        common_stub.restore();
+        assert(commonStub.calledOnce);
+        commonStub.restore();
 
     });
 
@@ -201,7 +201,7 @@ suite('app', function () {
 
 
         //when
-        app.get_login(req,res,oa);
+        app.getLogin(req, res, oa);
 
         //then
         assert(oa.getOAuthAccessToken.calledOnce);
@@ -216,10 +216,10 @@ suite('app', function () {
         var oauth2 = sinon.stub();
 
         res.redirect = sinon.spy();
-        var results = undefined;
+        var results;
 
         //when
-        app.getOAuthAccessToken_callback(results, req, res, oauth2);
+        app.getOAuthAccessTokenCallback(results, req, res, oauth2);
 
         //then
 
@@ -238,12 +238,12 @@ suite('app', function () {
 
         res.redirect = sinon.spy();
         var results = sinon.stub();
-        results.access_token = '13123213123123';
+        results.accessToken = '13123213123123';
         oauth2.get = sinon.stub();
 
 
         //when
-        app.getOAuthAccessToken_callback(results, req, res, oauth2);
+        app.getOAuthAccessTokenCallback(results, req, res, oauth2);
 
         //then
 
@@ -261,11 +261,13 @@ suite('app', function () {
         req.session = sinon.stub();
 
         res.redirect = sinon.spy();
-        var response = '{"organizations": [], "displayName": "kk@domain.com", "roles": [{"name": "Admin", "id": "123123dd"}, {"name": "Superuser", "id": "123123231"}], "app_id": "1231231321321", "email": "kk@domain.com", "id": "123123123123"}';
+        var response = '{"organizations": [], "displayName": "kk@domain.com", "roles": ' +
+            '[{"name": "Admin", "id": "123123dd"}, {"name": "Superuser", "id": "123123231"}],' +
+            '"app_id": "1231231321321", "email": "kk@domain.com", "id": "123123123123"}';
 
 
         //when
-        app.oauth_get_callback(response, req, res);
+        app.oauthGetCallback(response, req, res);
 
         //then
 
@@ -284,18 +286,18 @@ suite('app', function () {
         req.session = sinon.stub();
 
         res.redirect = sinon.spy();
-        var response = undefined;
+        var response;
 
 
         //when
-        app.oauth_get_callback(response, req, res);
+        app.oauthGetCallback(response, req, res);
 
         //then
 
         assert(res.redirect.calledOnce);
         assert.equal(req.session.user, undefined);
         assert.equal(req.session.role, undefined);
-        assert.equal(req.session.access_token, undefined);
+        assert.equal(req.session.accessToken, undefined);
 
     });
 
