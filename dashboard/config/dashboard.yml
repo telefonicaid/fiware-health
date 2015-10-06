@@ -44,7 +44,7 @@ idm:
   url: ''				# IdM's authentication URL
   logoutURL: ''				# Idm's logout URL
   callbackURL: ''			# App's callback URL after auth
-  regionsAuthorized:[]      # List of regions authorized to usename: [{'RegionName': 'usernama'}]
+  regionsAuthorized:[]      # List of regions authorized to username: [{'RegionName': 'usernama'}]
 
 #----------------------------------------------------------------------------
 # mailman-api section (mandatory)
