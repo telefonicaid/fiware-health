@@ -132,6 +132,7 @@ build)
 		sonar.sourceEncoding=UTF-8
 		sonar.sources=lib/
 		sonar.tests=test/
+		sonar.exclusions=lib/public/javascripts/**.js,lib/www.js,lib/oauth2.js
 		# coverage
 		sonar.dynamicAnalysis=reuseReports
 		sonar.cobertura.reportPath=$SONAR_COVERAGE_REPORT_RELATIVE_PATH
