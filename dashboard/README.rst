@@ -204,7 +204,7 @@ rule the use of ``config/dashboard.yml`` configuration file is preferable.
 Such `file <config/dashboard.yml>`_ is self-documented, so there you will
 find a description of every configuration option.
 
-Important: If the name of your admin region username don't match with admin-<regionName>
+Important: If the name of your admin region username does not match with admin-<regionName>
 you must fill the list regionsAuthorized in file ``<config/dashboard.yml>``
 
 Testing
