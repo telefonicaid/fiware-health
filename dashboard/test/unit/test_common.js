@@ -116,18 +116,18 @@ suite('common', function () {
             {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
         ];
         var expected = [
-            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized:true},
-            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized:true},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized:false}
+            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
+            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
+            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
         ];
         var data = [{'RegionOne': 'admin1'}, {'RegionOne1': 'admin-with-name'}, {'RegionOne': 'admin-with-name'}];
         config.idm.regionsAuthorized = data;
 
         //When
-        regions=common.addAuthorized(regions, 'admin-with-name');
+        regions = common.addAuthorized(regions, 'admin-with-name');
 
         //Then
-        assert.deepEqual(expected,regions);
+        assert.deepEqual(expected, regions);
         config.idm.regionsAuthorized = [];
 
 
