@@ -16,6 +16,7 @@
  */
 'use strict';
 
+var config = require('../config').data;
 
 
 
@@ -54,7 +55,37 @@ function parseRoles(roles) {
 
     return '';
 }
+/**
+ * Convert to lower case and cut the last character
+ * @param {string} regionName
+ * @returns {string} ready for compare
+ */
+function getRegionNameForCompare(regionName) {
 
+    return (regionName.substring(0, regionName.length - 1)).toLowerCase();
+
+}
+/**
+ * Check if region is authorized for an username using list in config file
+ * @param {Object} region
+ * @param {string} regionName
+ * @param {string} username
+ */
+function checkAuthorizedByConfig(region, regionName, username) {
+    if (!region.authorized) {
+
+        var data = config.idm.regionsAuthorized;
+        data.filter(function (obj) {
+            var key = Object.keys(obj).toString();
+            var configRegionName = getRegionNameForCompare(key);
+            var configUserName = obj[key];
+            if ((configRegionName === regionName) && (configUserName === username)) {
+                region.authorized = true;
+                return;
+            }
+        });
+    }
+}
 /**
  *  check if username is authorized to manage region and introduce a new field in object
  * @param {[]} regions
@@ -64,8 +95,10 @@ function addAuthorized(regions, username) {
 
     regions.filter(function(region) {
 
-        var regionName = (region.node.substring(0, region.node.length - 1)).toLowerCase();
+        var regionName = getRegionNameForCompare(region.node);
         region.authorized = ((username.indexOf(regionName)) !== -1);
+
+        checkAuthorizedByConfig(region, regionName, username);
 
     });
 

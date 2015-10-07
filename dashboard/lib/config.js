@@ -54,7 +54,8 @@ var config = {
         clientSecret: '',
         url: 'https://account.lab.fiware.org',
         logoutURL: 'https://account.lab.fiware.org/auth/logout',
-        callbackURL: 'http://fi-health.lab.fiware.org/login'
+        callbackURL: 'http://fi-health.lab.fiware.org/login',
+        regionsAuthorized:[]
     },
     mailman: {
         host: 'localhost',

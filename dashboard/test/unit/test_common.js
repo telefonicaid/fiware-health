@@ -17,7 +17,8 @@
 'use strict';
 
 var assert = require('assert'),
-    common = require('../../lib/routes/common');
+    common = require('../../lib/routes/common'),
+    config = require('../../lib/config').data;
 
 
 /* jshint multistr: true */
@@ -103,6 +104,32 @@ suite('common', function () {
 
         //Then
         assert.deepEqual(expected, regions);
+
+    });
+
+
+    test('should_return_true_if_is_authorized_like_admin_for_region_with_username_in_config_list', function () {
+        //Given
+         var regions = [
+            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
+            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
+            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
+        ];
+        var expected = [
+            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized:true},
+            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized:true},
+            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized:false}
+        ];
+        var data = [{'RegionOne': 'admin1'}, {'RegionOne1': 'admin-with-name'}, {'RegionOne': 'admin-with-name'}];
+        config.idm.regionsAuthorized = data;
+
+        //When
+        regions=common.addAuthorized(regions, 'admin-with-name');
+
+        //Then
+        assert.deepEqual(expected,regions);
+        config.idm.regionsAuthorized = [];
+
 
     });
 
