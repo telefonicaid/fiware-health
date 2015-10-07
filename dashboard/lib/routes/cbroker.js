@@ -17,7 +17,6 @@
 'use strict';
 
 var http = require('http'),
-    domain = require('domain'),
     logger = require('../logger'),
     config = require('../config').data,
     dateFormat = require('dateformat');
@@ -42,17 +41,17 @@ function parseRegions(entities) {
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
-            var sanity_status = '', timestamp = '';
+            var sanityStatus = '', timestamp = '';
             entry.contextElement.attributes.forEach(function (value) {
                 if (value.name === SANITY_STATUS_ATTRIBUTE) {
-                    sanity_status = value.value;
+                    sanityStatus = value.value;
                 }
                 if (value.name === TIMESTAMP_ATTRIBUTE) {
                     timestamp = dateFormat(new Date(parseInt(value.value)), 'UTC:yyyy/mm/dd HH:MM Z');
 
                 }
             });
-            result.push({node: entry.contextElement.id, status: sanity_status, timestamp: timestamp });
+            result.push({node: entry.contextElement.id, status: sanityStatus, timestamp: timestamp });
         }
     });
 

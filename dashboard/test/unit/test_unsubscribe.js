@@ -18,7 +18,6 @@
 
 var assert = require('assert'),
     unsubscribe = require('../../lib/routes/unsubscribe'),
-    logger = require('../../lib/logger'),
     http = require('http'),
     EventEmitter = require('events').EventEmitter,
     sinon = require('sinon');
@@ -30,23 +29,23 @@ suite('unsubscribe', function () {
     test('should_unsubcribe_user_and_redirect_to_webcontext', function () {
 
         //given
-        var req,res,spy;
+        var req, res, spy;
         req = sinon.stub();
         res = {};
         req.param = sinon.stub();
         req.param.withArgs('region').returns('region1');
         spy = res.redirect = sinon.spy();
         req.session = sinon.stub();
-        req.session.user = {email:'user@mail.com'};
+        req.session.user = {email: 'user@mail.com'};
 
-        var request = new EventEmitter;
+        var request = new EventEmitter();
 
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var request_stub = sinon.stub(http, 'request',function(options,callback) {
+        var requestStub = sinon.stub(http, 'request', function(options, callback) {
 
-            var response = new EventEmitter;
-            response.setEncoding=sinon.stub();
+            var response = new EventEmitter();
+            response.setEncoding = sinon.stub();
 
             callback(response);
 
@@ -56,13 +55,13 @@ suite('unsubscribe', function () {
         });
 
         //when
-        unsubscribe.getUnSubscribe(req,res);
+        unsubscribe.getUnSubscribe(req, res);
 
         //then
         assert(spy.calledOnce);
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
-        assert.equal('DELETE',request_stub.getCall(0).args[0].method);
+        assert.equal('DELETE', requestStub.getCall(0).args[0].method);
 
         http.request.restore();
 

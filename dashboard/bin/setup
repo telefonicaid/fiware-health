@@ -94,9 +94,9 @@ eval `cd $BASEDIR; node -p <<-EOF
 	EMAIL_FROM=%s',
 	config.app.settings,
 	config.app.host, config.app.port,
-	config.app.web_context.replace(/^\/|\/$/g, ''),
+	config.app.webContext.replace(/^\/|\/$/g, ''),
 	config.cbroker.host, config.cbroker.port,
-	config.mailman.email_from);
+	config.mailman.emailFrom);
 EOF`
 if [ ! -r "$SETTINGS" ]; then
 	printf "Cannot find '%s' settings file\n" "$SETTINGS" 1>&2

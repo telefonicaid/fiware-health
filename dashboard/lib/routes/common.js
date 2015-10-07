@@ -31,7 +31,7 @@ function notAuthorizedRender(req, res) {
     res.render('error', {
         message: err.message,
         error: err,
-        timestamp: req.session.title_timestamp
+        timestamp: req.session.titleTimestamp
     });
 }
 
@@ -45,11 +45,13 @@ function parseRoles(roles) {
         return obj.name === 'Admin';
     });
 
-    if (hasSuperuser.length > 0)
+    if (hasSuperuser.length > 0) {
         return 'superuser';
+    }
 
-    if (hasAdminUser.length > 0)
+    if (hasAdminUser.length > 0) {
         return 'admin';
+    }
 
     return '';
 }
@@ -94,7 +96,7 @@ function addAuthorized(regions, username) {
     regions.filter(function(region) {
 
         var regionName = getRegionNameForCompare(region.node);
-        region.authorized = ((username.indexOf(regionName)) != -1);
+        region.authorized = ((username.indexOf(regionName)) !== -1);
 
         checkAuthorizedByConfig(region, regionName, username);
 

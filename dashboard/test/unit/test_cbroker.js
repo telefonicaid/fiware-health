@@ -75,16 +75,16 @@ suite('cbroker', function () {
         req.param = sinon.stub();
         req.param.withArgs('region').returns('region1');
         req.session = sinon.stub();
-        req.session.user = {email:'user@mail.com'};
+        req.session.user = {email: 'user@mail.com'};
 
-        var request = new EventEmitter;
+        var request = new EventEmitter();
 
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var request_stub = sinon.stub(http, 'request',function(options,callback) {
+        var requestStub = sinon.stub(http, 'request', function(options, callback) {
 
-            var response = new EventEmitter;
-            response.setEncoding=sinon.stub();
+            var response = new EventEmitter();
+            response.setEncoding = sinon.stub();
 
             callback(response);
 
@@ -100,13 +100,13 @@ suite('cbroker', function () {
 
             //then
             http.request.restore();
-            assert.deepEqual('Region1',result[0].node);
+            assert.deepEqual('Region1', result[0].node);
             done();
         });
 
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
-        assert.equal('POST',request_stub.getCall(0).args[0].method);
+        assert.equal('POST', requestStub.getCall(0).args[0].method);
 
     });
 
@@ -117,16 +117,16 @@ suite('cbroker', function () {
         req.param = sinon.stub();
         req.param.withArgs('region').returns('region1');
         req.session = sinon.stub();
-        req.session.user = {email:'user@mail.com'};
+        req.session.user = {email: 'user@mail.com'};
 
-        var request = new EventEmitter;
+        var request = new EventEmitter();
 
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var request_stub = sinon.stub(http, 'request',function(options,callback) {
+        var requestStub = sinon.stub(http, 'request', function(options, callback) {
 
-            var response = new EventEmitter;
-            response.setEncoding=sinon.stub();
+            var response = new EventEmitter();
+            response.setEncoding = sinon.stub();
 
             callback(response);
 
@@ -143,13 +143,13 @@ suite('cbroker', function () {
 
             //then
             http.request.restore();
-            assert.deepEqual([],result);
+            assert.deepEqual([], result);
             done();
         });
 
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
-        assert.equal('POST',request_stub.getCall(0).args[0].method);
+        assert.equal('POST', requestStub.getCall(0).args[0].method);
      });
 
 

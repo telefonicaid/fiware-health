@@ -18,9 +18,6 @@
 
 var express = require('express'),
     router = express.Router(),
-    dateFormat = require('dateformat'),
-    cbroker = require('./cbroker'),
-    domain = require('domain'),
     logger = require('../logger'),
     http = require('http'),
     sleep = require('sleep'),
@@ -28,27 +25,24 @@ var express = require('express'),
     common = require('./common');
 
 
-/* GET refresh. */
-router.get('/', get_refresh);
 
 /**
  *
- * @param req
- * @param res
+ * @param {Object} req
+ * @param {Object} res
  */
-function get_refresh (req, res) {
+function getRefresh (req, res) {
 
     var region = req.param('region');
 
     logger.info({op: 'refresh#get'}, 'refresh region: %s, received role: %s', region, req.session.role);
 
-    if (req.session.role == undefined || req.session.role == '') {
+    if (req.session.role === undefined || req.session.role === '') {
         logger.warn({op: 'refresh#get'},'unauthorized operation, invalid role: %s', req.session.role);
         common.notAuthorized(req, res);
         return;
     }
 
-    var payload = '';
     var payloadString = 'token=' + config.jenkins.token;
 
     var headers = {
@@ -65,38 +59,43 @@ function get_refresh (req, res) {
         headers: headers
     };
 
-    var jira_req = http.request(options, function (jenkins_res) {
+    var jenkinsRequest = http.request(options, function (jenkinsResponse) {
         logger.info('job started');
-        jenkins_res.setEncoding('utf-8');
+        jenkinsResponse.setEncoding('utf-8');
         var responseString = '';
 
-        jenkins_res.on('data', function (data) {
+        jenkinsResponse.on('data', function (data) {
             responseString += data;
         });
-        jenkins_res.on('end', function () {
-            logger.info('response jenkins: code: %s message: %s', jenkins_res.statusCode, jenkins_res.statusMessage);
+        jenkinsResponse.on('end', function () {
+            logger.info('response jenkins: code: %s message: %s',
+                jenkinsResponse.statusCode, jenkinsResponse.statusMessage);
 
             sleep.sleep(10); //sleep for 10 seconds
-            res.redirect(config.web_context);
+            res.redirect(config.webContext);
         });
     });
-    jira_req.on('error', function (e) {
+    jenkinsRequest.on('error', function (e) {
         // TODO: handle error.
         logger.error('Error in connection with jenkins: ' + e);
 
         sleep.sleep(10); //sleep for 10 seconds
-        res.redirect(config.web_context);
+        res.redirect(config.webContext);
     });
 
-    jira_req.write(payloadString);
-    jira_req.end();
+    jenkinsRequest.write(payloadString);
+    jenkinsRequest.end();
 
 
-};
+}
+
+
+/* GET refresh. */
+router.get('/', getRefresh);
 
 /** @export */
 module.exports = router;
 
 
 /** @export */
-module.exports.get_refresh = get_refresh;
+module.exports.getRefresh = getRefresh;

@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------
 app:
   port: 3001
-  web_context: '/'
+  webContext: '/'
 #---------------------------------------------------------------------
 # Logging options section (mandatory)
 #---------------------------------------------------------------------
@@ -22,8 +22,8 @@ session:
 # Web server paths section (mandatory)
 #---------------------------------------------------------------------
 paths:
-  reports_url: '/report'
-  reports_files: '/var/www/html/RegionSanityCheckv2'
+  reportsUrl: '/report'
+  reportsFiles: '/var/www/html/RegionSanityCheckv2'
 
 #---------------------------------------------------------------------
 # Context Broker section (mandatory)
@@ -50,7 +50,7 @@ mailman:
   host: 'localhost'
   port: 8000
   path: '/'
-  email_from: ''
+  emailFrom: ''
 
 #---------------------------------------------------------------------
 # jenkins-api section (mandatory)

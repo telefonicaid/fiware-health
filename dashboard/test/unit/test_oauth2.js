@@ -42,7 +42,7 @@ suite('oauth2', function () {
         var result = oa._getAccessTokenUrl();
 
         //then
-        assert.equal(result,'http://idm/oauth2/token');
+        assert.equal(result, 'http://idm/oauth2/token');
 
     });
 
@@ -60,7 +60,7 @@ suite('oauth2', function () {
         oa.setAccessTokenName('name1');
 
         //then
-        assert.equal(oa._accessTokenName,'name1');
+        assert.equal(oa._accessTokenName, 'name1');
 
     });
 
@@ -78,7 +78,7 @@ suite('oauth2', function () {
         oa.buildAuthHeader();
 
         //then
-        assert.equal(oa._authMethod,'Basic');
+        assert.equal(oa._authMethod, 'Basic');
 
     });
 
@@ -95,14 +95,14 @@ suite('oauth2', function () {
         var code = 200;
         var callback = sinon.stub();
 
-        var request_stub = sinon.stub(oa, '_request');
+        var requestStub = sinon.stub(oa, '_request');
 
         //when
         oa.getOAuthAccessToken(code, callback);
 
         //then
-        assert(request_stub.calledOnce);
-        request_stub.restore();
+        assert(requestStub.calledOnce);
+        requestStub.restore();
 
     });
 
@@ -117,14 +117,15 @@ suite('oauth2', function () {
                 'http://idm/callback');
 
         var error = true;
-        var callback_stub = sinon.stub();
+        var callbackStub = sinon.stub();
         var data = sinon.stub();
 
         //when
-        oa._getOAuthAccessToken_request(error, callback_stub, data);
+        /*jshint camelcase: false */
+        oa._getOAuthAccessToken_request(error, callbackStub, data);
 
         //then
-        assert(callback_stub.withArgs(true).calledOnce);
+        assert(callbackStub.withArgs(true).calledOnce);
 
     });
 
@@ -140,14 +141,15 @@ suite('oauth2', function () {
                 'http://idm/callback');
 
         var error = false;
-        var callback_stub = sinon.stub();
+        var callbackStub = sinon.stub();
         var data = '{"a":"b", "c":"d"}';
 
         //when
-        oa._getOAuthAccessToken_request(error, callback_stub, data);
+        /*jshint camelcase: false */
+        oa._getOAuthAccessToken_request(error, callbackStub, data);
 
         //then
-        assert(callback_stub.withArgs(null,{ a: 'b', c: 'd' }).calledOnce);
+        assert(callbackStub.withArgs(null, { a: 'b', c: 'd' }).calledOnce);
 
     });
 
@@ -162,14 +164,15 @@ suite('oauth2', function () {
                 'http://idm/callback');
 
         var error = false;
-        var callback_stub = sinon.stub();
+        var callbackStub = sinon.stub();
         var data = 'a=b&c=d';
 
         //when
-        oa._getOAuthAccessToken_request(error, callback_stub, data);
+        /*jshint camelcase: false */
+        oa._getOAuthAccessToken_request(error, callbackStub, data);
 
         //then
-        assert(callback_stub.withArgs(null,{ a: 'b', c: 'd' }).calledOnce);
+        assert(callbackStub.withArgs(null, { a: 'b', c: 'd' }).calledOnce);
 
     });
 
@@ -185,26 +188,26 @@ suite('oauth2', function () {
         var method = sinon.stub();
         var url = 'http://localhost';
         var headers = '';
-        var post_body = '';
-        var access_token = '123132131223123';
+        var postBody = '';
+        var accessToken = '123132131223123';
         var callback = sinon.stub();
-        var http_stub = sinon.stub(http, 'request');
-        var request_stub = sinon.stub();
-        http_stub.returns(request_stub);
+        var httpStub = sinon.stub(http, 'request');
+        var requestStub = sinon.stub();
+        httpStub.returns(requestStub);
 
-        request_stub.on = sinon.stub();
-        request_stub.end = sinon.stub();
+        requestStub.on = sinon.stub();
+        requestStub.end = sinon.stub();
 
         //when
 
         try {
-            oa._request(method, url, headers, post_body, access_token, callback);
+            oa._request(method, url, headers, postBody, accessToken, callback);
 
             //then
 
         } finally {
 
-            http_stub.restore();
+            httpStub.restore();
         }
 
 
