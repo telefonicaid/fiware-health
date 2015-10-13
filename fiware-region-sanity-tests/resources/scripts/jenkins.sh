@@ -227,7 +227,7 @@ cd $PROJECT_DIR
 case $ACTION in
 prepare)
 	# Start prepare action
-	printf "Starting FiHealth Sanity Checks environment preparation ...\n"
+	printf "Starting FIHealth Sanity Checks environment preparation ...\n"
 
 	# Clean previous reports
 	rm -f *_results.html *_results.xml *_results.txt

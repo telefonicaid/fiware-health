@@ -17,7 +17,7 @@
 
 
 /**
- * Module that defines a parser for the results of FiHealth Sanity Checks.
+ * Module that defines a parser for the results of FIHealth Sanity Checks.
  *
  * Context attributes to be calculated:
  *
@@ -39,7 +39,7 @@ var GLOBAL_STATUS_PARTIAL_OK = "POK",
 
 
 /**
- * Parser for FiHealth Sanity Checks.
+ * Parser for FIHealth Sanity Checks.
  * @augments base
  */
 var parser = Object.create(require('./common/base').parser);

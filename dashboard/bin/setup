@@ -17,7 +17,7 @@
 #
 
 #
-# Initial setup of FiHealth Dashboard (create mailing lists and subscriptions)
+# Initial setup of FIHealth Dashboard (create mailing lists and subscriptions)
 #
 # Usage:
 #     $0 [options] [config_file]
@@ -121,7 +121,7 @@ LANGUAGE='en'
 URL_HOST=$EMAIL_HOST
 TMP_FILE=/tmp/$NAME_$$
 for LIST in $LISTS; do
-	DESCRIPTION="FiHealth mailing list for region $LIST"
+	DESCRIPTION="FIHealth mailing list for region $LIST"
 	$MAILMANLIB_PATH/bin/newlist -q -l $LANGUAGE \
 		-u $URL_HOST -e $EMAIL_HOST \
 		$LIST $ADMIN_MAIL $ADMIN_PASS \

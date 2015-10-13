@@ -1,5 +1,5 @@
 ===================================================
- FiHealth Sanity Checks | Publishing Sanity Status
+ FIHealth Sanity Checks | Publishing Sanity Status
 ===================================================
 
 Results included in summary report ``test_results.txt`` can be published through

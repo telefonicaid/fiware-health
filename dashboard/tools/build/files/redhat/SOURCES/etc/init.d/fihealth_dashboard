@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# Init script for starting up FiHealth Dashboard service
+# Init script for starting up FIHealth Dashboard service
 #
 # chkconfig:   2345 91 10
-# description: Frontend for FiHealth Sanity Checks. Publishes an overview \
+# description: Frontend for FIHealth Sanity Checks. Publishes an overview \
 #              page about the global status of FIWARE nodes, and provides \
 #              links to all test result reports.
 
@@ -13,14 +13,14 @@
 # Required-Stop:     $local_fs $remote_fs $network $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Init script for starting up FiHealth Dashboard service
-# Description:       Frontend for FiHealth Sanity Checks. Publishes an overview
+# Short-Description: Init script for starting up FIHealth Dashboard service
+# Description:       Frontend for FIHealth Sanity Checks. Publishes an overview
 #                    page about the global status of FIWARE nodes, and provides
 #                    links to all test result reports.
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="FiHealth Dashboard"
+DESC="FIHealth Dashboard"
 NAME=fihealth_dashboard
 DAEMON_DIR=/opt/fiware/$NAME
 DAEMON_BIN=bin/dashboard

@@ -37,7 +37,7 @@ class FiwareNovaOperations:
         """
         Initializes Nova-Client.
         :param logger: Logger object
-        :param region_name: Fiware Region name
+        :param region_name: FIWARE Region name
         :param test_flavor: Flavor for new test instances
         :param test_image: Image for new test instances
         :param auth_session: Keystone auth session object

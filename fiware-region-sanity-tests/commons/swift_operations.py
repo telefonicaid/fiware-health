@@ -41,7 +41,7 @@ class FiwareSwiftOperations:
         """
         Initializes Swift-Client.
         :param logger: Logger object
-        :param region_name: Fiware Region name
+        :param region_name: FIWARE Region name
         :param cred: Credentials to logging into keystone
         """
         self.region_name = region_name
