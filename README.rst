@@ -5,7 +5,7 @@
 |Build Status| |Coverage Status|
 
 
-This is the code repository for **FiHealth**, a tool to check the status of
+This is the code repository for **FIHealth**, a tool to check the status of
 each `FIWARE Lab`_ node, and part of the `FIWARE Ops`_ suite of tools for the
 operation of FIWARE Lab.
 
@@ -15,10 +15,10 @@ This project is part of FIWARE_.
 Components
 ==========
 
-`FiHealth Sanity Checks <fiware-region-sanity-tests/README.rst>`_
+`FIHealth Sanity Checks <fiware-region-sanity-tests/README.rst>`_
    Tests checking capabilities and global status of nodes (i.e. *regions*).
 
-`FiHealth Dashboard <dashboard/README.rst>`_
+`FIHealth Dashboard <dashboard/README.rst>`_
    Web server offering a frontend to view tests results and operate on nodes.
 
 

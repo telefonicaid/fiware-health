@@ -2,11 +2,11 @@
  FIWARE Health - Sanity Checks
 ===============================
 
-This is the code repository for **FiHealth - Sanity Checks**, a comprehensive
+This is the code repository for **FIHealth - Sanity Checks**, a comprehensive
 collection of *sanity* test cases over each region in `FIWARE Lab`_ in order
 to validate the capabilities of the regions and get their *status*.
 
-The sanity checks are one of the components of `FiHealth </README.rst>`_, which
+The sanity checks are one of the components of `FIHealth </README.rst>`_, which
 is part of the `FIWARE Ops`_ suite of tools for the operation of FIWARE Lab.
 
 This project is part of FIWARE_.
@@ -15,7 +15,7 @@ Any feedback on this documentation is highly welcome, including bugs, typos or
 things you think should be included but aren't. You can use `github issues`__
 to provide feedback.
 
-__ `FiHealth - GitHub issues`_
+__ `FIHealth - GitHub issues`_
 
 
 Overall description
@@ -87,7 +87,7 @@ __ `D-Bus`_
 
    $ source $WORKON_HOME/venv/fihealth_sanitychecks/bin/activate
 
-#. Go to main folder in the *FiHealth - Sanity Checks* project::
+#. Go to main folder in the *FIHealth - Sanity Checks* project::
 
    $ cd fiware-health/fiware-region-sanity-tests
 
@@ -310,7 +310,7 @@ the *key_test_cases* and *opt_test_cases* information configured in the
 
 Take a look at `Sanity Status and Data Storage documentation
 <doc/status_and_data_storage.rst>`_ to know more about *Sanity and Test Status*
-and the Context Broker integration with *FiHealth - Sanity Checks*
+and the Context Broker integration with *FIHealth - Sanity Checks*
 
 
 Testing
@@ -332,7 +332,7 @@ Advanced topics
 .. _FIWARE: http://www.fiware.org/
 .. _FIWARE Lab: https://www.fiware.org/lab/
 .. _FIWARE Ops: https://www.fiware.org/fiware-operations/
-.. _FiHealth - GitHub issues: https://github.com/telefonicaid/fiware-health/issues/new
+.. _FIHealth - GitHub issues: https://github.com/telefonicaid/fiware-health/issues/new
 .. _Python: http://www.python.org/
 .. _Python - Downloads: https://www.python.org/downloads/
 .. _Python - Unittest: https://docs.python.org/2/library/unittest.html

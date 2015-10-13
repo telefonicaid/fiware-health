@@ -1,6 +1,6 @@
 {
   "name": "fihealth_dashboard",
-  "description": "FiHealth Dashboard",
+  "description": "FIHealth Dashboard",
   "version": "1.2.0",
   "product": {
     "name": "fiware-health",

@@ -2,11 +2,11 @@
  FIWARE Health - Sanity Check Status Dashboard
 ===============================================
 
-This is the code repository for **FiHealth - Dashboard**, an overview page with
+This is the code repository for **FIHealth - Dashboard**, an overview page with
 a summary of the status of the regions in `FIWARE Lab`_ including links to the
 reports showing detailed information about the problems found.
 
-The dashboard is one of the components of `FiHealth </README.rst>`_, which is
+The dashboard is one of the components of `FIHealth </README.rst>`_, which is
 part of the `FIWARE Ops`_ suite of tools for the operation of FIWARE Lab.
 
 This project is part of FIWARE_.
@@ -15,7 +15,7 @@ Any feedback on this documentation is highly welcome, including bugs, typos or
 things you think should be included but aren't. You can use `github issues`__
 to provide feedback.
 
-__ `FiHealth - GitHub issues`_
+__ `FIHealth - GitHub issues`_
 
 
 Overall description
@@ -128,7 +128,7 @@ some additional steps are required after installation:
    # These format strings will be expanded w.r.t. the dictionary for the
    # mailing list instance.
    DEFAULT_MSG_FOOTER = """_______________________________________________
-   Fi-Health Sanity Checks
+   FI-Health Sanity Checks
    http://%(host_name)s/
    """
 
@@ -233,7 +233,7 @@ the ``test`` target is used for running the unit tests for the dashboard.
 .. _FIWARE: http://www.fiware.org/
 .. _FIWARE Lab: https://www.fiware.org/lab/
 .. _FIWARE Ops: https://www.fiware.org/fiware-operations/
-.. _FiHealth - GitHub issues: https://github.com/telefonicaid/fiware-health/issues/new
+.. _FIHealth - GitHub issues: https://github.com/telefonicaid/fiware-health/issues/new
 .. _Postfix: http://www.postfix.org/
 .. _mailman-api: http://mailman-api.readthedocs.org/en/stable/
 .. _Mailman: http://www.gnu.org/software/mailman/
