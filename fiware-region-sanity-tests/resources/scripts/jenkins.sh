@@ -131,12 +131,15 @@ ACTION=$(expr "$1" : "^\(prepare\|test\)$") && shift
 	exit 1
 }
 
-# This function update the value of the sanity_check_elapsed_time
-# context attribute in Context Broker for the given region with 
-# the value of $elapsed_time
+# This function updates the value of the sanity_check_elapsed_time
+# context attribute in ContextBroker with the time value
+# given by params.
 function update_elapsed_time_context_broker() {
 
-	printf "Updating elapsed time in Context Broker for $region. Elapsed time: $elapsed_time. "
+	local sc_elapsed_time=$1
+	local region=$OS_REGION_NAME
+
+	printf "Updating elapsed time in Context Broker for $region. Elapsed time: $sc_elapsed_time. "
 	curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
 	--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 	--header 'Content-Type: application/json' \
@@ -151,7 +154,7 @@ function update_elapsed_time_context_broker() {
 				{
 					"name": "sanity_check_elapsed_time",
 					"type": "string",
-					"value": "$elapsed_time"
+					"value": "$sc_elapsed_time"
 				}
 				]
 			}
@@ -208,9 +211,6 @@ function change_status() {
 		}
 		EOF
 	fi
-
-	# Update 'sanity_check_elapsed_time' context attribute
-	update_elapsed_time_context_broker
 
 	return $?
 }
@@ -304,6 +304,9 @@ test)
 	# In single region tests, change status to 'Maintenance'
 	change_status
 
+	# Update 'sanity_check_elapsed_time' context attribute
+	update_elapsed_time_context_broker $elapsed_time
+
 	# Activate virtualenv
 	source $VIRTUALENV/bin/activate
 
@@ -324,6 +327,9 @@ test)
 
 	# Get elapsed time of Sanity Checks execution
 	elapsed_time=$(expr $end_time - $start_time)
+
+	# Update 'sanity_check_elapsed_time' context attribute
+	update_elapsed_time_context_broker $elapsed_time
 
 	# Publish results to webserver
 	cp -f $OUTPUT_NAME.html $FIHEALTH_HTDOCS
