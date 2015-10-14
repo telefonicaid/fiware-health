@@ -39,23 +39,30 @@ function parseRegions(entities) {
     var result = [];
 
     logger.debug('Entities to parse %j', entities);
+
+
+
+
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
             var sanityStatus = '', timestamp = '', elapsedTime = '';
             entry.contextElement.attributes.forEach(function (value) {
-                if (value.name === SANITY_STATUS_ATTRIBUTE) {
+                var createValue = {};
+                createValue[SANITY_STATUS_ATTRIBUTE] = function () {
                     sanityStatus = value.value;
-                }
-                if (value.name === TIMESTAMP_ATTRIBUTE) {
+                };
+                createValue[TIMESTAMP_ATTRIBUTE] = function () {
                     timestamp = dateFormat(new Date(parseInt(value.value)), 'UTC:yyyy/mm/dd HH:MM Z');
 
-                }
-                if (value.name === ELAPSED_TIME) {
+                };
+                createValue[ELAPSED_TIME] = function () {
                     var myDate = new Date(parseInt(value.value));
                     elapsedTime = myDate.getUTCHours() + 'h, ' + myDate.getUTCMinutes() + 'm, ' +
-                        myDate.getUTCSeconds() + 's';
-                }
+                                    myDate.getUTCSeconds() + 's';
+                };
+
+                createValue[value.name]();
             });
             result.push({node: entry.contextElement.id,
                 status: sanityStatus,
