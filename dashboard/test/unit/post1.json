@@ -12,6 +12,11 @@
                         "name": "sanity_status",
                         "type": "string",
                         "value": "NOK"
+                    },
+                    {
+                        "name": "sanity_check_elapsed_time",
+                        "type": "string",
+                        "value": "60000"
                     }
                 ],
                 "id": "Region1",
@@ -35,6 +40,11 @@
                         "name": "sanity_status",
                         "type": "string",
                         "value": "OK"
+                    },
+                    {
+                        "name": "sanity_check_elapsed_time",
+                        "type": "string",
+                        "value": "60000"
                     }
                 ],
                 "id": "Region2",
@@ -56,6 +66,11 @@
                     },
                     {
                         "name": "sanity_status",
+                        "type": "string",
+                        "value": "N/A"
+                    },
+                    {
+                        "name": "sanity_check_elapsed_time",
                         "type": "string",
                         "value": "N/A"
                     }
@@ -81,6 +96,11 @@
                         "name": "sanity_status",
                         "type": "string",
                         "value": "POK"
+                    },
+                    {
+                        "name": "sanity_check_elapsed_time",
+                        "type": "string",
+                        "value": "60000"
                     }
                 ],
                 "id": "Region4",
