@@ -131,6 +131,36 @@ ACTION=$(expr "$1" : "^\(prepare\|test\)$") && shift
 	exit 1
 }
 
+# This function update the value of the sanity_check_elapsed_time
+# context attribute in Context Broker for the given region with 
+# the value of $elapsed_time
+function update_elapsed_time_context_broker() {
+
+	printf "Updating elapsed time in Context Broker for $region. Elapsed time: $elapsed_time. "
+	curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
+	--write-out "HTTP %{http_code} result from %{url_effective}\n" \
+	--header 'Content-Type: application/json' \
+	--header 'Accept: application/json' --data @- <<-EOF
+	{
+		"contextElements": [
+			{
+				"type": "region",
+				"isPattern": "false",
+				"id": "$region",
+				"attributes": [
+				{
+					"name": "sanity_check_elapsed_time",
+					"type": "string",
+					"value": "$elapsed_time"
+				}
+				]
+			}
+		],
+		"updateAction": "APPEND"
+	}
+	EOF
+}
+
 # Change region status (when running tests on a single region). If a filename is
 # given as argument $1, then status and all individual tests results are updated
 # by NGSI Adapter according to that results report.
@@ -150,6 +180,7 @@ function change_status() {
 		curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
 		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 		--header 'Content-Type: text/plain' --data-binary @$report
+
 	else
 		# Update region entity in ContextBroker
 		local strstatus="'maintenance' (value="$status")"
@@ -177,6 +208,9 @@ function change_status() {
 		}
 		EOF
 	fi
+
+	# Update 'sanity_check_elapsed_time' context attribute
+	update_elapsed_time_context_broker
 
 	return $?
 }
@@ -258,6 +292,8 @@ prepare)
 	;;
 
 test)
+	elapsed_time='N/A'
+
 	# Start test action
 	printf "Running %s ...\n" "$(./sanity_checks --version 2>&1)"
 
@@ -274,10 +310,20 @@ test)
 	# Execute tests
 	export OS_AUTH_URL OS_USERNAME OS_PASSWORD
 	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
+
+	# Get 'start_time' before executing Sanity Checks (milliseconds)
+	start_time=$(date +%s%3N)
+
 	./sanity_checks --verbose \
 		--output-name=$OUTPUT_NAME \
 		--template-name="dashboard_template.html" \
 		$REGIONS
+
+	# Get 'end_time' after executing Sanity Checks (milliseconds)
+	end_time=$(date +%s%3N)
+
+	# Get elapsed time of Sanity Checks execution
+	elapsed_time=$(expr $end_time - $start_time)
 
 	# Publish results to webserver
 	cp -f $OUTPUT_NAME.html $FIHEALTH_HTDOCS

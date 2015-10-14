@@ -309,7 +309,7 @@ the *key_test_cases* and *opt_test_cases* information configured in the
 ``resources/settings.json`` file.
 
 Take a look at `Sanity Status and Data Storage documentation
-<doc/status_and_data_storage.rst>`_ to know more about *Sanity and Test Status*
+<doc/publish_status_and_test_data.rst>`_ to know more about *Sanity and Test Status*
 and the Context Broker integration with *FiHealth - Sanity Checks*
 
 

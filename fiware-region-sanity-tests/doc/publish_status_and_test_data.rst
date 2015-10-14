@@ -71,6 +71,16 @@ Here is an example of the generated ``test_results.txt`` for an specific region
       OK	 test_images_not_empty
 
 
+Elapsed execution time of Sanity Checks
+---------------------------------------
+
+Apart from the context attributes described above, when Sanity Cheks
+of a node have been executed from Jenkins, a new attribute is updated in the
+context information of that region: the elapsed time of the execution
+``sanity_checks_elapsed_time``. This attribute will have the time in
+milliseconds or 'N/A' if Sanity tests have not finished yet.
+
+
 Sanity Check Status and Test Execution Status
 ---------------------------------------------
 
