@@ -14,7 +14,7 @@
                         "value": "NOK"
                     },
                     {
-                        "name": "sanity_checks_elapsed_time",
+                        "name": "sanity_check_elapsed_time",
                         "type": "string",
                         "value": "60000"
                     }
@@ -42,7 +42,7 @@
                         "value": "OK"
                     },
                     {
-                        "name": "sanity_checks_elapsed_time",
+                        "name": "sanity_check_elapsed_time",
                         "type": "string",
                         "value": "60000"
                     }
@@ -70,7 +70,7 @@
                         "value": "N/A"
                     },
                     {
-                        "name": "sanity_checks_elapsed_time",
+                        "name": "sanity_check_elapsed_time",
                         "type": "string",
                         "value": "N/A"
                     }
@@ -98,7 +98,7 @@
                         "value": "POK"
                     },
                     {
-                        "name": "sanity_checks_elapsed_time",
+                        "name": "sanity_check_elapsed_time",
                         "type": "string",
                         "value": "60000"
                     }

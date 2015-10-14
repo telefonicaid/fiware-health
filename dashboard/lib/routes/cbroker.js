@@ -24,7 +24,7 @@ var http = require('http'),
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
     TIMESTAMP_ATTRIBUTE = 'sanity_check_timestamp', // field name for value about timestamp
-    ELAPSED_TIME = 'sanity_checks_elapsed_time', // field name for value sanity_checks_elapsed_time
+    ELAPSED_TIME = 'sanity_check_elapsed_time', // field name for value sanity_checks_elapsed_time
     REGION_TYPE = 'region';
 
 
