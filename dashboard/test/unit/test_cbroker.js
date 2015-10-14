@@ -37,11 +37,11 @@ suite('cbroker', function () {
         //given
         var json = JSON.parse(fs.readFileSync('test/unit/post1.json', 'utf8'));
         var expected = [
-            {node: 'Region1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'Region2', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'Region4', status: 'POK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'Region5', status: '', timestamp: ''}
+            {node: 'Region1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
+            {node: 'Region2', status: 'OK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
+            {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', elapsedTime: 'NaNh, NaNm, NaNs'},
+            {node: 'Region4', status: 'POK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
+            {node: 'Region5', status: '', timestamp: '', elapsedTime: ''}
 
 
         ];
@@ -59,7 +59,7 @@ suite('cbroker', function () {
         //given
 
         var json = JSON.parse(fs.readFileSync('test/unit/notify_post1.json', 'utf8'));
-        var expected = {'node': 'Region1', 'status': 'OK', 'timestamp': ''};
+        var expected = {'node': 'Region1', 'status': 'OK', 'timestamp': '', elapsedTime: ''};
 
         //when
         var result = cbroker.changeReceived(json);
@@ -150,7 +150,7 @@ suite('cbroker', function () {
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
         assert.equal('POST', requestStub.getCall(0).args[0].method);
-     });
+    });
 
 
 

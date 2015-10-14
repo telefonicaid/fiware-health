@@ -24,6 +24,7 @@ var http = require('http'),
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
     TIMESTAMP_ATTRIBUTE = 'sanity_check_timestamp', // field name for value about timestamp
+    ELAPSED_TIME = 'sanity_checks_elapsed_time', // field name for value sanity_checks_elapsed_time
     REGION_TYPE = 'region';
 
 
@@ -41,7 +42,7 @@ function parseRegions(entities) {
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
-            var sanityStatus = '', timestamp = '';
+            var sanityStatus = '', timestamp = '', elapsedTime = '';
             entry.contextElement.attributes.forEach(function (value) {
                 if (value.name === SANITY_STATUS_ATTRIBUTE) {
                     sanityStatus = value.value;
@@ -50,8 +51,16 @@ function parseRegions(entities) {
                     timestamp = dateFormat(new Date(parseInt(value.value)), 'UTC:yyyy/mm/dd HH:MM Z');
 
                 }
+                if (value.name === ELAPSED_TIME) {
+                    var myDate = new Date(parseInt(value.value));
+                    elapsedTime = myDate.getUTCHours() + 'h, ' + myDate.getUTCMinutes() + 'm, ' +
+                        myDate.getUTCSeconds() + 's';
+                }
             });
-            result.push({node: entry.contextElement.id, status: sanityStatus, timestamp: timestamp });
+            result.push({node: entry.contextElement.id,
+                status: sanityStatus,
+                timestamp: timestamp,
+                elapsedTime: elapsedTime });
         }
     });
 
@@ -72,7 +81,8 @@ function retrieveAllRegions(callback) {
         ],
         attributes: [
             SANITY_STATUS_ATTRIBUTE,
-            TIMESTAMP_ATTRIBUTE
+            TIMESTAMP_ATTRIBUTE,
+            ELAPSED_TIME
         ]
     };
     var payloadString = JSON.stringify(payload);
