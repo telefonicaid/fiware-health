@@ -40,9 +40,6 @@ function parseRegions(entities) {
 
     logger.debug('Entities to parse %j', entities);
 
-
-
-
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
