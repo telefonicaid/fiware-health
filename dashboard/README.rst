@@ -128,7 +128,7 @@ some additional steps are required after installation:
    # These format strings will be expanded w.r.t. the dictionary for the
    # mailing list instance.
    DEFAULT_MSG_FOOTER = """_______________________________________________
-   FI-Health Sanity Checks
+   FIHealth Sanity Checks
    http://%(host_name)s/
    """
 
