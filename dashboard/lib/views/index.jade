@@ -25,24 +25,27 @@ block content
                         when 'OK'
                             li(class='sanity_ok #{background}')
                              a(class='sanity_ok', href='javascript:loadReport("#{filename}")') #{region['node']}
-                             div.timestamp
-                                  |(last updated: #{region['timestamp']})
-                             div.elapsedTime
-                                    | (took: #{region['elapsedTime']})
+                                div.elapsedTime
+                                    | took: #{region['elapsedTime']}
+                                div.timestamp
+                                  |last updated: #{region['timestamp']}
+
                         when 'NOK'
                             li(class='sanity_nok #{background}')
                                 a( class='sanity_nok', href='javascript:loadReport("#{filename}")') #{region['node']}
-                                div.timestamp
-                                    | (last updated: #{region['timestamp']})
                                 div.elapsedTime
-                                    | (took: #{region['elapsedTime']})
+                                    | took: #{region['elapsedTime']}
+                                div.timestamp
+                                    | last updated: #{region['timestamp']}
+                                    
                         when 'POK'
                             li(class='sanity_pok #{background}')
                                 a( class='sanity_pok', href='javascript:loadReport("#{filename}")') #{region['node']}
-                                div.timestamp
-                                    | (last updated: #{region['timestamp']})
                                 div.elapsedTime
-                                    | (took: #{region['elapsedTime']})
+                                    | took: #{region['elapsedTime']}
+                                div.timestamp
+                                    | last updated: #{region['timestamp']}
+
                         default
                              li(class='sanity_na #{background}')
                                  div(style="height:0px",title='Sanity Check in progress') #{region['node']}
