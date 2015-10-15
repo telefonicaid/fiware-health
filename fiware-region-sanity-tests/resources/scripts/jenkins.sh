@@ -131,6 +131,39 @@ ACTION=$(expr "$1" : "^\(prepare\|test\)$") && shift
 	exit 1
 }
 
+# This function updates the value of the sanity_check_elapsed_time
+# context attribute in ContextBroker with the time value
+# given by params.
+function update_elapsed_time_context_broker() {
+
+	local sc_elapsed_time=$1
+	local region=$OS_REGION_NAME
+
+	printf "Updating elapsed time in Context Broker for $region. Elapsed time: $sc_elapsed_time. "
+	curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
+	--write-out "HTTP %{http_code} result from %{url_effective}\n" \
+	--header 'Content-Type: application/json' \
+	--header 'Accept: application/json' --data @- <<-EOF
+	{
+		"contextElements": [
+			{
+				"type": "region",
+				"isPattern": "false",
+				"id": "$region",
+				"attributes": [
+				{
+					"name": "sanity_check_elapsed_time",
+					"type": "string",
+					"value": "$sc_elapsed_time"
+				}
+				]
+			}
+		],
+		"updateAction": "APPEND"
+	}
+	EOF
+}
+
 # Change region status (when running tests on a single region). If a filename is
 # given as argument $1, then status and all individual tests results are updated
 # by NGSI Adapter according to that results report.
@@ -150,6 +183,7 @@ function change_status() {
 		curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
 		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 		--header 'Content-Type: text/plain' --data-binary @$report
+
 	else
 		# Update region entity in ContextBroker
 		local strstatus="'maintenance' (value="$status")"
@@ -258,6 +292,8 @@ prepare)
 	;;
 
 test)
+	elapsed_time='N/A'
+
 	# Start test action
 	printf "Running %s ...\n" "$(./sanity_checks --version 2>&1)"
 
@@ -268,16 +304,32 @@ test)
 	# In single region tests, change status to 'Maintenance'
 	change_status
 
+	# Update 'sanity_check_elapsed_time' context attribute
+	update_elapsed_time_context_broker $elapsed_time
+
 	# Activate virtualenv
 	source $VIRTUALENV/bin/activate
 
 	# Execute tests
 	export OS_AUTH_URL OS_USERNAME OS_PASSWORD
 	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
+
+	# Get 'start_time' before executing Sanity Checks (milliseconds)
+	start_time=$(date +%s%3N)
+
 	./sanity_checks --verbose \
 		--output-name=$OUTPUT_NAME \
 		--template-name="dashboard_template.html" \
 		$REGIONS
+
+	# Get 'end_time' after executing Sanity Checks (milliseconds)
+	end_time=$(date +%s%3N)
+
+	# Get elapsed time of Sanity Checks execution
+	elapsed_time=$(expr $end_time - $start_time)
+
+	# Update 'sanity_check_elapsed_time' context attribute
+	update_elapsed_time_context_broker $elapsed_time
 
 	# Publish results to webserver
 	cp -f $OUTPUT_NAME.html $FIHEALTH_HTDOCS
