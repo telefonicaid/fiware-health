@@ -113,7 +113,7 @@ case $OPT in
 '?')	OPTERR="Unknown option -$OPTARG";;
 ':')	OPTERR="Missing value for option -$OPTARG";;
 'h')	OPTERR="$OPTHLP";;
-'V')	OPTHLP="FiHealth Sanity Checks v$VERSION"; OPTERR="$OPTHLP";;
+'V')	OPTHLP="FIHealth Sanity Checks v$VERSION"; OPTERR="$OPTHLP";;
 '-')	OPTLONG="${OPTARG%=*}";
 	OPT=$(expr $OPTS : ".*\(.\)($OPTLONG):.*" '|' '?');
 	if [ "$OPT" = '?' ]; then

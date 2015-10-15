@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>&lt;h3&gt;Fiware-Health - Region Sanity Check&lt;/h3&gt;&#xd;
+  <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
 This Job executes the Sanity Check on the selected Region:&#xd;
 &lt;ul&gt;&#xd;
   &lt;li&gt;Changes global region status to &apos;MAINTENANCE&apos;&lt;/li&gt;&#xd;

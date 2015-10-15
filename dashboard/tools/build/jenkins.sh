@@ -96,7 +96,7 @@ PRODUCT_RELEASE=$(echo "$PRODUCT_INFO" | sed -n '/"release"/ {s/.*:.*"\(.*\)".*/
 PROJECT_NAME=$(sed -n '/"name"/ {s/.*:.*"\(.*\)".*/\1/; p; q}' $PROJECT_DIR/package.json)
 PROJECT_DESC=$(sed -n '/"description"/ {s/.*:.*"\(.*\)".*/\1/; p; q}' $PROJECT_DIR/package.json)
 PROJECT_VERSION=$(sed -n '/"version"/ {s/.*:.*"\(.*\)".*/\1/; p; q}' $PROJECT_DIR/package.json)
-SONAR_PROJECT_NAME="FiHealth Dashboard"
+SONAR_PROJECT_NAME="FIHealth Dashboard"
 SONAR_PROJECT_KEY=com.telefonica.iot:fihealth-dashboard
 
 # Change to project directory

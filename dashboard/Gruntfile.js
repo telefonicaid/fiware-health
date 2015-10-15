@@ -172,7 +172,7 @@ module.exports = function (grunt) {
 
         dox: {
             options: {
-                title: 'Fiware health Documentation'
+                title: 'FIWARE Health Documentation'
             },
             files: {
                 src: ['<%= jshint.lib.src %>', '<%= jshint.test.src %>'],

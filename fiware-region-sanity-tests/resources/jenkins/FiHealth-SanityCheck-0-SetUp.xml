@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>&lt;h3&gt;Fiware-Health - Region Sanity Check&lt;/h3&gt;&#xd;
+  <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
 This Job executes the SetUp procedure for Sanity Check execution&#xd;
 &lt;ul&gt;&#xd;
   &lt;li&gt;Creates workspace&lt;/li&gt;&#xd;
-  &lt;li&gt;Downloads source code from Fiware-Healt repository&lt;/li&gt;&#xd;
+  &lt;li&gt;Downloads source code from FIHealth repository&lt;/li&gt;&#xd;
   &lt;li&gt;Clean all generated test data (*.html, *.txt, *.xml)&lt;/li&gt;&#xd;
-  &lt;li&gt;Creates Virtualen and configures the test environment&lt;/li&gt;&#xd;
+  &lt;li&gt;Creates Virtualenv and configures the test environment&lt;/li&gt;&#xd;
   &lt;li&gt;Install all project requirements&lt;/li&gt;&#xd;
 &lt;/ul&gt;&#xd;
 &#xd;

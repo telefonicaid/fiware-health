@@ -12,7 +12,7 @@
 %define _node_req_ver %(awk '/"node":/ {split($0,v,/["~=<>]/); print v[6]}' %{_basedir}/package.json)
 
 # Package main attributes (_topdir, _basedir, _version and _release must be given at command line)
-Summary: FiHealth Dashboard.
+Summary: FIHealth Dashboard.
 URL: https://github.com/telefonicaid/fiware-health/tree/master/dashboard
 Name: %{_name}
 Version: %{_version}
@@ -25,7 +25,7 @@ Requires: mailman python python-pip
 # nodejs dependency handled in 'pre' section (see below)
 
 %description
-Frontend for FiHealth Sanity Checks. Publishes an overview
+Frontend for FIHealth Sanity Checks. Publishes an overview
 page about the global status of FIWARE nodes, and provides
 links to all test result reports.
 
@@ -139,7 +139,7 @@ if [ $1 -eq 1 ]; then
 		groupadd --force $ADAPTER_GRP
 		useradd --gid $ADAPTER_GRP --shell /bin/false \
 		        --home-dir /nonexistent --no-create-home \
-		        --comment "FiHealth Dashboard" $DASHBOARD_USR
+		        --comment "FIHealth Dashboard" $DASHBOARD_USR
 	fi
 
 	# change ownership
@@ -159,7 +159,7 @@ if [ $1 -eq 1 ]; then
 	# postinstall message
 	if [ $STATUS -eq 0 ]; then fmt --width=${COLUMNS:-$(tput cols)} <<-EOF
 
-		FiHealth Dashboard successfully installed at $DASHBOARD_DIR.
+		FIHealth Dashboard successfully installed at $DASHBOARD_DIR.
 
 		WARNING: Please check values in the configuration file
 		$DASHBOARD_DIR/config/dashboard.yml before starting the

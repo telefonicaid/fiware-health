@@ -36,7 +36,7 @@ class FiwareNeutronOperations:
         """
         Initializes Neutron-Client.
         :param logger: Logger object
-        :param region_name: Fiware Region name
+        :param region_name: FIWARE Region name
         :param tenant_id: Tenant identifier
         :param auth_session: Keystone auth session object
         :param auth_url: Keystone auth URL (needed if no session is given)

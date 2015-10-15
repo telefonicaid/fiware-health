@@ -1,5 +1,5 @@
 ===================================
-FiHealth Sanity Checks | Test cases
+FIHealth Sanity Checks | Test cases
 ===================================
 
 This section describes some aspects about the implemented
