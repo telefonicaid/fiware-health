@@ -81,11 +81,11 @@ __ `D-Bus`_
 
 #. Create a virtual environment somewhere::
 
-   $ virtualenv $WORKON_HOME/venv/fihealth_sanitychecks --system-site-packages
+   $ virtualenv $WORKON_HOME/fiware-region-sanity-tests --system-site-packages
 
 #. Activate the virtual environment::
 
-   $ source $WORKON_HOME/venv/fihealth_sanitychecks/bin/activate
+   $ source $WORKON_HOME/fiware-region-sanity-tests/bin/activate
 
 #. Go to main folder in the *FIHealth - Sanity Checks* project::
 
@@ -130,9 +130,10 @@ Jenkins jobs
 Please use the `Jenkins CI Remote Access API`__ to submit the following files
 to create the corresponding jobs:
 
-- ``resources/jenkins/FiHealth-SanityCheck-0-SetUp.xml``
-- ``resources/jenkins/FiHealth-SanityCheck-1-Flow.xml``
-- ``resources/jenkins/FiHealth-SanityCheck-2-Exec-Region.xml``
+- ``resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml``
+- ``resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml``
+- ``resources/jenkins/FIHealth-SanityCheck-1-Flow.xml``
+- ``resources/jenkins/FIHealth-SanityCheck-2-Exec-Region.xml``
 
 __ `Jenkins CI - API`_
 
@@ -158,28 +159,32 @@ configuration of Jenkins or as part of the jobs:
 Running
 =======
 
-**Launch HTTP PhoneHome server**
+Prerequisites
+-------------
 
 Some tests need a HTTP server waiting for requests from deployed VMs to check
-network connectivity (part of the E2E behaviour). Before executing them, you
-will have to manually launch the **HTTP PhoneHome service**::
+network connectivity (part of the E2E behaviour). Before executing tests, you
+will have to ensure the **HTTP PhoneHome server** is running.
 
-    $ export TEST_PHONEHOME_ENDPOINT
-    $ python commons/http_phonehome_server.py
+This PhoneHome server requires a listen endpoint as parameter:
+- The host:port where server listens to must be accessible from the internet.
+- Endpoint should be configured in the ``phonehome_endpoint`` property of the
+  configuration file or in ``$TEST_PHONEHOME_ENDPOINT`` environment variable;
+  otherwise, the related tests will be skipped.
 
-If ``$TEST_PHONEHOME_ENDPOINT`` is not configured or its value is not set in
-the configuration file, the related tests will be skipped.
+To launch the PhoneHome server manually::
 
-The host where PhoneHome service is running must be accessible from the VMs
-deployed. This endpoint should be configured in the ``phonehome_endpoint``
-property of configuration file or ``$TEST_PHONEHOME_ENDPOINT`` environment
-variable to be used by Sanity Checks.
+  $ source $WORKON_HOME/fiware-region-sanity-tests/bin/activate
+  $ cd $FIHEALTH_WORKSPACE/fiware-region-sanity-tests
+  $ export TEST_PHONEHOME_ENDPOINT=http://<host>:<port>
+  $ PYTHONPATH=. python commons/http_phonehome_server.py
+
+Alternatively, server may be restarted just running ("Build now" option) the
+job ``FIHealth-SanityCheck-0-RestartTestServers`` from Jenkins GUI.
 
 The PhoneHome server is managed independently of the *Sanity Checks* runtime.
-
-To know more about the D-Bus architecture and the HTTP PhoneHome service,
-please take a look at the `PhoneHome architecture
-<doc/phonehome_architecture.rst>`_.
+To know more about it and the underlying D-Bus architecture, please take a
+look at the `PhoneHome architecture <doc/phonehome_architecture.rst>`_.
 
 
 **Running Sanity Checks from command line**
