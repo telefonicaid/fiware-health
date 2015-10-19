@@ -307,6 +307,9 @@ setup)
 	;;
 
 restart)
+	# Activate virtualenv
+	source $VIRTUALENV/bin/activate
+
 	# Force restart of PhoneHome server
 	restart_phone_home_server --force
 	;;
