@@ -219,10 +219,11 @@ function change_status() {
 # This function restarts PhoneHome server used for tests
 function restart_phone_home_server() {
 	local signal=TERM
+	local logfile=/var/log/httpPhoneHomeServerRequests.log
 	[ "$1" == "--force" ] && signal=KILL
 	pushd $PROJECT_DIR >/dev/null
 	pkill -$signal -f http_phonehome_server
-	PYTHONPATH=. python2.7 commons/http_phonehome_server.py &
+	PYTHONPATH=. nohup python2.7 commons/http_phonehome_server.py > $logfile &
 	popd >/dev/null
 }
 
