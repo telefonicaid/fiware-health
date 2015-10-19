@@ -130,9 +130,9 @@ Jenkins jobs
 Please use the `Jenkins CI Remote Access API`__ to submit the following files
 to create the corresponding jobs:
 
-- ``resources/jenkins/FiHealth-SanityCheck-0-SetUp.xml``
-- ``resources/jenkins/FiHealth-SanityCheck-1-Flow.xml``
-- ``resources/jenkins/FiHealth-SanityCheck-2-Exec-Region.xml``
+- ``resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml``
+- ``resources/jenkins/FIHealth-SanityCheck-1-Flow.xml``
+- ``resources/jenkins/FIHealth-SanityCheck-2-Exec-Region.xml``
 
 __ `Jenkins CI - API`_
 

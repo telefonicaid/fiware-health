@@ -20,7 +20,7 @@
 # Support script for this component within a Jenkins CI job
 #
 # Usage:
-#     $0 [options] prepare|test
+#     $0 [options] setup|restart|exec
 #     $0 --help
 #
 # Options:
@@ -40,12 +40,14 @@
 #     					replace the former if Identity API v3)
 #
 # Actions:
-#     prepare				Sanity Check preparation process
-#     test				Sanity Check execution for given region
+#     setup				Setup environment for Sanity Check
+#     restart				Restart supporting servers (PhoneHome)
+#     exec				Execution of Sanity Check for a region
 #
 # Environment:
 #     JENKINS_HOME			home path of Jenkins CI
 #     JOB_URL				full URL for this build job
+#     TEST_PHONEHOME_ENDPOINT		endpoint of supporting PhoneHome server
 #     FIHEALTH_WORKSPACE		default value for --workspace
 #     FIHEALTH_HTDOCS			default value for --htdocs
 #     FIHEALTH_ADAPTER_URL		default value for --adapter-url
@@ -120,7 +122,7 @@ case $OPT in
 	continue;;
 esac; break; done; done
 shift $(expr $OPTIND - 1)
-ACTION=$(expr "$1" : "^\(prepare\|test\)$") && shift
+ACTION=$(expr "$1" : "^\(setup\|restart\|exec\)$") && shift
 [ -z "$OPTERR" -a -z "$ACTION" ] && OPTERR="Valid action required as argument"
 [ -z "$OPTERR" -a -n "$*" ] && OPTERR="Too many arguments"
 [ -n "$OPTERR" ] && {
@@ -135,7 +137,6 @@ ACTION=$(expr "$1" : "^\(prepare\|test\)$") && shift
 # context attribute in ContextBroker with the time value
 # given by params.
 function update_elapsed_time_context_broker() {
-
 	local sc_elapsed_time=$1
 	local region=$OS_REGION_NAME
 
@@ -215,6 +216,16 @@ function change_status() {
 	return $?
 }
 
+# This function restarts PhoneHome server used for tests
+function restart_phone_home_server() {
+	local signal=TERM
+	[ "$1" == "--force" ] && signal=KILL
+	pushd $PROJECT_DIR >/dev/null
+	pkill -$signal -f http_phonehome_server
+	PYTHONPATH=. python2.7 commons/http_phonehome_server.py &
+	popd >/dev/null
+}
+
 # Main
 if [ -z "$JENKINS_HOME" ]; then
 	printf "Jenkins variable JENKINS_HOME missing\n" 1>&2
@@ -259,7 +270,7 @@ cd $PROJECT_DIR
 
 # Perform action
 case $ACTION in
-prepare)
+setup)
 	# Start prepare action
 	printf "Starting FIHealth Sanity Checks environment preparation ...\n"
 
@@ -289,9 +300,17 @@ prepare)
 	./configure --prefix=$VIRTUALENV
 	make
 	make install
+
+	# Restart PhoneHome server
+	restart_phone_home_server
 	;;
 
-test)
+restart)
+	# Force restart of PhoneHome server
+	restart_phone_home_server --force
+	;;
+
+exec)
 	elapsed_time='N/A'
 
 	# Start test action
