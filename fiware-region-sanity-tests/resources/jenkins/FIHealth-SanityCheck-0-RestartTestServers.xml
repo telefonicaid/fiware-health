@@ -26,7 +26,10 @@ This job forces the restart of supporting servers used in Sanity Check execution
   <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
-      <command># Execute &apos;restart&apos; script
+      <command># Workaround to spawn processes from build (https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build)
+BUILD_ID=dontKillMe
+
+# Execute &apos;restart&apos; script
 ./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh restart
 </command>
     </hudson.tasks.Shell>
