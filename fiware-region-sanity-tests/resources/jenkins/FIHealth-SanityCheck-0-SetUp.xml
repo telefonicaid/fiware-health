@@ -46,7 +46,10 @@ This job performs the initial setup procedure for Sanity Check execution&#xd;
   <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
-      <command># Execute &apos;setup&apos; script
+      <command># Workaround to spawn processes from build (https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build)
+BUILD_ID=dontKillMe
+
+# Execute &apos;setup&apos; script
 ./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh setup
 </command>
     </hudson.tasks.Shell>
