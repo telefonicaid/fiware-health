@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
+This job forces the restart of supporting servers used in Sanity Check execution:&#xd;
+&lt;ul&gt;&#xd;
+  &lt;li&gt;PhoneHome&lt;/li&gt;&#xd;
+&lt;/ul&gt;&#xd;
+&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>7</daysToKeep>
+    <numToKeep>14</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># Workaround to spawn processes from build (https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build)
+BUILD_ID=dontKillMe
+
+# Execute &apos;restart&apos; script
+./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh restart
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

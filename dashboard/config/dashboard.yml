@@ -4,7 +4,7 @@
 app:
   host: 'localhost'			# App listen host
   port: 3001				# App listen port
-  web_context: '/'			# App context
+  webContext: '/'			# App context
   settings: 'settings.json'		# Path of Sanity Checks settings file
 
 #----------------------------------------------------------------------------
@@ -23,8 +23,8 @@ session:
 # Web server paths section (mandatory)
 #----------------------------------------------------------------------------
 paths:
-  reports_url: '/report'
-  reports_files: '/var/www/html/RegionSanityCheck'
+  reportsUrl: '/report'
+  reportsFiles: '/var/www/html/RegionSanityCheck'
 
 #----------------------------------------------------------------------------
 # Context Broker section (mandatory)
@@ -44,6 +44,7 @@ idm:
   url: ''				# IdM's authentication URL
   logoutURL: ''				# Idm's logout URL
   callbackURL: ''			# App's callback URL after auth
+  regionsAuthorized: []      		# List of regions authorized to username: [{'RegionName': 'username'}]
 
 #----------------------------------------------------------------------------
 # mailman-api section (mandatory)
@@ -52,7 +53,7 @@ mailman:
   host: 'localhost'			# mailman-api listen host
   port: 8000				# mailman-api listen port
   path: '/'				# mailman-api context
-  email_from: ''			# Sender of email notifications
+  emailFrom: ''			# Sender of email notifications
 
 #----------------------------------------------------------------------------
 # jenkins-api section (mandatory)
@@ -63,3 +64,4 @@ jenkins:
   token: ''				# job auth token, configured in job
   path: ''				# jenkins context with job name
   parameterName: ''			# jenkins job parameter name for region
+

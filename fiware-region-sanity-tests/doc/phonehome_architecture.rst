@@ -1,5 +1,5 @@
 =================================================
- FiHealth Sanity Checks | PhoneHome architecture
+ FIHealth Sanity Checks | PhoneHome architecture
 =================================================
 
 This documentation describes the implemented *PhoneHome service* to support

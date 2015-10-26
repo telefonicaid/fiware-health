@@ -15,4 +15,5 @@ install:
   - npm install coveralls --save 
 
 after_success:
+  - grunt lint
   - grunt coverage-report && cat report/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

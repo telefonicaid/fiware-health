@@ -2,13 +2,13 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='#{web_context}stylesheets/style_fi.css')
-    link(rel='stylesheet', href='#{web_context}stylesheets/bootstrap-frame.css')
-    link(rel='stylesheet', href='#{web_context}stylesheets/style.css')
-    link(rel='stylesheet', href='#{web_context}stylesheets/index.css')
-    link(rel='stylesheet', href='#{web_context}stylesheets/font-awesome.css', media='screen')
+    link(rel='stylesheet', href='#{webContext}stylesheets/style_fi.css')
+    link(rel='stylesheet', href='#{webContext}stylesheets/bootstrap-frame.css')
+    link(rel='stylesheet', href='#{webContext}stylesheets/style.css')
+    link(rel='stylesheet', href='#{webContext}stylesheets/index.css')
+    link(rel='stylesheet', href='#{webContext}stylesheets/font-awesome.css', media='screen')
     link(rel='shortcut icon', href='https://account.lab.fiware.org/assets/icons/favicon-ec6bdf9204681a820dce0311ee5827e0.ico')
-    script(src='#{web_context}javascripts/dashboard.js')
+    script(src='#{webContext}javascripts/dashboard.js')
     script(src='//code.jquery.com/jquery-1.11.3.min.js')
   body
 
@@ -18,20 +18,20 @@ html
          .login
             if name=='sign in' || name==undefined
                div.fiware_icon
-                 img(src='#{web_context}images/fiware_ico.png' )
+                 img(src='#{webContext}images/fiware_ico.png' )
                div.header_buttons
-                   button.btn(onclick="window.location.href='#{web_context}signin'") Sign In
-                   button.btn(onclick="window.location.href='#{web_context}'") Home
+                   button.btn(onclick="window.location.href='#{webContext}signin'") Sign In
+                   button.btn(onclick="window.location.href='#{webContext}'") Home
 
             else
                 div(style="float:left")
                     ul
                         li
-                          img(src='#{web_context}images/user.png' )
+                          img(src='#{webContext}images/user.png' )
                         li
                           span.user #{name} &nbsp;
                 div.header_buttons
-                    button.btn(onclick="logout('#{web_context}logout','#{logout_url}')") Log out
+                    button.btn(onclick="logout('#{webContext}logout','#{logoutUrl}')") Log out
                     button.btn(onclick="window.location.href='/'") Home
 
 
@@ -52,7 +52,7 @@ html
         |&nbsp;The use of FIWARE Lab services is subject to the acceptance of the&nbsp;
         a(href="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE_LAB_Terms_and_Conditions") Terms and Conditions,
         |&nbsp;
-        a(href="http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FI-LAB_Personal_Data_Protection_Policy") Personal Data Protection Policy
+        a(href="https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/FIWARE_Lab_Personal_Data_Protection_Policy") Personal Data Protection Policy
         |&nbsp;and&nbsp;
         a(href="http://forge.fi-ware.org/plugins/mediawiki/wiki/fiware/index.php/Cookies_Policy_FIWARE_Lab") Cookies Policy
 

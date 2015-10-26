@@ -17,7 +17,7 @@
 #
 
 #
-# Initial setup of FiHealth Dashboard (create mailing lists and subscriptions)
+# Initial setup of FIHealth Dashboard (create mailing lists and subscriptions)
 #
 # Usage:
 #     $0 [options] [config_file]
@@ -94,9 +94,9 @@ eval `cd $BASEDIR; node -p <<-EOF
 	EMAIL_FROM=%s',
 	config.app.settings,
 	config.app.host, config.app.port,
-	config.app.web_context.replace(/^\/|\/$/g, ''),
+	config.app.webContext.replace(/^\/|\/$/g, ''),
 	config.cbroker.host, config.cbroker.port,
-	config.mailman.email_from);
+	config.mailman.emailFrom);
 EOF`
 if [ ! -r "$SETTINGS" ]; then
 	printf "Cannot find '%s' settings file\n" "$SETTINGS" 1>&2
@@ -121,7 +121,7 @@ LANGUAGE='en'
 URL_HOST=$EMAIL_HOST
 TMP_FILE=/tmp/$NAME_$$
 for LIST in $LISTS; do
-	DESCRIPTION="FiHealth mailing list for region $LIST"
+	DESCRIPTION="FIHealth mailing list for region $LIST"
 	$MAILMANLIB_PATH/bin/newlist -q -l $LANGUAGE \
 		-u $URL_HOST -e $EMAIL_HOST \
 		$LIST $ADMIN_MAIL $ADMIN_PASS \

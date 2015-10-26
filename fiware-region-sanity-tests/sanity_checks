@@ -58,7 +58,7 @@
 #     $REGIONS
 #
 
-VERSION=1.1.3
+VERSION=1.2.0
 NAME=$(basename $0)
 OPTS=`tr -d '\n ' <<END
       h(help)
@@ -113,7 +113,7 @@ case $OPT in
 '?')	OPTERR="Unknown option -$OPTARG";;
 ':')	OPTERR="Missing value for option -$OPTARG";;
 'h')	OPTERR="$OPTHLP";;
-'V')	OPTHLP="FiHealth Sanity Checks v$VERSION"; OPTERR="$OPTHLP";;
+'V')	OPTHLP="FIHealth Sanity Checks v$VERSION"; OPTERR="$OPTHLP";;
 '-')	OPTLONG="${OPTARG%=*}";
 	OPT=$(expr $OPTS : ".*\(.\)($OPTLONG):.*" '|' '?');
 	if [ "$OPT" = '?' ]; then

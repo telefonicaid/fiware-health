@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>&lt;h3&gt;Fiware-Health - Region Sanity Check&lt;/h3&gt;&#xd;
-This Job executes the Sanity Check on the selected Region:&#xd;
+  <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
+This job performs the Sanity Check on the region given as parameter:&#xd;
 &lt;ul&gt;&#xd;
-  &lt;li&gt;Changes global region status to &apos;MAINTENANCE&apos;&lt;/li&gt;&#xd;
+  &lt;li&gt;Change global region status to &apos;MAINTENANCE&apos;&lt;/li&gt;&#xd;
   &lt;li&gt;Launch Sanity Check on the Region&lt;/li&gt;&#xd;
   &lt;li&gt;Generate results and summary report&lt;/li&gt;&#xd;
-  &lt;li&gt;Processes test results and publishes it&lt;/li&gt;&#xd;
-  &lt;li&gt;Changes global region status to &apos;OK&apos; or &apos;NOK&apos;&lt;/li&gt;&#xd;
+  &lt;li&gt;Process test results&lt;/li&gt;&#xd;
+  &lt;li&gt;Change global region status to &apos;OK&apos; or &apos;NOK&apos;&lt;/li&gt;&#xd;
 &lt;/ul&gt;&#xd;
 &#xd;
 &lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
@@ -64,15 +64,14 @@ This Job executes the Sanity Check on the selected Region:&#xd;
   <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
-      <command># Execute &apos;Test&apos; Script
-# https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests/resources/scripts/jenkins.sh
-./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh test
+      <command># Execute &apos;exec&apos; script
+./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh exec
 </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>$FIHEALTH_WORKSPACE/$FIHEALTH_SANITY_PROJECT/*_results.*</artifacts>
+      <artifacts>$FIHEALTH_SANITY_PROJECT/*_results.*</artifacts>
       <allowEmptyArchive>true</allowEmptyArchive>
       <onlyIfSuccessful>false</onlyIfSuccessful>
       <fingerprint>false</fingerprint>
@@ -80,3 +79,4 @@ This Job executes the Sanity Check on the selected Region:&#xd;
     </hudson.tasks.ArtifactArchiver>
   </publishers>
   <buildWrappers/>
+</project>

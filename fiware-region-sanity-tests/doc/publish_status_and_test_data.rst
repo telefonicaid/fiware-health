@@ -1,5 +1,5 @@
 ===================================================
- FiHealth Sanity Checks | Publishing Sanity Status
+ FIHealth Sanity Checks | Publishing Sanity Status
 ===================================================
 
 Results included in summary report ``test_results.txt`` can be published through
@@ -69,6 +69,16 @@ Here is an example of the generated ``test_results.txt`` for an specific region
       OK	 test_external_networks
       OK	 test_flavors_not_empty
       OK	 test_images_not_empty
+
+
+Elapsed execution time of Sanity Checks
+---------------------------------------
+
+Apart from the context attributes described above, when Sanity Checks
+have been executed from Jenkins, a new attribute is updated in the
+context information of the region: the elapsed time of the execution
+``sanity_check_elapsed_time``. This attribute will have the time in
+milliseconds or 'N/A' if Sanity tests have not finished yet.
 
 
 Sanity Check Status and Test Execution Status

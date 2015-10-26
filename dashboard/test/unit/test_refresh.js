@@ -32,25 +32,25 @@ suite('refresh', function () {
         var req = sinon.stub(),
             res = sinon.stub();
 
-        req.param = sinon.stub().returns("region1");
+        req.param = sinon.stub().returns('region1');
         req.session = sinon.stub();
-        req.session.role = "Admin";
-        var request_stub = sinon.stub();
-        var http_stub = sinon.stub(http, 'request').returns(request_stub);
-        request_stub.on = sinon.stub();
-        request_stub.write = sinon.stub();
-        request_stub.end = sinon.stub();
+        req.session.role = 'Admin';
+        var requestStub = sinon.stub();
+        var httpStub = sinon.stub(http, 'request').returns(requestStub);
+        requestStub.on = sinon.stub();
+        requestStub.write = sinon.stub();
+        requestStub.end = sinon.stub();
 
 
         //when
-        refresh.get_refresh(req, res);
+        refresh.getRefresh(req, res);
 
         //then
-        assert(request_stub.on.calledOnce);
-        assert(request_stub.write.calledOnce);
-        assert(request_stub.end.calledOnce);
+        assert(requestStub.on.calledOnce);
+        assert(requestStub.write.calledOnce);
+        assert(requestStub.end.calledOnce);
 
-        http_stub.restore();
+        httpStub.restore();
 
     });
 
@@ -60,18 +60,18 @@ suite('refresh', function () {
         var req = sinon.stub(),
             res = sinon.stub();
 
-        req.param = sinon.stub().returns("region1");
+        req.param = sinon.stub().returns('region1');
         req.session = sinon.stub();
         req.session.role = undefined;
-        var common_stub = sinon.stub(common, 'notAuthorized');
+        var commonStub = sinon.stub(common, 'notAuthorized');
 
         //when
-        refresh.get_refresh(req, res);
+        refresh.getRefresh(req, res);
 
         //then
-        assert(common_stub.calledOnce);
+        assert(commonStub.calledOnce);
 
-        common_stub.restore();
+        commonStub.restore();
 
     });
 });

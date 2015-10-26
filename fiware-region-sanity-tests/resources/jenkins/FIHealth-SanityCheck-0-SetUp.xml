@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>&lt;h3&gt;Fiware-Health - Region Sanity Check&lt;/h3&gt;&#xd;
-This Job executes the SetUp procedure for Sanity Check execution&#xd;
+  <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
+This job performs the initial setup procedure for Sanity Check execution&#xd;
 &lt;ul&gt;&#xd;
-  &lt;li&gt;Creates workspace&lt;/li&gt;&#xd;
-  &lt;li&gt;Downloads source code from Fiware-Healt repository&lt;/li&gt;&#xd;
+  &lt;li&gt;Prepare workspace&lt;/li&gt;&#xd;
+  &lt;li&gt;Download source code from GitHub repository&lt;/li&gt;&#xd;
   &lt;li&gt;Clean all generated test data (*.html, *.txt, *.xml)&lt;/li&gt;&#xd;
-  &lt;li&gt;Creates Virtualen and configures the test environment&lt;/li&gt;&#xd;
-  &lt;li&gt;Install all project requirements&lt;/li&gt;&#xd;
+  &lt;li&gt;Create a Python virtualenv as test environment&lt;/li&gt;&#xd;
+  &lt;li&gt;Install package requirements&lt;/li&gt;&#xd;
 &lt;/ul&gt;&#xd;
 &#xd;
 &lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
@@ -30,7 +30,7 @@ This Job executes the SetUp procedure for Sanity Check execution&#xd;
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>develop</name>
+        <name>master</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
@@ -46,11 +46,14 @@ This Job executes the SetUp procedure for Sanity Check execution&#xd;
   <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
-      <command># Execute &apos;Prepare&apos; Script
-# https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests/resources/scripts/jenkins.sh
-./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh prepare
+      <command># Workaround to spawn processes from build (https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build)
+BUILD_ID=dontKillMe
+
+# Execute &apos;setup&apos; script
+./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh setup
 </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
   <buildWrappers/>
+</project>
