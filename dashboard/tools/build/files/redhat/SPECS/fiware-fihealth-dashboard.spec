@@ -201,8 +201,13 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Thu Nov 01 2015 Telefónica I+D <opensource@tid.es> 1.2.0-1
-- TODO ...
+* Mon Oct 26 2015 Telefónica I+D <opensource@tid.es> 1.2.0-1
+- Elapsed time of Sanity Checks execution
+- Username of region administrators given by configuration
+- Fix dependencies
+- Add exclusions to sonar configuration
+- Add jslint and gjslint support
+- Fix documentation
 
 * Thu Sep 28 2015 Telefónica I+D <opensource@tid.es> 1.1.3-1
 - Bugfixing
