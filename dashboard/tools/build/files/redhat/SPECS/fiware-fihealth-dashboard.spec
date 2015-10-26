@@ -201,6 +201,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Tue Dic 01 2015 Telefónica I+D <opensource@tid.es> 1.3.0-1
+- TODO
+
 * Mon Oct 26 2015 Telefónica I+D <opensource@tid.es> 1.2.0-1
 - Elapsed time of Sanity Checks execution
 - Username of region administrators given by configuration
