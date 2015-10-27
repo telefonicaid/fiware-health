@@ -137,11 +137,10 @@ function readConfigFile(file) {
 
 
 function main() {
-        // create argument parser
+    // create argument parser
     var argParser = optimist.demand([])
         .options('h', { 'alias': 'help', 'describe': 'show help message and exit', 'boolean': true })
         .options('v', { 'alias': 'version', 'describe': 'show version and exit', 'boolean': true });
-
 
     // read configuration file if exists (path maybe taken from command line)
     argParser
@@ -154,7 +153,7 @@ function main() {
         })
         .parse(process.argv);
 
-    //process config file
+    // process config file
     readConfigFile(config.configFile);
 
     // process command line arguments
@@ -177,7 +176,7 @@ function main() {
                 process.exit(0);
             } else {
                 Object.keys(argv).forEach(function (key) {
-                    var attr = key.replace('-', '_');
+                    var attr = key.replace(/(-)([a-z])/, function (str, $1, $2) { return $2.toUpperCase(); });
                     if (attr in config) {
                         config[attr] = argv[key];
                     }

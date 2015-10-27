@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="../../stylesheets/font-awesome.css" media="screen">
     <script src="../javascripts/dashboard.js"></script>
 </head>
-<body onload="calc_height();displaySections();changeAllTitles()">
+<body onload="calcHeight();displaySections();changeAllTitles()">
 <div class="box0">
     {% for class, group in report.items() %}
     <h1 align="left" class="subtitle" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
