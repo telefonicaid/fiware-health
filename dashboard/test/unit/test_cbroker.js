@@ -79,9 +79,10 @@ suite('cbroker', function () {
 
         var request = new EventEmitter();
 
+        request.setTimeout = sinon.spy();
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var requestStub = sinon.stub(http, 'request', function(options, callback) {
+        var requestStub = sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
@@ -96,7 +97,7 @@ suite('cbroker', function () {
         });
 
         //when
-        cbroker.retrieveAllRegions(function(result) {
+        cbroker.retrieveAllRegions(function (result) {
 
             //then
             http.request.restore();
@@ -106,6 +107,7 @@ suite('cbroker', function () {
 
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
+        assert(request.setTimeout.calledOnce);
         assert.equal('POST', requestStub.getCall(0).args[0].method);
 
     });
@@ -123,7 +125,8 @@ suite('cbroker', function () {
 
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var requestStub = sinon.stub(http, 'request', function(options, callback) {
+        request.setTimeout = sinon.spy();
+        var requestStub = sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
@@ -139,7 +142,7 @@ suite('cbroker', function () {
         });
 
         //when
-        cbroker.retrieveAllRegions(function(result) {
+        cbroker.retrieveAllRegions(function (result) {
 
             //then
             http.request.restore();
@@ -149,9 +152,10 @@ suite('cbroker', function () {
 
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
+        assert(request.setTimeout.calledOnce);
         assert.equal('POST', requestStub.getCall(0).args[0].method);
     });
-
+    
 
 
 

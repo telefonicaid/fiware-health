@@ -33,6 +33,7 @@ cbroker:
   host: 'localhost'			# ContextBroker listen host
   port: 1000				# ContextBroker listen port
   path: '/NGSI10/queryContext'		# QueryContext operation
+  timeout: 10000            		# Timeout after request. 0 disabled it.
 
 #----------------------------------------------------------------------------
 # IdM OAuth2 section (mandatory)
@@ -53,7 +54,7 @@ mailman:
   host: 'localhost'			# mailman-api listen host
   port: 8000				# mailman-api listen port
   path: '/'				# mailman-api context
-  emailFrom: ''			# Sender of email notifications
+  emailFrom: ''				# Sender of email notifications
 
 #----------------------------------------------------------------------------
 # jenkins-api section (mandatory)
