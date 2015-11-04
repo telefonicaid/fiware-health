@@ -28,22 +28,43 @@ var assert = require('assert'),
 suite('index', function () {
 
 
-     test('test_get_index', function () {
+    test('test_get_index', function () {
+        //given
 
-         //given
-
-         var req = sinon.stub();
-         var res = sinon.stub();
-         var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions');
+        var req = sinon.stub();
+        var res = sinon.stub();
+        var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions');
 
 
         //when
         index.getIndex(req, res);
 
         //then
-         assert(cbrokerStub.calledOnce);
-         cbrokerStub.restore();
+        assert(cbrokerStub.calledOnce);
+        cbrokerStub.restore();
 
+
+    });
+
+    test('should_retrieveAllRegions_with_empty_region_list', function () {
+
+        //given
+
+        var req = sinon.stub();
+        var res = sinon.stub();
+        var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions', function (callback) {
+
+            res.render = sinon.spy();
+            callback([]);
+        });
+
+        //when
+        index.getIndex(req, res);
+
+        //then
+        assert(cbrokerStub.calledOnce);
+        assert(res.render.calledOnce);
+        cbrokerStub.restore();
 
     });
 
