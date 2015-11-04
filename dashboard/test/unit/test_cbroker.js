@@ -79,9 +79,10 @@ suite('cbroker', function () {
 
         var request = new EventEmitter();
 
+        request.setTimeout = sinon.spy();
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var requestStub = sinon.stub(http, 'request', function(options, callback) {
+        var requestStub = sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
@@ -96,7 +97,7 @@ suite('cbroker', function () {
         });
 
         //when
-        cbroker.retrieveAllRegions(function(result) {
+        cbroker.retrieveAllRegions(function (result) {
 
             //then
             http.request.restore();
@@ -106,6 +107,7 @@ suite('cbroker', function () {
 
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
+        assert(request.setTimeout.calledOnce);
         assert.equal('POST', requestStub.getCall(0).args[0].method);
 
     });
@@ -123,7 +125,8 @@ suite('cbroker', function () {
 
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var requestStub = sinon.stub(http, 'request', function(options, callback) {
+        request.setTimeout = sinon.spy();
+        var requestStub = sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
@@ -139,7 +142,7 @@ suite('cbroker', function () {
         });
 
         //when
-        cbroker.retrieveAllRegions(function(result) {
+        cbroker.retrieveAllRegions(function (result) {
 
             //then
             http.request.restore();
@@ -149,10 +152,106 @@ suite('cbroker', function () {
 
         assert(request.write.calledOnce);
         assert(request.end.calledOnce);
+        assert(request.setTimeout.calledOnce);
         assert.equal('POST', requestStub.getCall(0).args[0].method);
     });
 
+    test('should_return_empty_region_list_and_print_log_when_timeout_on_request', function (done) {
 
+        //given
+        var req = sinon.stub();
+        req.param = sinon.stub();
+        req.param.withArgs('region').returns('region1');
+        req.session = sinon.stub();
+        req.session.user = {email: 'user@mail.com'};
+
+        var request = new EventEmitter();
+
+        request.setTimeout = sinon.spy(function (timeout, callback) {
+                callback();
+        });
+        request.end = sinon.spy();
+        request.write = sinon.spy();
+        request.abort = sinon.spy(function () {
+            var e = sinon.spy();
+            e.code = 'ECONNRESET';
+            this.emit('error', e);
+        });
+        var requestStub = sinon.stub(http, 'request', function () {
+
+            var response = new EventEmitter();
+            response.setEncoding = sinon.stub();
+
+            var json = fs.readFileSync('test/unit/notify_post1.json', 'utf8');
+
+            response.emit('data', json);
+            response.emit('end');
+            return request;
+        });
+
+        //when
+        cbroker.retrieveAllRegions(function (result) {
+
+            //then
+            http.request.restore();
+            assert.deepEqual(0, result.length);
+            done();
+        });
+
+        assert(request.write.calledOnce);
+        assert(request.end.calledOnce);
+        assert(request.setTimeout.calledOnce);
+        assert(request.abort.calledOnce);
+        assert.equal('POST', requestStub.getCall(0).args[0].method);
+
+    });
+
+    test('should_return_empty_region_list_and_print_log_when_context_broker_is_down', function (done) {
+
+        //given
+        var req = sinon.stub();
+        req.param = sinon.stub();
+        req.param.withArgs('region').returns('region1');
+        req.session = sinon.stub();
+        req.session.user = {email: 'user@mail.com'};
+
+        var request = new EventEmitter();
+
+        request.setTimeout = sinon.spy();
+        request.end = sinon.spy(function () {
+            var e = sinon.spy();
+            e.code = 'ECONNREFUSED';
+            this.emit('error', e);
+        });
+        request.write = sinon.spy();
+
+        var requestStub = sinon.stub(http, 'request', function () {
+
+            var response = new EventEmitter();
+            response.setEncoding = sinon.stub();
+
+            var json = fs.readFileSync('test/unit/notify_post1.json', 'utf8');
+
+            response.emit('data', json);
+            response.emit('end');
+            return request;
+        });
+
+        //when
+        cbroker.retrieveAllRegions(function (result) {
+
+            //then
+            http.request.restore();
+            assert.deepEqual(0, result.length);
+            done();
+        });
+
+        assert(request.write.calledOnce);
+        assert(request.setTimeout.calledOnce);
+        assert(request.end.calledOnce);
+        assert.equal('POST', requestStub.getCall(0).args[0].method);
+
+    });
 
 
 });

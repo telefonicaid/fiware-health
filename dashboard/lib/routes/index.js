@@ -31,13 +31,22 @@ var express = require('express'),
  * @param {*} req
  * @param {*} res
  */
-function getIndex (req, res) {
+function getIndex(req, res) {
 
     /**
      * callback for cbroker.retrieveAllRegions
      * @param {[]} regions
      */
     function callbackRetrieveRegions(regions) {
+
+
+        if (regions.length === 0) {
+            logger.error({op: 'index#get'}, 'cb down: Regions: %j', regions);
+
+            res.render('error', {message: 'The connection to Context Broker has timed out or the service is down',
+                error: {status: '', message: 'cb timeout'} });
+            return;
+        }
 
         logger.info({op: 'index#get'}, 'Regions: %j', regions);
 
@@ -65,8 +74,7 @@ function getIndex (req, res) {
             subscribe.searchSubscription(userinfo.email, regions, afterSearchCallback);
 
 
-        }
-        else {
+        } else {
             res.render('index', {name: 'sign in', regions: regions, role: req.session.role,
                 logoutUrl: config.idm.logoutURL});
 
