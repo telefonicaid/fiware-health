@@ -24,7 +24,7 @@ var express = require('express'),
     config = require('../config').data,
     common = require('./common');
 
-
+var MESSAGE = 'Page cannot be displayed due to a Context Broker error (connection timed out or service was down).';
 
 /**
  *
@@ -40,14 +40,6 @@ function getIndex(req, res) {
     function callbackRetrieveRegions(regions) {
 
 
-        if (regions.length === 0) {
-            logger.error({op: 'index#get'}, 'cb down: Regions: %j', regions);
-
-            res.render('error', {message: 'The connection to Context Broker has timed out or the service is down',
-                error: {status: '', message: 'cb timeout'} });
-            return;
-        }
-
         logger.info({op: 'index#get'}, 'Regions: %j', regions);
 
         var userinfo = req.session.user;
@@ -55,10 +47,16 @@ function getIndex(req, res) {
         logger.info({op: 'index#get'}, 'User info: %j', userinfo);
 
         if (userinfo !== undefined) {
-
             //search for subscription
 
             logger.debug({op: 'index#get'}, 'Regions: %s', regions.constructor.name);
+
+            if (regions.length === 0) {
+                res.render('error', {name: userinfo.displayName, role: req.session.role,
+                    message: MESSAGE,
+                    logoutUrl: config.idm.logoutURL, error: {status: '', message: 'cb timeout'} });
+                return;
+            }
 
             var afterSearchCallback = function () {
 
@@ -75,6 +73,12 @@ function getIndex(req, res) {
 
 
         } else {
+            if (regions.length === 0) {
+                res.render('error', {name: 'sign in', role: req.session.role, logoutUrl: config.idm.logoutURL,
+                    message: MESSAGE,
+                    error: {status: '', message: 'cb timeout'} });
+                return;
+            }
             res.render('index', {name: 'sign in', regions: regions, role: req.session.role,
                 logoutUrl: config.idm.logoutURL});
 
