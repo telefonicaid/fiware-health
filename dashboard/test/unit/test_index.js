@@ -54,6 +54,32 @@ suite('index', function () {
         var res = sinon.stub();
         var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions', function (callback) {
 
+            req.session = sinon.spy();
+            req.session.user = undefined;
+            res.render = sinon.spy();
+            callback([]);
+        });
+
+        //when
+        index.getIndex(req, res);
+
+        //then
+        assert(cbrokerStub.calledOnce);
+        assert(res.render.calledOnce);
+        cbrokerStub.restore();
+
+    });
+
+    test('should_retrieveAllRegions_with_empty_region_list_and_user_logged', function () {
+
+        //given
+
+        var req = sinon.stub();
+        var res = sinon.stub();
+        var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions', function (callback) {
+
+            req.session = sinon.spy();
+            req.session.user = {displayName: 'name01'};
             res.render = sinon.spy();
             callback([]);
         });
