@@ -24,7 +24,7 @@ var express = require('express'),
     config = require('../config').data,
     common = require('./common');
 
-
+var MESSAGE = 'Page cannot be displayed due to a Context Broker error (connection timed out or service was down).';
 
 /**
  *
@@ -53,7 +53,7 @@ function getIndex(req, res) {
 
             if (regions.length === 0) {
                 res.render('error', {name: userinfo.displayName, role: req.session.role,
-                    message: 'The connection to Context Broker has timed out or the service is down',
+                    message: MESSAGE,
                     logoutUrl: config.idm.logoutURL, error: {status: '', message: 'cb timeout'} });
                 return;
             }
@@ -75,7 +75,7 @@ function getIndex(req, res) {
         } else {
             if (regions.length === 0) {
                 res.render('error', {name: 'sign in', role: req.session.role, logoutUrl: config.idm.logoutURL,
-                    message: 'The connection to Context Broker has timed out or the service is down',
+                    message: MESSAGE,
                     error: {status: '', message: 'cb timeout'} });
                 return;
             }
