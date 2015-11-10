@@ -2,7 +2,7 @@
  FIWARE Health
 ===============
 
-|Build Status| |Coverage Status|
+|Build Status| |Coverage Status| |StackOverflow| |License|
 
 
 This is the code repository for **FIHealth**, a tool to check the status of
@@ -22,6 +22,13 @@ Components
    Web server offering a frontend to view tests results and operate on nodes.
 
 
+Support
+=======
+
+Ask your thorough programmming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
+In both cases please use the tag `fiware-health`
+
+
 License
 =======
 
@@ -36,10 +43,16 @@ License
 .. |Coverage Status| image:: https://img.shields.io/coveralls/telefonicaid/fiware-health/develop.svg
    :target: https://coveralls.io/r/telefonicaid/fiware-health
    :alt: Coverage Status
-
+.. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
+   :target: https://stackoverflow.com/questions/tagged/fiware-health
+   :alt: StackOverflow questions
+.. |License| image:: http://b.repl.ca/v1/license-Apache_2.0-blue.png
+   :alt: License
 
 .. REFERENCES
 
 .. _FIWARE: http://www.fiware.org/
 .. _FIWARE Lab: https://www.fiware.org/lab/
 .. _FIWARE Ops: https://www.fiware.org/fiware-operations/
+.. _stackoverflow: http://stackoverflow.com/questions/ask
+.. _`FIWARE Q&A`: https://ask.fiware.org
