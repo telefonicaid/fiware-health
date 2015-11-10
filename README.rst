@@ -26,7 +26,7 @@ Support
 =======
 
 Ask your thorough programmming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
-In both cases please use the tag `fiware-health`
+In both cases please use the tag *fiware-health*
 
 
 License
