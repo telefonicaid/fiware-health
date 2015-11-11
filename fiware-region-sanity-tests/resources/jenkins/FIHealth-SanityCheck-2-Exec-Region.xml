@@ -31,8 +31,6 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
               <string>Spain2</string>
               <string>Trento</string>
               <string>Lannion2</string>
-              <string>Waterford</string>
-              <string>Berlin2</string>
               <string>Prague</string>
               <string>Mexico</string>
               <string>PiraeusN</string>
@@ -41,7 +39,6 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
               <string>Karlskrona2</string>
               <string>Volos</string>
               <string>Budapest2</string>
-              <string>Stockholm2</string>
               <string>SophiaAntipolis</string>
               <string>Poznan</string>
               <string>Gent</string>
