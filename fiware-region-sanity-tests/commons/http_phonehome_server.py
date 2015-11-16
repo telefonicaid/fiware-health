@@ -27,7 +27,7 @@ import json
 from os import environ
 import sys
 from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
-    LOGGING_FILE, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH
+    LOGGING_FILE_PHONEHOME, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH
 import urlparse
 from dbus_phonehome_service import DbusPhoneHomeServer
 import logging.config
@@ -109,7 +109,7 @@ class HttpPhoneHomeServer():
 
 if __name__ == '__main__':
 
-    logging.config.fileConfig(LOGGING_FILE)
+    logging.config.fileConfig(LOGGING_FILE_PHONEHOME)
     logger = logging.getLogger("HttpPhoneHomeServer")
 
     # Load properties

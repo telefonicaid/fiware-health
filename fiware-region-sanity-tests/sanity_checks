@@ -86,7 +86,8 @@ export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
 
 # Options for nosetests
 TESTS=
-NOSEOPTS="--logging-filter=TestCase,novaclient,neutronclient --logging-level=ERROR"
+NOSEOPTS="--logging-filter=TestCase,novaclient,neutronclient --logging-level=ERROR
+--logging-format=\"%(asctime)s - %(name)s - %(levelname)s - %(message)s\""
 
 # Available regions
 REGIONS=$(sed -n '/"external_network_name"/,/}/ p' resources/settings.json \
