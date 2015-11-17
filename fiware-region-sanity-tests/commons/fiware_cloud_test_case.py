@@ -466,8 +466,9 @@ class FiwareTestCase(unittest.TestCase):
         file_handler.setFormatter(log_formatter)
         file_handler.setLevel(config.get('sanitychecks_handler_fileHandler', 'level'))
 
-        # > Set FileHandler for default root logger.
+        # > Set FileHandler for default root logger and configure UTC time formatter
         logging.getLogger('').addHandler(file_handler)
+        logging.Formatter.converter = time.gmtime
 
         cls.logger = logging.getLogger(PROPERTIES_LOGGER)
 
