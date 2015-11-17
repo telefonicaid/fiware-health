@@ -455,17 +455,21 @@ class FiwareTestCase(unittest.TestCase):
         """
 
         # Initialize logger
-        cls.logger = logging.getLogger(PROPERTIES_LOGGER)
-
-        # Configure a new custom file handler for SanityChecks
+        # > Get logging configuration for Sanity Checks
         config = ConfigParser()
         config.read(LOGGING_FILE_SANITYCHECKS)
+
+        # > Configure a new custom file handler for SanityChecks
         log_formatter = logging.Formatter(config.get('sanitychecks_formatter_fileFormatter', 'format', raw=True))
         file_handler = logging.FileHandler(
             config.get('sanitychecks_handler_fileHandler', 'filename').format(region_name=cls.region_name), mode='w')
         file_handler.setFormatter(log_formatter)
         file_handler.setLevel(config.get('sanitychecks_handler_fileHandler', 'level'))
-        cls.logger.addHandler(file_handler)
+
+        # > Set FileHandler for default root logger.
+        logging.getLogger('').addHandler(file_handler)
+
+        cls.logger = logging.getLogger(PROPERTIES_LOGGER)
 
         # Load properties
         cls.load_project_properties()
