@@ -208,7 +208,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         # Downloading a second big file to check that is different
         suffix2 = "second_file"
-        if not os.path.isfile(SWIFT_RESOURCES_PATH + big_object_name):
+        if not os.path.isfile(SWIFT_RESOURCES_PATH + TEST_BIG_OBJECT_PREFIX + suffix2 + TEST_BIG_FILE_EXTENSION):
             big_file_url_2 = \
                 self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_SWIFT][PROPERTIES_CONFIG_SWIFT_BIG_FILE_2]
             f2 = urllib2.urlopen(big_file_url_2)
