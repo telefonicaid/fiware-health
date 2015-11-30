@@ -201,6 +201,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Jan 01 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
+- TODO
+
 * Mon Nov 30 2015 Telefónica I+D <opensource@tid.es> 1.3.0-1
 - Timeout management for requests to Context Broker.
 
