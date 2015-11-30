@@ -35,6 +35,8 @@ block content
                                         button.btn.subscribe(onclick="window.location.href='#{webContext}unsubscribe?region=#{regionName}'" ) Unsubscribe
                                      else
                                         button.btn.subscribe(onclick="window.location.href='#{webContext}subscribe?region=#{regionName}'" ) Subscribe
+                                     div.elapsedTime
+                                           | took: #{region['elapsedTime']}
                                      div.timestamp
                                        |(last updated: #{region['timestamp']})
                            when 'NOK'
@@ -48,6 +50,8 @@ block content
                                                 button.btn.subscribe(onclick="window.location.href='#{webContext}unsubscribe?region=#{regionName}'" ) Unsubscribe
                                             else
                                                 button.btn.subscribe(onclick="window.location.href='#{webContext}subscribe?region=#{regionName}'" ) Subscribe
+                                            div.elapsedTime
+                                                | took: #{region['elapsedTime']}
                                             div.timestamp
                                                 | (last updated: #{region['timestamp']})
                            when 'POK'
@@ -61,6 +65,8 @@ block content
                                            button.btn.subscribe(onclick="window.location.href='#{webContext}unsubscribe?region=#{regionName}'" ) Unsubscribe
                                        else
                                            button.btn.subscribe(onclick="window.location.href='#{webContext}subscribe?region=#{regionName}'" ) Subscribe
+                                       div.elapsedTime
+                                           | took: #{region['elapsedTime']}
                                        div.timestamp
                                            | (last updated: #{region['timestamp']})
                            default

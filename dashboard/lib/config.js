@@ -46,7 +46,8 @@ var config = {
     cbroker: {
         host: 'localhost',
         port: '1026',
-        path: '/NGSI10/queryContext'
+        path: '/NGSI10/queryContext',
+        timeout: 10000
     },
     idm: {
         host: 'account.lab.fiware.org',

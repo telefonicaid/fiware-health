@@ -122,15 +122,26 @@ function retrieveAllRegions(callback) {
                 callback([]);
             }
         });
+
     });
     req.on('error', function (e) {
-        logger.error('Error in connection with context broker: ' + e);
+        if (e.code === 'ECONNRESET') {
+            logger.error('Error in connection by TIMEOUT with context broker: ' + e);
+        } else {
+            logger.error('Error in connection with context broker: ' + e);
+        }
         callback([]);
+
 
     });
 
+    req.setTimeout(config.cbroker.timeout, function () {
+        req.abort();
+        logger.error('Timeout in the connection with context broker. Time exceed');
+    });
 
     req.write(payloadString);
+
     req.end();
 
 }

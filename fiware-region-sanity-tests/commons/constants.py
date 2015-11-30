@@ -23,7 +23,8 @@
 
 
 # LOGGING CONFIGURATION
-LOGGING_FILE = "resources/logging.conf"
+LOGGING_FILE_PHONEHOME = "resources/logging_phonehome.conf"
+LOGGING_FILE_SANITYCHECKS = "resources/logging_sanitychecks.conf"
 
 # CONFIGURATION PROPERTIES
 PROPERTIES_FILE = "resources/settings.json"

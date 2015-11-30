@@ -43,6 +43,8 @@ from os.path import isfile, join
 import unittest
 import urlparse
 import logging
+import logging.config
+from ConfigParser import ConfigParser
 import json
 import time
 import os
@@ -453,7 +455,25 @@ class FiwareTestCase(unittest.TestCase):
         """
 
         # Initialize logger
+        # > Get logging configuration for Sanity Checks
+        config = ConfigParser()
+        config.read(LOGGING_FILE_SANITYCHECKS)
+
+        # > Configure a new custom file handler for SanityChecks
+        log_formatter = logging.Formatter(config.get('sanitychecks_formatter_fileFormatter', 'format', raw=True))
+        file_handler = logging.FileHandler(
+            config.get('sanitychecks_handler_fileHandler', 'filename').format(region_name=cls.region_name), mode='w')
+        file_handler.setFormatter(log_formatter)
+        file_handler.setLevel(config.get('sanitychecks_handler_fileHandler', 'level'))
+
+        # > Set FileHandler for default root logger and configure UTC time formatter
+        logging.getLogger('').addHandler(file_handler)
+        logging.Formatter.converter = time.gmtime
+
         cls.logger = logging.getLogger(PROPERTIES_LOGGER)
+
+        # Load properties
+        cls.load_project_properties()
 
         # These tests should be particularized for a region
         cls.logger.debug("Tests for '%s' region", cls.region_name)

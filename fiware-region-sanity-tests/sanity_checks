@@ -58,7 +58,7 @@
 #     $REGIONS
 #
 
-VERSION=1.2.0
+VERSION=1.3.0
 NAME=$(basename $0)
 OPTS=`tr -d '\n ' <<END
       h(help)
@@ -86,7 +86,7 @@ export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
 
 # Options for nosetests
 TESTS=
-NOSEOPTS="--logging-filter=TestCase,novaclient,neutronclient --logging-level=ERROR"
+NOSEOPTS="--config=nose.cfg"
 
 # Available regions
 REGIONS=$(sed -n '/"external_network_name"/,/}/ p' resources/settings.json \
