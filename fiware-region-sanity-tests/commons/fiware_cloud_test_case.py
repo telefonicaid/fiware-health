@@ -235,6 +235,11 @@ class FiwareTestCase(unittest.TestCase):
         # release resources to ensure a clean world
         for server_id in list(world['servers']):
             try:
+                # Logging nova console-log of the server before deleting
+                cls.logger.debug("Nova Console-Log of the server '%s':\n %s",
+                                 server_id, cls.nova_operations.get_nova_console_log(server_id))
+
+                # Deleting server
                 cls.nova_operations.delete_server(server_id)
                 cls.nova_operations.wait_for_task_status(server_id, 'DELETED')
             except NotFound:
