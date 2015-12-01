@@ -204,6 +204,9 @@ fi
 * Fri Jan 01 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
 - TODO
 
+* Tue Dec 01 2015 Telefónica I+D <opensource@tid.es> 1.3.1-1
+- Fix long name nodes.
+
 * Mon Nov 30 2015 Telefónica I+D <opensource@tid.es> 1.3.0-1
 - Timeout management for requests to Context Broker.
 
