@@ -16,10 +16,10 @@
                     {
                         "name": "sanity_check_elapsed_time",
                         "type": "string",
-                        "value": "60000"
+                        "value": "160000"
                     }
                 ],
-                "id": "Region1",
+                "id": "RegionLongName1",
                 "isPattern": "false",
                 "type": "region"
             },
