@@ -37,7 +37,7 @@ suite('cbroker', function () {
         //given
         var json = JSON.parse(fs.readFileSync('test/unit/post1.json', 'utf8'));
         var expected = [
-            {node: 'Region1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
+            {node: 'RegionLongName1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 2m, 40s'},
             {node: 'Region2', status: 'OK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
             {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', elapsedTime: 'NaNh, NaNm, NaNs'},
             {node: 'Region4', status: 'POK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
