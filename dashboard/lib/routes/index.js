@@ -46,6 +46,17 @@ function getIndex(req, res) {
 
         logger.info({op: 'index#get'}, 'User info: %j', userinfo);
 
+        regions.sort(function (a, b) {
+            if (a.node > b.node) {
+                return 1;
+            }
+            if (a.node < b.node) {
+                return -1;
+            }
+              // a must be equal to b
+            return 0;
+        });
+
         if (userinfo !== undefined) {
             //search for subscription
 
