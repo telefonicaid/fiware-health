@@ -141,7 +141,12 @@ done
 }
 TESTS=${TESTS:-tests/regions}
 
-# Main
+# Delete all generated log files before each sanity check execution.
+echo "Deleting log files from previous executions"
+rm -f *.log
+
+# Sanity Checks execution
+echo "Running Sanity Checks"
 nosetests $TESTS $NOSEOPTS -v --exe \
 	--with-xunit --xunit-file=$OUTPUT_NAME.xml \
 	--with-html --html-report=$OUTPUT_NAME.html \

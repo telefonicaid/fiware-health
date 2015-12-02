@@ -235,9 +235,22 @@ class FiwareTestCase(unittest.TestCase):
         # release resources to ensure a clean world
         for server_id in list(world['servers']):
             try:
-                # Logging nova console-log of the server before deleting
-                cls.logger.debug("Nova Console-Log of the server '%s':\n %s",
-                                 server_id, cls.nova_operations.get_nova_console_log(server_id))
+                # Logging Nova Console-Log of the server before deleting and writing data into a new file.
+                # Nova Console-Log is only retrieved when log level for Sanity Checks is set to DEBUG.
+                if cls.logger_level == 'DEBUG':
+                    nova_console_log = cls.nova_operations.get_nova_console_log(server_id)
+                    nova_console_file_name = \
+                        LOGGING_OUTPUT_NOVA_CONSOLE_LOG_TEMPLATE.format(region_name=cls.region_name,
+                                                                        server_id=server_id)
+                    if nova_console_log:
+                        nova_console_file = open(nova_console_file_name, 'w')
+                        nova_console_file.write(nova_console_log)
+                        nova_console_file.close()
+                        cls.logger.debug("Nova Console-Log of the server '%s' has been saved in '%s'",
+                                         server_id, nova_console_file_name)
+                    else:
+                        cls.logger.debug("Nova Console-Log of the server '%s' is empty",
+                                         server_id)
 
                 # Deleting server
                 cls.nova_operations.delete_server(server_id)
@@ -470,6 +483,7 @@ class FiwareTestCase(unittest.TestCase):
             config.get('sanitychecks_handler_fileHandler', 'filename').format(region_name=cls.region_name), mode='w')
         file_handler.setFormatter(log_formatter)
         file_handler.setLevel(config.get('sanitychecks_handler_fileHandler', 'level'))
+        cls.logger_level = config.get('sanitychecks_handler_fileHandler', 'level')
 
         # > Set FileHandler for default root logger and configure UTC time formatter
         logging.getLogger('').addHandler(file_handler)
