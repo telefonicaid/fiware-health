@@ -78,6 +78,7 @@ END`
 # Command line options (default values)
 OUTPUT_NAME=test_results
 TEMPLATE_NAME=test_report_template.html
+OUTPUT_NOVA_CONSOLE_NAME=test_novaconsole
 
 # Environment variables for nosetests
 export TEST_PHONEHOME_ENDPOINT
@@ -141,9 +142,12 @@ done
 }
 TESTS=${TESTS:-tests/regions}
 
-# Delete all generated log files before each sanity check execution.
-echo "Deleting log files from previous executions"
-rm -f *.log
+# Delete all generated log files for the given regions before each sanity check execution.
+echo "Deleting log files from previous executions for the given regions ($1)"
+for region in $(echo $1 | sed "s/,/ /g")
+do
+	rm -f ${OUTPUT_NOVA_CONSOLE_NAME}_${region}_*.log
+done
 
 # Sanity Checks execution
 echo "Running Sanity Checks"
