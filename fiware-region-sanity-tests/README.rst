@@ -308,15 +308,14 @@ additionally an HTML report ``test_results.html`` (or the same basename as
 the former) is generated from the given template (or the default found at
 ``resources/templates/`` folder).
 
-Apart from these, a log file will be written with all logged info in a
+Additionally, a log file is written with all logged info in a
 Sanity Check execution, based on its handlers configuration
 (`resources/logging_sanitychecks.conf`). When test cases involve VM
 launching, just before deleting the VM, *FIHealth Sanity Checks*
-will try to get the Nova Console-Log of that VM and it will write
-the content in a new file `novaconsole_{region_name}_{server_id}.log`.
-If the Console-Log is empty or it was impossible to be retrieved,
-the file will not be generated. These files are only generated whether
-the log level is set tu *DEBUG*.
+tries to get the Nova Console-Log of that VM and it writes
+the content in a new file `test_novaconsole_{region_name}_{server_id}.log`.
+If the Console-Log is empty, it was impossible to be retrieved or
+the log level is set tu *DEBUG*, the file is not generated.
 
 The script ``commons/result_analyzer.py`` is invoked to create a summary
 report ``test_results.txt``. It will analyze the status of each region using
