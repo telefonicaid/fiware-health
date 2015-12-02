@@ -240,7 +240,7 @@ class FiwareTestCase(unittest.TestCase):
                 if cls.logger_level == 'DEBUG':
                     nova_console_log = cls.nova_operations.get_nova_console_log(server_id)
                     nova_console_file_name = \
-                        LOGGING_OUTPUT_NOVA_CONSOLE_LOG_TEMPLATE.format(region_name=cls.region_name,
+                        LOGGING_OUTPUT_NOVA_CONSOLE_LOG_TEMPLATE.format(region_name=cls.region_name.lower(),
                                                                         server_id=server_id)
                     if nova_console_log:
                         nova_console_file = open(nova_console_file_name, 'w')
