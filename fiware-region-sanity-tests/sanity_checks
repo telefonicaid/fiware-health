@@ -95,7 +95,7 @@ REGIONS=$(sed -n '/"external_network_name"/,/}/ p' resources/settings.json \
 REGIONS_PATTERN='^\('$(echo $REGIONS | sed 's/ /\\|/g')'\)$'
 
 # Process command line
-REGION_NAME_LIST=()
+REGION_NAME_LIST=
 OPTERR=
 OPTSTR=$(echo :-:$OPTS | sed 's/([a-zA-Z0-9]*)//g')
 OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0 | head -n -2;
@@ -132,7 +132,7 @@ while [ -z "$OPTERR" -a -n "$1" ]; do
 	REGION=$(expr "$1" : "$REGIONS_PATTERN" | sed 's/.*/\L&/')
 	[ -z "$REGION" ] && OPTERR="Invalid region '$1'"
 	TESTS="$TESTS tests.regions.test_$REGION"
-	REGION_NAME_LIST+=($REGION)
+	REGION_NAME_LIST="$REGION_NAME_LIST $REGION"
 	shift
 done
 [ -n "$OPTERR" ] && {
@@ -145,8 +145,8 @@ done
 TESTS=${TESTS:-tests/regions}
 
 # Delete all generated Nova Console-Log files for the given regions before each sanity check execution.
-echo "Deleting Nova Console-Log files from previous executions for the given regions (${REGION_NAME_LIST[@]})"
-for region in ${REGION_NAME_LIST[@]}; do
+echo "Deleting Nova Console-Log files from previous executions for the given regions ($REGION_NAME_LIST)"
+for region in $REGION_NAME_LIST; do
 	rm -f ${OUTPUT_NOVA_CONSOLE_NAME}_${region}_*.log
 done
 
