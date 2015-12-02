@@ -210,9 +210,13 @@ suite('subscribe', function () {
 
         //given
         var req;
+        var region = {
+            node: 'region1',
+            status: 'OK'
+        };
         req = sinon.stub();
         req.param = sinon.stub();
-        req.param.withArgs('region').returns('region1');
+        req.param.withArgs('region').returns(region.node);
         req.session = sinon.stub();
         req.session.user = {email: 'user@mail.com'};
 
@@ -232,7 +236,7 @@ suite('subscribe', function () {
         });
 
         //when
-        subscribe.notify('region1', function() {
+        subscribe.notify(region, function() {
         });
 
         //then
