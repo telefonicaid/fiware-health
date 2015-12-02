@@ -47,7 +47,8 @@ var config = {
         host: 'localhost',
         port: '1026',
         path: '/NGSI10/queryContext',
-        timeout: 10000
+        timeout: 10000,
+        filter: []
     },
     idm: {
         host: 'account.lab.fiware.org',

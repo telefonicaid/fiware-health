@@ -34,6 +34,7 @@ cbroker:
   port: 1000				# ContextBroker listen port
   path: '/NGSI10/queryContext'		# QueryContext operation
   timeout: 10000            		# Timeout after request. 0 disabled it.
+  filter: []				# List of regions to remove from web
 
 #----------------------------------------------------------------------------
 # IdM OAuth2 section (mandatory)
