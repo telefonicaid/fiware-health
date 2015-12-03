@@ -80,7 +80,7 @@ class DbusPhoneHomeClient():
         :return: None
         """
         DbusPhoneHomeClient.logger.debug("Data received from PhoneHome Server: '%s'",
-                                         phonehome_http_data.encode('base64', 'strict'))
+                                         phonehome_http_data.encode('base64', 'strict').replace('\n', ' '))
         hostname = re.match(".*hostname=([\w-]*)", phonehome_http_data)
         hostname = hostname.group(1) if hostname is not None else hostname
         if DbusPhoneHomeClient.expected_signal_hostname == hostname:
@@ -104,7 +104,7 @@ class DbusPhoneHomeClient():
         :return: None
         """
         DbusPhoneHomeClient.logger.debug("Data received from PhoneHome Server (Hostname): '%s'",
-                                         hostname.encode('base64', 'strict'))
+                                         hostname.encode('base64', 'strict').replace('\n', ' '))
 
         if DbusPhoneHomeClient.expected_signal_hostname == hostname:
             DbusPhoneHomeClient.logger.debug("Received hostname: '%s'", hostname)
