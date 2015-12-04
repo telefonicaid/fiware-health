@@ -63,11 +63,11 @@ var strWindowFeatures = 'resizable=yes,scrollbars=yes,status=yes';
 function openFailureDetailsInNewWindow(anchorTag) {
 
     var html = document.getElementById('html_failure_details').innerHTML;
+    var iFrameContainer =  window.parent.document.getElementById('iframe-container');
 
     if ( isFirefox()) {
         console.log('openFailureDetailsInNewWindow#firefox');
 
-        var iFrameContainer =  window.parent.document.getElementById('iframe-container');
         if (iFrameContainer !== null) {
             iFrameContainer.contentDocument.body.innerHTML = html;
             iFrameContainer.contentWindow.location.hash = anchorTag;
@@ -94,7 +94,6 @@ function openFailureDetailsInNewWindow(anchorTag) {
         } else {
             console.log('openFailureDetailsInNewWindow#safari ' + anchorTag);
 
-            var iFrameContainer =  window.parent.document.getElementById('iframe-container');
             if (iFrameContainer !== null) {
                 iFrameContainer.contentDocument.body.innerHTML = html;
                 iFrameContainer.contentWindow.location.hash = '#';
