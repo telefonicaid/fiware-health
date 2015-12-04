@@ -33,7 +33,10 @@ function calcHeight() {
     }
 
     console.log('resize to height: ' + height);
-    window.parent.document.getElementById('iframe-container').style.height = height + 'px';
+    var iFrameContainer =  window.parent.document.getElementById('iframe-container');
+    if (iFrameContainer !== null) {
+        iFrameContainer.style.height = height + 'px';
+    }
 
 }
 
@@ -64,8 +67,16 @@ function openFailureDetailsInNewWindow(anchorTag) {
     if ( isFirefox()) {
         console.log('openFailureDetailsInNewWindow#firefox');
 
-        window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML = html;
-        window.parent.document.getElementById('iframe-container').contentWindow.location.hash = anchorTag;
+        var iFrameContainer =  window.parent.document.getElementById('iframe-container');
+        if (iFrameContainer !== null) {
+            iFrameContainer.contentDocument.body.innerHTML = html;
+            iFrameContainer.contentWindow.location.hash = anchorTag;
+        } else {
+            document.getElementsByTagName('body')[0].innerHTML = html;
+            document.location.hash = anchorTag;
+
+        }
+
         displaySections();
         console.log('openFailureDetailsInNewWindow#calc');
 
@@ -83,8 +94,14 @@ function openFailureDetailsInNewWindow(anchorTag) {
         } else {
             console.log('openFailureDetailsInNewWindow#safari ' + anchorTag);
 
-            window.parent.document.getElementById('iframe-container').contentDocument.body.innerHTML = html;
-            window.parent.document.getElementById('iframe-container').contentWindow.location.hash = '#';
+            var iFrameContainer =  window.parent.document.getElementById('iframe-container');
+            if (iFrameContainer !== null) {
+                iFrameContainer.contentDocument.body.innerHTML = html;
+                iFrameContainer.contentWindow.location.hash = '#';
+            } else {
+                document.getElementsByTagName('body')[0].innerHTML = html;
+                document.location.hash = '#';
+            }
 
             displaySections();
             console.log('openFailureDetailsInNewWindow#calc');
