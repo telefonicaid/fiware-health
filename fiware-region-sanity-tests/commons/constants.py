@@ -25,6 +25,7 @@
 # LOGGING CONFIGURATION
 LOGGING_FILE_PHONEHOME = "resources/logging_phonehome.conf"
 LOGGING_FILE_SANITYCHECKS = "resources/logging_sanitychecks.conf"
+LOGGING_OUTPUT_NOVA_CONSOLE_LOG_TEMPLATE = "test_novaconsole_{region_name}_{server_id}.log"
 
 # CONFIGURATION PROPERTIES
 PROPERTIES_FILE = "resources/settings.json"

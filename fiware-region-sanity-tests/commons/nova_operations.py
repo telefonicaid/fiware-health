@@ -308,3 +308,12 @@ class FiwareNovaOperations:
         :return: None
         """
         self.client.servers.add_floating_ip(server_id, ip_address, fixed_address=None)
+
+    def get_nova_console_log(self, server_id):
+        """
+        This method gets the NOVA Console-Log of the given server.
+        :param server_id (string): Server ID to get its console-log
+        :return (string): console-log output
+        """
+
+        return self.client.servers.get_console_output(server_id)

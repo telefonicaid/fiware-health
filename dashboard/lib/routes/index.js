@@ -26,6 +26,25 @@ var express = require('express'),
 
 var MESSAGE = 'Page cannot be displayed due to a Context Broker error (connection timed out or service was down).';
 
+
+/**
+ * Compare two region name nodes
+ * @param {Json} a
+ * @param {Json} b
+ * @returns {number}
+ */
+function compare(a, b) {
+    if (a.node > b.node) {
+        return 1;
+    }
+    if (a.node < b.node) {
+        return -1;
+    }
+      // a must be equal to b
+    return 0;
+}
+
+
 /**
  *
  * @param {*} req
@@ -45,6 +64,8 @@ function getIndex(req, res) {
         var userinfo = req.session.user;
 
         logger.info({op: 'index#get'}, 'User info: %j', userinfo);
+
+        regions.sort(compare);
 
         if (userinfo !== undefined) {
             //search for subscription
@@ -98,5 +119,7 @@ module.exports = router;
 
 /** @export */
 module.exports.getIndex = getIndex;
+/** @export */
+module.exports.compare = compare;
 
 

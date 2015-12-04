@@ -61,16 +61,24 @@ function parseRegions(entities) {
 
                 createValue[value.name]();
             });
-            result.push({node: entry.contextElement.id,
-                status: sanityStatus,
-                timestamp: timestamp,
-                elapsedTime: elapsedTime });
+
+            if (config.cbroker.filter.indexOf(entry.contextElement.id) >= 0) {
+                logger.warn({op: 'retrieveAllRegions'}, 'Found in filter  %s ', entry.contextElement.id);
+            } else {
+                result.push({node: entry.contextElement.id,
+                        status: sanityStatus,
+                        timestamp: timestamp,
+                        elapsedTime: elapsedTime });
+
+            }
+
         }
     });
 
 
     return result;
 }
+
 
 /**
  * @function retrieveAllRegions
