@@ -18,6 +18,7 @@
 
 var assert = require('assert'),
     cbroker = require('../../lib/routes/cbroker'),
+    constants = require('../../lib/constants'),
     sinon = require('sinon'),
     EventEmitter = require('events').EventEmitter,
     http = require('http'),
@@ -37,13 +38,36 @@ suite('cbroker', function () {
         //given
         var json = JSON.parse(fs.readFileSync('test/unit/post1.json', 'utf8'));
         var expected = [
-            {node: 'RegionLongName1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 2m, 40s'},
-            {node: 'Region2', status: 'OK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
-            {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', elapsedTime: 'NaNh, NaNm, NaNs'},
-            {node: 'Region4', status: 'POK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
-            {node: 'Region5', status: '', timestamp: '', elapsedTime: ''}
-
-
+            {
+                node: 'RegionLongName1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: '0h, 2m, 40s'
+            },
+            {
+                node: 'Region2',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: '0h, 1m, 0s'
+            },
+            {
+                node: 'Region3',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: 'NaNh, NaNm, NaNs'
+            },
+            {
+                node: 'Region4',
+                status: constants.GLOBAL_STATUS_PARTIAL_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: '0h, 1m, 0s'
+            },
+            {
+                node: 'Region5',
+                status: '',
+                timestamp: '',
+                elapsedTime: ''
+            }
         ];
 
         //when
@@ -57,9 +81,8 @@ suite('cbroker', function () {
 
     test('should_receive_notify_from_context_broker_and_return_200_ok', function () {
         //given
-
         var json = JSON.parse(fs.readFileSync('test/unit/notify_post1.json', 'utf8'));
-        var expected = {'node': 'Region1', 'status': 'OK', 'timestamp': '', elapsedTime: ''};
+        var expected = {'node': 'Region1', 'status': constants.GLOBAL_STATUS_OK, 'timestamp': '', elapsedTime: ''};
 
         //when
         var result = cbroker.changeReceived(json);
