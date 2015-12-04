@@ -79,18 +79,20 @@ class DbusPhoneHomeClient():
          main loop will be finished.
         :return: None
         """
-        DbusPhoneHomeClient.logger.debug("Signal received with data '%s'", phonehome_http_data)
+        DbusPhoneHomeClient.logger.debug("Data received from PhoneHome Server: '%s'",
+                                         phonehome_http_data.encode('base64', 'strict').replace('\n', ' '))
         hostname = re.match(".*hostname=([\w-]*)", phonehome_http_data)
         hostname = hostname.group(1) if hostname is not None else hostname
-        DbusPhoneHomeClient.logger.debug("Received hostname: '%s'. Expected hostname: '%s'",
-                                             hostname, DbusPhoneHomeClient.expected_signal_hostname)
         if DbusPhoneHomeClient.expected_signal_hostname == hostname:
-            DbusPhoneHomeClient.logger.debug("Matches! Finishing main loop...")
+            DbusPhoneHomeClient.logger.debug("Received hostname: '%s'",
+                                             DbusPhoneHomeClient.expected_signal_hostname)
             DbusPhoneHomeClient.data_received = phonehome_http_data
             DbusPhoneHomeClient.mainloop.quit()
         else:
-            DbusPhoneHomeClient.logger.debug("Signal data received is not the expected one. "
-                                             "Waiting for valid signal...")
+            DbusPhoneHomeClient.logger.debug("Received data are not for this FIWARE Node. "
+                                             "Probably they come from another SanityCheck execution running "
+                                             "at the same time. Skipping and waiting for more data from PhoneHome "
+                                             "Server...")
 
     @staticmethod
     def phonehome_signal_handler_metadata(phonehome_http_data, hostname):
@@ -101,16 +103,18 @@ class DbusPhoneHomeClient():
          main loop will be finished.
         :return: None
         """
-        DbusPhoneHomeClient.logger.debug("Received hostname: '%s'. Expected hostname: '%s'",
-                                         hostname, DbusPhoneHomeClient.expected_signal_hostname)
+        DbusPhoneHomeClient.logger.debug("Data received from PhoneHome Server (Hostname): '%s'",
+                                         hostname.encode('base64', 'strict').replace('\n', ' '))
 
         if DbusPhoneHomeClient.expected_signal_hostname == hostname:
-            DbusPhoneHomeClient.logger.debug("Matches! Finishing main loop...")
+            DbusPhoneHomeClient.logger.debug("Received hostname: '%s'", hostname)
             DbusPhoneHomeClient.data_received = phonehome_http_data
             DbusPhoneHomeClient.mainloop.quit()
         else:
-            DbusPhoneHomeClient.logger.debug("Signal hostname received is not the expected one. "
-                                             "Waiting for valid signal...")
+            DbusPhoneHomeClient.logger.debug("Received data are not for this FIWARE Node. "
+                                             "Probably they come from another SanityCheck execution running "
+                                             "at the same time. Skipping and waiting for more data from PhoneHome "
+                                             "Server...")
 
     def connect_and_wait_for_phonehome_signal(self, bus_name, object_path, phonehome_signal, data_expected):
         """
