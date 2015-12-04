@@ -94,5 +94,47 @@ suite('index', function () {
 
     });
 
+    test('should_return_1_when_first_argument_greater_than_second', function () {
+        //given
+
+        var a = { node: 'Zregion'};
+        var b = { node: 'Aregion'};
+
+        //when
+        var result = index.compare(a, b);
+
+        //then
+        assert(result === 1);
+
+    });
+
+    test('should_return_negative__when_first_argument_less_than_second', function () {
+        //given
+
+        var a = { node: 'Aregion'};
+        var b = { node: 'Zregion'};
+
+        //when
+        var result = index.compare(a, b);
+
+        //then
+        assert(result === -1);
+
+    });
+
+    test('should_return_0_when_first_argument_equal_than_second', function () {
+        //given
+
+        var a = { node: 'Aregion'};
+        var b = { node: 'Aregion'};
+
+        //when
+        var result = index.compare(a, b);
+
+        //then
+        assert(result === 0);
+
+    });
+
 
 });
