@@ -82,9 +82,9 @@ function compile(str, path) {
 function postContextbroker(req, res) {
      try {
         var region = cbroker.changeReceived(req.body),
-            notify_exclude = [ constants.GLOBAL_STATUS_OTHER ];
+            notifyExclude = [ constants.GLOBAL_STATUS_OTHER ];
         logger.info('request received from contextbroker for region: %s', region.node);
-        if (notify_exclude.indexOf(region.status) == -1) {
+        if (notifyExclude.indexOf(region.status) === -1) {
             subscribe.notify(region, function () {
                 logger.info('post to mailing list ok');
                 res.status(200).end();

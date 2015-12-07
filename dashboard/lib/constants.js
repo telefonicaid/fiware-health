@@ -18,13 +18,13 @@
 'use strict';
 
 /** @export */
-module.exports.GLOBAL_STATUS_PARTIAL_OK = "POK";
+module.exports.GLOBAL_STATUS_PARTIAL_OK = 'POK';
 
 /** @export */
-module.exports.GLOBAL_STATUS_NOT_OK = "NOK";
+module.exports.GLOBAL_STATUS_NOT_OK = 'NOK';
 
 /** @export */
-module.exports.GLOBAL_STATUS_OK = "OK";
+module.exports.GLOBAL_STATUS_OK = 'OK';
 
 /** @export */
-module.exports.GLOBAL_STATUS_OTHER = "N/A";
+module.exports.GLOBAL_STATUS_OTHER = 'N/A';
