@@ -81,6 +81,30 @@ suite('app', function () {
 
     });
 
+    test('should_return_200_in_contextbroker_post_na', function () {
+        //given
+        var req = sinon.stub();
+        var res = sinon.stub();
+        var sendStub = sinon.stub();
+
+        res.status = sinon.stub();
+        res.status.withArgs(400).returns(sendStub);
+        res.status.withArgs(200).returns(sendStub);
+        sendStub.send = sinon.spy();
+
+        var cbrokerStub = sinon.stub(cbroker, 'changeReceived', function() {
+            return {'node': 'Region1', 'status': 'N/A', 'timestamp': ''};
+        });
+
+        //when
+        app.postContextbroker(req, res);
+
+        //then
+        assert(res.status.withArgs(200).calledOnce);
+        assert(sendStub.send.calledOnce);
+        cbrokerStub.restore();
+    });
+
     test('should_close_session_with_get_logout', function() {
         //given
 

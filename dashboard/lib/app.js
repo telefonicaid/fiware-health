@@ -90,6 +90,12 @@ function postContextbroker(req, res) {
                 res.status(200).end();
             });
         }
+        else {
+            logger.info('mail notification is not sent because region status %s is on the notifyExclude list: %s',
+                region.status, notifyExclude);
+            res.status(200).end();
+        }
+
     } catch (ex) {
         logger.error('error in contextbroker notification: %s', ex);
         res.status(400).send({ error: 'bad request! ' + ex });

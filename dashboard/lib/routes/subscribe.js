@@ -163,7 +163,7 @@ function notify(region, notifyCallback) {
         payloadString += 'email_from=' + config.mailman.emailFrom + '&';
         payloadString += 'subject=Status changed for region ' + regionName + '&';
         payloadString += 'body=Status changed to ' + regionStatus + ' for region ' + regionName +
-                         ' (visit ' + config.fiHealthUrl + '/report/' + regionName + '_results.html for details)';
+                         ' (visit ' + config.fiHealthUrl + 'report/' + regionName + '_results.html for details)';
 
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
