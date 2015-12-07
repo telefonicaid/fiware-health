@@ -86,6 +86,7 @@ function readConfigFile(file) {
                  case 'app':
                     config.listenPort = cfgParse.app.port;
                     config.webContext = cfgParse.app.webContext;
+                    config.fiHealthUrl = util.format('https://%s%s', cfgParse.app.host, cfgParse.app.webContext);
                     break;
                 case 'logging':
                     config.logLevel = cfgParse.logging.level;

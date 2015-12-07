@@ -149,18 +149,21 @@ function searchSubscription(user, regions, callback) {
 
 /**
  * notify to region list for a change in region
- * @param {String} region
+ * @param {Object} region
  * @param {function} notifyCallback
  */
 function notify(region, notifyCallback) {
 
-    logger.info({op: 'subscribe#notify'}, 'notify to region: ' + region);
+    var regionName = region.node,
+        regionStatus = region.status;
 
+    logger.info({op: 'subscribe#notify'}, 'notify to region: ' + regionName);
 
     var payloadString = 'name_from= fi-health sanity&';
         payloadString += 'email_from=' + config.mailman.emailFrom + '&';
-        payloadString += 'subject=Status changed for region ' + region + '&';
-        payloadString += 'body=Status changed for region ' + region;
+        payloadString += 'subject=Status changed for region ' + regionName + '&';
+        payloadString += 'body=Status changed to ' + regionStatus + ' for region ' + regionName +
+                         ' (visit ' + config.fiHealthUrl + '/report/' + regionName + '_results.html for details)';
 
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -171,11 +174,10 @@ function notify(region, notifyCallback) {
     var options = {
         host: config.mailman.host,
         port: config.mailman.port,
-        path: config.mailman.path + region.toLowerCase() + '/sendmail',
+        path: config.mailman.path + regionName.toLowerCase() + '/sendmail',
         method: 'POST',
         headers: headers
     };
-
 
     var mailmainRequest = http.request(options, function (mailmanResponse) {
         mailmanResponse.setEncoding('utf-8');
@@ -185,7 +187,7 @@ function notify(region, notifyCallback) {
             responseString += data;
         });
         mailmanResponse.on('end', function () {
-            logger.info('response mailman: region: %s, code: %s, message: %s', region, mailmanResponse.statusCode,
+            logger.info('response mailman: region: %s, code: %s, message: %s', regionName, mailmanResponse.statusCode,
                 mailmanResponse.statusMessage);
             notifyCallback();
 

@@ -18,6 +18,7 @@
 
 var assert = require('assert'),
     common = require('../../lib/routes/common'),
+    constants = require('../../lib/constants'),
     config = require('../../lib/config').data;
 
 
@@ -67,14 +68,41 @@ suite('common', function () {
     test('should_return_true_if_is_authorized_like_admin_for_region', function () {
         //Given
         var regions = [
-            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionTwo',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC'
+            }
         ];
         var expected = [
-            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
-            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: false},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true
+            },
+            {
+                node: 'RegionTwo',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false
+            }
         ];
 
         //When
@@ -87,16 +115,43 @@ suite('common', function () {
 
 
     test('should_return_true_if_is_authorized_like_admin_for_region_with_postfix', function () {
-        //Given
+         //Given
          var regions = [
-            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
+            {
+                node: 'RegionOne1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC'
+            }
         ];
         var expected = [
-            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
-            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
+            {
+                node: 'RegionOne1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true
+            },
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false
+            }
         ];
 
         //When
@@ -109,16 +164,43 @@ suite('common', function () {
 
 
     test('should_return_true_if_is_authorized_like_admin_for_region_with_username_in_config_list', function () {
-        //Given
+         //Given
          var regions = [
-            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
+            {
+                node: 'RegionOne1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC'
+            }
         ];
         var expected = [
-            {node: 'RegionOne1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
-            {node: 'RegionOne', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: true},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
+            {
+                node: 'RegionOne1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true
+            },
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false
+            }
         ];
         var data = [{'RegionOne': 'admin1'}, {'RegionOne1': 'admin-with-name'}, {'RegionOne': 'admin-with-name'}];
         config.idm.regionsAuthorized = data;
@@ -138,17 +220,41 @@ suite('common', function () {
     test('should_return_false_if_is_not_authorized_like_admin_for_region', function () {
         //Given
         var regions = [
-            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC'},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC'}
-
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionTwo',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC'
+            }
         ];
-
         var expected = [
-            {node: 'RegionOne', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', authorized: false},
-            {node: 'RegionTwo', status: 'OK', timestamp: '2015/05/13 11:10 UTC', authorized: false},
-            {node: 'RegionTree', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', authorized: false}
-
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false
+            },
+            {
+                node: 'RegionTwo',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false
+            }
         ];
 
         //When
@@ -158,8 +264,4 @@ suite('common', function () {
         assert.deepEqual(expected, regions);
     });
 
-
-
-
 });
-
