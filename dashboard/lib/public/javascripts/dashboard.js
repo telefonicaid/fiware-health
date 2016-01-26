@@ -164,22 +164,21 @@ function loadReport(filename) {
 }
 
 
+function asyncLogout() {
+    setTimeout(function() {
+        Fiware.signOut('health')
+    }, 0);
+}
+
 function logout(redirectUrl, logoutUrl) {
     console.log('after logout, go to: ' + redirectUrl);
+    try {
+        asyncLogout();
+    } catch(err) {
+        console.log('async logout: ' + err.message);
+    }
 
-    $.ajax({
-      url: logoutUrl,
-        async: false,
-      xhrFields: { withCredentials: true }
-
-    }).fail(function(jqXHR, textStatus) {
-        console.log('Request failed: ' + textStatus );
-        window.location.href = redirectUrl;
-        return window.location.href;
-    }).done(function (data) {
-        console.log('Logout Done !');
-        window.location.href = redirectUrl;
-        return window.location.href;
-    });
+    window.location.href = redirectUrl;
+    return window.location.href;
 
 }
