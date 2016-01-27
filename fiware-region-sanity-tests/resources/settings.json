@@ -29,6 +29,7 @@
         "external_network_name": {
             "Spain2": "public-ext-net-01",
             "Trento": "public-ext-net-02",
+            "Trento2": "public-ext-net-01",
             "Lannion2": "public-ext-net-01",
             "Prague": "default",
             "Mexico": "public-ext-net-01",

@@ -30,6 +30,7 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
             <a class="string-array">
               <string>Spain2</string>
               <string>Trento</string>
+              <string>Trento2</string>
               <string>Lannion2</string>
               <string>Prague</string>
               <string>Mexico</string>
