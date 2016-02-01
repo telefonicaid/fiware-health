@@ -166,7 +166,7 @@ function loadReport(filename) {
 
 function asyncLogout() {
     setTimeout(function() {
-        Fiware.signOut('health')
+        Fiware.signOut('health'); // jshint ignore:line
     }, 0);
 }
 
@@ -174,7 +174,7 @@ function logout(redirectUrl, logoutUrl) {
     console.log('after logout, go to: ' + redirectUrl);
     try {
         asyncLogout();
-    } catch(err) {
+    } catch (err) {
         console.log('async logout: ' + err.message);
     }
 
