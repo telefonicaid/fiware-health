@@ -201,8 +201,13 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Fri Jan 01 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
+* Mon Mar 03 2016 Telefónica I+D <opensource@tid.es> 1.5.0-1
 - TODO
+
+* Wed Feb 03 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
+- Add FIWARE SignOut library
+- Fix checkstyle to avoid JShint errors.
+- Add filter list to configuration
 
 * Tue Dec 01 2015 Telefónica I+D <opensource@tid.es> 1.3.1-1
 - Fix long name nodes.
