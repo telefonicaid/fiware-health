@@ -201,7 +201,7 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Mon Mar 03 2016 Telefónica I+D <opensource@tid.es> 1.5.0-1
+* Mon Mar 03 2016 Telefónica I+D <opensource@tid.es> 1.4.1-1
 - TODO
 
 * Wed Feb 03 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
