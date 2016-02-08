@@ -31,16 +31,16 @@ LOGFILE=/var/log/$NAME/$NAME.log
 PIDFILE=$FOREVER_DIR/pids/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
-# Read configuration variable files, if present
+# Read configuration variable files, if present, and check networking is up
 [ -r /etc/profile ]		&& . /etc/profile
-[ -r /etc/sysconfig/$NAME ]	&& . /etc/sysconfig/$NAME
-
-# Check that networking is up
 [ -r /etc/sysconfig/network ]	&& . /etc/sysconfig/network
 [ "${NETWORKING}" = "no" ]	&& exit 0
 
 # Source function library
 . /etc/rc.d/init.d/functions
+
+# Service configuration file
+[ -r /etc/sysconfig/$NAME.yml ]	&& DAEMON_ARGS="-c/etc/sysconfig/$NAME.yml"
 
 # Workaround to set forever path for auxiliary files
 FOREVER="HOME=$(dirname $FOREVER_DIR) $DAEMON_DIR/node_modules/.bin/forever"
@@ -66,8 +66,9 @@ do_checkup()
 # Function that starts the daemon/service
 do_start()
 {
+	local cmdline="$DAEMON_BIN $DAEMON_ARGS"
 	local options="$FOREVER_OPTS --minUptime 1000 --spinSleepTime 1000"
-	local startup="$FOREVER start $options --uid $NAME $DAEMON_BIN"
+	local startup="$FOREVER start $options --uid $NAME $cmdline"
 	cd $DAEMON_DIR \
 	&& do_checkup \
 	&& action $"Starting $NAME:" daemon --user=$DAEMON_USER "$startup"

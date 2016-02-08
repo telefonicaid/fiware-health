@@ -39,16 +39,20 @@ fi
 rm -rf $RPM_BUILD_ROOT
 
 %install
+mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
 mkdir -p $RPM_BUILD_ROOT/%{_dashboard_dir}; set +x
 INCLUDE='bin|config|lib|package.json|README.*|.*rc$'
+CFGFILE=config/dashboard.yml.sample
 PATTERN='* .npmrc'
 FILES=$(cd %{_basedir}; for i in $PATTERN; do echo $i; done | egrep "$INCLUDE")
 for I in $FILES; do cp -R %{_basedir}/$I $RPM_BUILD_ROOT/%{_dashboard_dir}; done
+cp %{_basedir}/$CFGFILE $RPM_BUILD_ROOT/etc/sysconfig/%{_dashboard_srv}.yml
 cp -R %{_sourcedir}/* $RPM_BUILD_ROOT
 (cd $RPM_BUILD_ROOT; find . -type f -printf "/%%P\n" >> %{_topdir}/MANIFEST)
 echo "FILES:"; cat %{_topdir}/MANIFEST
 
 %files -f %{_topdir}/MANIFEST
+%config /etc/sysconfig/%{_dashboard_srv}.yml
 
 %pre
 # preinst ($1 == 1)
@@ -162,14 +166,16 @@ if [ $1 -eq 1 ]; then
 		FIHealth Dashboard successfully installed at $DASHBOARD_DIR.
 
 		WARNING: Please check values in the configuration file
-		$DASHBOARD_DIR/config/dashboard.yml before starting the
+		/etc/sysconfig/$DASHBOARD_SRV.yml before starting the
 		\`$DASHBOARD_SRV' service. This must include the path to
 		the settings file of Sanity Checks.
 
 		In order to use mail notifications, some configuration steps
 		should be done before running the Dashboard: please configure
 		\`mailman' and \`mailman-api' first, and then execute (as
-		superuser) the script $DASHBOARD_DIR/bin/setup.
+		superuser) the script $DASHBOARD_DIR/bin/setup passing the
+		configuration file /etc/sysconfig/$DASHBOARD_SRV.yml as
+		argument.
 
 		EOF
 	else fmt --width=${COLUMNS:-$(tput cols)} 1>&2 <<-EOF
@@ -201,9 +207,6 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Mon Mar 03 2016 Telefónica I+D <opensource@tid.es> 1.4.1-1
-- TODO
-
 * Wed Feb 03 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
 - Add FIWARE SignOut library
 - Fix checkstyle to avoid JShint errors.

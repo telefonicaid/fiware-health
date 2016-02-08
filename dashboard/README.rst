@@ -83,9 +83,9 @@ Post-installation
 -----------------
 
 Mailman_ and mailman-api_ are installed as dependencies of this component,
-given that notifications are sent via mailing lists. After checking the values
-for configuration options in file ``{installation_path}/config/dashboard.yml``,
-some additional steps are required after installation:
+given that notifications are sent via mailing lists. After checking values for
+configuration options in file ``/etc/sysconfig/fihealth_dashboard.yml``, some
+additional steps are required after installation:
 
 -  Customize subscription message by editing file
    ``{mailman-lib-path}/templates/en/subscribeack.txt``:
@@ -165,14 +165,16 @@ the package installation (preferred). It is not recommended to mix both ways
 From the command line
 ---------------------
 
-Simply type:
+First of all, create a custom configuration file ``config/dashboard.yml`` from
+sample found at the same directory. Then, simply type:
 
 .. code::
 
    $ cd {installation_path}/bin
    $ dashboard
 
-You can use command line arguments, e.g. to specify the listen port:
+You can use command line arguments to override values given in the configuration
+file, e.g. to specify the listen port:
 
 .. code::
 
@@ -199,13 +201,19 @@ Use the ``fihealth_dashboard`` service:
 Configuration file
 ------------------
 
-Some of the options can be overriden from the command line, but as a general
-rule the use of ``config/dashboard.yml`` configuration file is preferable.
-Such `file <config/dashboard.yml>`_ is self-documented, so there you will
-find a description of every configuration option.
+Although some options can be specified from the command line, as a general rule
+the use of a configuration file is preferable:
 
-Important: If the name of your admin region username does not match with admin-<regionName>
-you must fill the list regionsAuthorized in file ``<config/dashboard.yml>``
+- ``/etc/sysconfig/fihealth_dashboard.yml`` (when running system service)
+- ``{installation_path}/config/dashboard.yml`` (when running manually)
+
+Such configuration file is self-documented, so there you will find a description
+of every configuration option.
+
+**Important**: If your region's admin username does not match pattern
+*admin-{regionName}*, you must include it in property ``regionsAuthorized``
+at section ``idm`` in the configuration file.
+
 
 Testing
 =======
