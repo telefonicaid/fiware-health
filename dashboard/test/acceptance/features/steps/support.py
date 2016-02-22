@@ -23,7 +23,7 @@
 
 from behave import step, then
 import requests
-from hamcrest import assert_that, contains_string, is_, equal_to
+from hamcrest import assert_that, is_, equal_to
 import os
 
 
@@ -66,4 +66,4 @@ def response_title(context):
     Step: Check the response title
     """
     assert_that(context.driver.title, is_(equal_to('Sanity check status')),
-                "the response tile is not the expected one.")
+                "the response title is not the expected one.")
