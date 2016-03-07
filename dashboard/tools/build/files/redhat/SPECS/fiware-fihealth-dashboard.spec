@@ -207,6 +207,11 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Mon Mar 07 2016 Telefónica I+D <opensource@tid.es> 1.5.0-1
+- Add *.yml config file to /etc/sysconfig when packaging
+- Fix file permissions
+- Add new acceptance test with behave
+
 * Wed Feb 03 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
 - Add FIWARE SignOut library
 - Fix checkstyle to avoid JShint errors.
