@@ -58,7 +58,7 @@
 #     $REGIONS
 #
 
-VERSION=1.4.1
+VERSION=1.5.0
 NAME=$(basename $0)
 OPTS=`tr -d '\n ' <<END
       h(help)
