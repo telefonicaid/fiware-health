@@ -148,7 +148,7 @@ function searchSubscription(user, regions, callback) {
 }
 
 /**
- * notify to region list for a change in region
+ * notify mailing list for a change in region
  * @param {Object} region
  * @param {function} notifyCallback
  */
@@ -157,7 +157,7 @@ function notify(region, notifyCallback) {
     var regionName = region.node,
         regionStatus = region.status;
 
-    logger.info({op: 'subscribe#notify'}, 'notify to region: ' + regionName);
+    logger.info({op: 'subscribe#notify'}, 'notify change in region: ' + regionName);
 
     var payloadString = 'name_from= fi-health sanity&';
         payloadString += 'email_from=' + config.mailman.emailFrom + '&';
@@ -179,7 +179,7 @@ function notify(region, notifyCallback) {
         headers: headers
     };
 
-    var mailmainRequest = http.request(options, function (mailmanResponse) {
+    var mailmanRequest = http.request(options, function (mailmanResponse) {
         mailmanResponse.setEncoding('utf-8');
         var responseString = '';
 
@@ -193,12 +193,13 @@ function notify(region, notifyCallback) {
 
         });
     });
-    mailmainRequest.on('error', function (e) {
+    mailmanRequest.on('error', function (e) {
         logger.error('Error in connection with mailman: ' + e);
+        notifyCallback(e);
     });
 
-    mailmainRequest.write(payloadString);
-    mailmainRequest.end();
+    mailmanRequest.write(payloadString);
+    mailmanRequest.end();
 }
 
 
