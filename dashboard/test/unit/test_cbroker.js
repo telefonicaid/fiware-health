@@ -22,6 +22,7 @@ var assert = require('assert'),
     sinon = require('sinon'),
     EventEmitter = require('events').EventEmitter,
     http = require('http'),
+    logger = require('../../lib/logger'),
     config = require('../../lib/config').data,
     fs = require('fs');
 
@@ -29,6 +30,15 @@ var assert = require('assert'),
 /* jshint multistr: true */
 suite('cbroker', function () {
 
+    var stream = logger.stream;
+
+    suiteSetup(function () {
+        logger.stream = require('dev-null')();
+    });
+
+    suiteTeardown(function () {
+        logger.stream = stream;
+    });
 
     test('should_have_a_retrieveAllRegions_method', function () {
         assert.equal(cbroker.retrieveAllRegions.name, 'retrieveAllRegions');

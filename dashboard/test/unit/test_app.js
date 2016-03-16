@@ -19,31 +19,39 @@
 var assert = require('assert'),
     sinon = require('sinon'),
     app = require('../../lib/app'),
+    monasca = require('../../lib/monasca'),
     cbroker = require('../../lib/routes/cbroker'),
     subscribe = require('../../lib/routes/subscribe'),
-    common = require('../../lib/routes/common');
-
+    common = require('../../lib/routes/common'),
+    logger = require('../../lib/logger'),
+    constants = require('../../lib/constants');
 
 
 /* jshint multistr: true */
 suite('app', function () {
 
+    var stream = logger.stream;
+
+    suiteSetup(function () {
+        logger.stream = require('dev-null')();
+    });
+
+    suiteTeardown(function () {
+        logger.stream = stream;
+    });
+
     test('should_have_some_methods', function () {
         assert.equal(app.postContextbroker.name, 'postContextbroker');
         assert.equal(app.getLogout.name, 'getLogout');
-
     });
 
     test('should_return_400_in_contextbroker_post_with_exception_in_parser', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
-        var sendStub = sinon.stub();
-
+        res.send = sinon.spy();
         res.status = sinon.stub();
-        res.status.withArgs(400).returns(sendStub);
-        sendStub.send = sinon.spy();
+        res.status.withArgs(400).returns(res);
 
         var cbrokerStub = sinon.stub(cbroker, 'changeReceived');
         cbrokerStub.throws();
@@ -52,57 +60,61 @@ suite('app', function () {
         app.postContextbroker(req, res);
 
         //then
-        assert(res.status.withArgs(400).calledOnce);
-        assert(sendStub.send.calledOnce);
         cbrokerStub.restore();
-
+        assert(res.status.withArgs(400).calledOnce);
+        assert(res.send.calledOnce);
     });
 
     test('should_return_200_in_contextbroker_post', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
+        res.end = sinon.spy();
+        res.status = sinon.stub();
+        res.status.withArgs(200).returns(res);
 
-        var cbrokerStub = sinon.stub(cbroker, 'changeReceived', function() {
-
-            return {'node': 'Region1', 'status': 'OK', 'timestamp': ''};
-        });
-
-        var subscribeStub = sinon.stub(subscribe, 'notify');
+        var subscribeStub = sinon.stub(subscribe, 'notify'),
+            monascaStub = sinon.stub(monasca, 'notify'),
+            cbrokerStub = sinon.stub(cbroker, 'changeReceived', function () {
+                return {'node': 'Region1', 'status': 'OK', 'timestamp': ''};
+            });
 
         //when
         app.postContextbroker(req, res);
 
         //then
-        cbrokerStub.restore();
         subscribeStub.restore();
+        monascaStub.restore();
+        cbrokerStub.restore();
+        assert(res.status.withArgs(200).calledOnce);
         assert(subscribeStub.calledOnce);
-
+        assert(monascaStub.calledOnce);
     });
 
-    test('should_return_200_in_contextbroker_post_na', function () {
+    test('should_return_200_in_contextbroker_post_when_region_status_excluded', function () {
         //given
         var req = sinon.stub();
         var res = sinon.stub();
-        var sendStub = sinon.stub();
-
+        res.end = sinon.spy();
         res.status = sinon.stub();
-        res.status.withArgs(400).returns(sendStub);
-        res.status.withArgs(200).returns(sendStub);
-        sendStub.send = sinon.spy();
+        res.status.withArgs(200).returns(res);
 
-        var cbrokerStub = sinon.stub(cbroker, 'changeReceived', function() {
-            return {'node': 'Region1', 'status': 'N/A', 'timestamp': ''};
-        });
+        var subscribeStub = sinon.stub(subscribe, 'notify'),
+            monascaStub = sinon.stub(monasca, 'notify'),
+            cbrokerStub = sinon.stub(cbroker, 'changeReceived', function () {
+                return {'node': 'Region1', 'status': constants.GLOBAL_STATUS_OTHER, 'timestamp': ''};
+            });
 
         //when
         app.postContextbroker(req, res);
 
         //then
-        assert(res.status.withArgs(200).calledOnce);
-        assert(sendStub.send.calledOnce);
+        subscribeStub.restore();
+        monascaStub.restore();
         cbrokerStub.restore();
+        assert(res.status.withArgs(200).calledOnce);
+        assert(subscribeStub.notCalled);
+        assert(monascaStub.notCalled);
     });
 
     test('should_close_session_with_get_logout', function() {

@@ -53,6 +53,18 @@ mailman:
   emailFrom: ''
 
 #---------------------------------------------------------------------
+# monasca-api section (mandatory)
+#---------------------------------------------------------------------
+monasca:
+  host: 'localhost'
+  port: 8070
+  keystoneHost: 'cloud.lab.fiware.org'
+  keystonePort: 4731
+  keystonePath: '/v3/auth/tokens'
+  keystoneUser: 'ceilometer'
+  keystonePass: 'sssssss'
+
+#---------------------------------------------------------------------
 # jenkins-api section (mandatory)
 #---------------------------------------------------------------------
 jenkins:

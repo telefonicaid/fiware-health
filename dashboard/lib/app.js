@@ -30,12 +30,12 @@ var express = require('express'),
     subscribe = require('./routes/subscribe'),
     unsubscribe = require('./routes/unsubscribe'),
     cbroker = require('./routes/cbroker'),
-    monasca = require('./routes/monasca'),
     common = require('./routes/common'),
     config = require('./config').data,
     logger = require('./logger'),
     OAuth2 = require('./oauth2').OAuth2,
-    constants = require('./constants');
+    constants = require('./constants'),
+    monasca = require('./monasca');
 
 
 var app = express();

@@ -63,7 +63,11 @@ mailman:
 monasca:
   host: 'localhost'			# monasca-api listen host
   port: 8070				# monasca-api listen port
-  user: 'admin'				# user with 'monasca_user' role
+  keystoneHost: 'cloud.lab.fiware.org'	# keystone host
+  keystonePort: 4731			# keystone port
+  keystonePath: '/v3/auth/tokens'	# keystone path to get an auth token
+  keystoneUser: 'ceilometer'		# keystone user with 'monasca_user' role
+  keystonePass: ''			# password of keystone user
 
 #----------------------------------------------------------------------------
 # jenkins-api section (mandatory)

@@ -65,6 +65,15 @@ var config = {
         path: '/',
         emailFrom: ''
     },
+    monasca: {
+        host: 'localhost',
+        port: '8070',
+        keystoneHost: 'cloud.lab.fiware.org',
+        keystonePort: '4731',
+        keystonePath: '/v3/auth/tokens',
+        keystoneUser: 'ceilometer',
+        keystonePass: ''
+    },
     jenkins: {
         host: 'localhost',
         port: '8000',
@@ -76,14 +85,14 @@ var config = {
 };
 
 
-
 function readConfigFile(file) {
     var cfgParserResult = [ 'INFO', 'Read configuration file' ];
     try {
         var cfgParse = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
-        ['app', 'logging', 'session', 'paths', 'cbroker', 'idm', 'mailman', 'jenkins'].forEach(function (key) {
+        var cfgKeys = ['app', 'logging', 'session', 'paths', 'cbroker', 'idm', 'mailman', 'monasca', 'jenkins'];
+        cfgKeys.forEach(function (key) {
             switch (key in cfgParse && key) {
-                 case 'app':
+                case 'app':
                     config.listenPort = cfgParse.app.port;
                     config.webContext = cfgParse.app.webContext;
                     config.fiHealthUrl = util.format('https://%s%s', cfgParse.app.host, cfgParse.app.webContext);
@@ -113,6 +122,11 @@ function readConfigFile(file) {
                 case 'mailman':
                     Object.keys(config.mailman).filter(hasOwnProperty, cfgParse.mailman).forEach(function (key) {
                         config.mailman[key] = cfgParse.mailman[key];
+                    });
+                    break;
+                case 'monasca':
+                    Object.keys(config.monasca).filter(hasOwnProperty, cfgParse.monasca).forEach(function (key) {
+                        config.monasca[key] = cfgParse.monasca[key];
                     });
                     break;
                 case 'jenkins':
