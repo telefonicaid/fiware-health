@@ -72,8 +72,8 @@ monasca.withAuthToken = function (callback) {
             responseString += data;
         });
         res.on('end', function () {
-            logger.info('Response from Keystone: %s', responseString);
-            logger.debug('Response from Keystone: status=%s headers=%s', res.statusCode, res.headers);
+            logger.debug('Response from Keystone: %s headers=%s', responseString, res.headers);
+            logger.info('Response from Keystone: status=%s', res.statusCode);
             if (res.statusCode === 201) {
                 callback(res.headers['x-subject-token']);
             } else {
@@ -111,7 +111,7 @@ monasca.notify = function (region, notifyCallback) {
             notifyCallback(new Error('could not get auth token'));
         } else {
             var regionStatus = region.status,
-                timestampMillis = region.sanity_check_timestamp,
+                timestampMillis = new Date(region.timestamp).getTime(),
                 payload = {
                     'name': 'region.sanity_status',
                     'dimensions': {

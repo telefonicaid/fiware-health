@@ -94,7 +94,12 @@ suite('cbroker', function () {
     test('should_receive_notify_from_context_broker_and_return_200_ok', function () {
         //given
         var json = JSON.parse(fs.readFileSync('test/unit/notify_post1.json', 'utf8'));
-        var expected = {'node': 'Region1', 'status': constants.GLOBAL_STATUS_OK, 'timestamp': '', elapsedTime: ''};
+        var expected = {
+            'node': 'Region1',
+            'status': constants.GLOBAL_STATUS_OK,
+            'timestamp': '2015/05/13 11:10 UTC',
+            'elapsedTime': '0h, 2m, 40s'
+        };
 
         //when
         var result = cbroker.changeReceived(json);
