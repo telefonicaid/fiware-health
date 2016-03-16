@@ -121,7 +121,10 @@ monasca.notify = function (region, notifyCallback) {
                         'type': 'gauge'
                     },
                     'timestamp': timestampMillis,
-                    'value': regionStatus
+                    'value': ['NOK', 'OK', 'POK'].indexOf(regionStatus),
+                    'value_meta': {
+                        'status': regionStatus
+                    }
                 };
             var payloadString = JSON.stringify(payload);
             var headers = {
