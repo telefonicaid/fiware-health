@@ -34,7 +34,8 @@ var express = require('express'),
     config = require('./config').data,
     logger = require('./logger'),
     OAuth2 = require('./oauth2').OAuth2,
-    constants = require('./constants');
+    constants = require('./constants'),
+    monasca = require('./monasca');
 
 
 var app = express();
@@ -75,7 +76,7 @@ function compile(str, path) {
         });
 }
 /**
- * called when /contextbroker get
+ * called when /contextbroker post
  * @param {*} req
  * @param {*} res
  */
@@ -83,17 +84,28 @@ function postContextbroker(req, res) {
      try {
         var region = cbroker.changeReceived(req.body),
             notifyExclude = [ constants.GLOBAL_STATUS_OTHER ];
-        logger.info('request received from contextbroker for region: %s', region.node);
+
+        logger.info('status change notification received from contextbroker for region: %s', region.node);
+        res.status(200).end();
+
         if (notifyExclude.indexOf(region.status) === -1) {
-            subscribe.notify(region, function () {
-                logger.info('post to mailing list ok');
-                res.status(200).end();
+            subscribe.notify(region, function (err) {
+                if (err) {
+                    logger.error('post to mailing list failed: %s', err);
+                } else {
+                    logger.info('post to mailing list succeeded');
+                }
             });
-        }
-        else {
-            logger.info('mail notification is not sent because region status %s is on the notifyExclude list: %s',
-                region.status, notifyExclude);
-            res.status(200).end();
+            monasca.notify(region, function (err) {
+                if (err) {
+                    logger.error('post to Monasca failed: %s', err);
+                } else {
+                    logger.info('post to Monasca succeeded');
+                }
+            });
+        } else {
+            logger.info('notifications to mailing list and Monasca not sent because region status %s is excluded',
+                region.status);
         }
 
     } catch (ex) {

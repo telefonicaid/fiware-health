@@ -6,9 +6,19 @@
             "contextElement": {
                 "attributes": [
                     {
+                        "name": "sanity_check_timestamp",
+                        "type": "string",
+                        "value": "1431515409572"
+                    },
+                    {
                         "name": "sanity_status",
                         "type": "string",
                         "value": "OK"
+                    },
+                    {
+                        "name": "sanity_check_elapsed_time",
+                        "type": "string",
+                        "value": "160000"
                     }
                 ],
                 "type": "region",
