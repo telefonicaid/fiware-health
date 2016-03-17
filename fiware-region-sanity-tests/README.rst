@@ -167,6 +167,7 @@ network connectivity (part of the E2E behaviour). Before executing tests, you
 will have to ensure the **HTTP PhoneHome server** is running.
 
 This PhoneHome server requires a listen endpoint as parameter:
+
 - The host:port where server listens to must be accessible from the internet.
 - Endpoint should be configured in the ``phonehome_endpoint`` property of the
   configuration file or in ``$TEST_PHONEHOME_ENDPOINT`` environment variable;

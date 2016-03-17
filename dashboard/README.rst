@@ -22,8 +22,8 @@ Overall description
 ===================
 
 This dashboard is a tool to graphically monitor the *health* of the nodes in
-FIWARE Lab. It allows users and node administrators to know which capabilities
-of a region are working.
+FIWARE Lab. It allows end users and node administrators to know which
+capabilities of a region are working.
 
 As the frontend for `Sanity Checks </fiware-region-sanity-tests/README.rst>`_,
 the dashboard shows all test results of each execution and the sanity check
@@ -32,7 +32,11 @@ and their results; in case of failure, detailed logs are shown.
 
 Additionaly, it allows administrators to re-launch the Sanity Checks execution
 (this requires to sign in using FIWARE Account credentials) and to subscribe
-to mail notifications about changes in a region status.
+to mail notifications about changes in a region status. Such changes are also
+published as *metrics* into Monasca_.
+
+.. figure:: doc/architecture.png
+   :alt: FIHealth Dashboard architecture.
 
 
 Build and Install
@@ -246,3 +250,4 @@ the ``test`` target is used for running the unit tests for the dashboard.
 .. _mailman-api: http://mailman-api.readthedocs.org/en/stable/
 .. _Mailman: http://www.gnu.org/software/mailman/
 .. _Mailman - Set up your mail server: http://www.gnu.org/software/mailman/mailman-install/mail-server.html
+.. _Monasca: https://wiki.openstack.org/wiki/Monasca
