@@ -2,16 +2,22 @@
  FIHealth Sanity Checks | Publishing Sanity Status
 ===================================================
 
-Results included in summary report ``test_results.txt`` can be published through
-a `Context Broker`_ (therefore, available for querying and stored in database).
+Results included in summary report ``test_results.txt`` are published to a
+`Context Broker`_ (therefore, available for querying and stored in database).
+Even more, we take advantage of the `subscription capabilities`__ of the
+broker, so that results are notified to subscribers, being
+`FIHealth Dashboard </dashboard/README.rst>`_ one of them.
+
+__ `Context Broker - Context subscriptions`_
 
 To do that, a request to the `NGSI Adapter`_ component must be issued. The name
 of the probe originating source data will be ``sanity_tests``::
 
-    $ curl "{adapter_endpoint}/sanity_tests?id={myregion}&type=region" -s -S --header 'Content-Type: text/plain' -X POST -d @test_results.txt
+    $ curl "{adapter_endpoint}/sanity_tests?id={myregion}&type=region" -s -S \
+    --header 'Content-Type: text/plain' -X POST -d @test_results.txt
 
-Please note that the invocation to the NGSI Adapter once summary report has been
-generated is **only** automated when running the Sanity Checks within Jenkins.
+Please note that the invocation to NGSI Adapter, once summary report has been
+generated, is **only** automated when running the Sanity Checks within Jenkins.
 
 As a prerequisite, custom parser ``resources/parsers/sanity_tests.js`` (provided
 as part of this component) has to be installed together with the rest of parsers
@@ -77,7 +83,7 @@ Elapsed execution time of Sanity Checks
 Apart from the context attributes described above, when Sanity Checks
 have been executed from Jenkins, a new attribute is updated in the
 context information of the region: the elapsed time of the execution
-``sanity_check_elapsed_time``. This attribute will have the time in
+``sanity_check_elapsed_time``. This attribute will measure the time in
 milliseconds or 'N/A' if Sanity tests have not finished yet.
 
 
@@ -151,4 +157,5 @@ So that, we have two type of statuses:
 .. REFERENCES
 
 .. _NGSI Adapter: https://github.com/telefonicaid/fiware-monitoring/tree/master/ngsi_adapter
-.. _Context Broker: http://github.com/telefonicaid/fiware-orion/
+.. _Context Broker: http://github.com/telefonicaid/fiware-orion/tree/master
+.. _Context Broker - Context subscriptions: https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/user/walkthrough_apiv1.md#context-subscriptions
