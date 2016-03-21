@@ -30,6 +30,13 @@ var assert = require('assert'),
 suite('monasca', function () {
 
     var stream = logger.stream;
+    var region = {
+        node: 'region1',
+        status: 'OK',
+        timestamp: '2015/05/13 11:10 UTC',
+        elapsedTime: '0h, 1m, 0s',
+        elapsedTimeMillis: 60000
+    };
 
     suiteSetup(function () {
         logger.stream = require('dev-null')();
@@ -42,10 +49,6 @@ suite('monasca', function () {
     test('should_notify_to_monasca_api', function () {
         //given
         var req;
-        var region = {
-            node: 'region1',
-            status: 'OK'
-        };
         req = sinon.stub();
         req.param = sinon.stub();
         req.param.withArgs('region').returns(region.node);
@@ -87,10 +90,6 @@ suite('monasca', function () {
     test('should_return_error_if_monasca_request_failed', function (done) {
         //given
         var req;
-        var region = {
-            node: 'region1',
-            status: 'OK'
-        };
         req = sinon.stub();
         req.param = sinon.stub();
         req.param.withArgs('region').returns(region.node);
@@ -122,10 +121,6 @@ suite('monasca', function () {
     test('should_return_error_if_keystone_failed', function (done) {
         //given
         var req;
-        var region = {
-            node: 'region1',
-            status: 'OK'
-        };
         req = sinon.stub();
         req.param = sinon.stub();
         req.param.withArgs('region').returns(region.node);
@@ -159,10 +154,6 @@ suite('monasca', function () {
     test('should_return_error_if_keystone_timed_out', function (done) {
         //given
         var req;
-        var region = {
-            node: 'region1',
-            status: 'OK'
-        };
         req = sinon.stub();
         req.param = sinon.stub();
         req.param.withArgs('region').returns(region.node);
@@ -188,10 +179,6 @@ suite('monasca', function () {
 
     test('should_return_error_if_no_auth_token_obtained', function (done) {
         //given
-        var region = {
-            node: 'region1',
-            status: 'OK'
-        };
         var keystoneStub = sinon.stub(monasca, 'withAuthToken', function (callback) {
             callback();
         });

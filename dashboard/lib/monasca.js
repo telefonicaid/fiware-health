@@ -112,6 +112,7 @@ monasca.notify = function (region, notifyCallback) {
         } else {
             var regionStatus = region.status,
                 timestampMillis = new Date(region.timestamp).getTime(),
+                elapsedTimeMillis = region.elapsedTimeMillis,
                 payload = {
                     'name': 'region.sanity_status',
                     'dimensions': {
@@ -123,7 +124,8 @@ monasca.notify = function (region, notifyCallback) {
                     'timestamp': timestampMillis,
                     'value': ['NOK', 'OK', 'POK'].indexOf(regionStatus),
                     'value_meta': {
-                        'status': regionStatus
+                        'status': regionStatus,
+                        'elapsed_time': elapsedTimeMillis.toString()
                     }
                 };
             var payloadString = JSON.stringify(payload);

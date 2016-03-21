@@ -43,20 +43,21 @@ function parseRegions(entities) {
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
         if (type === REGION_TYPE) {
-            var sanityStatus = '', timestamp = '', elapsedTime = '';
+            var sanityStatus = '', timestamp = '', elapsedTimeStr = '', elapsedTimeMillis = '', elapsedDate;
             entry.contextElement.attributes.forEach(function (value) {
                 var createValue = {};
                 createValue[SANITY_STATUS_ATTRIBUTE] = function () {
                     sanityStatus = value.value;
                 };
                 createValue[TIMESTAMP_ATTRIBUTE] = function () {
-                    timestamp = dateFormat(new Date(parseInt(value.value)), 'UTC:yyyy/mm/dd HH:MM Z');
-
+                    timestamp = dateFormat(new Date(parseInt(value.value, 10)), 'UTC:yyyy/mm/dd HH:MM Z');
                 };
                 createValue[ELAPSED_TIME] = function () {
-                    var myDate = new Date(parseInt(value.value));
-                    elapsedTime = myDate.getUTCHours() + 'h, ' + myDate.getUTCMinutes() + 'm, ' +
-                                    myDate.getUTCSeconds() + 's';
+                    elapsedTimeMillis = parseInt(value.value, 10);
+                    elapsedDate = new Date(elapsedTimeMillis);
+                    elapsedTimeStr = elapsedDate.getUTCHours() + 'h, ' +
+                                     elapsedDate.getUTCMinutes() + 'm, ' +
+                                     elapsedDate.getUTCSeconds() + 's';
                 };
 
                 createValue[value.name]();
@@ -65,16 +66,16 @@ function parseRegions(entities) {
             if (config.cbroker.filter.indexOf(entry.contextElement.id) >= 0) {
                 logger.warn({op: 'retrieveAllRegions'}, 'Found in filter  %s ', entry.contextElement.id);
             } else {
-                result.push({node: entry.contextElement.id,
-                        status: sanityStatus,
-                        timestamp: timestamp,
-                        elapsedTime: elapsedTime });
-
+                result.push({
+                    node: entry.contextElement.id,
+                    status: sanityStatus,
+                    timestamp: timestamp,
+                    elapsedTime: elapsedTimeStr,
+                    elapsedTimeMillis: elapsedTimeMillis
+                });
             }
-
         }
     });
-
 
     return result;
 }
