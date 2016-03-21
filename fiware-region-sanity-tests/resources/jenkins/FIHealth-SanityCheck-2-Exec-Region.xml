@@ -36,6 +36,7 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
               <string>Mexico</string>
               <string>PiraeusU</string>
               <string>Zurich</string>
+              <string>Zurich2</string>
               <string>Volos</string>
               <string>Budapest2</string>
               <string>SophiaAntipolis</string>
