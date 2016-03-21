@@ -27,6 +27,16 @@ var assert = require('assert'),
     fs = require('fs');
 
 
+/**
+ * @function isNaN
+ * Assert that parameter is NaN
+ * @param {number} value
+ */
+assert.isNaN = function (value) {
+    assert.equal(value.toString(), 'NaN');
+};
+
+
 /* jshint multistr: true */
 suite('cbroker', function () {
 
@@ -53,52 +63,61 @@ suite('cbroker', function () {
                 node: 'ZRegionLongName1',
                 status: constants.GLOBAL_STATUS_NOT_OK,
                 timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: '0h, 2m, 40s'
+                elapsedTime: '0h, 2m, 40s',
+                elapsedTimeMillis: 160000
             },
             {
                 node: 'Region2',
                 status: constants.GLOBAL_STATUS_OK,
                 timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: '0h, 1m, 0s'
+                elapsedTime: '0h, 1m, 0s',
+                elapsedTimeMillis: 60000
             },
             {
                 node: 'Region3',
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: 'NaNh, NaNm, NaNs'
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
             },
             {
                 node: 'Region4',
                 status: constants.GLOBAL_STATUS_PARTIAL_OK,
                 timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: '0h, 1m, 0s'
+                elapsedTime: '0h, 1m, 0s',
+                elapsedTimeMillis: 60000
             },
             {
                 node: 'Region5',
                 status: '',
                 timestamp: '',
-                elapsedTime: ''
+                elapsedTime: '',
+                elapsedTimeMillis: ''
             }
-
         ];
+        
 
         //when
         var result = cbroker.parseRegions(json);
+
         //then
-
+        assert.equal(expected[2].node, result[2].node);
+        assert.isNaN(expected[2].elapsedTimeMillis);
+        assert.isNaN(result[2].elapsedTimeMillis);
+        delete expected[2].elapsedTimeMillis;
+        delete result[2].elapsedTimeMillis;
         assert.deepEqual(expected, result);
-
     });
-
 
     test('should_receive_notify_from_context_broker_and_return_200_ok', function () {
         //given
         var json = JSON.parse(fs.readFileSync('test/unit/notify_post1.json', 'utf8'));
         var expected = {
-            'node': 'Region1',
-            'status': constants.GLOBAL_STATUS_OK,
-            'timestamp': '2015/05/13 11:10 UTC',
-            'elapsedTime': '0h, 2m, 40s'
+            node: 'Region1',
+            status: constants.GLOBAL_STATUS_OK,
+            timestamp: '2015/05/13 11:10 UTC',
+            elapsedTime: '0h, 2m, 40s',
+            elapsedTimeMillis: 160000
         };
 
         //when
@@ -109,7 +128,6 @@ suite('cbroker', function () {
     });
 
     test('should_retrieve_data_about_all_regions', function (done) {
-
         //given
         var req = sinon.stub();
         req.param = sinon.stub();
@@ -149,12 +167,10 @@ suite('cbroker', function () {
         assert(request.end.calledOnce);
         assert(request.setTimeout.calledOnce);
         assert.equal('POST', requestStub.getCall(0).args[0].method);
-
     });
 
     test('should_return_empty_collection_when_an_error_occurs', function (done) {
         //given
-
         var req = sinon.stub();
         req.param = sinon.stub();
         req.param.withArgs('region').returns('region1');
@@ -197,7 +213,6 @@ suite('cbroker', function () {
     });
 
     test('should_return_empty_region_list_and_print_log_when_timeout_on_request', function (done) {
-
         //given
         var req = sinon.stub();
         req.param = sinon.stub();
@@ -208,7 +223,7 @@ suite('cbroker', function () {
         var request = new EventEmitter();
 
         request.setTimeout = sinon.spy(function (timeout, callback) {
-                callback();
+            callback();
         });
         request.end = sinon.spy();
         request.write = sinon.spy();
@@ -297,21 +312,48 @@ suite('cbroker', function () {
         //given
         var json = JSON.parse(fs.readFileSync('test/unit/post1.json', 'utf8'));
         var expected = [
-            {node: 'ZRegionLongName1', status: 'NOK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 2m, 40s'},
-            {node: 'Region3', status: 'N/A', timestamp: '2015/05/13 11:10 UTC', elapsedTime: 'NaNh, NaNm, NaNs'},
-            {node: 'Region4', status: 'POK', timestamp: '2015/05/13 11:10 UTC', elapsedTime: '0h, 1m, 0s'},
-            {node: 'Region5', status: '', timestamp: '', elapsedTime: ''}
+            {
+                node: 'ZRegionLongName1',
+                status: 'NOK',
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: '0h, 2m, 40s',
+                elapsedTimeMillis: 160000
+            },
+            {
+                node: 'Region3',
+                status: 'N/A',
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
+            },
+            {
+                node: 'Region4',
+                status: 'POK',
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: '0h, 1m, 0s',
+                elapsedTimeMillis: 60000
+            },
+            {
+                node: 'Region5',
+                status: '',
+                timestamp: '',
+                elapsedTime: '',
+                elapsedTimeMillis: ''
+            }
         ];
 
         config.cbroker.filter = ['Region2'];
 
         //when
         var result = cbroker.parseRegions(json);
-        //then
 
+        //then
+        assert.equal(expected[1].node, result[1].node);
+        assert.isNaN(expected[1].elapsedTimeMillis);
+        assert.isNaN(result[1].elapsedTimeMillis);
+        delete expected[1].elapsedTimeMillis;
+        delete result[1].elapsedTimeMillis;
         assert.deepEqual(expected, result);
     });
-
-
 
 });
