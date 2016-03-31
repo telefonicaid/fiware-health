@@ -29,6 +29,7 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>Spain2</string>
+              <string>SpainTenerife</string>
               <string>Trento</string>
               <string>Trento2</string>
               <string>Lannion2</string>
