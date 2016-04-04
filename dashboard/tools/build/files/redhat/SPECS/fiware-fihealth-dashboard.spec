@@ -207,6 +207,13 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Mon Apr 04 2016 Telefónica I+D <opensource@tid.es> 1.6.0-1
+- Add request to Monasca on notification from ContextBroker
+- Fix timestamp handling
+- Fix request to Monasca including value_meta
+- Add elapsed time when publishing to Monasca
+- Update documentation
+
 * Mon Mar 07 2016 Telefónica I+D <opensource@tid.es> 1.5.0-1
 - Add *.yml config file to /etc/sysconfig when packaging
 - Fix file permissions
