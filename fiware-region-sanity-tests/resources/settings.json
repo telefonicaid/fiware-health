@@ -28,7 +28,6 @@
     "region_configuration": {
         "external_network_name": {
             "Spain2": "public-ext-net-01",
-            "SpainTenerife": "public-ext-net-01",
             "Trento": "public-ext-net-02",
             "Trento2": "public-ext-net-01",
             "Lannion2": "public-ext-net-01",
@@ -36,22 +35,40 @@
             "Mexico": "public-ext-net-01",
             "PiraeusU": "public-ext-net-01",
             "Zurich": "public-ext-net-01",
-            "Zurich2": "public-ext-net-01",
+            "SpainTenerife": "public-ext-net-01",
             "Volos": "public-ext-net-01",
             "Budapest2": "public-ext-net-01",
             "SophiaAntipolis": "public-ext-net-01",
             "Poznan": "public-ext-net-01",
+            "Zurich2": "public-ext-net-01",
             "Crete": "public-ext-net-01",
             "SaoPaulo": "public-ext-net-01"
         },
         "shared_network_name": {
-            "Spain2": "node-int-net-01"
+            "Spain2": "node-int-net-01",
+            "Trento": "node-int-net-02",
+            "Trento2": "node-int-net-01",
+            "Lannion2": "node-int-net-01",
+            "Waterford": "node-int-net-01",
+            "Berlin2": "node-int-net-01",
+            "Mexico": "node-int-net-01",
+            "PiraeusU": "node-int-net-01",
+            "Zurich": "node-int-net-01",
+            "SpainTenerife": "node-int-net-01",
+            "Volos": "node-int-net-01",
+            "Budapest2": "node-int-net-01",
+            "Stockholm2": "node-int-net-01",
+            "SophiaAntipolis": "node-int-net-01",
+            "Poznan": "node-int-net-01",
+            "Zurich2": "node-int-net-01",
+            "Crete": "node-int-net-01",
+            "SaoPaulo": "node-int-net-01"
         },
         "test_flavor": {
             "Prague": "tiny"
         },
         "test_image": {
-            "Spain2": "base_centos_6"
+	    "Lannion2": "CentOS-6.3init_deprecated"
         }
     },
     "key_test_cases": [ "test_(.*)" ],
