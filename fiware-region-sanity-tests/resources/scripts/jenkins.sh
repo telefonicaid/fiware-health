@@ -251,6 +251,12 @@ if [ -z "$FIHEALTH_ADAPTER_URL" -o -z "$FIHEALTH_CB_URL" ]; then
 	exit 3
 fi
 
+# Check FIHealth environment variables for Jenkins
+if [ -z "$JENKINS_USER" -o -z "$JENKINS_PASSWORD" ]; then
+	printf "Either Jenkins user or Jenkins password not specified\n" 1>&2
+	exit 3
+fi
+
 # Check python2.7 and virtualenv
 if ! which python2.7 virtualenv >/dev/null 2>&1; then
 	printf "python2.7 or virtualenv not found\n" 1>&2
@@ -302,6 +308,18 @@ setup)
 	./configure --prefix=$VIRTUALENV
 	make
 	make install
+
+    # Update Restart job
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-0-RestartTestServers/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml"
+
+    # Update SetUp job
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-0-SetUp/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml"
+
+	# Update Flow job
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-1-Flow/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-1-Flow.xml"
+
+	# Update Exec job
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-2-Exec-Region/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-2-Exec-Region.xml"
 
 	# Restart PhoneHome server
 	restart_phone_home_server
