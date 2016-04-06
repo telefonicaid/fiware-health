@@ -42,10 +42,12 @@
             "SophiaAntipolis": "public-ext-net-01",
             "Poznan": "public-ext-net-01",
             "Crete": "public-ext-net-01",
-            "SaoPaulo": "public-ext-net-01"
+            "SaoPaulo": "public-ext-net-01",
+            "Vicenza": "public-ext-net-01"
         },
         "shared_network_name": {
-            "Spain2": "node-int-net-01"
+            "Spain2": "node-int-net-01",
+            "Vicenza": "node-int-net-01"
         },
         "test_flavor": {
             "Prague": "tiny"
