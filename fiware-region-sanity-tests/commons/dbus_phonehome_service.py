@@ -247,14 +247,17 @@ class DbusPhoneHomeServer():
         self.dbus_phonehome_objects[phonehome_object_path] = DbusPhoneHomeObject(self.logger, bus,
                                                                                  phonehome_object_path)
 
-    def emit_phonehome_signal(self, phonehome_data, phonehome_object_path, hostname):
+    def emit_phonehome_signal(self, phonehome_data, phonehome_object_path, hostname, transaction_id):
         """
         This method emits the phonehome signal to all clients connected to the bus,
          with the given data as value.
         :param phonehome_data: PhoneHome data (HTTP POST request)
         :param hostname: String with the header Hostname value
+        :param transaction_id: String with the transaction id value
         :return: None
         """
+        self.logger.debug("%s - Emit signal, data:'%s' to '%s'", transaction_id, phonehome_data, hostname)
+
         if phonehome_object_path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
             self.dbus_phonehome_objects[phonehome_object_path].phonehome_metadata_signal(phonehome_data, hostname)
         elif phonehome_object_path == PHONEHOME_DBUS_OBJECT_PATH:
@@ -267,3 +270,6 @@ class DbusPhoneHomeServer():
         :return: None
         """
         self.dbus_phonehome_objects[phonehome_object_path].remove_object()
+
+    def logdebug(self, trace):
+        self.logger.debug(trace)

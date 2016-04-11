@@ -52,24 +52,32 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         content = self.rfile.read(content_length)
 
+        transaction_id = "txid:" + self.headers['TransactionId']
+
+
         # Get data from body
         if content:
             if self.path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
                 if "Hostname" in self.headers:
-                    dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH, self.headers['Hostname'])
+                    hostname = self.headers['Hostname']
+
+                    dbus_server.logdebug("{0} - Sending signal to hostname: {1}".format(transaction_id, hostname))
+                    dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH, hostname, transaction_id)
                     self.send_response(200)
                 else:
-                    self.send_response(400, message="Hostname header is not present in HTTP PhoneHome request")
+                    self.send_response(400, message=transaction_id + " - Hostname header is not present in HTTP " \
+                                                                    "PhoneHome request")
 
             elif self.path == PHONEHOME_DBUS_OBJECT_PATH:
-                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None)
+                dbus_server.logdebug("{0} - Sending signal".format(transaction_id))
+                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None, transaction_id)
                 self.send_response(200)
             else:
-                self.send_response(404, message=" Path not found for HTTP PhoneHome request")
+                self.send_response(404, message=transaction_id + " - Path not found for HTTP PhoneHome request")
 
         else:
             # Bad Request
-            self.send_response(400, message="Invalid data received in HTTP PhoneHome request")
+            self.send_response(400, message=transaction_id + " - Invalid data received in HTTP PhoneHome request")
 
 
 class HttpPhoneHomeServer():
