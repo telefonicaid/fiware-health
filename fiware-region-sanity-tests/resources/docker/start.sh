@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rm -rf /var/run/dbus/system_bus_socket;
+rm -rf /var/run/dbus/system_bus_socket
 service messagebus restart
 export PYTHONPATH=$PWD
 export TEST_PHONEHOME_ENDPOINT=http://localhost:8081

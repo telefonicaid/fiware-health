@@ -15,9 +15,7 @@ RUN wget --no-check-certificate http://pypi.python.org/packages/source/d/distrib
 RUN tar xf distribute-0.6.35.tar.gz
 RUN cd distribute-0.6.35;python2.7 setup.py install
 RUN easy_install-2.7 pip
-#RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 RUN pip2.7 install virtualenv
-WORKDIR /opt
 RUN yum install -y dbus-devel.x86_64 dbus-glib-devel.x86_64
 RUN virtualenv fihealth --system-site-packages
 RUN mkdir /opt/fihealth/src
