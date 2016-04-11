@@ -46,6 +46,8 @@
 #
 # Environment:
 #     JENKINS_HOME			home path of Jenkins CI
+#     JENKINS_USER          username of the Jenkins CI
+#     JENKINS_PASSWORD      password of the Jenkins CI
 #     JOB_URL				full URL for this build job
 #     TEST_PHONEHOME_ENDPOINT		endpoint of supporting PhoneHome server
 #     FIHEALTH_WORKSPACE		default value for --workspace
@@ -309,10 +311,10 @@ setup)
 	make
 	make install
 
-    # Update Restart job
+	# Update Restart job
 	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-0-RestartTestServers/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml"
 
-    # Update SetUp job
+	# Update SetUp job
 	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-0-SetUp/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml"
 
 	# Update Flow job
