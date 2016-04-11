@@ -1,26 +1,28 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
-This job performs the Sanity Check on the region given as parameter:&#xd;
+  <description>&lt;h3&gt;FIWARE-Health - Region Sanity Check&lt;/h3&gt;&#xd;
+This Job executes the Sanity Check on the selected region:&#xd;
 &lt;ul&gt;&#xd;
   &lt;li&gt;Change global region status to &apos;MAINTENANCE&apos;&lt;/li&gt;&#xd;
   &lt;li&gt;Launch Sanity Check on the Region&lt;/li&gt;&#xd;
   &lt;li&gt;Generate results and summary report&lt;/li&gt;&#xd;
-  &lt;li&gt;Process test results&lt;/li&gt;&#xd;
+  &lt;li&gt;Process test results and publishes it&lt;/li&gt;&#xd;
   &lt;li&gt;Change global region status to &apos;OK&apos; or &apos;NOK&apos;&lt;/li&gt;&#xd;
 &lt;/ul&gt;&#xd;
 &#xd;
 &lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
 &lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
-  <logRotator class="hudson.tasks.LogRotator">
-    <daysToKeep>14</daysToKeep>
-    <numToKeep>30</numToKeep>
-    <artifactDaysToKeep>-1</artifactDaysToKeep>
-    <artifactNumToKeep>-1</artifactNumToKeep>
-  </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>14</daysToKeep>
+        <numToKeep>69</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.ChoiceParameterDefinition>
@@ -29,7 +31,6 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>Spain2</string>
-              <string>SpainTenerife</string>
               <string>Trento</string>
               <string>Trento2</string>
               <string>Lannion2</string>
@@ -37,13 +38,14 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
               <string>Mexico</string>
               <string>PiraeusU</string>
               <string>Zurich</string>
-              <string>Zurich2</string>
+              <string>SpainTenerife</string>
               <string>Volos</string>
               <string>Budapest2</string>
               <string>SophiaAntipolis</string>
               <string>Poznan</string>
-              <string>Crete</string>
+              <string>Zurich2</string>
               <string>SaoPaulo</string>
+              <string>Crete</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -61,18 +63,31 @@ This job performs the Sanity Check on the region given as parameter:&#xd;
   <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
-      <command># Execute &apos;exec&apos; script
-./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh exec
+      <command># Execute &amp;apos;exec&amp;apos; script
+./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh exec</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command># WORKAROUND - Publish data into Master CB.
+
+MASTER_ADAPTER_URL=http://10.0.64.4:1337
+OUTPUT_NAME=${OS_REGION_NAME:-test}_results
+
+cd $FIHEALTH_SANITY_PROJECT
+echo &quot;Request to MASTER NGSI Adapter to change region status ($MASTER_ADAPTER_URL) ... &quot;
+curl &quot;$MASTER_ADAPTER_URL/sanity_tests?id=$OS_REGION_NAME&amp;type=region&quot; -o /dev/null -s -S \
+		--write-out &quot;HTTP %{http_code} result from %{url_effective}\n&quot; \
+		--header &apos;Content-Type: text/plain&apos; --data-binary @$OUTPUT_NAME.txt
 </command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>$FIHEALTH_SANITY_PROJECT/*_results.*</artifacts>
+      <artifacts>**/*${OS_REGION_NAME}*.html,**/*${OS_REGION_NAME}*.log,**/*${OS_REGION_NAME}*.xml</artifacts>
       <allowEmptyArchive>true</allowEmptyArchive>
       <onlyIfSuccessful>false</onlyIfSuccessful>
       <fingerprint>false</fingerprint>
       <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
     </hudson.tasks.ArtifactArchiver>
   </publishers>
   <buildWrappers/>
