@@ -48,6 +48,7 @@
 #     JENKINS_HOME			home path of Jenkins CI
 #     JENKINS_USER          username of the Jenkins CI
 #     JENKINS_PASSWORD      password of the Jenkins CI
+#     JENKINS_URL           URL of the Jenkins CI
 #     JOB_URL				full URL for this build job
 #     TEST_PHONEHOME_ENDPOINT		endpoint of supporting PhoneHome server
 #     FIHEALTH_WORKSPACE		default value for --workspace
@@ -259,6 +260,12 @@ if [ -z "$JENKINS_USER" -o -z "$JENKINS_PASSWORD" ]; then
 	exit 3
 fi
 
+# Check FIHealth environment variables for Jenkins
+if [ -z "$JENKINS_URL" ]; then
+	printf "The environment variable JENKINS_URL is not defined\n" 1>&2
+	exit 3
+fi
+
 # Check python2.7 and virtualenv
 if ! which python2.7 virtualenv >/dev/null 2>&1; then
 	printf "python2.7 or virtualenv not found\n" 1>&2
@@ -311,17 +318,35 @@ setup)
 	make
 	make install
 
+	# Extract the URL of the Jenkins from the JENKINS_URL environment variable.
+	# It has the format 'http://somehost:someport/' and we get only somehost:someport
+	re1="(http?)://([^\s/$.?#]*.[^\s]*)/"
+	re2="([^\s/$.?#]*.[^\s]*:[0-9]*)"
+
+	if [[ $JENKINS_URL =~ $re1 ]]; then
+	    # First, check if the URL has the format http://somehost:someport/
+	    JENKINSURL=${BASH_REMATCH[2]};
+	elif [[ $JENKINS_URL =~ $re2 ]]; then
+	    # Second, check if the URL has the format somehost:sopeport
+	    JENKINSURL=${BASH_REMATCH[1]};
+	else
+	    printf "Malformed JENKINS_URL environment variable\n" 1>&2
+	    printf "Expected value 'http://somehost:someport/' or 'somehost:someport'\n" 1>&2
+	    printf "Current value: '$JENKINS_URL'\n" 1>&2
+	    exit 4
+    fi
+
 	# Update Restart job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-0-RestartTestServers/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml"
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-0-RestartTestServers/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml"
 
 	# Update SetUp job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-0-SetUp/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml"
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-0-SetUp/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml"
 
 	# Update Flow job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-1-Flow/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-1-Flow.xml"
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-1-Flow/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-1-Flow.xml"
 
 	# Update Exec job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@127.0.0.1:8080/job/FIHealth-SanityCheck-2-Exec-Region/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-2-Exec-Region.xml"
+	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-2-Exec-Region/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-2-Exec-Region.xml"
 
 	# Restart PhoneHome server
 	restart_phone_home_server
