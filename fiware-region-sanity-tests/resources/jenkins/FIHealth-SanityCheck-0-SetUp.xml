@@ -1,19 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>&lt;h3&gt;FIHealth - Sanity Check SetUp&lt;/h3&gt;&#xd;
-This job performs the initial setup procedure for Sanity Check execution&#xd;
+  <description>&lt;h3&gt;FIWARE-Health - Region Sanity Check&lt;/h3&gt;&#xd;
+This Job executes the SetUp procedure for Sanity Check execution&#xd;
 &lt;ul&gt;&#xd;
-  &lt;li&gt;Prepare workspace&lt;/li&gt;&#xd;
-  &lt;li&gt;Download tests from fiware-health repository&lt;/li&gt;&#xd;
+  &lt;li&gt;Create workspace&lt;/li&gt;&#xd;
+  &lt;li&gt;Download source code from Fiware-Health repository&lt;/li&gt;&#xd;
   &lt;li&gt;Clean all generated test data (*.html, *.txt, *.xml)&lt;/li&gt;&#xd;
-  &lt;li&gt;Create a Python virtualenv as test environment&lt;/li&gt;&#xd;
-  &lt;li&gt;Install package requirements&lt;/li&gt;&#xd;
+  &lt;li&gt;Create Virtualenv and configures the test environment&lt;/li&gt;&#xd;
+  &lt;li&gt;Install all project requirements&lt;/li&gt;&#xd;
 &lt;/ul&gt;&#xd;
 &#xd;
-&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests&lt;br&gt;&#xd;
-&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/master/fiware-region-sanity-tests/README.rst&#xd;
-</description>
+&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
   <logRotator class="hudson.tasks.LogRotator">
     <daysToKeep>7</daysToKeep>
     <numToKeep>14</numToKeep>
@@ -22,23 +21,22 @@ This job performs the initial setup procedure for Sanity Check execution&#xd;
   </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties/>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <scm class="hudson.scm.NullSCM"/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.3.5">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/telefonicaid/fiware-health.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -48,47 +46,11 @@ This job performs the initial setup procedure for Sanity Check execution&#xd;
   <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
-      <command>#!/bin/sh
-
-# Workaround to spawn processes from build (https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build)
+      <command># Workaround to spawn processes from build (https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build)
 BUILD_ID=dontKillMe
 
-
-# Very first run: download tests from GitHub repository
-if [ ! -d $WORKSPACE/.git ]; then
-	git clone --branch=master https://github.com/telefonicaid/fiware-health.git $WORKSPACE
-	cd $FIHEALTH_SANITY_PROJECT
-	printf 1&gt;&amp;2 &quot;\n[WARNING] Check configuration at $PWD/resources and re-run this job\n\n&quot;
-	exit 1
-fi
-
-# Subsequent runs: only upgrade tests if configuration backup exists
-cd $FIHEALTH_SANITY_PROJECT
-if [ -d resources.backup ]; then
-	git fetch
-	git pull origin master
-else
-	mkdir resources.backup
-	cp resources/*.conf resources.backup
-	cp resources/*.json resources.backup
-	printf &quot;\n[INFO] Copy of configuration files stored in $PWD/resources.backup\n\n&quot;
-fi
-
-# Check for configuration differences and restore backup if needed
-EXCLUDE_SUBDIRS=$(cd resources; for i in `ls -d */`; do echo -x ${i%/}; done)
-if ! diff -r $EXCLUDE_SUBDIRS resources resources.backup &gt;/dev/null; then
-	printf 1&gt;&amp;2 &quot;\n[WARNING] Change in configuration detected:&quot;
-	printf 1&gt;&amp;2 &quot;\n- Configuration restored from $PWD/resources.backup&quot;
-	printf 1&gt;&amp;2 &quot;\n- Check $PWD/resources and re-run this job\n\n&quot;
-	cp resources.backup/*.conf resources
-	cp resources.backup/*.json resources
-	rm -rf resources.backup
-	exit 1
-fi
-
-# Perform setup
-./resources/scripts/jenkins.sh setup
-</command>
+# Execute &amp;apos;setup&amp;apos; script
+./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh setup</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
