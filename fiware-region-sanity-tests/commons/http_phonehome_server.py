@@ -91,7 +91,7 @@ class PhoneHome():
 
 def handle_error():
     cherrypy.response.status = 500
-    cherrypy.response.body = ""
+    cherrypy.response.body = "Internal Server Error"
     print(_cperror.format_exc())
 
 
