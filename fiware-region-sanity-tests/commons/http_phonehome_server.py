@@ -120,7 +120,6 @@ class HttpPhoneHomeServer():
         self.timeout = timeout
         self.port = port
 
-
     def start_forever(self):
         """
         Starts the server. Forever...
@@ -174,7 +173,7 @@ if __name__ == '__main__':
 
     if not phonehome_endpoint:
         logger.error("No value found for '%s.%s' setting. Phonehome server will NOT be launched",
-                       PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT)
+                     PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT)
         sys.exit(1)
 
     phonehome_port = urlparse.urlsplit(phonehome_endpoint).port
