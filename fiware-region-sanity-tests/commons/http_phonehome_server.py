@@ -21,7 +21,8 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+import cherrypy
+from cherrypy import _cperror
 import logging
 import json
 from os import environ
@@ -37,9 +38,11 @@ import logging.config
 dbus_server = None
 
 
-class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
+class PhoneHome():
+    exposed = True
 
-    def do_POST(self):
+    @cherrypy.tools.accept(media='text/plain')
+    def POST(self):
         """
         Manages a POST request. Phonehome service.
           Emits a new DBus signal to the PhoneHome object published.
@@ -49,35 +52,53 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
 
         global dbus_server
 
-        content_length = int(self.headers['Content-Length'])
-        content = self.rfile.read(content_length)
+        content_length = int(cherrypy.request.headers['Content-Length'])
+        content = cherrypy.request.body.read(content_length)
 
-        transaction_id = "txid:" + self.headers['TransactionId']
+        transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
 
+        path = cherrypy.request.path_info
 
         # Get data from body
         if content:
-            if self.path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
-                if "Hostname" in self.headers:
-                    hostname = self.headers['Hostname']
+            if path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
+
+                if "Hostname" in cherrypy.request.headers:
+                    hostname = cherrypy.request.headers['Hostname']
 
                     dbus_server.logdebug("{0} - Sending signal to hostname: {1}".format(transaction_id, hostname))
                     dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH, hostname, transaction_id)
-                    self.send_response(200)
+                    cherrypy.response.status = 200
+                    return
                 else:
-                    self.send_response(400, message=transaction_id + " - Hostname header is not present in HTTP " \
-                                                                    "PhoneHome request")
+                    cherrypy.response.status = 400
+                    return transaction_id + " - Hostname header is not present in HTTP PhoneHome request"
 
-            elif self.path == PHONEHOME_DBUS_OBJECT_PATH:
+            elif path == PHONEHOME_DBUS_OBJECT_PATH:
                 dbus_server.logdebug("{0} - Sending signal".format(transaction_id))
                 dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None, transaction_id)
-                self.send_response(200)
+                cherrypy.response.status = 200
+                return
             else:
-                self.send_response(404, message=transaction_id + " - Path not found for HTTP PhoneHome request")
+                cherrypy.response.status = 404
+                return transaction_id + " - Path not found for HTTP PhoneHome request"
 
         else:
             # Bad Request
-            self.send_response(400, message=transaction_id + " - Invalid data received in HTTP PhoneHome request")
+            cherrypy.response.status = 400
+            return transaction_id + " - Invalid data received in HTTP PhoneHome request"
+
+
+def handle_error():
+    cherrypy.response.status = 500
+    cherrypy.response.body = ""
+    print(_cperror.format_exc())
+
+
+class Root(object):
+
+    _cp_config = {'request.error_response': handle_error}
+    pass
 
 
 class HttpPhoneHomeServer():
@@ -96,16 +117,9 @@ class HttpPhoneHomeServer():
         """
         self.logger = logger
         self.logger.debug("Creating PhoneHome Server. Port %d; Timeout: %s", port, str(timeout))
-        self.server = HTTPServer(('', port), HttpPhoneHomeRequestHandler)
-        self.server.timeout = timeout
+        self.timeout = timeout
+        self.port = port
 
-    def start_single_request(self):
-        """
-        Starts the server. Only waits for ONE request.
-        :return:
-        """
-        self.logger.debug("Waiting for ONE call...")
-        self.server.handle_request()
 
     def start_forever(self):
         """
@@ -113,7 +127,28 @@ class HttpPhoneHomeServer():
         :return:
         """
         self.logger.debug("Waiting for calls...")
-        self.server.serve_forever()
+        conf = {
+            'global': {
+                'server.socket_host': '0.0.0.0',
+                'server.socket_port': self.port,
+            },
+            '/': {
+                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                'response.timeout': self.timeout,
+                'tools.sessions.on': True,
+                'tools.response_headers.on': True,
+                'tools.response_headers.headers': [('Content-Type', 'text/plain')],
+            }
+
+        }
+        root = Root()
+        root.phonehome = PhoneHome()
+        root.metadata = PhoneHome()
+
+        cherrypy.log.error_log.propagate = False
+        cherrypy.log.access_log.propagate = False
+        cherrypy.log.screen = None
+        cherrypy.quickstart(root, '/', conf)
 
 if __name__ == '__main__':
 
