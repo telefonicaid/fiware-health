@@ -269,7 +269,8 @@ class FiwareNovaOperations:
                 break
 
             self.logger.debug("Waiting (#%d) for status %s of instance %s (current is %s)...",
-                              i+1, expected_status, server_id, server_data['status'])
+                              i + 1, expected_status, server_id, server_data['status'])
+
             time.sleep(SLEEP_TIME)
 
         self.logger.debug("Status of instance %s is %s", server_id, server_data['status'])

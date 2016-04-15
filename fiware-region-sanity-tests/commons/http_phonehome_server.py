@@ -54,7 +54,6 @@ class HttpPhoneHomeRequestHandler(BaseHTTPRequestHandler):
 
         transaction_id = "txid:" + self.headers['TransactionId']
 
-
         # Get data from body
         if content:
             if self.path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
