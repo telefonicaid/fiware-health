@@ -23,6 +23,7 @@
 
 import cherrypy
 from cherrypy import _cperror
+import httplib
 import logging
 import json
 from os import environ
@@ -68,29 +69,29 @@ class PhoneHome():
 
                     dbus_server.logdebug("{0} - Sending signal to hostname: {1}".format(transaction_id, hostname))
                     dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH, hostname, transaction_id)
-                    cherrypy.response.status = 200
+                    cherrypy.response.status = httplib.OK
                     return
                 else:
-                    cherrypy.response.status = 400
+                    cherrypy.response.status = httplib.BAD_REQUEST
                     return transaction_id + " - Hostname header is not present in HTTP PhoneHome request"
 
             elif path == PHONEHOME_DBUS_OBJECT_PATH:
                 dbus_server.logdebug("{0} - Sending signal".format(transaction_id))
                 dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None, transaction_id)
-                cherrypy.response.status = 200
+                cherrypy.response.status = httplib.OK
                 return
             else:
-                cherrypy.response.status = 404
+                cherrypy.response.status = httplib.NOT_FOUND
                 return transaction_id + " - Path not found for HTTP PhoneHome request"
 
         else:
             # Bad Request
-            cherrypy.response.status = 400
+            cherrypy.response.status = httplib.BAD_REQUEST
             return transaction_id + " - Invalid data received in HTTP PhoneHome request"
 
 
 def handle_error():
-    cherrypy.response.status = 500
+    cherrypy.response.status = httplib.INTERNAL_SERVER_ERROR
     cherrypy.response.body = "Internal Server Error"
     print(_cperror.format_exc())
 
