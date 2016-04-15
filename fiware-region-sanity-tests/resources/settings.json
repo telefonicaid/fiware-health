@@ -43,7 +43,8 @@
             "Zurich2": "public-ext-net-01",
             "Crete": "public-ext-net-01",
             "SaoPaulo": "public-ext-net-01",
-            "Vicenza": "public-ext-net-01"
+            "Vicenza": "public-ext-net-01",
+            "ZurichS": "public-ext-net-01"
         },
         "shared_network_name": {
             "Spain2": "node-int-net-01",
@@ -64,13 +65,14 @@
             "Zurich2": "node-int-net-01",
             "Crete": "node-int-net-01",
             "SaoPaulo": "node-int-net-01",
-            "Vicenza": "node-int-net-01"
+            "Vicenza": "node-int-net-01",
+            "ZurichS": "node-int-net-01"
         },
         "test_flavor": {
             "Prague": "tiny"
         },
         "test_image": {
-	    "Lannion2": "CentOS-6.3init_deprecated"
+            "Lannion2": "CentOS-6.3init_deprecated"
         }
     },
     "key_test_cases": [ "test_(.*)" ],
