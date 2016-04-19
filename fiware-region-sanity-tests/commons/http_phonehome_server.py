@@ -68,7 +68,10 @@ class PhoneHome():
                     hostname = cherrypy.request.headers['Hostname']
 
                     dbus_server.logdebug("{0} - Sending signal to hostname: {1}".format(transaction_id, hostname))
-                    dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH, hostname, transaction_id)
+
+                    dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH,
+                                                      hostname, transaction_id)
+
                     cherrypy.response.status = httplib.OK
                     return
                 else:

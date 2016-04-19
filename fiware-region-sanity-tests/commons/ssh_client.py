@@ -90,7 +90,7 @@ class SSHClient():
         connected = False
         for i in range(MAX_WAIT_SSH_CONNECT_ITERATIONS):
             try:
-                self.logger.debug("Attempt (#%d) for SSH connection to %s", i+1, self.host)
+                self.logger.debug("Attempt (#%d) for SSH connection to %s", i + 1, self.host)
                 self.connect()
             except socket.error as e:
                 self.logger.debug("SSH connection error. Error: %s; Message: %s", str(e.strerror), str(e.message))

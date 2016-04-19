@@ -578,6 +578,10 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_METADATA_PATH,
                                                               PHONEHOME_METADATA_SIGNAL, expected_instance_name)
+
+        # First, check that the DBus is registered on the system
+        self.assertNotEqual(result, False, "PhoneHome bus or object not found. Please check the PhoneHome services.")
+
         self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
         self.logger.debug("Request received from VM when 'calling home': %s", result)
 
