@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2013-2015 Telefónica I+D
+# Copyright 2013-2016 Telefónica I+D
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -26,6 +26,7 @@
 # Options:
 #     -h, --help			show this help message
 #     -w, --workspace=PATH		absolute path of Jenkins job workspace
+#     -y, --history=PATH		absolute path of history of executions
 #     -t, --htdocs=PATH			absolute path where to publish HTML
 #     -a, --adapter-url=URL		endpoint of NGSI Adapter
 #     -c, --cb-url=URL			endpoint of ContextBroker
@@ -46,12 +47,13 @@
 #
 # Environment:
 #     JENKINS_HOME			home path of Jenkins CI
-#     JENKINS_USER          username of the Jenkins CI
-#     JENKINS_PASSWORD      password of the Jenkins CI
-#     JENKINS_URL           URL of the Jenkins CI
+#     JENKINS_USER 			username of the Jenkins CI
+#     JENKINS_PASSWORD			password of the Jenkins CI
+#     JENKINS_URL			URL of the Jenkins CI
 #     JOB_URL				full URL for this build job
 #     TEST_PHONEHOME_ENDPOINT		endpoint of supporting PhoneHome server
 #     FIHEALTH_WORKSPACE		default value for --workspace
+#     FIHEALTH_HISTORY			default value for --history
 #     FIHEALTH_HTDOCS			default value for --htdocs
 #     FIHEALTH_ADAPTER_URL		default value for --adapter-url
 #     FIHEALTH_CB_URL			default value for --cb-url
@@ -76,6 +78,7 @@ NAME=$(basename $0)
 OPTS=`tr -d '\n ' <<END
       h(help)
       w(workspace):
+      y(history):
       t(htdocs):
       a(adapter-url):
       c(cb-url):
@@ -99,6 +102,7 @@ OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0)
 while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
 case $OPT in
 'w')	FIHEALTH_WORKSPACE=$OPTARG;;
+'y')	FIHEALTH_HISTORY=$OPTARG;;
 't')	FIHEALTH_HTDOCS=$OPTARG;;
 'a')	FIHEALTH_ADAPTER_URL=$OPTARG;;
 'c')	FIHEALTH_CB_URL=$OPTARG;;
@@ -136,9 +140,19 @@ ACTION=$(expr "$1" : "^\(setup\|restart\|exec\)$") && shift
 	exit 1
 }
 
-# This function updates the value of the sanity_check_elapsed_time
-# context attribute in ContextBroker with the time value
-# given by params.
+# Move reports of region $1 to history of executions, with timestamp prepended
+function move_reports_to_history() {
+	local region=$1
+	local timestamp=$(ls -l --time-style='+%Y%m%d%H%M' ${region}_results.txt 2>/dev/null | cut -d' ' -f6)
+	local histreport=$FIHEALTH_HISTORY/${timestamp}_${region}_results.txt
+	if [ -n "$region" -a -n "$FIHEALTH_HISTORY" ]; then
+		printf "$region previous report stored as $histreport\n"
+		mv ${region}_results.txt $histreport
+		rm ${region}_results.*
+	fi
+}
+
+# Update value of sanity_check_elapsed_time context attribute in ContextBroker
 function update_elapsed_time_context_broker() {
 	local sc_elapsed_time=$1
 	local region=$OS_REGION_NAME
@@ -288,7 +302,7 @@ cd $PROJECT_DIR
 # Perform action
 case $ACTION in
 setup)
-	# Start prepare action
+	# Start "setup" action
 	printf "Starting FIHealth Sanity Checks environment preparation ...\n"
 
 	# Clean previous reports
@@ -297,6 +311,9 @@ setup)
 	# Clean and re-create virtualenv
 	rm -rf $VIRTUALENV
 	virtualenv -p python2.7 $VIRTUALENV
+
+	# Create directory for history of executions, if needed
+	[ -n "$FIHEALTH_HISTORY" ] && mkdir -p $FIHEALTH_HISTORY
 
 	# Install dependencies in virtualenv
 	source $VIRTUALENV/bin/activate
@@ -324,17 +341,17 @@ setup)
 	re2="([^\s/$.?#]*.[^\s]*:[0-9]*)"
 
 	if [[ $JENKINS_URL =~ $re1 ]]; then
-	    # First, check if the URL has the format http://somehost:someport/
-	    JENKINSURL=${BASH_REMATCH[2]};
+		# First, check if the URL has the format http://somehost:someport/
+		JENKINSURL=${BASH_REMATCH[2]};
 	elif [[ $JENKINS_URL =~ $re2 ]]; then
-	    # Second, check if the URL has the format somehost:sopeport
-	    JENKINSURL=${BASH_REMATCH[1]};
+		# Second, check if the URL has the format somehost:sopeport
+		JENKINSURL=${BASH_REMATCH[1]};
 	else
-	    printf "Malformed JENKINS_URL environment variable\n" 1>&2
-	    printf "Expected value 'http://somehost:someport/' or 'somehost:someport'\n" 1>&2
-	    printf "Current value: '$JENKINS_URL'\n" 1>&2
-	    exit 4
-    fi
+		printf "Malformed JENKINS_URL environment variable\n" 1>&2
+		printf "Expected value 'http://somehost:someport/' or 'somehost:someport'\n" 1>&2
+		printf "Current value: '$JENKINS_URL'\n" 1>&2
+		exit 4
+	fi
 
 	# Update Restart job
 	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-0-RestartTestServers/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml"
@@ -369,6 +386,9 @@ exec)
 	# Optionally restrict tests to a region (leave empty for all)
 	REGIONS=$OS_REGION_NAME
 	OUTPUT_NAME=${OS_REGION_NAME:-test}_results
+
+	# In single region tests, move previous reports to history of executions
+	move_reports_to_history $OS_REGION_NAME
 
 	# In single region tests, change status to 'Maintenance'
 	change_status
