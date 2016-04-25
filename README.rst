@@ -2,7 +2,7 @@
  FIWARE Health
 ===============
 
-|Build Status| |Coverage Status| |StackOverflow| |License|
+|License| |StackOverflow| |Build Status| |Coverage Status|
 
 
 This is the code repository for **FIHealth**, a tool to check the status of
@@ -43,11 +43,12 @@ License
 .. |Coverage Status| image:: https://img.shields.io/coveralls/telefonicaid/fiware-health/develop.svg
    :target: https://coveralls.io/r/telefonicaid/fiware-health
    :alt: Coverage Status
-.. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
+.. |StackOverflow| image:: https://img.shields.io/badge/support-sof-yellowgreen.svg
    :target: https://stackoverflow.com/questions/tagged/fiware-health
    :alt: StackOverflow questions
 .. |License| image:: http://b.repl.ca/v1/license-Apache_2.0-blue.png
-   :alt: License
+   :target: LICENSE
+   :alt: Apache 2.0 License
 
 .. REFERENCES
 
