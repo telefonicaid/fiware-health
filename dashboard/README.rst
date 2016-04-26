@@ -66,7 +66,7 @@ Using FIWARE package repository (recommended)
 
 Refer to the documentation of your Linux distribution to set up the URL of the
 repository where FIWARE packages are available (and update cache, if needed).
-Currently, ``http://repositories.testbed.fiware.org/repo/rpm/x86_64``
+Currently, ``http://repositories.lab.fiware.org/repo/rpm``
 
 Then, use the package tool to install ``fiware-fihealth-dashboard``::
 
