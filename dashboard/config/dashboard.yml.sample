@@ -39,7 +39,6 @@ cbroker:
 #----------------------------------------------------------------------------
 # IdM OAuth2 section (mandatory)
 #----------------------------------------------------------------------------
-
 idm:
   clientId: ''				# Id after registering app in IdM
   clientSecret: ''			# Secret key of the registered app

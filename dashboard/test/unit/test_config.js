@@ -25,15 +25,12 @@ var assert = require('assert'),
 /* jshint multistr: true */
 suite('config', function () {
 
-
     test('should_return_valid_config', function () {
         //Given
         var filename = path.join(__dirname, 'test_config.yml');
 
         //When
-
         var result = config.readConfigFile(filename);
-
 
         //Then
         assert.deepEqual(['INFO', 'Read configuration file'], result);
@@ -45,22 +42,17 @@ suite('config', function () {
         assert.equal(config.data.jenkins.path, '/jenkins/job/fiware_job1');
         assert.equal(config.data.jenkins.parameterName, 'REGION_NAME');
         assert.equal(config.data.default, false);
-
     });
 
-
-      test('should_fail_with_invalid_path', function () {
+    test('should_fail_with_invalid_path', function () {
         //Given
         var invalidFilename = path.join(__dirname, 'kk.yml');
 
         //When
         var result = config.readConfigFile(invalidFilename);
 
-
         //Then
         assert.deepEqual(['WARN', 'Could not read configuration file'], result);
-
     });
-
 
 });

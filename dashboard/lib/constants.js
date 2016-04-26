@@ -28,3 +28,6 @@ module.exports.GLOBAL_STATUS_OK = 'OK';
 
 /** @export */
 module.exports.GLOBAL_STATUS_OTHER = 'N/A';
+
+/** @export */
+module.exports.TRANSACTION_ID_HEADER = 'txid';

@@ -16,13 +16,17 @@
  */
 'use strict';
 
-var express = require('express'),
+var cuid = require('cuid'),
+    express = require('express'),
     router = express.Router(),
-    cbroker = require('./cbroker'),
-    logger = require('../logger'),
     subscribe = require('./subscribe'),
+    cbroker = require('./cbroker'),
+    constants = require('../constants'),
+    jenkins = require('../jenkins'),
+    logger = require('../logger'),
     config = require('../config').data,
     common = require('./common');
+
 
 var MESSAGE = 'Page cannot be displayed due to a Context Broker error (connection timed out or service was down).';
 
@@ -40,17 +44,19 @@ function compare(a, b) {
     if (a.node < b.node) {
         return -1;
     }
-      // a must be equal to b
+    // a must be equal to b
     return 0;
 }
 
 
 /**
- *
  * @param {*} req
  * @param {*} res
  */
 function getIndex(req, res) {
+
+    var txid = req.headers[constants.TRANSACTION_ID_HEADER.toLowerCase()] || cuid(),
+        context = {trans: txid, op: 'index#get'};
 
     /**
      * callback for cbroker.retrieveAllRegions
@@ -58,68 +64,97 @@ function getIndex(req, res) {
      */
     function callbackRetrieveRegions(regions) {
 
-
-        logger.info({op: 'index#get'}, 'Regions: %j', regions);
+        logger.info(context, 'Regions: %j', regions);
 
         var userinfo = req.session.user;
 
-        logger.info({op: 'index#get'}, 'User info: %j', userinfo);
+        logger.info(context, 'User info: role=%s %j', req.session.role, userinfo);
 
         regions.sort(compare);
 
         if (userinfo !== undefined) {
             //search for subscription
 
-            logger.debug({op: 'index#get'}, 'Regions: %s', regions.constructor.name);
+            logger.debug(context, 'Regions: %s', regions.constructor.name);
 
             if (regions.length === 0) {
-                res.render('error', {name: userinfo.displayName, role: req.session.role,
+                res.render('error', {
+                    name: userinfo.displayName,
+                    role: req.session.role,
                     message: MESSAGE,
-                    logoutUrl: config.idm.logoutURL, error: {status: '', message: 'cb timeout'} });
+                    logoutUrl: config.idm.logoutURL,
+                    error: {
+                        status: '',
+                        message: 'cb timeout'
+                    }
+                });
                 return;
             }
 
             var afterSearchCallback = function () {
-
                 regions = common.addAuthorized(regions, userinfo.displayName);
-
-                logger.debug('before render: %s', JSON.stringify(regions));
-                console.log({name: userinfo.displayName, regions: regions, role: req.session.role});
-                res.render('logged', {name: userinfo.displayName, regions: regions, role: req.session.role,
-                    logoutUrl: config.idm.logoutURL});
-
+                logger.debug(context, 'before render: %s', JSON.stringify(regions));
+                res.render('logged', {
+                    name: userinfo.displayName,
+                    regions: regions,
+                    role: req.session.role,
+                    logoutUrl: config.idm.logoutURL
+                });
             };
 
             subscribe.searchSubscription(userinfo.email, regions, afterSearchCallback);
 
-
         } else {
+
             if (regions.length === 0) {
-                res.render('error', {name: 'sign in', role: req.session.role, logoutUrl: config.idm.logoutURL,
+                res.render('error', {
+                    name: 'sign in',
+                    role: req.session.role,
+                    logoutUrl: config.idm.logoutURL,
                     message: MESSAGE,
-                    error: {status: '', message: 'cb timeout'} });
+                    error: {
+                        status: '',
+                        message: 'cb timeout'
+                    }
+                });
                 return;
             }
-            res.render('index', {name: 'sign in', regions: regions, role: req.session.role,
-                logoutUrl: config.idm.logoutURL});
+
+            res.render('index', {
+                name: 'sign in',
+                regions: regions,
+                role: req.session.role,
+                logoutUrl: config.idm.logoutURL
+            });
 
         }
     }
 
-    cbroker.retrieveAllRegions(callbackRetrieveRegions);
-
+    cbroker.retrieveAllRegions(txid, function (regions) {
+        // Update region sanity_status to `GLOBAL_STATUS_OTHER` for those currently in progress
+        jenkins.regionJobsInProgress(txid, function (progress) {
+            if (progress) {
+                regions.forEach(function (region) {
+                    if (progress[region.node] === true) {
+                        region.status = constants.GLOBAL_STATUS_OTHER;
+                    }
+                });
+            }
+            callbackRetrieveRegions(regions);
+        });
+    });
 }
 
 
 /* GET home page. */
 router.get('/', getIndex);
 
+
 /** @export */
 module.exports = router;
 
 /** @export */
 module.exports.getIndex = getIndex;
+
 /** @export */
 module.exports.compare = compare;
-
-

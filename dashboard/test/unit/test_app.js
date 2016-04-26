@@ -117,9 +117,8 @@ suite('app', function () {
         assert(monascaStub.notCalled);
     });
 
-    test('should_close_session_with_get_logout', function() {
+    test('should_close_session_with_get_logout', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
 
@@ -136,12 +135,10 @@ suite('app', function () {
         assert.equal(undefined, req.session.role);
         assert(res.clearCookie.calledWith('oauth_token'));
         assert(res.clearCookie.calledWith('expires_in'));
-
     });
 
-    test('should_signin_with_token_in_get_signin', function() {
+    test('should_signin_with_token_in_get_signin', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
 
@@ -151,18 +148,15 @@ suite('app', function () {
         var oa = sinon.stub();
         oa.get = sinon.stub();
 
-
         //when
         app.getSignin(req, res, oa);
 
         //then
         assert(oa.get.calledOnce);
-
     });
 
-    test('should_signin_without_token_in_get_signin', function() {
+    test('should_signin_without_token_in_get_signin', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
 
@@ -173,19 +167,16 @@ suite('app', function () {
         var path = 'http://localhost/oauth2';
         oa.getAuthorizeUrl = sinon.stub().returns(path);
 
-
         //when
         app.getSignin(req, res, oa);
 
         //then
         assert(oa.getAuthorizeUrl.calledOnce);
         assert(res.redirect.withArgs(path).calledOnce);
-
     });
 
-    test('should_check_token_with_valid_token', function() {
+    test('should_check_token_with_valid_token', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
         var next = sinon.stub();
@@ -197,14 +188,12 @@ suite('app', function () {
         app.checkToken(req, res, next, 'debug message');
 
         //then
-
         assert(next.calledOnce);
     });
 
 
-    test('should_check_token_with_invalid_token', function() {
+    test('should_check_token_with_invalid_token', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
         var next = sinon.stub();
@@ -213,19 +202,16 @@ suite('app', function () {
         req.session.accessToken = undefined;
         var commonStub = sinon.stub(common, 'notAuthorized');
 
-
         //when
         app.checkToken(req, res, next, 'debug message');
 
         //then
         assert(commonStub.calledOnce);
         commonStub.restore();
-
     });
 
-    test('should_getAuthAccessToken_in_get_login', function() {
+    test('should_getAuthAccessToken_in_get_login', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
 
@@ -235,18 +221,15 @@ suite('app', function () {
         var oa = sinon.stub();
         oa.getOAuthAccessToken = sinon.stub();
 
-
         //when
         app.getLogin(req, res, oa);
 
         //then
         assert(oa.getOAuthAccessToken.calledOnce);
-
     });
 
-    test('should_redirect_without_results_getOAuthAccessToken_callback', function() {
+    test('should_redirect_without_results_getOAuthAccessToken_callback', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
         var oauth2 = sinon.stub();
@@ -258,14 +241,11 @@ suite('app', function () {
         app.getOAuthAccessTokenCallback(results, req, res, oauth2);
 
         //then
-
         assert(res.redirect.calledOnce);
-
     });
 
-    test('should_call_to_oauth2_get_in_getOAuthAccessToken_callback', function() {
+    test('should_call_to_oauth2_get_in_getOAuthAccessToken_callback', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
         var oauth2 = sinon.stub();
@@ -277,64 +257,49 @@ suite('app', function () {
         results.accessToken = '13123213123123';
         oauth2.get = sinon.stub();
 
-
         //when
         app.getOAuthAccessTokenCallback(results, req, res, oauth2);
 
         //then
-
         assert(oauth2.get.calledOnce);
-
     });
 
-
-    test('should_parse_and_redirect_oauth_get_callback', function() {
+    test('should_parse_and_redirect_oauth_get_callback', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
 
         req.session = sinon.stub();
-
         res.redirect = sinon.spy();
         var response = '{"organizations": [], "displayName": "kk@domain.com", "roles": ' +
             '[{"name": "Admin", "id": "123123dd"}, {"name": "Superuser", "id": "123123231"}],' +
             '"app_id": "1231231321321", "email": "kk@domain.com", "id": "123123123123"}';
 
-
         //when
         app.oauthGetCallback(response, req, res);
 
         //then
-
         assert(res.redirect.calledOnce);
         assert.equal(req.session.role, 'superuser');
-
-
     });
 
-    test('should_reset_and_redirect_in_oauth_get_callback', function() {
+    test('should_reset_and_redirect_in_oauth_get_callback', function () {
         //given
-
         var req = sinon.stub();
         var res = sinon.stub();
 
         req.session = sinon.stub();
-
         res.redirect = sinon.spy();
         var response;
-
 
         //when
         app.oauthGetCallback(response, req, res);
 
         //then
-
         assert(res.redirect.calledOnce);
         assert.equal(req.session.user, undefined);
         assert.equal(req.session.role, undefined);
         assert.equal(req.session.accessToken, undefined);
-
     });
 
 });
