@@ -16,8 +16,6 @@
  */
 
 'use strict';
-/*jshint camelcase: false */
-
 
 var util = require('util'),
     logger = require('./logger'),
@@ -37,6 +35,8 @@ function regionJobsInProgress(txid, callback) {
         progress = {};
 
     logger.info(context, 'checking all jobs "%s" in progress', jobName);
+
+    /* jshint camelcase: false */
     jenkins.job_info(jobName, function (err, job) {
         if (err) {
             callback();

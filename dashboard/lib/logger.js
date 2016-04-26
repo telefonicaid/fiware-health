@@ -15,16 +15,14 @@
  * under the License.
  */
 
+'use strict';
+
 
 /**
  * Module for logging.
  *
  * @module logger
  */
-
-
-'use strict';
-/* jshint -W072 */
 
 
 var util = require('util'),
