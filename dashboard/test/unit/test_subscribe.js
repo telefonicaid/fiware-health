@@ -14,19 +14,19 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
-
 var assert = require('assert'),
-    subscribe = require('../../lib/routes/subscribe'),
     sinon = require('sinon'),
-    http = require('http'),
     EventEmitter = require('events').EventEmitter,
-    logger = require('../../lib/logger');
+    http = require('http'),
+    init = require('./init'),
+    logger = require('../../lib/logger'),
+    subscribe = require('../../lib/routes/subscribe');
 
 
-
-/* jshint multistr: true */
+/* jshint unused: false */
 suite('subscribe', function () {
 
     suiteSetup(function() {

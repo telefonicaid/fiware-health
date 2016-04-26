@@ -14,89 +14,99 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var assert = require('assert'),
     sinon = require('sinon'),
+    logger = require('../../lib/logger'),
+    jenkinsApi = require('./init').jenkinsApi,
+    jenkins = require('../../lib/jenkins'),
     cbroker = require('../../lib/routes/cbroker'),
     index = require('../../lib/routes/index');
 
 
-
-
-/* jshint multistr: true */
+/* jshint unused: false */
 suite('index', function () {
 
+    var stream = logger.stream;
+
+    suiteSetup(function () {
+        logger.stream = require('dev-null')();
+        this.jenkinsStub = sinon.stub(jenkins, 'regionJobsInProgress', function (txid, callback) {
+            callback({});
+        });
+    });
+
+    suiteTeardown(function () {
+        logger.stream = stream;
+        this.jenkinsStub.restore();
+    });
+
+    setup(function () {
+        this.request = {headers: []};
+        this.response = {};
+    });
+
+    teardown(function () {
+        delete this.request;
+        delete this.response;
+    });
 
     test('test_get_index', function () {
         //given
-
-        var req = sinon.stub();
-        var res = sinon.stub();
-        var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions');
-
+        var req = this.request,
+            res = this.response,
+            cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions');
 
         //when
         index.getIndex(req, res);
 
         //then
-        assert(cbrokerStub.calledOnce);
         cbrokerStub.restore();
-
-
+        assert(cbrokerStub.calledOnce);
     });
 
     test('should_retrieveAllRegions_with_empty_region_list', function () {
-
         //given
-
-        var req = sinon.stub();
-        var res = sinon.stub();
-        var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions', function (callback) {
-
-            req.session = sinon.spy();
-            req.session.user = undefined;
-            res.render = sinon.spy();
-            callback([]);
-        });
+        var req = this.request,
+            res = this.response,
+            cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions', function (txid, callback) {
+                req.session = {user: undefined};
+                res.render = sinon.spy();
+                callback([]);
+            });
 
         //when
         index.getIndex(req, res);
 
         //then
+        cbrokerStub.restore();
         assert(cbrokerStub.calledOnce);
         assert(res.render.calledOnce);
-        cbrokerStub.restore();
-
     });
 
     test('should_retrieveAllRegions_with_empty_region_list_and_user_logged', function () {
-
         //given
-
-        var req = sinon.stub();
-        var res = sinon.stub();
-        var cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions', function (callback) {
-
-            req.session = sinon.spy();
-            req.session.user = {displayName: 'name01'};
-            res.render = sinon.spy();
-            callback([]);
-        });
+        var req = this.request,
+            res = this.response,
+            cbrokerStub = sinon.stub(cbroker, 'retrieveAllRegions', function (txid, callback) {
+                req.session = {user: {displayName: 'name01'}};
+                res.render = sinon.spy();
+                callback([]);
+            });
 
         //when
         index.getIndex(req, res);
 
         //then
+        cbrokerStub.restore();
         assert(cbrokerStub.calledOnce);
         assert(res.render.calledOnce);
-        cbrokerStub.restore();
-
     });
 
     test('should_return_1_when_first_argument_greater_than_second', function () {
         //given
-
         var a = { node: 'Zregion'};
         var b = { node: 'Aregion'};
 
@@ -105,12 +115,10 @@ suite('index', function () {
 
         //then
         assert(result === 1);
-
     });
 
     test('should_return_negative__when_first_argument_less_than_second', function () {
         //given
-
         var a = { node: 'Aregion'};
         var b = { node: 'Zregion'};
 
@@ -119,12 +127,10 @@ suite('index', function () {
 
         //then
         assert(result === -1);
-
     });
 
     test('should_return_0_when_first_argument_equal_than_second', function () {
         //given
-
         var a = { node: 'Aregion'};
         var b = { node: 'Aregion'};
 
@@ -133,8 +139,6 @@ suite('index', function () {
 
         //then
         assert(result === 0);
-
     });
-
 
 });

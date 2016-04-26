@@ -14,15 +14,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+ 
 'use strict';
 
 var assert = require('assert'),
-    unsubscribe = require('../../lib/routes/unsubscribe'),
-    http = require('http'),
+    sinon = require('sinon'),
     EventEmitter = require('events').EventEmitter,
-    sinon = require('sinon');
+    http = require('http'),
+    init = require('./init'),
+    unsubscribe = require('../../lib/routes/unsubscribe');
 
-/* jshint multistr: true */
+
+/* jshint unused: false */
 suite('unsubscribe', function () {
 
 

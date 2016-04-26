@@ -14,17 +14,17 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var assert = require('assert'),
     sinon = require('sinon'),
     http = require('http'),
+    init = require('./init'),
     OAuth2 = require('../../lib/oauth2').OAuth2;
 
 
-
-
-/* jshint multistr: true */
+/* jshint unused: false */
 suite('oauth2', function () {
 
 

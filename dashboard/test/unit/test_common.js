@@ -14,15 +14,17 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var assert = require('assert'),
+    init = require('./init'),
     common = require('../../lib/routes/common'),
     constants = require('../../lib/constants'),
     config = require('../../lib/config').data;
 
 
-/* jshint multistr: true */
+/* jshint unused: false */
 suite('common', function () {
 
 

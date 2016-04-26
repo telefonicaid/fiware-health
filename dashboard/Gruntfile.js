@@ -154,7 +154,7 @@ module.exports = function (grunt) {
                     ignoreLeaks: false
                 },
                 src: [
-                    '<%= jshint.test.src %>'
+                    '<%= dirs.test[0] %>/unit/test_*.js'
                 ]
             },
             unitReport: {
@@ -165,7 +165,7 @@ module.exports = function (grunt) {
 
                 },
                 src: [
-                    '<%= jshint.test.src %>'
+                    '<%= dirs.test[0] %>/unit/test_*.js'
                 ]
             }
         },

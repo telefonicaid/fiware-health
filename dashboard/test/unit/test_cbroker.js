@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var fs = require('fs'),
@@ -25,7 +26,8 @@ var fs = require('fs'),
     cbroker = require('../../lib/routes/cbroker'),
     constants = require('../../lib/constants'),
     logger = require('../../lib/logger'),
-    config = require('../../lib/config').data;
+    config = require('../../lib/config').data,
+    init = require('./init');
 
 
 /**
@@ -38,37 +40,25 @@ assert.isNaN = function (value) {
 };
 
 
-/* jshint multistr: true */
+/* jshint unused: false, sub: true */
 suite('cbroker', function () {
 
     var stream = logger.stream;
 
     suiteSetup(function () {
-        this.sampleDataQueryContext = 'test/unit/post1.json';
-        this.sampleDataNotifyContext = 'test/unit/notify_post1.json';
         logger.stream = require('dev-null')();
-    });
-
-    suiteTeardown(function () {
-        logger.stream = stream;
-    });
-
-    setup(function () {
-        this.txid = cuid();
-    });
-
-    teardown(function () {
-        delete this.txid;
-    });
-
-    test('should_have_a_retrieveAllRegions_method', function () {
-        assert.equal(cbroker.retrieveAllRegions.name, 'retrieveAllRegions');
-    });
-
-    test('should_return_a_json_with_all_regions_and_status', function () {
-        //given
-        var json = JSON.parse(fs.readFileSync(this.sampleDataQueryContext, 'utf8'));
-        var expected = [
+        this.sampleDataNotifyContext = fs.readFileSync('test/unit/notify_post1.json', 'utf8');
+        this.sampleDataQueryContext = fs.readFileSync('test/unit/post1.json', 'utf8');
+        this.parsedRegionsNotifyContext = [
+            {
+                node: 'Region1',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: '0h, 2m, 40s',
+                elapsedTimeMillis: 160000
+            }
+        ];
+        this.parsedRegionsQueryContext = [
             {
                 node: 'ZRegionLongName1',
                 status: constants.GLOBAL_STATUS_NOT_OK,
@@ -105,9 +95,31 @@ suite('cbroker', function () {
                 elapsedTimeMillis: ''
             }
         ];
+    });
+
+    suiteTeardown(function () {
+        logger.stream = stream;
+    });
+
+    setup(function () {
+        this.txid = cuid();
+    });
+
+    teardown(function () {
+        delete this.txid;
+    });
+
+    test('should_have_a_retrieveAllRegions_method', function () {
+        assert.equal(cbroker.retrieveAllRegions.name, 'retrieveAllRegions');
+    });
+
+    test('should_return_a_json_with_all_regions_and_status', function () {
+        //given
+        var entities = JSON.parse(this.sampleDataQueryContext),
+            expected = this.parsedRegionsQueryContext;
 
         //when
-        var result = cbroker.parseRegions(this.txid, json);
+        var result = cbroker.parseRegions(this.txid, entities);
 
         //then
         assert.equal(expected[2].node, result[2].node);
@@ -120,17 +132,14 @@ suite('cbroker', function () {
 
     test('should_receive_notify_from_context_broker_and_return_200_ok', function () {
         //given
-        var json = JSON.parse(fs.readFileSync(this.sampleDataNotifyContext, 'utf8'));
-        var expected = {
-            node: 'Region1',
-            status: constants.GLOBAL_STATUS_OK,
-            timestamp: '2015/05/13 11:10 UTC',
-            elapsedTime: '0h, 2m, 40s',
-            elapsedTimeMillis: 160000
-        };
+        var data = this.sampleDataNotifyContext,
+            expected = this.parsedRegionsNotifyContext[0],
+            req = {
+                body: data
+            };
 
         //when
-        var result = cbroker.changeReceived(this.txid, json);
+        var result = cbroker.changeReceived(this.txid, req);
 
         //then
         assert.deepEqual(expected, result);
@@ -138,19 +147,24 @@ suite('cbroker', function () {
 
     test('should_retrieve_data_about_all_regions', function (done) {
         //given
-        var req = sinon.stub();
-        req.param = sinon.stub();
-        req.param.withArgs('region').returns('region1');
-        req.session = sinon.stub();
-        req.session.user = {email: 'user@mail.com'};
+        var data = this.sampleDataQueryContext,
+            index = 0,
+            region = JSON.parse(data)['contextResponses'][index]['contextElement'].id,
+            req = {
+                param: sinon.stub(),
+                session: {
+                    user: {
+                        email: 'user@mail.com'
+                    }
+                }
+            };
+        req.param.withArgs('region').returns(region);
 
         var request = new EventEmitter();
-
         request.setTimeout = sinon.spy();
         request.end = sinon.spy();
         request.write = sinon.spy();
 
-        var responseSampleData = this.sampleDataQueryContext;
         var requestStub = sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
@@ -158,9 +172,7 @@ suite('cbroker', function () {
 
             callback(response);
 
-            var json = fs.readFileSync(responseSampleData, 'utf8');
-
-            response.emit('data', json);
+            response.emit('data', data);
             response.emit('end');
             return request;
         });
@@ -170,7 +182,7 @@ suite('cbroker', function () {
 
             //then
             http.request.restore();
-            assert.deepEqual('Region1', result[0].node);
+            assert.deepEqual(region, result[index].node);
             done();
         });
 
@@ -182,17 +194,21 @@ suite('cbroker', function () {
 
     test('should_return_empty_collection_when_an_error_occurs', function (done) {
         //given
-        var req = sinon.stub();
-        req.param = sinon.stub();
-        req.param.withArgs('region').returns('region1');
-        req.session = sinon.stub();
-        req.session.user = {email: 'user@mail.com'};
+        var req = {
+                param: sinon.stub(),
+                session: {
+                    user: {
+                        email: 'user@mail.com'
+                    }
+                }
+            };
+        req.param.withArgs('region').returns('some_region');
 
         var request = new EventEmitter();
-
         request.end = sinon.spy();
         request.write = sinon.spy();
         request.setTimeout = sinon.spy();
+
         var requestStub = sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
@@ -200,10 +216,10 @@ suite('cbroker', function () {
 
             callback(response);
 
-            var resultString = '{ "errorCode" : { "reasonPhrase" : "Internal Server Error", ' +
+            var errorString = '{ "errorCode" : { "reasonPhrase" : "Internal Server Error", ' +
                 '"details" : "collection: .... exception: socket exception [FAILED_STATE] for localhost:27017"} }';
 
-            response.emit('data', resultString);
+            response.emit('data', errorString);
             response.emit('end');
             return request;
         });
@@ -225,34 +241,32 @@ suite('cbroker', function () {
 
     test('should_return_empty_region_list_and_print_log_when_timeout_on_request', function (done) {
         //given
-        var req = sinon.stub();
-        req.param = sinon.stub();
-        req.param.withArgs('region').returns('region1');
-        req.session = sinon.stub();
-        req.session.user = {email: 'user@mail.com'};
+        var data = this.sampleDataQueryContext,
+            req = {
+                param: sinon.stub(),
+                session: {
+                    user: {
+                        email: 'user@mail.com'
+                    }
+                }
+            };
+        req.param.withArgs('region').returns('some_region');
 
         var request = new EventEmitter();
-
         request.setTimeout = sinon.spy(function (timeout, callback) {
             callback();
         });
         request.end = sinon.spy();
         request.write = sinon.spy();
         request.abort = sinon.spy(function () {
-            var e = sinon.spy();
-            e.code = 'ECONNRESET';
-            this.emit('error', e);
+            this.emit('error', {code: 'ECONNRESET'});
         });
 
-        var responseSampleData = this.sampleDataQueryContext;
         var requestStub = sinon.stub(http, 'request', function () {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
-
-            var json = fs.readFileSync(responseSampleData, 'utf8');
-
-            response.emit('data', json);
+            response.emit('data', data);
             response.emit('end');
             return request;
         });
@@ -275,31 +289,29 @@ suite('cbroker', function () {
 
     test('should_return_empty_region_list_and_print_log_when_context_broker_is_down', function (done) {
         //given
-        var req = sinon.stub();
-        req.param = sinon.stub();
+        var data = this.sampleDataQueryContext,
+            req = {
+                param: sinon.stub(),
+                session: {
+                    user: {
+                        email: 'user@mail.com'
+                    }
+                }
+            };
         req.param.withArgs('region').returns('region1');
-        req.session = sinon.stub();
-        req.session.user = {email: 'user@mail.com'};
 
         var request = new EventEmitter();
-
         request.setTimeout = sinon.spy();
         request.end = sinon.spy(function () {
-            var e = sinon.spy();
-            e.code = 'ECONNREFUSED';
-            this.emit('error', e);
+            this.emit('error', {code: 'ECONNREFUSED'});
         });
         request.write = sinon.spy();
 
-        var responseSampleData = this.sampleDataQueryContext;
         var requestStub = sinon.stub(http, 'request', function () {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
-
-            var json = fs.readFileSync(responseSampleData, 'utf8');
-
-            response.emit('data', json);
+            response.emit('data', data);
             response.emit('end');
             return request;
         });
@@ -321,50 +333,19 @@ suite('cbroker', function () {
 
     test('should_filter_region_list_and_remove_disabled_region', function () {
         //given
-        var json = JSON.parse(fs.readFileSync(this.sampleDataQueryContext, 'utf8'));
-        var expected = [
-            {
-                node: 'ZRegionLongName1',
-                status: 'NOK',
-                timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: '0h, 2m, 40s',
-                elapsedTimeMillis: 160000
-            },
-            {
-                node: 'Region3',
-                status: 'N/A',
-                timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: 'NaNh, NaNm, NaNs',
-                elapsedTimeMillis: NaN
-            },
-            {
-                node: 'Region4',
-                status: 'POK',
-                timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: '0h, 1m, 0s',
-                elapsedTimeMillis: 60000
-            },
-            {
-                node: 'Region5',
-                status: '',
-                timestamp: '',
-                elapsedTime: '',
-                elapsedTimeMillis: ''
-            }
-        ];
-
-        config.cbroker.filter = ['Region2'];
+        var filtered = 'Region2',
+            entities = JSON.parse(this.sampleDataQueryContext),
+            expected = this.parsedRegionsQueryContext.filter(function (item) {
+                return (item.node !== filtered);
+            });
+        config.cbroker.filter = [filtered];
 
         //when
-        var result = cbroker.parseRegions(this.txid, json);
+        var result = cbroker.parseRegions(this.txid, entities);
 
         //then
-        assert.equal(expected[1].node, result[1].node);
-        assert.isNaN(expected[1].elapsedTimeMillis);
-        assert.isNaN(result[1].elapsedTimeMillis);
-        delete expected[1].elapsedTimeMillis;
-        delete result[1].elapsedTimeMillis;
-        assert.deepEqual(expected, result);
+        assert.equal(result.length, entities['contextResponses'].length - config.cbroker.filter.length);
+        assert.equal(result.length, expected.length);
     });
 
 });

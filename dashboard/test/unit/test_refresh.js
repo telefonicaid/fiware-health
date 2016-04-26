@@ -14,17 +14,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+ 
 'use strict';
 
 var assert = require('assert'),
     sinon = require('sinon'),
     http = require('http'),
+    init = require('./init'),
     common = require('../../lib/routes/common'),
     refresh = require('../../lib/routes/refresh');
 
 
-
-/* jshint multistr: true */
+/* jshint unused: false */
 suite('refresh', function () {
 
     test('test_get_refresh', function () {

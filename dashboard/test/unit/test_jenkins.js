@@ -14,28 +14,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
-
-var path = require('path'),
-    util = require('util'),
-    configFile = path.join(__dirname, 'test_config.yml');
-
-
-/** Fake command line arguments to load a test config file */
-process.argv = [ util.format('--config-file=%s', configFile) ];
-
-
 var assert = require('assert'),
-    sinon = require('sinon'),
     cuid = require('cuid'),
+    util = require('util'),
+    init = require('./init'),
     logger = require('../../lib/logger'),
     config = require('../../lib/config').data,
-    jenkinsApiStub = sinon.stub(require('jenkins-api'), 'init').returns({}),
+    jenkinsApi = require('./init').jenkinsApi,
     jenkins = require('../../lib/jenkins');
 
 
-/* jshint camelcase: false */
+/* jshint unused: false, camelcase: false */
 suite('jenkins', function () {
 
     var stream = logger.stream;
@@ -62,7 +54,6 @@ suite('jenkins', function () {
 
     suiteTeardown(function () {
         logger.stream = stream;
-        jenkinsApiStub.restore();
     });
 
     setup(function () {
@@ -75,13 +66,14 @@ suite('jenkins', function () {
 
     test('should_initialize_jenkins_client_with_host_port_from_config', function () {
         var expectedJenkinsURL = util.format('http://%s:%d', config.jenkins.host, config.jenkins.port);
-        assert(jenkinsApiStub.calledOnce);
-        assert.equal(jenkinsApiStub.args[0][0], expectedJenkinsURL);
+        assert(jenkinsApi.init.calledOnce);
+        assert.equal(jenkinsApi.init.lastCall.args[0], expectedJenkinsURL);
     });
 
     test('should_invoke_callback_with_empty_params_if_job_info_fails', function (done) {
         //Given
-        var jenkinsClient = jenkinsApiStub();
+        var jenkinsClient = jenkinsApi.init.lastCall.returnValue;
+
         jenkinsClient.job_info = function (jobName, result) {
             result('Some error');
         };
@@ -96,21 +88,23 @@ suite('jenkins', function () {
 
     test('should_invoke_callback_with_build_status_of_all_jobs', function (done) {
         //Given
-        var jenkinsClient = jenkinsApiStub(),
-            self = this;
+        var jenkinsBuilds = this.jobBuilds,
+            jenkinsClient = jenkinsApi.init.lastCall.returnValue;
+
         jenkinsClient.job_info = function (jobName, result) {
-            var jobBuilds = self.jobBuilds.map(function(build) { return {number: build.number}; });
+            var jobBuilds = jenkinsBuilds.map(function(build) { return {number: build.number}; });
             result(null, {builds: jobBuilds});
         };
+
         jenkinsClient.build_info = function (jobName, buildNumber, result) {
-            var buildData = self.jobBuilds.filter(function(build) { return buildNumber === build.number; })[0].data;
+            var buildData = jenkinsBuilds.filter(function(build) { return buildNumber === build.number; })[0].data;
             result(null, buildData);
         };
 
         //When
         jenkins.regionJobsInProgress(this.txid, function callback(progress) {
             //Then
-            var buildParams = self.jobBuilds.map(function(build) { return build.data.actions[0][0].value; });
+            var buildParams = jenkinsBuilds.map(function(build) { return build.data.actions[0][0].value; });
             assert(progress);
             buildParams.forEach(function (param) {
                 assert(progress.hasOwnProperty(param));
