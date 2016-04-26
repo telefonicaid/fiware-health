@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var http = require('http'),
@@ -164,7 +165,7 @@ function retrieveAllRegions(txid, callback) {
  * @return {Object}
  */
 function changeReceived(txid, req) {
-    var result = parseRegions(txid, req.body);
+    var result = parseRegions(txid, JSON.parse(req.body));
     return result[0];
 }
 
