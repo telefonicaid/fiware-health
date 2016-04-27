@@ -182,53 +182,22 @@ function update_elapsed_time_context_broker() {
 	EOF
 }
 
-# Change region status (when running tests on a single region). If a filename is
-# given as argument $1, then status and all individual tests results are updated
-# by NGSI Adapter according to that results report.
+# Change region status (when running tests on a single region) according to the
+# test results included in summary report file $1, by invoking NGSI Adapter.
 function change_status() {
 	local region=$OS_REGION_NAME
 	local status="N/A"
 	local report=$1
 
-	# Finish if no region is set
-	[ -n "$region" ] || return 0
+	# Finish if no region is set or no report is given
+	[ -n "$region" && -r "$report" ] || return 0
 
-	# Change region status
-	if [ -r "$report" ]; then
-		# Adjust status according to results report
-		local resource="sanity_tests?id=$region&type=region"
-		printf "Request to NGSI Adapter to change region status ... "
-		curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
-		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
-		--header 'Content-Type: text/plain' --data-binary @$report
-
-	else
-		# Update region entity in ContextBroker
-		local strstatus="'maintenance' (value="$status")"
-		printf "Change region %s status to %s ... " $region "$strstatus"
-		curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
-		--write-out "HTTP %{http_code} result from %{url_effective}\n" \
-		--header 'Content-Type: application/json' \
-		--header 'Accept: application/json' --data @- <<-EOF
-		{
-			"contextElements": [
-				{
-					"type": "region",
-					"isPattern": "false",
-					"id": "$region",
-					"attributes": [
-						{
-							"name": "sanity_status",
-							"type": "string",
-							"value": "$status"
-						}
-					]
-				}
-			],
-			"updateAction": "APPEND"
-		}
-		EOF
-	fi
+	# Adjust status according to results report
+	local resource="sanity_tests?id=$region&type=region"
+	printf "Request to NGSI Adapter to change region status ... "
+	curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
+	--write-out "HTTP %{http_code} result from %{url_effective}\n" \
+	--header 'Content-Type: text/plain' --data-binary @$report
 
 	return $?
 }
@@ -390,9 +359,6 @@ exec)
 	# In single region tests, move previous reports to history of executions
 	move_reports_to_history $OS_REGION_NAME
 
-	# In single region tests, change status to 'Maintenance'
-	change_status
-
 	# Update 'sanity_check_elapsed_time' context attribute
 	update_elapsed_time_context_broker $elapsed_time
 
@@ -406,6 +372,7 @@ exec)
 	# Get 'start_time' before executing Sanity Checks (milliseconds)
 	start_time=$(date +%s%3N)
 
+	# Run sanity checks
 	./sanity_checks --verbose \
 		--output-name=$OUTPUT_NAME \
 		--template-name="dashboard_template.html" \

@@ -22,6 +22,7 @@ var express = require('express'),
     stylus = require('stylus'),
     nib = require('nib'),
     path = require('path'),
+    cuid = require('cuid'),
     // TODO favicon = require('serve-favicon'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
@@ -81,35 +82,38 @@ function compile(str, path) {
  * @param {*} res
  */
 function postContextbroker(req, res) {
-     try {
-        var region = cbroker.changeReceived(req.body),
+
+    var txid = req.headers[constants.TRANSACTION_ID_HEADER.toLowerCase()] || cuid(),
+        context = {trans: txid, op: 'app#contextbroker'};
+
+    try {
+        var region = cbroker.changeReceived(txid, req),
             notifyExclude = [ constants.GLOBAL_STATUS_OTHER ];
 
-        logger.info('status change notification received from contextbroker for region: %s', region.node);
+        logger.info(context, 'status change notification received from contextbroker for region: %s', region.node);
         res.status(200).end();
 
         if (notifyExclude.indexOf(region.status) === -1) {
             subscribe.notify(region, function (err) {
                 if (err) {
-                    logger.error('post to mailing list failed: %s', err);
+                    logger.error(context, 'post to mailing list failed: %s', err);
                 } else {
-                    logger.info('post to mailing list succeeded');
+                    logger.info(context, 'post to mailing list succeeded');
                 }
             });
             monasca.notify(region, function (err) {
                 if (err) {
-                    logger.error('post to Monasca failed: %s', err);
+                    logger.error(context, 'post to Monasca failed: %s', err);
                 } else {
-                    logger.info('post to Monasca succeeded');
+                    logger.info(context, 'post to Monasca succeeded');
                 }
             });
         } else {
-            logger.info('notifications to mailing list and Monasca not sent because region status %s is excluded',
-                region.status);
+            logger.info(context, 'notifications not sent because region status %s is excluded', region.status);
         }
 
     } catch (ex) {
-        logger.error('error in contextbroker notification: %s', ex);
+        logger.error(context, 'error in contextbroker notification: %s', ex);
         res.status(400).send({ error: 'bad request! ' + ex });
     }
 

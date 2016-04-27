@@ -14,9 +14,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-'use strict';
-/* jshint camelcase: false */
 
+'use strict';
 
 var config = require('./config').data,
     logger = require('./logger'),

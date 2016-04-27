@@ -25,14 +25,14 @@ Components
 Support
 =======
 
-Ask your thorough programmming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
-In both cases please use the tag *fiware-health*
+Ask your thorough programmming questions using `stackoverflow`_ and your general
+questions on `FIWARE Q&A`_. In both cases please use the tag *fiware-health*
 
 
 License
 =======
 
-\(c) 2015 Telefónica I+D, Apache License 2.0
+\(c) 2015-2016 Telefónica I+D, Apache License 2.0
 
 
 .. IMAGES

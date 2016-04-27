@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Telefónica I+D
+ * Copyright 2016 Telefónica I+D
  * All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,20 +14,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 'use strict';
 
-/** @export */
-module.exports.GLOBAL_STATUS_PARTIAL_OK = 'POK';
+/* jshint unused: false */
+var sinon = require('sinon'),
+    path = require('path'),
+    util = require('util'),
+    configFile = path.join(__dirname, 'test_config.yml');
+
+
+/** Fake command line arguments to load 'config' module with test configuration file */
+process.argv = [ util.format('--config-file=%s', configFile) ];
+require('../../lib/config');
+
+
+/** Mock Jenkins API */
+var jenkinsApi = require('jenkins-api'),
+    jenkinsInit = sinon.stub(jenkinsApi, 'init').returns({}),
+    jenkins = require('../../lib/jenkins');
+
 
 /** @export */
-module.exports.GLOBAL_STATUS_NOT_OK = 'NOK';
-
-/** @export */
-module.exports.GLOBAL_STATUS_OK = 'OK';
-
-/** @export */
-module.exports.GLOBAL_STATUS_OTHER = 'N/A';
-
-/** @export */
-module.exports.TRANSACTION_ID_HEADER = 'txid';
+exports.jenkinsApi = jenkinsApi;

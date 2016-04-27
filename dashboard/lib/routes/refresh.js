@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var express = require('express'),
@@ -25,13 +26,12 @@ var express = require('express'),
     common = require('./common');
 
 
-
 /**
  *
  * @param {Object} req
  * @param {Object} res
  */
-function getRefresh (req, res) {
+function getRefresh(req, res) {
 
     var region = req.param('region');
 

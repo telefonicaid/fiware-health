@@ -14,26 +14,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-'use strict';
 
+'use strict';
 
 var assert = require('assert'),
     path = require('path'),
+    init = require('./init'),
     config = require('../../lib/config');
 
 
-/* jshint multistr: true */
+/* jshint unused: false */
 suite('config', function () {
-
 
     test('should_return_valid_config', function () {
         //Given
         var filename = path.join(__dirname, 'test_config.yml');
 
         //When
-
         var result = config.readConfigFile(filename);
-
 
         //Then
         assert.deepEqual(['INFO', 'Read configuration file'], result);
@@ -45,22 +43,17 @@ suite('config', function () {
         assert.equal(config.data.jenkins.path, '/jenkins/job/fiware_job1');
         assert.equal(config.data.jenkins.parameterName, 'REGION_NAME');
         assert.equal(config.data.default, false);
-
     });
 
-
-      test('should_fail_with_invalid_path', function () {
+    test('should_fail_with_invalid_path', function () {
         //Given
         var invalidFilename = path.join(__dirname, 'kk.yml');
 
         //When
         var result = config.readConfigFile(invalidFilename);
 
-
         //Then
         assert.deepEqual(['WARN', 'Could not read configuration file'], result);
-
     });
-
 
 });

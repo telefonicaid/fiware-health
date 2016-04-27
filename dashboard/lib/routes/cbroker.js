@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var http = require('http'),
@@ -30,15 +31,16 @@ var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about reg
 
 /**
  * @function parseRegions
- *
+ * Extract regions from the entities included in contextbroker notification
+ * @param {string} txid
  * @param {Object} entities
  * @return {Array}
  */
-function parseRegions(entities) {
+function parseRegions(txid, entities) {
+    var context = {trans: txid, op: 'cbroker#parseRegions'},
+        result = [];
 
-    var result = [];
-
-    logger.debug('Entities to parse %j', entities);
+    logger.debug(context, 'Entities to parse: %j', entities);
 
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
@@ -64,7 +66,7 @@ function parseRegions(entities) {
             });
 
             if (config.cbroker.filter.indexOf(entry.contextElement.id) >= 0) {
-                logger.warn({op: 'retrieveAllRegions'}, 'Found in filter  %s ', entry.contextElement.id);
+                logger.warn(context, 'Found in filter: %s', entry.contextElement.id);
             } else {
                 result.push({
                     node: entry.contextElement.id,
@@ -84,9 +86,12 @@ function parseRegions(entities) {
 /**
  * @function retrieveAllRegions
  * Call to context broker and get all regions and status.
+ * @param {string} txid
  * @param {function} callback
  */
-function retrieveAllRegions(callback) {
+function retrieveAllRegions(txid, callback) {
+
+    var context = {trans: txid, op: 'retrieveAllRegions'};
 
     var payload = {
         entities: [
@@ -98,6 +103,7 @@ function retrieveAllRegions(callback) {
             ELAPSED_TIME
         ]
     };
+
     var payloadString = JSON.stringify(payload);
     var headers = {
         'Content-Type': 'application/json',
@@ -105,7 +111,7 @@ function retrieveAllRegions(callback) {
         'Content-Length': payloadString.length
     };
 
-    logger.debug('Using configuration: %j', config.cbroker);
+    logger.debug(context, 'Using configuration: %j', config.cbroker);
     var options = {
         host: config.cbroker.host,
         port: config.cbroker.port,
@@ -122,55 +128,53 @@ function retrieveAllRegions(callback) {
             responseString += data;
         });
         res.on('end', function () {
-            logger.debug({op: 'retrieveAllRegions'}, 'Response string: %s', responseString);
+            logger.debug(context, 'Response string: %s', responseString);
             try {
                 var resultObject = JSON.parse(responseString);
-                callback(parseRegions(resultObject));
+                callback(parseRegions(txid, resultObject));
             } catch (ex) {
-                logger.warn({op: 'retrieveAllRegions'}, 'Error in parse response string:  %s %s', responseString, ex);
+                logger.warn(context, 'Error in parse response string: %s %s', responseString, ex);
                 callback([]);
             }
         });
-
     });
+
     req.on('error', function (e) {
         if (e.code === 'ECONNRESET') {
-            logger.error('Error in connection by TIMEOUT with context broker: ' + e);
+            logger.error(context, 'Error in connection by TIMEOUT with context broker: %s', e);
         } else {
-            logger.error('Error in connection with context broker: ' + e);
+            logger.error(context, 'Error in connection with context broker: %s', e);
         }
         callback([]);
-
-
     });
 
     req.setTimeout(config.cbroker.timeout, function () {
         req.abort();
-        logger.error('Timeout in the connection with context broker. Time exceed');
+        logger.error(context, 'Timeout in the connection with context broker. Time exceed');
     });
 
     req.write(payloadString);
-
     req.end();
-
 }
+
 
 /**
  * invoked when change is received from context broker
- * @param {[]} entities
+ * @param {string} txid
+ * @param {*} req
+ * @return {Object}
  */
-function changeReceived(entities) {
-    logger.debug('entities to parse' + entities);
-
-    var result = parseRegions(entities);
+function changeReceived(txid, req) {
+    var result = parseRegions(txid, JSON.parse(req.body));
     return result[0];
 }
 
 
 /** @export */
 module.exports.retrieveAllRegions = retrieveAllRegions;
+
 /** @export */
 module.exports.parseRegions = parseRegions;
+
 /** @export */
 module.exports.changeReceived = changeReceived;
-

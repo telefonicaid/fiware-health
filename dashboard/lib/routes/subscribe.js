@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 'use strict';
 
 var express = require('express'),
@@ -22,6 +23,7 @@ var express = require('express'),
     logger = require('../logger'),
     http = require('http'),
     _ = require('underscore');
+
 
 /**
  * router get subscribe
