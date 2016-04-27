@@ -47,6 +47,7 @@ This Job executes the Sanity Check on the selected region:&#xd;
               <string>SaoPaulo</string>
               <string>Crete</string>
               <string>Vicenza</string>
+              <string>ZurichS</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>

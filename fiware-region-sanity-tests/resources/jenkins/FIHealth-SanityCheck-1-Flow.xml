@@ -48,8 +48,9 @@ This job executes the Sanity Check on each FIWARE Lab node. It will spawn parall
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Poznan&apos;) },
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Zurich2&apos;) },
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;SaoPaulo&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Crete&apos;) }
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Vicenza&apos;) }
+    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Crete&apos;) },
+    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Vicenza&apos;) },
+    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;ZurichS&apos;) }
 )</dsl>
   <buildNeedsWorkspace>false</buildNeedsWorkspace>
 </com.cloudbees.plugins.flow.BuildFlow>
