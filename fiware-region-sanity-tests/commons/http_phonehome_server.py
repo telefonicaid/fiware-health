@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 
 
-"""PhoneHome server listening to requests from deployed instances to test E2E network connectivity..
+"""PhoneHome server listening to requests from deployed instances to test E2E network connectivity.
 
 Usage:
   {prog}
