@@ -47,7 +47,7 @@ class DbusPhoneHomeClient:
     logger = None
 
     def __init__(self, logger):
-        """Inits the DBus client and creates a new System bus
+        """Inits the DBus client and creates a new System bus.
         :param logger: Logger
         :return:
         """
@@ -63,7 +63,7 @@ class DbusPhoneHomeClient:
 
     @staticmethod
     def timeout(mainloop, logger, *args):
-        """Timeout function for DBus MainLoop
+        """Timeout function for DBus MainLoop.
         :param mainloop: Loop manager (MainLoop)
         :param logger: Logger
         :param args: Rest of arguments
