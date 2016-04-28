@@ -190,10 +190,10 @@ look at the `PhoneHome architecture <doc/phonehome_architecture.rst>`_.
 
 **Running Sanity Checks from command line**
 
-- Go to the root folder of the project and edit ``resources/settings.json``
-  (or set environment variables, see above).
-- Run ``./sanity_checks``. This command will execute all Sanity Checks in all
-  nodes found under ``tests/regions/`` folder:
+- Go to the root folder of the project and edit ``etc/settings.json`` (or set
+  environment variables, see above).
+- Run ``./sanity_checks``. This command will execute Sanity Checks (defined
+  as TestCases under ``tests/`` folder) in all the regions:
 
   * It is possible to provide a list of regions as argument to restrict the
     execution to them.
@@ -210,9 +210,9 @@ look at the `PhoneHome architecture <doc/phonehome_architecture.rst>`_.
 Jobs submitted during `installation <#Jenkins jobs>`_ run the script found at
 ``resources/scripts/jenkins.sh`` to perform one of these actions:
 
-- ``prepare`` as a required step prior running the tests (this performs some
+- ``setup`` as a required step prior running the tests (this performs some
   preparation tasks that are common to subsequent test executions)
-- ``test``: the actual Sanity Check execution for a single region (given by the
+- ``exec``: the actual Sanity Check execution for a single region (given by the
   environment variable ``$OS_REGION_NAME``)
 
 
@@ -243,6 +243,7 @@ configuration values under ``region_configuration``:
 
 - ``external_network_name`` is the network for external floating IP addresses
 - ``shared_network_name`` is the shared network to use in E2E tests
+- ``test_object_storage`` enables object storage tests, if true
 - ``test_flavor`` specifies the flavor of instances launched in tests
 - ``test_image`` specifies the base image of instances launched in tests
 
@@ -277,26 +278,33 @@ are required:
             },
             "openstack_metadata_service_url": "http://169.254.169.254/openstack/latest/meta_data.json"
         },
+        "key_test_cases": [
+            "test_(.*)"
+        ],
+        "opt_test_cases": [
+            "test_.*container.*"
+        ],
         "region_configuration": {
-            "external_network_name": {
-                "Region1": "public-ext-net-01",
-                "Region2": "my-ext-net",
-                ...
+            "RegionWithNetworkAndStorage": {
+                "external_network_name": "my-ext-net1",
+                "shared_network_name": "my-shared-net1",
+                "test_object_storage": true
             },
-            "shared_network_name": {
-                "Region3": "my-shared-net",
-                ...
+            "RegionWithoutNetwork": {
+                "external_network_name": "my-ext-net1",
+                "test_object_storage": true
             },
-            "test_flavor": {
-                "RegionX": "tiny"
+            "RegionWithCustomImageNoStorage": {
+                "external_network_name": "public-ext-net-02",
+                "shared_network_name": "my-shared-net-02",
+                "test_image": "base_image"
             },
-            "test_image": {
-                "RegionY": "base_image1",
-                "RegionZ": "base_image2"
+            "RegionWithCustomFlavor": {
+                "external_network_name": "public-ext-net-01",
+                "shared_network_name": "node-int-net-01",
+                "test_flavor": "tiny"
             }
-        },
-        "key_test_cases": [ "test_(.*)" ],
-        "opt_test_cases": [ "test_.*container.*" ]
+        }
     }
 
 
@@ -311,7 +319,7 @@ the former) is generated from the given template (or the default found at
 
 Additionally, a log file is written with all logged info in a
 Sanity Check execution, based on its handlers configuration
-(`resources/logging_sanitychecks.conf`). When test cases involve VM
+(`etc/logging_sanitychecks.conf`). When test cases involve VM
 launching, just before deleting the VM, *FIHealth Sanity Checks*
 tries to get the Nova Console-Log of that VM and it writes
 the content in a new file `test_novaconsole_{region_name}_{server_id}.log`.
@@ -321,7 +329,7 @@ the log level is set tu *DEBUG*, the file is not generated.
 The script ``commons/result_analyzer.py`` is invoked to create a summary
 report ``test_results.txt``. It will analyze the status of each region using
 the *key_test_cases* and *opt_test_cases* information configured in the
-``resources/settings.json`` file.
+``etc/settings.json`` file.
 
 Take a look at `Sanity Status and Data Storage documentation
 <doc/publish_status_and_test_data.rst>`_ to know more about *Sanity and Test

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
@@ -21,31 +22,52 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-import cherrypy
+
+"""PhoneHome server listening to requests from deployed instances to test E2E network connectivity..
+
+Usage:
+  {prog}
+
+Environment:
+  SANITY_CHECKS_SETTINGS            (Optional) Path to settings file
+  TEST_PHONEHOME_LOGGING            (Optional) Path to logging configuration file
+  TEST_PHONEHOME_ENDPOINT           (Optional) PhoneHome service endpoint
+
+Files:
+  etc/settings.json                 Default settings file
+  etc/logging_phonehome.conf        Default logging configuration file
+
+"""
+
+
+from commons.constants import PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
+    PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH, \
+    DEFAULT_PHONEHOME_LOGGING_CONF, DEFAULT_SETTINGS_FILE
+
+from os import environ
+from dbus_phonehome_service import DbusPhoneHomeServer
 from cherrypy import _cperror
+import cherrypy
 import httplib
 import logging
 import json
-from os import environ
 import sys
-from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
-    LOGGING_FILE_PHONEHOME, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH
 import urlparse
-from dbus_phonehome_service import DbusPhoneHomeServer
 import logging.config
+import os.path
 
 
 # Global DBus server instance
 dbus_server = None
 
 
-class PhoneHome():
+class PhoneHome:
+
     exposed = True
 
     @cherrypy.tools.accept(media='text/plain')
     def POST(self):
-        """
-        Manages a POST request. Phonehome service.
+        """Manages a POST request. Phonehome service.
           Emits a new DBus signal to the PhoneHome object published.
           The request always will return 200OK if some content is received. This content will be emitted in the signal.
         :return: None
@@ -100,20 +122,17 @@ def handle_error():
 
 
 class Root(object):
-
     _cp_config = {'request.error_response': handle_error}
     pass
 
 
-class HttpPhoneHomeServer():
-    """
-    This Server will be waiting for POST requests. If some request is received to '/' resource (root) will be
-    processed. POST body is precessed using a DBus PhoneHome Client and 200OK is always returned.
+class HttpPhoneHomeServer:
+    """This Server will be waiting for POST requests. If some request is received to '/' resource (root) will be
+       processed. POST body is precessed using a DBus PhoneHome Client and 200 OK is always returned.
     """
 
     def __init__(self, logger, port, timeout=None):
-        """
-        Creates a PhoneHome server
+        """Creates a PhoneHome server
         :param logger: Logger
         :param port: Listen port
         :param timeout: Timeout to wait for some request. Only is used when 'single request server' is configured.
@@ -125,9 +144,8 @@ class HttpPhoneHomeServer():
         self.port = port
 
     def start_forever(self):
-        """
-        Starts the server. Forever...
-        :return:
+        """Starts the server. Forever...
+        :return: None
         """
         self.logger.debug("Waiting for calls...")
         conf = {
@@ -153,30 +171,36 @@ class HttpPhoneHomeServer():
         cherrypy.log.screen = None
         cherrypy.quickstart(root, '/', conf)
 
-if __name__ == '__main__':
 
-    logging.config.fileConfig(LOGGING_FILE_PHONEHOME)
+if __name__ == '__main__':
+    # Configuration files
+    parentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    settings_file = os.environ.get('SANITY_CHECKS_SETTINGS', os.path.join(parentdir, DEFAULT_SETTINGS_FILE))
+    logging_conf = os.environ.get('TEST_PHONEHOME_LOGGING', os.path.join(parentdir, DEFAULT_PHONEHOME_LOGGING_CONF))
+
+    # Configure logger
+    logging.config.fileConfig(logging_conf)
     logger = logging.getLogger("HttpPhoneHomeServer")
 
     # Load properties
     logger.info("Loading test settings...")
     conf = dict()
-    with open(PROPERTIES_FILE) as config_file:
+    with open(settings_file) as settings:
         try:
-            conf = json.load(config_file)
+            conf = json.load(settings)
         except Exception as e:
-            assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
+            print "Error parsing config file '{}': {}".format(settings_file, e)
+            sys.exit(-1)
 
-    # Check and load PhoneHome configuration (settings or env vars)
-    conf_test = conf[PROPERTIES_CONFIG_TEST]
-    phonehome_endpoint = environ.get('TEST_PHONEHOME_ENDPOINT', conf_test[PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT])
+    # Check and load PhoneHome configuration (settings or environment variabless)
+    default_phonehome_endpoint = conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
+    phonehome_endpoint = environ.get('TEST_PHONEHOME_ENDPOINT', default_phonehome_endpoint)
     env_conf = {
         PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT: phonehome_endpoint
     }
     conf[PROPERTIES_CONFIG_TEST].update(env_conf)
-
     if not phonehome_endpoint:
-        logger.error("No value found for '%s.%s' setting. Phonehome server will NOT be launched",
+        logger.error("No value found for '%s.%s' setting. PhoneHome server will NOT be launched",
                      PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT)
         sys.exit(1)
 

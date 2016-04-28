@@ -37,21 +37,23 @@ from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
 from commons.swift_operations import FiwareSwiftOperations
 from commons.constants import *
+from ConfigParser import ConfigParser
+from os.path import isfile, join
 from os import environ
 from os import listdir
-from os.path import isfile, join
 import unittest
 import urlparse
 import logging
 import logging.config
-from ConfigParser import ConfigParser
-import json
 import time
 import os
 import re
 
 
 class FiwareTestCase(unittest.TestCase):
+
+    # Test configuration (to be overriden)
+    conf = None
 
     # Test region (to be overriden)
     region_name = None
@@ -76,20 +78,18 @@ class FiwareTestCase(unittest.TestCase):
     logger = None
 
     @classmethod
-    def load_project_properties(cls):
+    def configure(cls):
         """
-        Parse the JSON configuration file located in the settings folder and store the resulting dictionary in the
-        `conf` class variable. Values from "standard" OpenStack environment variables override this configuration.
+        Configure the test case with values taken from `conf` read from settings file (although environment variables
+        may override this configuration).
         """
 
-        cls.logger.debug("Loading test settings...")
-        with open(PROPERTIES_FILE) as config_file:
-            try:
-                cls.conf = json.load(config_file)
-            except Exception as e:
-                assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
+        cls.logger.debug('Configuring tests for region "%s" ...', cls.region_name)
 
-        # Check for environment variables related to credentials and update configuration
+        cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION][cls.region_name]
+        cls.glance_conf = cls.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_GLANCE]
+
+        # Check for environment variables related to credentials
         cls.auth_cred = cls.conf[PROPERTIES_CONFIG_CRED]
         env_cred = {
             PROPERTIES_CONFIG_CRED_KEYSTONE_URL:
@@ -114,21 +114,21 @@ class FiwareTestCase(unittest.TestCase):
         except IndexError:
             assert False, "Invalid setting {}.{}".format(PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_KEYSTONE_URL)
 
-        # Update configuration with values from environment variables
+        # Update credentials configuration after processing environment variables
         cls.auth_cred.update(env_cred)
-
-        # Check for optional environment variables related to test configuration and update configuration
-        conf = cls.conf[PROPERTIES_CONFIG_TEST]
-        phonehome_endpoint = environ.get('TEST_PHONEHOME_ENDPOINT', conf[PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT])
-        env_conf = {
-            PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT: phonehome_endpoint
-        }
-        conf.update(env_conf)
 
         # Ensure credentials are given (either by settings file or overriden by environment variables)
         for name in env_cred.keys():
             if not cls.auth_cred[name]:
                 assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)
+
+        # Check for the rest of optional environment variables and update configuration accordingly
+        default_phonehome_endpoint = cls.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
+        phonehome_endpoint = environ.get('TEST_PHONEHOME_ENDPOINT', default_phonehome_endpoint)
+        env_conf = {
+            PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT: phonehome_endpoint
+        }
+        cls.conf[PROPERTIES_CONFIG_TEST].update(env_conf)
 
     @classmethod
     def init_auth(cls):
@@ -184,7 +184,7 @@ class FiwareTestCase(unittest.TestCase):
                                                          auth_session=cls.auth_sess)
         if cls.with_storage:
             cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
-                                                          auth_cred=cls.auth_cred)
+                                                         auth_cred=cls.auth_cred)
 
     @classmethod
     def init_world(cls, world, suite=False):
@@ -449,10 +449,13 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the world['containers'] entry (after deleting existing resources)
         """
+
+        local_objects_path = join(cls.home_dir, SWIFT_RESOURCES_PATH)
+
         if suite and cls.with_storage:
             # get pre-existing test local files list (ideally, empty when starting the tests)
-            files = [f for f in listdir(SWIFT_RESOURCES_PATH) if isfile(join(SWIFT_RESOURCES_PATH, f))]
-            for file in files:
+            local_files = [f for f in listdir(local_objects_path) if isfile(join(local_objects_path, f))]
+            for file in local_files:
                 cls.logger.debug("init_world() found local object '%s' not deleted", file)
                 if (file != TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION) \
                         and (file not in list(world['local_objects'])):
@@ -460,11 +463,11 @@ class FiwareTestCase(unittest.TestCase):
 
         # release resources to ensure a clean world
         for local_file in list(world['local_objects']):
-                os.remove(SWIFT_RESOURCES_PATH + local_file)
-                try:
-                    world['local_objects'].remove(local_file)
-                except ValueError:
-                    cls.logger.warn("This file was removed and it came from an older execution: %s", local_file)
+            os.remove(join(local_objects_path, local_file))
+            try:
+                world['local_objects'].remove(local_file)
+            except ValueError:
+                cls.logger.warn("This file was removed and it came from an older execution: %s", local_file)
 
     @classmethod
     def setUpClass(cls):
@@ -472,37 +475,27 @@ class FiwareTestCase(unittest.TestCase):
         Setup testcase (executed before ALL tests): release resources, initialize logger and REST clients.
         """
 
-        # Initialize logger
-        # > Get logging configuration for Sanity Checks
+        # Initialize logger with a new custom file handler for SanityChecks using UTC time format
         config = ConfigParser()
-        config.read(LOGGING_FILE_SANITYCHECKS)
+        config.read(cls.logging_conf)
+        cls.logger_level = config.get(LOGGING_CONF_SECTION_HANDLER, 'level')
+        formatter = logging.Formatter(config.get(LOGGING_CONF_SECTION_FORMATTER, 'format', raw=True))
+        file_handler = logging.FileHandler(config.get(LOGGING_CONF_SECTION_HANDLER, 'filename').
+                                           format(region_name=cls.region_name), mode='w')
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(cls.logger_level)
 
-        # > Configure a new custom file handler for SanityChecks
-        log_formatter = logging.Formatter(config.get('sanitychecks_formatter_fileFormatter', 'format', raw=True))
-        file_handler = logging.FileHandler(
-            config.get('sanitychecks_handler_fileHandler', 'filename').format(region_name=cls.region_name), mode='w')
-        file_handler.setFormatter(log_formatter)
-        file_handler.setLevel(config.get('sanitychecks_handler_fileHandler', 'level'))
-        cls.logger_level = config.get('sanitychecks_handler_fileHandler', 'level')
-
-        # > Set FileHandler for default root logger and configure UTC time formatter
-        logging.getLogger('').addHandler(file_handler)
+        logging.root.addHandler(file_handler)
         logging.Formatter.converter = time.gmtime
+        cls.logger = logging.getLogger(LOGGING_TEST_LOGGER)
 
-        cls.logger = logging.getLogger(PROPERTIES_LOGGER)
-
-        # Load properties
-        cls.load_project_properties()
-
-        # These tests should be particularized for a region
-        cls.logger.debug("Tests for '%s' region", cls.region_name)
-
-        # Get properties from global config
-        tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
-        test_flavor = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_FLAVOR].get(cls.region_name)
-        test_image = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_IMAGE].get(cls.region_name)
+        # Global configuration of tests
+        cls.configure()
 
         # Initialize session trying to get auth token; on success, continue with initialization
+        tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
+        test_image = cls.region_conf[PROPERTIES_CONFIG_REGION_TEST_IMAGE]
+        test_flavor = cls.region_conf[PROPERTIES_CONFIG_REGION_TEST_FLAVOR]
         if cls.init_auth():
             cls.init_clients(tenant_id, test_flavor, test_image)
             cls.init_world(cls.suite_world, suite=True)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -135,7 +135,6 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.logger.debug("Created %s container was created", containerName)
 
         # Uploading the object
-
         response = self.swift_operations.create_object(containerName, SWIFT_RESOURCES_PATH
                                                             + TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION,
                                                             textObjectName)

@@ -145,11 +145,10 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         external_network_id = None
         external_network_list = self.neutron_operations.find_networks(router_external=True)
         if len(external_network_list) != 0:
-            external_net_region = self.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_EXTERNAL_NET]
-            if self.region_name in external_net_region:
-                ext_net_config = external_net_region[self.region_name]
+            external_net_conf = self.region_conf.get(PROPERTIES_CONFIG_REGION_EXTERNAL_NET)
+            if external_net_conf:
                 for external_network in external_network_list:
-                    if external_network['name'] == ext_net_config:
+                    if external_network['name'] == external_net_conf:
                         external_network_id = external_network['id']
             if external_network_id is None:
                 external_network_id = external_network_list[0]['id']
@@ -163,10 +162,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         :return: Shared network name
         """
         # get from settings the name of the shared network to lookup
-        lookup_network_name = TEST_SHARED_NET_DEFAULT
-        shared_network_conf = self.conf[PROPERTIES_CONFIG_REGION].get(PROPERTIES_CONFIG_REGION_SHARED_NET)
-        if shared_network_conf:
-            lookup_network_name = shared_network_conf.get(self.region_name, TEST_SHARED_NET_DEFAULT)
+        lookup_network_name = self.region_conf.get(PROPERTIES_CONFIG_REGION_SHARED_NET, TEST_SHARED_NET_DEFAULT)
 
         # find the network in the list of existing shared networks
         lookup_network_list = self.neutron_operations.find_networks(name=lookup_network_name,
