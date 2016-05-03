@@ -133,19 +133,21 @@ function readConfigFile(file) {
                     Object.keys(config.jenkins).filter(hasOwnProperty, cfgParse.jenkins).forEach(function (key) {
                         config.jenkins[key] = cfgParse.jenkins[key];
                     });
+                    var ctx = config.jenkins.path.replace(/(.*)\/job\/.+/, '$1');
+                    config.jenkins.url = util.format('http://%s:%d%s', config.jenkins.host, config.jenkins.port, ctx);
                     break;
                 default:
-                    throw new Error(util.format('no "%s" node found', key));
+                    throw new Error(util.format('No "%s" node found', key));
             }
         });
         config.default = false;
+
     } catch (err) {
         var msg = err.errno ? 'Could not read configuration file' : util.format('Configuration file: %s', err.message);
         cfgParserResult = [ 'WARN', msg ];
     }
 
     // show result of configuration processing
-
     var logFunction = logger[cfgParserResult[0].toLowerCase()],
     logMessage = cfgParserResult[1];
     logFunction(logMessage);
