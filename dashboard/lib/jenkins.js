@@ -49,7 +49,7 @@ function regionJobsInProgress(txid, callback) {
                     logger.error(context, 'Failed to get information for build #%d', build.number);
                 } else {
                     var paramActions = data.actions.filter(function (item) {
-                    return (item.parameters instanceof Array) || (item instanceof Array);
+                        return (item.parameters instanceof Array) || (item instanceof Array);
                     });
                     var parameters = paramActions[0].parameters || paramActions[0],
                         regionName = parameters.filter(function (item) { return item.name === paramName; })[0].value;
