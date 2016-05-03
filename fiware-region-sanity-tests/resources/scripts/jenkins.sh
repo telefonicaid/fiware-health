@@ -322,17 +322,16 @@ setup)
 		exit 4
 	fi
 
-	# Update Restart job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-0-RestartTestServers/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml"
-
-	# Update SetUp job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-0-SetUp/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml"
-
-	# Update Flow job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-1-Flow/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-1-Flow.xml"
-
-	# Update Exec job
-	curl -X POST http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job/FIHealth-SanityCheck-2-Exec-Region/config.xml --data-binary "@resources/jenkins/FIHealth-SanityCheck-2-Exec-Region.xml"
+	# Update Jenkins jobs
+	cd $PROJECT_DIR
+	BASE_JOB_URL=http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job
+	for JOB_NAME in	FIHealth-SanityCheck-0-RestartTestServers \
+			FIHealth-SanityCheck-0-SetUp \
+			FIHealth-SanityCheck-1-Flow \
+			FIHealth-SanityCheck-2-Exec-Region; do
+		curl -X POST $BASE_JOB_URL/$JOB_NAME/config.xml \
+			--data-binary "@resources/jenkins/$JOB_NAME.xml"
+	done
 
 	# Restart PhoneHome server
 	restart_phone_home_server
