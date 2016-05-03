@@ -55,8 +55,8 @@ echo "FILES:"; cat %{_topdir}/MANIFEST
 %config /etc/sysconfig/%{_dashboard_srv}.yml
 
 %pre
-# preinst ($1 == 1)
-if [ $1 -eq 1 ]; then
+# pre install ($1 == 1) or upgrade ($1 == 2)
+if [ $1 -ge 1 ]; then
 	# Function to compare version strings (in `x.y.z' format)
 	valid_version() {
 		local CUR=$1
@@ -103,8 +103,8 @@ if [ $1 -eq 1 ]; then
 fi
 
 %post
-# postinst ($1 == 1)
-if [ $1 -eq 1 ]; then
+# post install ($1 == 1) or upgrade ($1 == 2)
+if [ $1 -ge 1 ]; then
 	# actual values of installation variables
 	FIWARE_USR=%{_fiware_usr}
 	FIWARE_GRP=%{_fiware_grp}
