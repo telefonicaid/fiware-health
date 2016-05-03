@@ -329,7 +329,8 @@ setup)
 			FIHealth-SanityCheck-0-SetUp \
 			FIHealth-SanityCheck-1-Flow \
 			FIHealth-SanityCheck-2-Exec-Region; do
-		curl -X POST $BASE_JOB_URL/$JOB_NAME/config.xml \
+		printf "Updating job '%s'...\n" $JOB_NAME
+		curl -s -S -X POST $BASE_JOB_URL/$JOB_NAME/config.xml \
 			--data-binary "@resources/jenkins/$JOB_NAME.xml"
 	done
 
