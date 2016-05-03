@@ -12,9 +12,8 @@ RUN yum -y install rpm-build
 RUN yum -y install initscripts
 RUN yum -y install crontabs
 RUN git clone https://github.com/telefonicaid/fiware-health /opt/fiware-health
-ARG BRANCH
-ARG BRANCH develop
-RUN git cd /opt/fiware-health; git checkout $BRANCH
+ARG BRANCH=develop
+RUN cd /opt/fiware-health; git checkout ${BRANCH}
 WORKDIR /opt/fiware-health/dashboard
 RUN npm install -g grunt-cli
 RUN npm install
