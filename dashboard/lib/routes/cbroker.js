@@ -66,7 +66,7 @@ function parseRegions(txid, entities) {
             });
 
             if (config.cbroker.filter.indexOf(entry.contextElement.id) >= 0) {
-                logger.warn(context, 'Found in filter: %s', entry.contextElement.id);
+                logger.warn(context, 'Discarded region "%s" found in filter', entry.contextElement.id);
             } else {
                 result.push({
                     node: entry.contextElement.id,
@@ -130,7 +130,9 @@ function retrieveAllRegions(txid, callback) {
         res.on('end', function () {
             logger.debug(context, 'Response string: %s', responseString);
             try {
-                var resultObject = JSON.parse(responseString);
+                var resultObject = JSON.parse(responseString),
+                    regions = resultObject.contextResponses.map(function (item) {return item.contextElement.id;});
+                logger.info(context, 'Found %d regions: %s', regions.length, regions);
                 callback(parseRegions(txid, resultObject));
             } catch (ex) {
                 logger.warn(context, 'Error in parse response string: %s %s', responseString, ex);
