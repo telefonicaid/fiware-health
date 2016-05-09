@@ -36,14 +36,13 @@ function getSubscribe(req, res) {
 
     var userinfo = req.session.user;
 
-    logger.info({op: 'subscribe#get'}, 'subscribe to region: ' + region + ' userinfo:' + userinfo);
+    logger.info({op: 'subscribe#get'}, 'Subscribe to region: %s userinfo: %s', region, userinfo);
 
     var payloadString = 'address=' + userinfo.email;
 
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': payloadString.length
-
     };
 
     var options = {
@@ -69,7 +68,7 @@ function getSubscribe(req, res) {
         });
     });
     mailmainRequest.on('error', function (e) {
-        logger.error('Error in connection with mailman: ' + e);
+        logger.error('Error in connection with mailman: %s', e);
         res.redirect(config.webContext);
     });
 
@@ -123,7 +122,7 @@ function isSubscribed(user, region, isSubscribedCallback) {
     });
 
     mailmainRequest.on('error', function (e) {
-        logger.error({op: 'subscribe#isSubscribed'}, 'Error in connection with mailman: ' + e);
+        logger.error({op: 'subscribe#isSubscribed'}, 'Error in connection with mailman: %s', e);
         region.subscribed = false;
         isSubscribedCallback();
     });
@@ -195,7 +194,7 @@ function notify(region, notifyCallback) {
     });
 
     mailmanRequest.on('error', function (e) {
-        logger.error('Error in connection with mailman: ' + e);
+        logger.error('Error in connection with mailman: %s', e);
         notifyCallback(e);
     });
 
