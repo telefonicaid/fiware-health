@@ -26,9 +26,10 @@ var config = require('./config').data,
 /**
  * @function withAuthToken
  * Call keystone and invoke callback with the auth token.
+ * @param {Object}   context
  * @param {function} callback
  */
-monasca.withAuthToken = function (callback) {
+monasca.withAuthToken = function (context, callback) {
     var payload = {
         auth: {
             identity: {
@@ -71,8 +72,8 @@ monasca.withAuthToken = function (callback) {
             responseString += data;
         });
         res.on('end', function () {
-            logger.debug('Response from Keystone: %s headers=%s', responseString, res.headers);
-            logger.info('Response from Keystone: status=%s', res.statusCode);
+            logger.debug(context, 'Response from Keystone: headers=%j', res.headers);
+            logger.info(context, 'Response from Keystone: status=%s', res.statusCode);
             if (res.statusCode === 201) {
                 callback(res.headers['x-subject-token']);
             } else {
@@ -83,7 +84,7 @@ monasca.withAuthToken = function (callback) {
 
     req.on('error', function (e) {
         var detail = (e.code === 'ECONNRESET') ? 'TIMEOUT' : 'failed';
-        logger.error('Request to Keystone %s: %s', detail, e);
+        logger.error(context, 'Request to Keystone %s: %s', detail, e);
         callback();
     });
 
@@ -103,36 +104,44 @@ monasca.withAuthToken = function (callback) {
  * @param {function} notifyCallback
  */
 monasca.notify = function (region, notifyCallback) {
-    var regionName = region.node;
-    logger.info({op: 'monasca#notify'}, 'notify change in region %s', regionName);
-    this.withAuthToken(function (authToken) {
+    var regionName = region.node,
+        context = {op: 'monasca#notify'};
+
+    logger.info(context, 'Notify sanity_status for region "%s"', regionName);
+    this.withAuthToken(context, function (authToken) {
         if (!authToken) {
             notifyCallback(new Error('could not get auth token'));
         } else {
             var regionStatus = region.status,
+                regionStatusFloat = ['NOK', 'OK', 'POK'].indexOf(regionStatus),
                 timestampMillis = new Date(region.timestamp).getTime(),
                 elapsedTimeMillis = region.elapsedTimeMillis,
                 payload = {
                     'name': 'region.sanity_status',
                     'dimensions': {
+                        'region': regionName,
                         'unit': 'status',
                         'resource_id': regionName,
                         'source': 'fihealth',
                         'type': 'gauge'
                     },
                     'timestamp': timestampMillis,
-                    'value': ['NOK', 'OK', 'POK'].indexOf(regionStatus),
+                    'value': regionStatusFloat,
                     'value_meta': {
                         'status': regionStatus,
                         'elapsed_time': elapsedTimeMillis.toString()
                     }
                 };
+
             var payloadString = JSON.stringify(payload);
+            logger.debug(context, 'New measurement: %s', payloadString);
+
             var headers = {
                 'Content-Type': 'application/json',
                 'Content-Length': payloadString.length,
                 'X-Auth-Token': authToken
             };
+
             var options = {
                 host: config.monasca.host,
                 port: config.monasca.port,
@@ -140,6 +149,7 @@ monasca.notify = function (region, notifyCallback) {
                 method: 'POST',
                 headers: headers
             };
+
             var monascaRequest = http.request(options, function (monascaResponse) {
                 monascaResponse.setEncoding('utf-8');
                 var responseString = '';
@@ -148,14 +158,15 @@ monasca.notify = function (region, notifyCallback) {
                     responseString += data;
                 });
                 monascaResponse.on('end', function () {
-                    logger.info('response monasca: region: %s, code: %s, message: %s',
-                                regionName, monascaResponse.statusCode, monascaResponse.statusMessage);
-                    notifyCallback();
+                    var err = (this.statusCode === 204) ? null : http.STATUS_CODES[this.statusCode];
+                    logger.info(context, 'Response from Monasca: region=%s status=%s', regionName, this.statusCode);
+                    notifyCallback(err);
                 });
             });
-            monascaRequest.on('error', function (e) {
-                logger.error('Error in connection with monasca: %s', e);
-                notifyCallback(e);
+
+            monascaRequest.on('error', function (err) {
+                logger.error(context, 'Error in connection with Monasca: %s', err);
+                notifyCallback(err);
             });
 
             monascaRequest.write(payloadString);
