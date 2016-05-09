@@ -23,8 +23,8 @@ RUN yum clean all; yum -y install epel-release
 RUN yum -y install python-pip
 RUN yum -y install mailman
 RUN RPM_FILE=$(find $WORKSPACE -name "*.rpm"); rpm -i $RPM_FILE
-COPY fihealth_dashboard.yml /etc/sysconfig/fihealth_dashboard.yml
-COPY settings.json /opt/fiware-health/dashboard/test/acceptance/conf/settings.json
+COPY dashboard/tools/docker/fihealth_dashboard.yml /etc/sysconfig/fihealth_dashboard.yml
+COPY dashboard/tools/docker/settings.json /opt/fiware-health/dashboard/test/acceptance/conf/settings.json
 WORKDIR /opt/fiware-health/dashboard/test/acceptance
 RUN yum -y install python-devel libffi-devel openssl-devel nc
 RUN pip install -r requirements.txt
