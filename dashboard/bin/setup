@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2015 Telefónica I+D
+# Copyright 2015-2016 Telefónica I+D
 # All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -85,18 +85,30 @@ fi
 
 # Parse config file to get settings file (region list) and endpoints
 eval `cd $BASEDIR; node -p <<-EOF
-	var yaml=require('js-yaml'), util=require('util'), fs=require('fs');
-	var config=yaml.safeLoad(fs.readFileSync('$CONFIG_FILE', 'utf8'));
+	var fs = require('fs'),
+	    url = require('url'),
+	    util = require('util'),
+	    yaml = require('js-yaml'),
+	    config = yaml.safeLoad(fs.readFileSync('$CONFIG_FILE', 'utf8')),
+	    constants = require('./lib/constants');
+	var appUrl = url.format({
+	    protocol: 'http',
+	    hostname: config.app.host,
+	    port: config.app.port,
+	    pathname: config.app.webContext
+	});
 	util.format('\
-	SETTINGS=%s \
-	CALLBACK_URL=http://%s:%s/%s/contextbroker \
-	BROKER_URL=http://%s:%s/NGSI10 \
-	EMAIL_FROM=%s',
-	config.app.settings,
-	config.app.host, config.app.port,
-	config.app.webContext.replace(/^\/|\/$/g, ''),
-	config.cbroker.host, config.cbroker.port,
-	config.mailman.emailFrom);
+	    SETTINGS=%s \
+	    BROKER_URL=http://%s:%s/NGSI10 \
+	    CALLBACK_URL_CHANGE=%s%s \
+	    CALLBACK_URL_VALUE=%s%s \
+	    EMAIL_FROM=%s',
+	    config.app.settings,
+	    config.cbroker.host, config.cbroker.port,
+	    appUrl, constants.CONTEXT_SANITY_STATUS_CHANGE,
+	    appUrl, constants.CONTEXT_SANITY_STATUS_VALUE,
+	    config.mailman.emailFrom
+	);
 EOF`
 if [ ! -r "$SETTINGS" ]; then
 	printf "Cannot find '%s' settings file\n" "$SETTINGS" 1>&2
@@ -116,7 +128,7 @@ LISTS=$(sed -n '/"external_network_name"/,/}/ { s/.*/\L&/; p}' $SETTINGS \
 ADMIN_MAIL=$EMAIL_FROM
 [ -n "$LISTS" -a -z "$ADMIN_PASS" ] && read -p "Admin password: " ADMIN_PASS
 
-# Create mailing lists
+# Create mailing lists not existing yet
 LANGUAGE='en'
 URL_HOST=$EMAIL_HOST
 TMP_FILE=/tmp/$NAME_$$
@@ -149,31 +161,42 @@ if echo $LIST | egrep -qv $EXCLUDE_LISTS; then
 fi
 rm -f $TMP_FILE
 
-# Subscribe to changes in Context Broker
-(curl $BROKER_URL/subscribeContext -s -S -X POST \
-	-H "Content-Type: application/json" -H "Accept: application/json" \
-	-d @- | python -mjson.tool) <<-EOF
-	{
-	    "entities": [
-	        {
-	            "type": "region",
-	            "isPattern": "true",
-	            "id": ".*"
-	        }
-	    ],
-	    "attributes": [
-	        "sanity_status"
-	    ],
-	    "reference": "$CALLBACK_URL",
-	    "duration": "P99Y",
-	    "notifyConditions": [
-	        {
-	            "type": "ONCHANGE",
-	            "condValues": [
-	                "sanity_status"
-	            ]
-	        }
-	    ],
-	    "throttling": "PT5S"
-	}
-EOF
+# Subscriptions to Context Broker, if not existing yet
+# - ONCHANGE(sanity_status) to be notified ONLY for changes in sanity_status
+# - ONCHANGE(sanity_check_timestamp) to be notified for all new status values
+TRIGGER_CHANGE=sanity_status
+TRIGGER_VALUE=sanity_check_timestamp
+for TYPE in CHANGE VALUE; do
+	eval TRIGGER=\$TRIGGER_$TYPE
+	eval CALLBACK=\$CALLBACK_URL_$TYPE
+	CSUB=$(mongo orion --quiet --eval \
+	'db.csubs.find({"conditions.value": "'$TRIGGER'"}).shellPrint();')
+	[ -n "$CSUB" ] || (curl $BROKER_URL/subscribeContext -s -S \
+		-H "Content-Type: application/json" \
+		-H "Accept: application/json" \
+		-X POST -d @- | python -mjson.tool) <<-EOF
+		{
+		    "entities": [
+		        {
+		            "type": "region",
+		            "isPattern": "true",
+		            "id": ".*"
+		        }
+		    ],
+		    "attributes": [
+		        "sanity_status"
+		    ],
+		    "reference": "$CALLBACK",
+		    "duration": "P99Y",
+		    "notifyConditions": [
+		        {
+		            "type": "ONCHANGE",
+		            "condValues": [
+		                "$TRIGGER"
+		            ]
+		        }
+		    ],
+		    "throttling": "PT5S"
+		}
+	EOF
+done

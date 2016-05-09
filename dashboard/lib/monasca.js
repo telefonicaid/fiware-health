@@ -98,7 +98,7 @@ monasca.withAuthToken = function (callback) {
 
 /**
  * @function notify
- * Notify Monasca for a change in region
+ * Notify Monasca for new sanity_status value in a region
  * @param {Object} region
  * @param {function} notifyCallback
  */
@@ -163,6 +163,10 @@ monasca.notify = function (region, notifyCallback) {
         }
     });
 };
+
+
+/** Name of notify destination as an attribute */
+monasca.notify.destination = 'Monasca';
 
 
 /** @export */

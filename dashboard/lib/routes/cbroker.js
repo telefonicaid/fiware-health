@@ -161,12 +161,12 @@ function retrieveAllRegions(txid, callback) {
 
 
 /**
- * invoked when change is received from context broker
+ * Return the entity involved in a Context Broker notification
  * @param {string} txid
  * @param {*} req
  * @return {Object}
  */
-function changeReceived(txid, req) {
+function getEntity(txid, req) {
     var result = parseRegions(txid, JSON.parse(req.body));
     return result[0];
 }
@@ -179,4 +179,4 @@ module.exports.retrieveAllRegions = retrieveAllRegions;
 module.exports.parseRegions = parseRegions;
 
 /** @export */
-module.exports.changeReceived = changeReceived;
+module.exports.getEntity = getEntity;

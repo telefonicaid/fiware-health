@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Telefónica I+D
+ * Copyright 2015-2016 Telefónica I+D
  * All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -31,3 +31,30 @@ module.exports.GLOBAL_STATUS_OTHER = 'N/A';
 
 /** @export */
 module.exports.TRANSACTION_ID_HEADER = 'txid';
+
+/** @export */
+module.exports.CONTEXT_AUTH = 'auth';
+
+/** @export */
+module.exports.CONTEXT_SIGNIN = 'signin';
+
+/** @export */
+module.exports.CONTEXT_LOGIN = 'login';
+
+/** @export */
+module.exports.CONTEXT_LOGOUT = 'logout';
+
+/** @export */
+module.exports.CONTEXT_REFRESH = 'refresh';
+
+/** @export */
+module.exports.CONTEXT_SUBSCRIBE = 'subscribe';
+
+/** @export */
+module.exports.CONTEXT_UNSUBSCRIBE = 'unsubscribe';
+
+/** @export */
+module.exports.CONTEXT_SANITY_STATUS_VALUE = 'sanity_status';
+
+/** @export */
+module.exports.CONTEXT_SANITY_STATUS_CHANGE = 'change_sanity_status';
