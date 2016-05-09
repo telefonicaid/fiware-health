@@ -29,8 +29,5 @@ WORKDIR /opt/fiware-health/dashboard/test/acceptance
 RUN yum -y install python-devel libffi-devel openssl-devel nc
 RUN pip install -r requirements.txt
 RUN pip install behave
-CMD /etc/init.d/fihealth_dashboard start; (while ! nc -vn 127.0.0.1 3000; do sleep 1; done); behave features/ --tags
-~@selenium
---junit
---junit-directory testreport
+CMD /etc/init.d/fihealth_dashboard start; (while ! nc -vn 127.0.0.1 3000; do sleep 1; done); behave features/ --tags ~@selenium --junit --junit-directory testreport
 
