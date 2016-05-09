@@ -79,6 +79,7 @@ function parseRegions(txid, entities) {
         }
     });
 
+    logger.debug(context, 'Result: %j', result);
     return result;
 }
 
@@ -167,6 +168,11 @@ function retrieveAllRegions(txid, callback) {
  * @return {Object}
  */
 function getEntity(txid, req) {
+    var context = {trans: txid, op: 'getEntity'};
+    if (typeof req.body !== 'string') {
+        logger.warn(context, 'Non-string request body');
+        req.body = JSON.stringify(req.body);
+    }
     var result = parseRegions(txid, JSON.parse(req.body));
     return result[0];
 }
