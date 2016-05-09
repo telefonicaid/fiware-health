@@ -260,9 +260,13 @@ app.use(config.webContext, stylus.middleware(
 
 app.use(session({secret: config.secret}));
 
-// trace all requests
+// trace all requests and include transaction id (if not present)
 app.use(function (req, res, next) {
-    logger.debug({op: 'app#use'}, '%s %s %s', req.method, req.url, req.path);
+    var txidHeader = constants.TRANSACTION_ID_HEADER.toLowerCase(),
+        txid = req.headers[txidHeader] || cuid(),
+        context = {trans: txid, op: 'app#use'};
+    logger.debug(context, '%s %s', req.method, req.url);
+    req.headers[txidHeader] = txid;
     next();
 });
 
