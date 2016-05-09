@@ -102,7 +102,7 @@ suite('app', function () {
         monascaNotifyStub.restore();
         getEntityStub.restore();
         assert(res.status.withArgs(200).calledOnce);
-        assert(mailmanNotifyStub.calledOnce)
+        assert(mailmanNotifyStub.calledOnce);
         assert(monascaNotifyStub.notCalled);
     });
 
@@ -130,7 +130,7 @@ suite('app', function () {
         monascaNotifyStub.restore();
         getEntityStub.restore();
         assert(res.status.withArgs(200).calledOnce);
-        assert(mailmanNotifyStub.notCalled)
+        assert(mailmanNotifyStub.notCalled);
         assert(monascaNotifyStub.calledOnce);
     });
 
