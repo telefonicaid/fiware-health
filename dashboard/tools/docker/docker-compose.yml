@@ -1,0 +1,4 @@
+fiwaredashboard:
+  image: fiwaredashboard
+  ports:
+   - 3000:3000
