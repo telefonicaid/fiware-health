@@ -40,7 +40,6 @@ This job executes the Sanity Check on each FIWARE Lab node. It will spawn parall
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Prague&apos;) },
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Mexico&apos;) },
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;PiraeusU&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Zurich&apos;) },
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;SpainTenerife&apos;) },
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Volos&apos;) },
     { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Budapest2&apos;) },
