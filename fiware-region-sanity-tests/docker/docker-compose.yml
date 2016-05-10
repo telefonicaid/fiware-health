@@ -1,0 +1,14 @@
+ph:
+  image: ph
+  environment: 
+   - KEY
+   - VMIP
+
+
+
+
+
+
+
+  ports:
+   - 8081:8081
