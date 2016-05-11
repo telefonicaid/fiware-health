@@ -26,7 +26,7 @@ var express = require('express'),
 
 
 /**
- * router get subscribe
+ * Called by router when GET
  * @param {Object} req
  * @param {Object} res
  */
@@ -36,14 +36,13 @@ function getSubscribe(req, res) {
 
     var userinfo = req.session.user;
 
-    logger.info({op: 'subscribe#get'}, 'subscribe to region: ' + region + ' userinfo:' + userinfo);
+    logger.info({op: 'subscribe#get'}, 'Subscribe to region: %s userinfo: %s', region, userinfo);
 
     var payloadString = 'address=' + userinfo.email;
 
     var headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': payloadString.length
-
     };
 
     var options = {
@@ -69,7 +68,7 @@ function getSubscribe(req, res) {
         });
     });
     mailmainRequest.on('error', function (e) {
-        logger.error('Error in connection with mailman: ' + e);
+        logger.error('Error in connection with mailman: %s', e);
         res.redirect(config.webContext);
     });
 
@@ -92,7 +91,6 @@ function isSubscribed(user, region, isSubscribedCallback) {
         path: config.mailman.path + region.node.toLowerCase(),
         method: 'GET'
     };
-
 
     function isMail(value) {
         return value === user;
@@ -122,8 +120,9 @@ function isSubscribed(user, region, isSubscribedCallback) {
 
         });
     });
+
     mailmainRequest.on('error', function (e) {
-        logger.error({op: 'subscribe#isSubscribed'},'Error in connection with mailman: ' + e);
+        logger.error({op: 'subscribe#isSubscribed'}, 'Error in connection with mailman: %s', e);
         region.subscribed = false;
         isSubscribedCallback();
     });
@@ -131,8 +130,8 @@ function isSubscribed(user, region, isSubscribedCallback) {
     mailmainRequest.end();
 }
 
+
 /**
- *
  * @param {Object} user
  * @param {[]} regions
  * @param {callback} callback
@@ -142,12 +141,10 @@ function searchSubscription(user, regions, callback) {
     logger.debug('searchSubscription');
     var finished = _.after(regions.length, callback);
     regions.map(function (region) {
-
-
         isSubscribed(user, region, finished);
-
     });
 }
+
 
 /**
  * notify mailing list for a change in region
@@ -195,8 +192,9 @@ function notify(region, notifyCallback) {
 
         });
     });
+
     mailmanRequest.on('error', function (e) {
-        logger.error('Error in connection with mailman: ' + e);
+        logger.error('Error in connection with mailman: %s', e);
         notifyCallback(e);
     });
 
@@ -205,20 +203,24 @@ function notify(region, notifyCallback) {
 }
 
 
-/* GET /subcribe: send PUT to mailman*/
+/** Name of notify destination as an attribute */
+notify.destination = 'mailing list';
+
+
 router.get('/', getSubscribe);
-
-
 
 /** @export */
 module.exports = router;
 
 /** @export */
 module.exports.getSubscribe = getSubscribe;
+
 /** @export */
 module.exports.isSubscribed = isSubscribed;
+
 /** @export */
 module.exports.searchSubscription = searchSubscription;
+
 /** @export */
 module.exports.notify = notify;
 
