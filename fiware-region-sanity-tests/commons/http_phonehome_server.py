@@ -38,6 +38,9 @@ import logging.config
 # Global DBus server instance
 dbus_server = None
 
+# Global logger
+logging.config.fileConfig(LOGGING_FILE_PHONEHOME)
+logger = logging.getLogger("HttpPhoneHomeServer")
 
 class PhoneHome():
     exposed = True
@@ -105,6 +108,35 @@ class Root(object):
     pass
 
 
+# Add a Tool to our new Toolbox.
+def before_request_body():
+    transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
+    content_length = int(cherrypy.request.headers['Content-Length'])
+    logger.info("%s - before_request_body, path: %s %d", transaction_id, cherrypy.request.path_info, content_length)
+    request = cherrypy.serving.request
+
+    def processor(entity):
+        """Do nothing with body"""
+        if not entity.headers.get("Content-Length", ""):
+            raise cherrypy.HTTPError(411)
+
+        try:
+            content_length = int(cherrypy.request.headers['Content-Length'])
+            logger.info("%s - body - content_length: %s ", transaction_id, content_length)
+
+        except ValueError:
+            raise cherrypy.HTTPError(400, 'Invalid Content-Length')
+
+    request.body.processors['application/x-www-form-urlencoded'] = processor
+
+
+# After each request
+def on_end_request():
+    transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
+    logger.info("%s - on_end_request", transaction_id)
+    print 'end'
+
+
 class HttpPhoneHomeServer():
     """
     This Server will be waiting for POST requests. If some request is received to '/' resource (root) will be
@@ -134,6 +166,8 @@ class HttpPhoneHomeServer():
             'global': {
                 'server.socket_host': '0.0.0.0',
                 'server.socket_port': self.port,
+                'tools.newauth_open.on': True,
+                'tools.newauth_close.on': True,
             },
             '/': {
                 'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -148,15 +182,14 @@ class HttpPhoneHomeServer():
         root.phonehome = PhoneHome()
         root.metadata = PhoneHome()
 
+        cherrypy.tools.newauth_open = cherrypy.Tool('before_request_body', before_request_body, priority=100)
+        cherrypy.tools.newauth_close = cherrypy.Tool('on_end_request', on_end_request)
         cherrypy.log.error_log.propagate = False
         cherrypy.log.access_log.propagate = False
         cherrypy.log.screen = None
         cherrypy.quickstart(root, '/', conf)
 
 if __name__ == '__main__':
-
-    logging.config.fileConfig(LOGGING_FILE_PHONEHOME)
-    logger = logging.getLogger("HttpPhoneHomeServer")
 
     # Load properties
     logger.info("Loading test settings...")
