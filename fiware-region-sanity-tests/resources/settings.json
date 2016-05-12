@@ -28,7 +28,6 @@
     "region_configuration": {
         "external_network_name": {
             "Spain2": "public-ext-net-01",
-            "Trento": "public-ext-net-02",
             "Trento2": "public-ext-net-01",
             "Lannion2": "public-ext-net-01",
             "Prague": "default",
@@ -47,17 +46,13 @@
         },
         "shared_network_name": {
             "Spain2": "node-int-net-01",
-            "Trento": "node-int-net-02",
             "Trento2": "node-int-net-01",
             "Lannion2": "node-int-net-01",
-            "Waterford": "node-int-net-01",
-            "Berlin2": "node-int-net-01",
             "Mexico": "node-int-net-01",
             "PiraeusU": "node-int-net-01",
             "SpainTenerife": "node-int-net-01",
             "Volos": "node-int-net-01",
             "Budapest2": "node-int-net-01",
-            "Stockholm2": "node-int-net-01",
             "SophiaAntipolis": "node-int-net-01",
             "Poznan": "node-int-net-01",
             "Zurich2": "node-int-net-01",
