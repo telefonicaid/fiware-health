@@ -42,7 +42,8 @@ dbus_server = None
 logging.config.fileConfig(LOGGING_FILE_PHONEHOME)
 logger = logging.getLogger("HttpPhoneHomeServer")
 
-class PhoneHome():
+
+class PhoneHome:
     exposed = True
 
     @cherrypy.tools.accept(media='text/plain')
@@ -108,15 +109,16 @@ class Root(object):
     pass
 
 
-# Add a Tool to our new Toolbox.
 def before_request_body():
+    """
+    Add a Tool to our new Toolbox.
+    """
     transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
-    content_length = int(cherrypy.request.headers['Content-Length'])
-    logger.info("%s - before_request_body, path: %s %d", transaction_id, cherrypy.request.path_info, content_length)
+    logger.info("%s - before_request_body, path: %s", transaction_id, cherrypy.request.path_info)
     request = cherrypy.serving.request
 
     def processor(entity):
-        """Do nothing with body"""
+        """Important! Do nothing with body"""
         if not entity.headers.get("Content-Length", ""):
             raise cherrypy.HTTPError(411)
 
@@ -130,14 +132,16 @@ def before_request_body():
     request.body.processors['application/x-www-form-urlencoded'] = processor
 
 
-# After each request
 def on_end_request():
+    """
+    After each request
+    """
     transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
     logger.info("%s - on_end_request", transaction_id)
     print 'end'
 
 
-class HttpPhoneHomeServer():
+class HttpPhoneHomeServer:
     """
     This Server will be waiting for POST requests. If some request is received to '/' resource (root) will be
     processed. POST body is precessed using a DBus PhoneHome Client and 200OK is always returned.
@@ -166,8 +170,8 @@ class HttpPhoneHomeServer():
             'global': {
                 'server.socket_host': '0.0.0.0',
                 'server.socket_port': self.port,
-                'tools.newauth_open.on': True,
-                'tools.newauth_close.on': True,
+                'tools.newprocessor_open.on': True,
+                'tools.newprocessor_close.on': True,
             },
             '/': {
                 'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -182,8 +186,8 @@ class HttpPhoneHomeServer():
         root.phonehome = PhoneHome()
         root.metadata = PhoneHome()
 
-        cherrypy.tools.newauth_open = cherrypy.Tool('before_request_body', before_request_body, priority=100)
-        cherrypy.tools.newauth_close = cherrypy.Tool('on_end_request', on_end_request)
+        cherrypy.tools.newprocessor_open = cherrypy.Tool('before_request_body', before_request_body, priority=100)
+        cherrypy.tools.newprocessor_close = cherrypy.Tool('on_end_request', on_end_request)
         cherrypy.log.error_log.propagate = False
         cherrypy.log.access_log.propagate = False
         cherrypy.log.screen = None
