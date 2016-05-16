@@ -15,4 +15,5 @@ echo ${KEY} >> key.pem
 chmod 0600 key.pem
 ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@${VMIP} -fnN -R0:8081:0:8081 &
 ./resources/docker/start.sh &
+sleep 12000
 ./resources/scripts/jenkins.sh exec

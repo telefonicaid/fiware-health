@@ -219,7 +219,7 @@ class FiwareTestCase(unittest.TestCase):
             cls.reset_world_routers(world, suite)
             cls.reset_world_allocated_ips(world, suite)
             cls.reset_world_containers(world, suite)
-        #    cls.reset_world_local_objects(world, suite)
+            cls.reset_world_local_objects(world, suite)
 
     @classmethod
     def reset_world_servers(cls, world, suite=False):

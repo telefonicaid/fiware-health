@@ -138,7 +138,7 @@ class FiwareNovaOperations:
         self.client.security_groups.delete(sec_group_id)
         self.logger.debug("Deleted security group %s", sec_group_id)
 
-    def list_security_groups(self, name_prefix=None,  **kwargs):
+    def list_security_groups(self, name_prefix=None, **kwargs):
         """
         Gets all the security groups
         :param name_prefix: Prefix to match security group names
