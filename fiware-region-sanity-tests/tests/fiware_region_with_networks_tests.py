@@ -34,7 +34,7 @@ import json
 import uuid
 
 
-def _build_path_resource(self, path_resource):
+def _build_path_resource(path_resource):
     """Build url path with a transactionId param"""
     return path_resource + '?TransactionId=' + str(uuid.uuid1())
 
