@@ -29,12 +29,12 @@ from dbus.service import BusName
 from dbus.mainloop.glib import DBusGMainLoop
 import gobject
 from commons.constants import PHONEHOME_DBUS_NAME, PHONEHOME_TIMEOUT, PHONEHOME_SIGNAL, PHONEHOME_METADATA_SIGNAL,\
-    PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_DBUS_OBJECT_PATH
+    PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_TX_ID_HEADER
 import re
 import json
 
 
-class DbusPhoneHomeClient():
+class DbusPhoneHomeClient:
 
     expected_signal_hostname = None
     mainloop = None
@@ -75,8 +75,8 @@ class DbusPhoneHomeClient():
     def phonehome_signal_handler(phonehome_http_data):
         """
         Handler for the signal 'phonehome_signal'.
-        :param phonehome_http_data: Receives the data of the VM emitted in the signal. If matches with the expected one,
-         main loop will be finished.
+        :param phonehome_http_data: Receives the data of the VM emitted in the signal. If matches with the expected
+         one, main loop will be finished.
         :return: None
         """
         DbusPhoneHomeClient.logger.debug("Data received from PhoneHome Server: '%s'",
@@ -218,7 +218,7 @@ class DbusPhoneHomeObject(dbus.service.Object):
         self.remove_from_connection(path=self.object_path)
 
 
-class DbusPhoneHomeServer():
+class DbusPhoneHomeServer:
 
     def __init__(self, logger):
         """
@@ -252,11 +252,13 @@ class DbusPhoneHomeServer():
         This method emits the phonehome signal to all clients connected to the bus,
          with the given data as value.
         :param phonehome_data: PhoneHome data (HTTP POST request)
+        :param phonehome_object_path: /metadata or /phonehome
         :param hostname: String with the header Hostname value
         :param transaction_id: String with the transaction id value
         :return: None
         """
-        self.logger.debug("%s - Emit signal, data:'%s' to '%s'", transaction_id, phonehome_data, hostname)
+        self.logger.debug("%s: %s - Emit signal, data:'%s' to '%s'", PHONEHOME_TX_ID_HEADER, transaction_id,
+                          phonehome_data, hostname)
 
         if phonehome_object_path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
             self.dbus_phonehome_objects[phonehome_object_path].phonehome_metadata_signal(phonehome_data, hostname)
