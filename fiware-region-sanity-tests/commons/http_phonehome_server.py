@@ -29,10 +29,11 @@ import json
 from os import environ
 import sys
 from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
-    LOGGING_FILE_PHONEHOME, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH
+    LOGGING_FILE_PHONEHOME, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_TX_ID_HEADER
 import urlparse
 from dbus_phonehome_service import DbusPhoneHomeServer
 import logging.config
+import uuid
 
 
 # Global DBus server instance
@@ -60,7 +61,7 @@ class PhoneHome:
         content_length = int(cherrypy.request.headers['Content-Length'])
         content = cherrypy.request.body.read(content_length)
 
-        transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
+        logger.info("%s: %s - POST: ", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
         path = cherrypy.request.path_info
 
@@ -71,30 +72,36 @@ class PhoneHome:
                 if "Hostname" in cherrypy.request.headers:
                     hostname = cherrypy.request.headers['Hostname']
 
-                    dbus_server.logdebug("{0} - Sending signal to hostname: {1}".format(transaction_id, hostname))
+                    dbus_server.logdebug("{0}: {1} - Sending signal to hostname: {2}".format(
+                        PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id, hostname))
 
                     dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH,
-                                                      hostname, transaction_id)
+                                                      hostname, cherrypy.request.transaction_id)
 
                     cherrypy.response.status = httplib.OK
                     return
                 else:
                     cherrypy.response.status = httplib.BAD_REQUEST
-                    return transaction_id + " - Hostname header is not present in HTTP PhoneHome request"
+                    return "{0}: {1} - Hostname header is not present in HTTP PhoneHome request".format(
+                        PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
             elif path == PHONEHOME_DBUS_OBJECT_PATH:
-                dbus_server.logdebug("{0} - Sending signal".format(transaction_id))
-                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None, transaction_id)
+                dbus_server.logdebug("{0}: {1} - Sending signal".format(PHONEHOME_TX_ID_HEADER,
+                                                                       cherrypy.request.transaction_id))
+                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None,
+                                                  cherrypy.request.transaction_id)
                 cherrypy.response.status = httplib.OK
                 return
             else:
                 cherrypy.response.status = httplib.NOT_FOUND
-                return transaction_id + " - Path not found for HTTP PhoneHome request"
+                return "{0}: {1} - Path not found for HTTP PhoneHome request".format(
+                    PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
         else:
             # Bad Request
             cherrypy.response.status = httplib.BAD_REQUEST
-            return transaction_id + " - Invalid data received in HTTP PhoneHome request"
+            return "{0}: {1} - Invalid data received in HTTP PhoneHome request".format(
+                    PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
 
 def handle_error():
@@ -113,8 +120,19 @@ def before_request_body():
     """
     Add a Tool to our new Toolbox.
     """
-    transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
-    logger.info("%s - before_request_body, path: %s", transaction_id, cherrypy.request.path_info)
+    logger.info("before_request_body: %s ", cherrypy.request.params)
+    if PHONEHOME_TX_ID_HEADER in cherrypy.request.headers:
+        transaction_id = cherrypy.request.headers[PHONEHOME_TX_ID_HEADER]
+    elif PHONEHOME_TX_ID_HEADER in cherrypy.request.params:
+        transaction_id = cherrypy.request.params[PHONEHOME_TX_ID_HEADER]
+        cherrypy.request.params = {}
+    else:
+        transaction_id = str(uuid.uuid1())
+
+    cherrypy.request.transaction_id = transaction_id
+    logger.info("%s: %s - before_request_body, path: %s", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id,
+                cherrypy.request.path_info)
+
     request = cherrypy.serving.request
 
     def processor(entity):
@@ -124,7 +142,8 @@ def before_request_body():
 
         try:
             content_length = int(cherrypy.request.headers['Content-Length'])
-            logger.info("%s - body - content_length: %s ", transaction_id, content_length)
+            logger.info("%s: %s - body - content_length: %s ", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id,
+                        content_length)
 
         except ValueError:
             raise cherrypy.HTTPError(400, 'Invalid Content-Length')
@@ -136,8 +155,7 @@ def on_end_request():
     """
     After each request
     """
-    transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
-    logger.info("%s - on_end_request", transaction_id)
+    logger.info("%s: %s - on_end_request", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
     print 'end'
 
 
