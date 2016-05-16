@@ -29,6 +29,7 @@ from neutronclient.common.exceptions import NeutronClientException, IpAddressGen
 from datetime import datetime
 from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
+from commons.constants import PHONEHOME_TX_ID_HEADER
 import re
 import json
 import uuid
@@ -36,7 +37,7 @@ import uuid
 
 def _build_path_resource(path_resource):
     """Build url path with a transactionId param"""
-    return path_resource + '?TransactionId=' + str(uuid.uuid1())
+    return '{0}?{1}={2}'.format(path_resource, PHONEHOME_TX_ID_HEADER, str(uuid.uuid1()))
 
 
 class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
