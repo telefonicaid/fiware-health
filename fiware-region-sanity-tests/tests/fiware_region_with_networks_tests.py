@@ -544,7 +544,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
             userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
-                                                           path_resource=_build_path_resource(path_resource),
+                                                           path_resource=path_resource,
                                                            openstack_metadata_service_url=metadata_service_url)
 
             self.logger.debug("Userdata content: %s", userdata_content)
