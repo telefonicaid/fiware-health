@@ -138,13 +138,13 @@ class FiwareNovaOperations:
         self.client.security_groups.delete(sec_group_id)
         self.logger.debug("Deleted security group %s", sec_group_id)
 
-    def list_security_groups(self, name_prefix=None):
+    def list_security_groups(self, name_prefix=None,  **kwargs):
         """
         Gets all the security groups
         :param name_prefix: Prefix to match security group names
         :return: A list of :class:`SecurityGroup`
         """
-        sec_group_list = self.client.security_groups.list()
+        sec_group_list = self.client.security_groups.list(kwargs)
         if name_prefix:
             sec_group_list = [sec_group for sec_group in sec_group_list if sec_group.name.startswith(name_prefix)]
 
@@ -238,13 +238,13 @@ class FiwareNovaOperations:
         """
         self.client.servers.delete(instance_id)
 
-    def list_servers(self, name_prefix=None):
+    def list_servers(self, name_prefix=None, **kwargs):
         """
         Gets all the servers of the tenant
         :param name_prefix: Prefix to match server names
         :return: A list of :class:`Server`
         """
-        server_list = self.client.servers.list()
+        server_list = self.client.servers.list(kwargs)
         if name_prefix:
             server_list = [server for server in server_list if server.name.startswith(name_prefix)]
 

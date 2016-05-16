@@ -35,6 +35,7 @@ from swiftclient.exceptions import ClientException as SwiftClientException
 from requests.exceptions import ConnectionError
 from commons.nova_operations import FiwareNovaOperations
 from commons.neutron_operations import FiwareNeutronOperations
+from commons.keystone_operations import FiwareKeystoneOperations
 from commons.swift_operations import FiwareSwiftOperations
 from commons.constants import *
 from os import environ
@@ -107,6 +108,7 @@ class FiwareTestCase(unittest.TestCase):
         # Check Identity API version from auth_url (v3 requires additional properties)
         try:
             cls.auth_url = env_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
+            cls.tenant_id = env_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]
             cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
             if cls.auth_api == 'v3':
                 domain = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
@@ -182,6 +184,9 @@ class FiwareTestCase(unittest.TestCase):
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
+        cls.keystone_operations = FiwareKeystoneOperations(cls.logger, cls.region_name, tenant_id, user_id=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
+                                                         auth_session=cls.auth_sess, auth_url=cls.auth_url, auth_token=cls.auth_token)
+        cls.keystone_operations.check_permited_role()
         if cls.with_storage:
             cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
                                                           auth_cred=cls.auth_cred)
@@ -214,7 +219,7 @@ class FiwareTestCase(unittest.TestCase):
             cls.reset_world_routers(world, suite)
             cls.reset_world_allocated_ips(world, suite)
             cls.reset_world_containers(world, suite)
-            cls.reset_world_local_objects(world, suite)
+        #    cls.reset_world_local_objects(world, suite)
 
     @classmethod
     def reset_world_servers(cls, world, suite=False):
@@ -225,7 +230,7 @@ class FiwareTestCase(unittest.TestCase):
         if suite:
             # get pre-existing server list (ideally, empty when starting the tests)
             try:
-                server_list = cls.nova_operations.list_servers(TEST_SERVER_PREFIX)
+                server_list = cls.nova_operations.list_servers(TEST_SERVER_PREFIX, tenant_id=cls.tenant_id)
                 for server in server_list:
                     cls.logger.debug("init_world() found server '%s' not deleted", server.name)
                     world['servers'].append(server.id)
@@ -273,7 +278,7 @@ class FiwareTestCase(unittest.TestCase):
         if suite:
             # get pre-existing test security group list (ideally, empty when starting the tests)
             try:
-                sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP_PREFIX)
+                sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP_PREFIX, tenant_id=cls.tenant_id)
                 for sec_group_data in sec_group_data_list:
                     cls.logger.debug("init_world() found security group '%s' not deleted", sec_group_data.name)
                     world['sec_groups'].append(sec_group_data.id)
@@ -389,7 +394,7 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the world['ports'] entry (after deleting existing resources)
         """
-
+        ports = []
         if suite and cls.with_networks:
             # get pre-existing port list (ideally, empty when starting the tests)
             try:
@@ -397,22 +402,26 @@ class FiwareTestCase(unittest.TestCase):
                 for port in port_list:
                     cls.logger.debug("init_world() found port '%s' not deleted", port['id'])
                     world['ports'].append(port['id'])
+                    ports.append(port)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get port list: %s", e)
 
         # release resources to ensure a clean test_world
-        for port_id in list(world['ports']):
+
+        for port in ports:
             try:
-                port_data = cls.neutron_operations.show_port(port_id)
+                if port["tenant_id"] != cls.tenant_id or port["device_owner"] == 'compute:None':
+                    continue
+                port_data = cls.neutron_operations.show_port(port['id'])
                 if 'network:router_interface' in port_data['device_owner']:
                     for fixed_ip in port_data['fixed_ips']:
                         cls.neutron_operations.delete_interface_router(router_id=port_data['device_id'],
                                                                        subnetwork_id=fixed_ip['subnet_id'])
                 else:
-                    cls.neutron_operations.delete_port(port_id)
-                world['ports'].remove(port_id)
+                    cls.neutron_operations.delete_port(port['id'])
+                world['ports'].remove(port['id'])
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("Failed to delete port %s: %s", port_id, e)
+                cls.logger.error("Failed to delete port %s: %s", port.id, e)
 
     @classmethod
     def reset_world_containers(cls, world, suite=False):

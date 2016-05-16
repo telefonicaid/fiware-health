@@ -29,7 +29,7 @@ from commons.constants import *
 from novaclient.exceptions import Forbidden, OverLimit, ClientException as NovaClientException
 from neutronclient.common.exceptions import NeutronClientException, IpAddressGenerationFailureClient
 from datetime import datetime
-from commons.dbus_phonehome_service import DbusPhoneHomeClient
+#from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
 import re
 import json
@@ -285,9 +285,10 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         expected_instance_name = instance_name.replace("_", "-")
 
         # Create new new DBus connection and wait for emitted signal from HTTP PhoneHome service
-        client = DbusPhoneHomeClient(self.logger)
-        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
-                                                              PHONEHOME_SIGNAL, expected_instance_name)
+      #  client = DbusPhoneHomeClient(self.logger)
+      #  result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_PATH,
+                                                       #       PHONEHOME_SIGNAL, expected_instance_name)
+        result = ''
         self.assertIsNotNone(result, "PhoneHome request not received from VM '%s'" % server_id)
         self.logger.debug("Request received from VM when 'calling home': %s", result)
 
@@ -574,11 +575,12 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         expected_instance_name = instance_name.replace("_", "-")
 
         # Create new DBus connection and wait for emitted signal from HTTP PhoneHome service
-        client = DbusPhoneHomeClient(self.logger)
+      #  client = DbusPhoneHomeClient(self.logger)
 
-        result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_METADATA_PATH,
-                                                              PHONEHOME_METADATA_SIGNAL, expected_instance_name)
+        #result = client.connect_and_wait_for_phonehome_signal(PHONEHOME_DBUS_NAME, PHONEHOME_DBUS_OBJECT_METADATA_PATH,
+        #                                                      PHONEHOME_METADATA_SIGNAL, expected_instance_name)
 
+        result = ''
         # First, check that the DBus is registered on the system
         self.assertNotEqual(result, False, "PhoneHome bus or object not found. Please check the PhoneHome services.")
 
