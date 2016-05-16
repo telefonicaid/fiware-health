@@ -162,7 +162,6 @@ class FiwareNeutronOperations:
         Gets the list of ports.
         :return: A list of :class:`dict` with port data
         """
-        #return self.find_ports(tenant_id=self.tenant_id)
         return self.client.list_ports(retrieve_all=True).get("ports")
 
     def show_port(self, port_id):
