@@ -21,8 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
-
 
 from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import *
@@ -33,6 +31,12 @@ from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
 import re
 import json
+import uuid
+
+
+def _build_path_resource(self, path_resource):
+    """Build url path with a transactionId param"""
+    return path_resource + '?TransactionId=' + str(uuid.uuid1())
 
 
 class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
@@ -253,7 +257,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
             userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
-                                                           path_resource=path_resource)
+                                                           path_resource=_build_path_resource(path_resource))
             self.logger.debug("Userdata content: %s", userdata_content)
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -540,7 +544,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
             userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
-                                                           path_resource=path_resource,
+                                                           path_resource=_build_path_resource(path_resource),
                                                            openstack_metadata_service_url=metadata_service_url)
 
             self.logger.debug("Userdata content: %s", userdata_content)

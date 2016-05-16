@@ -33,6 +33,7 @@ from commons.constants import PROPERTIES_FILE, PROPERTIES_CONFIG_TEST, PROPERTIE
 import urlparse
 from dbus_phonehome_service import DbusPhoneHomeServer
 import logging.config
+import uuid
 
 
 # Global DBus server instance
@@ -60,7 +61,8 @@ class PhoneHome:
         content_length = int(cherrypy.request.headers['Content-Length'])
         content = cherrypy.request.body.read(content_length)
 
-        transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
+        transaction_id = "txid:" + cherrypy.request.transaction_id
+        logger.info("%s - POST: ", transaction_id)
 
         path = cherrypy.request.path_info
 
@@ -113,8 +115,19 @@ def before_request_body():
     """
     Add a Tool to our new Toolbox.
     """
-    transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
+    logger.info("before_request_body: %s ", cherrypy.request.params)
+    if 'TransactionId' in cherrypy.request.headers:
+        transaction_id = cherrypy.request.headers['TransactionId']
+    elif 'TransactionId' in cherrypy.request.params:
+        transaction_id = cherrypy.request.params['TransactionId']
+        cherrypy.request.params = {}
+    else:
+        transaction_id = str(uuid.uuid1())
+
+    cherrypy.request.transaction_id = transaction_id
+    transaction_id = "txid:" + transaction_id
     logger.info("%s - before_request_body, path: %s", transaction_id, cherrypy.request.path_info)
+
     request = cherrypy.serving.request
 
     def processor(entity):
