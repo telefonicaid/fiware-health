@@ -20,7 +20,7 @@
 # Launch testcase execution and generate reports
 #
 # Usage:
-#     $0 [options] [REGION ...]
+#     $0 [options] [region ...]
 #     $0 --help|--version
 #
 # Options:

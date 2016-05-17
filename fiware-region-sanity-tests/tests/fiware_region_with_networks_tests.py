@@ -29,15 +29,9 @@ from neutronclient.common.exceptions import NeutronClientException, IpAddressGen
 from datetime import datetime
 from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
-from commons.constants import PHONEHOME_TX_ID_HEADER
 import re
 import json
 import uuid
-
-
-def _build_path_resource(path_resource):
-    """Build url path with a transactionId param"""
-    return '{0}?{1}={2}'.format(path_resource, PHONEHOME_TX_ID_HEADER, str(uuid.uuid1()))
 
 
 class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
@@ -178,6 +172,13 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
 
         return shared_network_name
 
+    @staticmethod
+    def __add_transaction_id(path_resource):
+        """
+        Build url path with a transactionId param
+        """
+        return '{0}?{1}={2}'.format(path_resource, PHONEHOME_TX_ID_HEADER, str(uuid.uuid1()))
+
     def __e2e_connection_using_public_ip_test_helper__(self, use_shared_network=True):
         """
         HELPER. Test whether it is possible to deploy an instance, assign an allocated public IP and establish
@@ -247,14 +248,15 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             self.skipTest("No value found for '{}.{}' setting".format(
                 PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
 
-        path_resource = PHONEHOME_DBUS_OBJECT_PATH
+        path_resource = self.__add_transaction_id(PHONEHOME_DBUS_OBJECT_PATH)
 
         # Load userdata from file and compile the template (replacing variable values)
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
         with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
-                                                           path_resource=_build_path_resource(path_resource))
+            userdata_content = replace_template_properties(userdata_content,
+                                                           phonehome_endpoint=phonehome_endpoint,
+                                                           path_resource=path_resource)
             self.logger.debug("Userdata content: %s", userdata_content)
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -540,7 +542,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_METADATA_PATH)
         with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
+            userdata_content = replace_template_properties(userdata_content,
+                                                           phonehome_endpoint=phonehome_endpoint,
                                                            path_resource=path_resource,
                                                            openstack_metadata_service_url=metadata_service_url)
 
