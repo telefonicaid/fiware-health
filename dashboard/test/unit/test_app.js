@@ -53,7 +53,7 @@ suite('app', function () {
     });
 
     test('should_have_some_methods', function () {
-        assert.equal(app.postContextbroker.name, 'postContextbroker');
+        assert.equal(app.postContextBroker.name, 'postContextBroker');
         assert.equal(app.getLogout.name, 'getLogout');
     });
 
@@ -66,19 +66,19 @@ suite('app', function () {
         res.status = sinon.stub();
         res.status.withArgs(400).returns(res);
 
-        var cbrokerStub = sinon.stub(cbroker, 'changeReceived');
-        cbrokerStub.throws();
+        var getEntityStub = sinon.stub(cbroker, 'getEntity');
+        getEntityStub.throws();
 
         //when
-        app.postContextbroker(req, res);
+        app.postContextBroker(req, res);
 
         //then
-        cbrokerStub.restore();
+        getEntityStub.restore();
         assert(res.status.withArgs(400).calledOnce);
         assert(res.send.calledOnce);
     });
 
-    test('should_return_200_in_contextbroker_post', function () {
+    test('should_only_notify_mailman_in_contextbroker_post_for_sanity_status_change', function () {
         //given
         var req = this.request,
             res = this.response;
@@ -86,26 +86,55 @@ suite('app', function () {
         res.end = sinon.spy();
         res.status = sinon.stub();
         res.status.withArgs(200).returns(res);
+        req.path = '/' + constants.CONTEXT_SANITY_STATUS_CHANGE;
 
-        var subscribeStub = sinon.stub(subscribe, 'notify'),
-            monascaStub = sinon.stub(monasca, 'notify'),
-            cbrokerStub = sinon.stub(cbroker, 'changeReceived', function () {
+        var mailmanNotifyStub = sinon.stub(subscribe, 'notify'),
+            monascaNotifyStub = sinon.stub(monasca, 'notify'),
+            getEntityStub = sinon.stub(cbroker, 'getEntity', function () {
                 return {'node': 'Region1', 'status': 'OK', 'timestamp': ''};
             });
 
         //when
-        app.postContextbroker(req, res);
+        app.postContextBroker(req, res);
 
         //then
-        subscribeStub.restore();
-        monascaStub.restore();
-        cbrokerStub.restore();
+        mailmanNotifyStub.restore();
+        monascaNotifyStub.restore();
+        getEntityStub.restore();
         assert(res.status.withArgs(200).calledOnce);
-        assert(subscribeStub.calledOnce);
-        assert(monascaStub.calledOnce);
+        assert(mailmanNotifyStub.calledOnce);
+        assert(monascaNotifyStub.notCalled);
     });
 
-    test('should_return_200_in_contextbroker_post_when_region_status_excluded', function () {
+    test('should_only_notify_monasca_in_contextbroker_post_for_sanity_status_value', function () {
+        //given
+        var req = this.request,
+            res = this.response;
+
+        res.end = sinon.spy();
+        res.status = sinon.stub();
+        res.status.withArgs(200).returns(res);
+        req.path = '/' + constants.CONTEXT_SANITY_STATUS_VALUE;
+
+        var mailmanNotifyStub = sinon.stub(subscribe, 'notify'),
+            monascaNotifyStub = sinon.stub(monasca, 'notify'),
+            getEntityStub = sinon.stub(cbroker, 'getEntity', function () {
+                return {'node': 'Region1', 'status': 'OK', 'timestamp': ''};
+            });
+
+        //when
+        app.postContextBroker(req, res);
+
+        //then
+        mailmanNotifyStub.restore();
+        monascaNotifyStub.restore();
+        getEntityStub.restore();
+        assert(res.status.withArgs(200).calledOnce);
+        assert(mailmanNotifyStub.notCalled);
+        assert(monascaNotifyStub.calledOnce);
+    });
+
+    test('should_not_notify_at_all_in_contextbroker_post_when_region_status_excluded', function () {
         //given
         var req = this.request,
             res = this.response;
@@ -114,22 +143,22 @@ suite('app', function () {
         res.status = sinon.stub();
         res.status.withArgs(200).returns(res);
 
-        var subscribeStub = sinon.stub(subscribe, 'notify'),
-            monascaStub = sinon.stub(monasca, 'notify'),
-            cbrokerStub = sinon.stub(cbroker, 'changeReceived', function () {
+        var mailmanNotifyStub = sinon.stub(subscribe, 'notify'),
+            monascaNotifyStub = sinon.stub(monasca, 'notify'),
+            getEntityStub = sinon.stub(cbroker, 'getEntity', function () {
                 return {'node': 'Region1', 'status': constants.GLOBAL_STATUS_OTHER, 'timestamp': ''};
             });
 
         //when
-        app.postContextbroker(req, res);
+        app.postContextBroker(req, res);
 
         //then
-        subscribeStub.restore();
-        monascaStub.restore();
-        cbrokerStub.restore();
+        mailmanNotifyStub.restore();
+        monascaNotifyStub.restore();
+        getEntityStub.restore();
         assert(res.status.withArgs(200).calledOnce);
-        assert(subscribeStub.notCalled);
-        assert(monascaStub.notCalled);
+        assert(mailmanNotifyStub.notCalled);
+        assert(monascaNotifyStub.notCalled);
     });
 
     test('should_close_session_with_get_logout', function () {
@@ -202,7 +231,6 @@ suite('app', function () {
         //then
         assert(next.calledOnce);
     });
-
 
     test('should_check_token_with_invalid_token', function () {
         //given

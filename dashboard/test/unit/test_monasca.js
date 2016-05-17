@@ -67,7 +67,7 @@ suite('monasca', function () {
             return request;
         });
 
-        var keystoneStub = sinon.stub(monasca, 'withAuthToken', function (callback) {
+        var keystoneStub = sinon.stub(monasca, 'withAuthToken', function (context, callback) {
             callback('TOKEN');
         });
 
@@ -103,7 +103,7 @@ suite('monasca', function () {
             return request;
         });
 
-        var keystoneStub = sinon.stub(monasca, 'withAuthToken', function (callback) {
+        var keystoneStub = sinon.stub(monasca, 'withAuthToken', function (context, callback) {
             callback('TOKEN');
         });
 
@@ -179,7 +179,7 @@ suite('monasca', function () {
 
     test('should_return_error_if_no_auth_token_obtained', function (done) {
         //given
-        var keystoneStub = sinon.stub(monasca, 'withAuthToken', function (callback) {
+        var keystoneStub = sinon.stub(monasca, 'withAuthToken', function (context, callback) {
             callback();
         });
 

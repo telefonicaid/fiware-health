@@ -16,7 +16,7 @@ Summary: FIHealth Dashboard.
 URL: https://github.com/telefonicaid/fiware-health/tree/master/dashboard
 Name: %{_name}
 Version: %{_version}
-Release: %{_release}
+Release: %{_release}%{?dist}
 License: Apache
 Group: Applications/Engineering
 Vendor: Telefónica I+D
@@ -55,8 +55,8 @@ echo "FILES:"; cat %{_topdir}/MANIFEST
 %config /etc/sysconfig/%{_dashboard_srv}.yml
 
 %pre
-# preinst ($1 == 1)
-if [ $1 -eq 1 ]; then
+# pre install ($1 == 1) or upgrade ($1 == 2)
+if [ $1 -ge 1 ]; then
 	# Function to compare version strings (in `x.y.z' format)
 	valid_version() {
 		local CUR=$1
@@ -103,8 +103,8 @@ if [ $1 -eq 1 ]; then
 fi
 
 %post
-# postinst ($1 == 1)
-if [ $1 -eq 1 ]; then
+# post install ($1 == 1) or upgrade ($1 == 2)
+if [ $1 -ge 1 ]; then
 	# actual values of installation variables
 	FIWARE_USR=%{_fiware_usr}
 	FIWARE_GRP=%{_fiware_grp}
@@ -207,6 +207,9 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Mon May 03 2016 Telefónica I+D <opensource@tid.es> 1.7.0-1
+- Progress status of sanity checks retrieved from Jenkins
+
 * Mon Apr 04 2016 Telefónica I+D <opensource@tid.es> 1.6.0-1
 - Add request to Monasca on notification from ContextBroker
 - Fix timestamp handling

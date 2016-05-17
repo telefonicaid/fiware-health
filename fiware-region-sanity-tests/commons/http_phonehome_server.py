@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -41,7 +41,7 @@ Files:
 
 
 from commons.constants import PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT, \
-    PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH, \
+    PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_TX_ID_HEADER, \
     DEFAULT_PHONEHOME_LOGGING_CONF, DEFAULT_SETTINGS_FILE
 
 from os import environ
@@ -55,10 +55,15 @@ import sys
 import urlparse
 import logging.config
 import os.path
+import uuid
 
 
 # Global DBus server instance
 dbus_server = None
+
+
+# Global logger
+logger = None
 
 
 class PhoneHome:
@@ -78,7 +83,7 @@ class PhoneHome:
         content_length = int(cherrypy.request.headers['Content-Length'])
         content = cherrypy.request.body.read(content_length)
 
-        transaction_id = "txid:" + cherrypy.request.headers['TransactionId']
+        logger.info("%s: %s - POST: ", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
         path = cherrypy.request.path_info
 
@@ -89,30 +94,36 @@ class PhoneHome:
                 if "Hostname" in cherrypy.request.headers:
                     hostname = cherrypy.request.headers['Hostname']
 
-                    dbus_server.logdebug("{0} - Sending signal to hostname: {1}".format(transaction_id, hostname))
+                    dbus_server.logdebug("{0}: {1} - Sending signal to hostname: {2}".format(
+                        PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id, hostname))
 
                     dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_METADATA_PATH,
-                                                      hostname, transaction_id)
+                                                      hostname, cherrypy.request.transaction_id)
 
                     cherrypy.response.status = httplib.OK
                     return
                 else:
                     cherrypy.response.status = httplib.BAD_REQUEST
-                    return transaction_id + " - Hostname header is not present in HTTP PhoneHome request"
+                    return "{0}: {1} - Hostname header is not present in HTTP PhoneHome request".format(
+                        PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
             elif path == PHONEHOME_DBUS_OBJECT_PATH:
-                dbus_server.logdebug("{0} - Sending signal".format(transaction_id))
-                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None, transaction_id)
+                dbus_server.logdebug("{0}: {1} - Sending signal".format(PHONEHOME_TX_ID_HEADER,
+                                                                       cherrypy.request.transaction_id))
+                dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None,
+                                                  cherrypy.request.transaction_id)
                 cherrypy.response.status = httplib.OK
                 return
             else:
                 cherrypy.response.status = httplib.NOT_FOUND
-                return transaction_id + " - Path not found for HTTP PhoneHome request"
+                return "{0}: {1} - Path not found for HTTP PhoneHome request".format(
+                    PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
         else:
             # Bad Request
             cherrypy.response.status = httplib.BAD_REQUEST
-            return transaction_id + " - Invalid data received in HTTP PhoneHome request"
+            return "{0}: {1} - Invalid data received in HTTP PhoneHome request".format(
+                    PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
 
 def handle_error():
@@ -126,20 +137,62 @@ class Root(object):
     pass
 
 
+def before_request_body():
+    """
+    Add a Tool to our new Toolbox.
+    """
+    logger.info("before_request_body: %s ", cherrypy.request.params)
+    if PHONEHOME_TX_ID_HEADER in cherrypy.request.headers:
+        transaction_id = cherrypy.request.headers[PHONEHOME_TX_ID_HEADER]
+    elif PHONEHOME_TX_ID_HEADER in cherrypy.request.params:
+        transaction_id = cherrypy.request.params[PHONEHOME_TX_ID_HEADER]
+        cherrypy.request.params = {}
+    else:
+        transaction_id = str(uuid.uuid1())
+
+    cherrypy.request.transaction_id = transaction_id
+    logger.info("%s: %s - before_request_body, path: %s", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id,
+                cherrypy.request.path_info)
+
+    request = cherrypy.serving.request
+
+    def processor(entity):
+        """Important! Do nothing with body"""
+        if not entity.headers.get("Content-Length", ""):
+            raise cherrypy.HTTPError(411)
+
+        try:
+            content_length = int(cherrypy.request.headers['Content-Length'])
+            logger.info("%s: %s - body - content_length: %s ", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id,
+                        content_length)
+
+        except ValueError:
+            raise cherrypy.HTTPError(400, 'Invalid Content-Length')
+
+    request.body.processors['application/x-www-form-urlencoded'] = processor
+
+
+def on_end_request():
+    """
+    After each request
+    """
+    logger.info("%s: %s - on_end_request", PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
+    print 'end'
+
+
 class HttpPhoneHomeServer:
-    """This Server will be waiting for POST requests. If some request is received to '/' resource (root) will be
-       processed. POST body is precessed using a DBus PhoneHome Client and 200 OK is always returned.
+    """
+    This Server will be waiting for POST requests. If some request is received to '/' resource (root), it will be
+    processed. POST body is processed using a DBus PhoneHome Client and 200 OK is always returned.
     """
 
-    def __init__(self, logger, port, timeout=None):
+    def __init__(self, port, timeout=None):
         """Creates a PhoneHome server
-        :param logger: Logger
         :param port: Listen port
         :param timeout: Timeout to wait for some request. Only is used when 'single request server' is configured.
         :return: None
         """
-        self.logger = logger
-        self.logger.debug("Creating PhoneHome Server. Port %d; Timeout: %s", port, str(timeout))
+        logger.debug("Creating PhoneHome Server. Port %d; Timeout: %s", port, str(timeout))
         self.timeout = timeout
         self.port = port
 
@@ -147,11 +200,13 @@ class HttpPhoneHomeServer:
         """Starts the server. Forever...
         :return: None
         """
-        self.logger.debug("Waiting for calls...")
+        logger.debug("Waiting for calls...")
         conf = {
             'global': {
                 'server.socket_host': '0.0.0.0',
                 'server.socket_port': self.port,
+                'tools.newprocessor_open.on': True,
+                'tools.newprocessor_close.on': True,
             },
             '/': {
                 'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -166,6 +221,8 @@ class HttpPhoneHomeServer:
         root.phonehome = PhoneHome()
         root.metadata = PhoneHome()
 
+        cherrypy.tools.newprocessor_open = cherrypy.Tool('before_request_body', before_request_body, priority=100)
+        cherrypy.tools.newprocessor_close = cherrypy.Tool('on_end_request', on_end_request)
         cherrypy.log.error_log.propagate = False
         cherrypy.log.access_log.propagate = False
         cherrypy.log.screen = None
@@ -173,6 +230,8 @@ class HttpPhoneHomeServer:
 
 
 if __name__ == '__main__':
+    global logger
+
     # Configuration files
     parentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     settings_file = os.environ.get('SANITY_CHECKS_SETTINGS', os.path.join(parentdir, DEFAULT_SETTINGS_FILE))
@@ -216,5 +275,5 @@ if __name__ == '__main__':
 
     # Create and start server
     logger.info("Creating and starting PhoneHome Server")
-    server = HttpPhoneHomeServer(logger, phonehome_port)
+    server = HttpPhoneHomeServer(phonehome_port)
     server.start_forever()
