@@ -87,7 +87,7 @@ class PhoneHome:
 
             elif path == PHONEHOME_DBUS_OBJECT_PATH:
                 dbus_server.logdebug("{0}: {1} - Sending signal".format(PHONEHOME_TX_ID_HEADER,
-                                                                       cherrypy.request.transaction_id))
+                                                                        cherrypy.request.transaction_id))
                 dbus_server.emit_phonehome_signal(str(content), PHONEHOME_DBUS_OBJECT_PATH, None,
                                                   cherrypy.request.transaction_id)
                 cherrypy.response.status = httplib.OK
@@ -100,8 +100,8 @@ class PhoneHome:
         else:
             # Bad Request
             cherrypy.response.status = httplib.BAD_REQUEST
-            return "{0}: {1} - Invalid data received in HTTP PhoneHome request".format(
-                    PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
+            return "{0}: {1} - Invalid data received in HTTP PhoneHome request".\
+                format(PHONEHOME_TX_ID_HEADER, cherrypy.request.transaction_id)
 
 
 def handle_error():

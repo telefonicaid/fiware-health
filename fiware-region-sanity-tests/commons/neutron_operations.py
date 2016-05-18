@@ -162,7 +162,7 @@ class FiwareNeutronOperations:
         Gets the list of ports.
         :return: A list of :class:`dict` with port data
         """
-        return self.client.list_ports().get('ports')
+        return self.client.list_ports(retrieve_all=True).get("ports")
 
     def show_port(self, port_id):
         """
@@ -264,12 +264,12 @@ class FiwareNeutronOperations:
         """
         found = []
         search = [(key.replace('router_', 'router:'), value) for (key, value) in kwargs.items()]
-        network_list = self.client.list_networks(retrieve_all=True).get('networks')
-        for network in network_list:
+        neutron_list = self.client.list_networks(retrieve_all=True).get('networks')
+
+        for network in neutron_list:
             try:
                 if all(network[attr] == value for (attr, value) in search):
                     found.append(network)
             except KeyError:
                 continue
-
         return found
