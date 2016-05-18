@@ -264,12 +264,12 @@ class FiwareNeutronOperations:
         """
         found = []
         search = [(key.replace('router_', 'router:'), value) for (key, value) in kwargs.items()]
-        list = self.client.list_networks(retrieve_all=True).get('networks')
+        neutron_list = self.client.list_networks(retrieve_all=True).get('networks')
 
-        for element in list:
+        for network in neutron_list:
             try:
-                if all(element[attr] == value for (attr, value) in search):
-                    found.append(element)
+                if all(network[attr] == value for (attr, value) in search):
+                    found.append(network)
             except KeyError:
                 continue
         return found
