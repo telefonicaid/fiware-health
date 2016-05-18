@@ -93,16 +93,15 @@ class FiwareTestCase(unittest.TestCase):
         # Check for environment variables related to credentials and update configuration
         cls.auth_cred = cls.conf[PROPERTIES_CONFIG_CRED]
         env_cred = {
-            PROPERTIES_CONFIG_CRED_KEYSTONE_URL:
-                environ.get('OS_AUTH_URL', cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
-            PROPERTIES_CONFIG_CRED_USER:
-                environ.get('OS_USERNAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
-            PROPERTIES_CONFIG_CRED_PASS:
-                environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
-            PROPERTIES_CONFIG_CRED_TENANT_ID:
-                environ.get('OS_TENANT_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
-            PROPERTIES_CONFIG_CRED_TENANT_NAME:
-                environ.get('OS_TENANT_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL',
+                                                             cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
+            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME',
+                                                     cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
+            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
+            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID',
+                                                          cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
+            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME',
+                                                            cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
         }
 
         # Check Identity API version from auth_url (v3 requires additional properties)
@@ -179,17 +178,19 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the OpenStack API clients
         """
-
+        user_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER]
         cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor, test_image,
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
-        cls.keystone_operations = FiwareKeystoneOperations(cls.logger, cls.region_name, tenant_id, user_id=cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
-                                                         auth_session=cls.auth_sess, auth_url=cls.auth_url, auth_token=cls.auth_token)
+        cls.keystone_operations = FiwareKeystoneOperations(cls.logger, cls.region_name, tenant_id,
+                                                           user_id=user_id,
+                                                           auth_session=cls.auth_sess,
+                                                           auth_url=cls.auth_url, auth_token=cls.auth_token)
         cls.keystone_operations.check_permited_role()
         if cls.with_storage:
             cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
-                                                          auth_cred=cls.auth_cred)
+                                                         auth_cred=cls.auth_cred)
 
     @classmethod
     def init_world(cls, world, suite=False):
@@ -278,7 +279,8 @@ class FiwareTestCase(unittest.TestCase):
         if suite:
             # get pre-existing test security group list (ideally, empty when starting the tests)
             try:
-                sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP_PREFIX, tenant_id=cls.tenant_id)
+                sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP_PREFIX,
+                                                                               tenant_id=cls.tenant_id)
                 for sec_group_data in sec_group_data_list:
                     cls.logger.debug("init_world() found security group '%s' not deleted", sec_group_data.name)
                     world['sec_groups'].append(sec_group_data.id)
@@ -394,21 +396,19 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the world['ports'] entry (after deleting existing resources)
         """
-        ports = []
         if suite and cls.with_networks:
             # get pre-existing port list (ideally, empty when starting the tests)
             try:
                 port_list = cls.neutron_operations.list_ports()
                 for port in port_list:
                     cls.logger.debug("init_world() found port '%s' not deleted", port['id'])
-                    world['ports'].append(port['id'])
-                    ports.append(port)
+                    world['ports'].append(port)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get port list: %s", e)
 
         # release resources to ensure a clean test_world
 
-        for port in ports:
+        for port in world['ports']:
             try:
                 if port["tenant_id"] != cls.tenant_id or port["device_owner"] == 'compute:None':
                     continue
@@ -419,7 +419,7 @@ class FiwareTestCase(unittest.TestCase):
                                                                        subnetwork_id=fixed_ip['subnet_id'])
                 else:
                     cls.neutron_operations.delete_port(port['id'])
-                world['ports'].remove(port['id'])
+                world['ports'].remove(port)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete port %s: %s", port.id, e)
 

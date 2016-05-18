@@ -24,9 +24,10 @@
 from keystoneclient import client
 from commons.constants import DEFAULT_REQUEST_TIMEOUT
 
+
 class FiwareKeystoneOperations:
 
-    def __init__(self, logger,  region_name,tenant_id, user_id, **kwargs):
+    def __init__(self, logger, region_name, tenant_id, user_id, **kwargs):
         """
         Initializes Keyston-client.
         :param logger: Logger object
@@ -51,12 +52,8 @@ class FiwareKeystoneOperations:
         exits the execution.
         :return: nothing
         """
-        roles= self.client.roles.list(user=self.user_id, project=self.tenant_id)
+        roles = self.client.roles.list(user=self.user_id, project=self.tenant_id)
         for role in roles:
             if "admin" in role.name:
-                self.logger.debug( "User with role admin cannot be used")
-                exit()
-
-
-
-
+                self.logger.debug("User with role admin cannot be used")
+                raise Exception("User with role admin cannot be used")

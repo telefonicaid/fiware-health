@@ -26,7 +26,7 @@ __author__ = 'jfernandez'
 
 from novaclient.v1_1 import client
 from commons.constants import DEFAULT_REQUEST_TIMEOUT, SLEEP_TIME, MAX_WAIT_ITERATIONS, \
-     TEST_FLAVOR_DEFAULT, TEST_IMAGE_DEFAULT, SSH_CONNECTION_PORT
+    TEST_FLAVOR_DEFAULT, TEST_IMAGE_DEFAULT, SSH_CONNECTION_PORT
 import time
 import re
 
