@@ -1,7 +1,16 @@
-export JOB_URL=.
+export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_DOMAIN_NAME=default
-export OS_USER_DOMAIN_NAME=default
 export OS_IDENTITY_API_VERSION=3
+openstack project create test
+openstack user create test --password test --project test
+openstack role add --user test --project test owner
+openstack project show test > project
+export OS_TENANT_ID=`grep "| id" project | awk 'NR==1{print $4}'`
+
+export OS_USERNAME=test
+export OS_PASSWORD=test
+export OS_TENANT_NAME=test
+export JOB_URL=.
 export JENKINS_HOME=.
 export JENKINS_URL=.
 export JENKINS_JOB=.

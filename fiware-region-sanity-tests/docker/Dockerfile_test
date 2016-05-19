@@ -12,7 +12,7 @@ RUN easy_install-2.7 pip
 RUN pip2.7 install virtualenv
 RUN virtualenv /root/venv/fiware-region-sanity-tests --system-site-packages
 RUN echo "source /root/venv/fiware-region-sanity-tests/bin/activate" >>/etc/bashrc
-RUN pip2.7 install python-config
+RUN pip2.7 install python-config python-openstackclient
 RUN cp /usr/local/bin/python2.7-config /usr/bin/python-config
 # install dbus
 RUN wget http://repositories.lab.fiware.org/repo/files/dbus-python-0.84.0.tar.gz
