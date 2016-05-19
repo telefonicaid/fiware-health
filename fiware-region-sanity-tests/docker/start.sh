@@ -1,5 +1,5 @@
 export OS_USER_DOMAIN_NAME=Default
-export OS_PROJECT_DOMAIN_NAME=default
+export OS_PROJECT_DOMAIN_ID=default
 export OS_IDENTITY_API_VERSION=3
 openstack project create test
 openstack user create test --password test --project test
