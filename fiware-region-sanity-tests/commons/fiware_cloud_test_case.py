@@ -409,19 +409,23 @@ class FiwareTestCase(unittest.TestCase):
         # release resources to ensure a clean test_world
 
         for port in world['ports']:
+            if isinstance(port, unicode):
+                world['ports'].remove(port)
+                port = cls.neutron_operations.show_port(port)
             try:
-                if port["tenant_id"] != cls.tenant_id or port["device_owner"] == 'compute:None':
+                if port.get("tenant_id") != cls.tenant_id or port.get("device_owner") == 'compute:None':
                     continue
-                port_data = cls.neutron_operations.show_port(port['id'])
+                port_data = cls.neutron_operations.show_port(port.get('id'))
                 if 'network:router_interface' in port_data['device_owner']:
                     for fixed_ip in port_data['fixed_ips']:
                         cls.neutron_operations.delete_interface_router(router_id=port_data['device_id'],
                                                                        subnetwork_id=fixed_ip['subnet_id'])
                 else:
                     cls.neutron_operations.delete_port(port['id'])
-                world['ports'].remove(port)
+                if port in world['ports']:
+                    world['ports'].remove(port)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("Failed to delete port %s: %s", port.id, e)
+                cls.logger.error("Failed to delete port %s: %s", port['id'], e)
 
     @classmethod
     def reset_world_containers(cls, world, suite=False):
