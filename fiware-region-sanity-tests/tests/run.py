@@ -26,7 +26,7 @@
 """Run tests (using nose) in selected region/s, according to command line arguments.
 
 Usage:
-  {prog} [nose_options] reqion|test_spec ...
+  {prog} [nose_options] region|test_spec ...
 
 Environment:
   OS_AUTH_URL                       The URL of OpenStack Identity Service for authentication
