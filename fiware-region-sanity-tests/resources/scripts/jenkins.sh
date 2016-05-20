@@ -50,7 +50,6 @@
 #     JENKINS_USER 			username of the Jenkins CI
 #     JENKINS_PASSWORD			password of the Jenkins CI
 #     JENKINS_URL			URL of the Jenkins CI
-#     JOB_URL				full URL for this build job
 #     TEST_PHONEHOME_ENDPOINT		endpoint of supporting PhoneHome server
 #     FIHEALTH_WORKSPACE		default value for --workspace
 #     FIHEALTH_HISTORY			default value for --history
@@ -69,9 +68,6 @@
 # Requirements:
 #     python2.7				Python 2.7 interpreter (found in path)
 #     virtualenv			Python package 'virtualenv'
-#
-# OpenStack credentials:
-#     Override those defined in 'settings.json', used by 'sanity_checks' script.
 #
 
 NAME=$(basename $0)
@@ -215,44 +211,38 @@ function restart_phone_home_server() {
 }
 
 # Main
+
+# Check environment variables for Jenkins CI
+if [ -z "$JENKINS_URL" ]; then
+	printf "Environment variable JENKINS_URL not defined\n" 1>&2
+	exit 2
+elif [ -z "$(expr "$JENKINS_URL" : "^\(http://\)\S\S*:\S\S*\(/\S*\)\?$")" ]; then
+	printf "Environment variable JENKINS_URL has a malformed value\n" 1>&2
+	exit 2
+elif [ -z "$JENKINS_USER" -o -z "$JENKINS_PASSWORD" ]; then
+	printf "Either Jenkins user or password not specified\n" 1>&2
+	exit 2
+fi
+
+# Check environment variables for paths
 if [ -z "$JENKINS_HOME" ]; then
-	printf "Jenkins variable JENKINS_HOME missing\n" 1>&2
+	printf "Environment variable JENKINS_HOME not defined\n" 1>&2
 	exit 2
-fi
-
-if [ -z "$JOB_URL" ]; then
-	printf "Jenkins variable JOB_URL missing (maybe not in a job?)\n" 1>&2
-	exit 2
-fi
-
-# Check FIHealth environment variables for paths
-if [ -z "$FIHEALTH_WORKSPACE" -o -z "$FIHEALTH_HTDOCS" ]; then
+elif [ -z "$FIHEALTH_WORKSPACE" -o -z "$FIHEALTH_HTDOCS" ]; then
 	printf "Either 'workspace' or 'htdocs' path not specified\n" 1>&2
-	exit 3
+	exit 2
 fi
 
 # Check FIHealth environment variables for endpoints
 if [ -z "$FIHEALTH_ADAPTER_URL" -o -z "$FIHEALTH_CB_URL" ]; then
 	printf "Either NGSI Adapter or ContextBroker URL not specified\n" 1>&2
-	exit 3
-fi
-
-# Check FIHealth environment variables for Jenkins
-if [ -z "$JENKINS_USER" -o -z "$JENKINS_PASSWORD" ]; then
-	printf "Either Jenkins user or Jenkins password not specified\n" 1>&2
-	exit 3
-fi
-
-# Check FIHealth environment variables for Jenkins
-if [ -z "$JENKINS_URL" ]; then
-	printf "The environment variable JENKINS_URL is not defined\n" 1>&2
-	exit 3
+	exit 2
 fi
 
 # Check python2.7 and virtualenv
 if ! which python2.7 virtualenv >/dev/null 2>&1; then
 	printf "python2.7 or virtualenv not found\n" 1>&2
-	exit 4
+	exit 3
 fi
 
 # Project name and root directory at Jenkins
@@ -304,27 +294,9 @@ setup)
 	make
 	make install
 
-	# Extract the URL of the Jenkins from the JENKINS_URL environment variable.
-	# It has the format 'http://somehost:someport/' and we get only somehost:someport
-	re1="(http?)://([^\s/$.?#]*.[^\s]*)/"
-	re2="([^\s/$.?#]*.[^\s]*:[0-9]*)"
-
-	if [[ $JENKINS_URL =~ $re1 ]]; then
-		# First, check if the URL has the format http://somehost:someport/
-		JENKINSURL=${BASH_REMATCH[2]};
-	elif [[ $JENKINS_URL =~ $re2 ]]; then
-		# Second, check if the URL has the format somehost:sopeport
-		JENKINSURL=${BASH_REMATCH[1]};
-	else
-		printf "Malformed JENKINS_URL environment variable\n" 1>&2
-		printf "Expected value 'http://somehost:someport/' or 'somehost:someport'\n" 1>&2
-		printf "Current value: '$JENKINS_URL'\n" 1>&2
-		exit 4
-	fi
-
 	# Update Jenkins jobs
 	cd $PROJECT_DIR
-	BASE_JOB_URL=http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job
+	BASE_JOB_URL=http://$JENKINS_USER:$JENKINS_PASSWORD@${JENKINS_URL#http://}/job
 	for JOB_NAME in	FIHealth-SanityCheck-0-RestartTestServers \
 			FIHealth-SanityCheck-0-SetUp \
 			FIHealth-SanityCheck-1-Flow \

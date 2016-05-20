@@ -2,17 +2,15 @@
 <project>
   <actions/>
   <description>&lt;h3&gt;FIWARE-Health - Region Sanity Check&lt;/h3&gt;&#xd;
-This Job executes the Sanity Check on the selected region:&#xd;
+This job executes the Sanity Check on the selected region:&#xd;
 &lt;ul&gt;&#xd;
-  &lt;li&gt;Change global region status to &apos;MAINTENANCE&apos;&lt;/li&gt;&#xd;
   &lt;li&gt;Launch Sanity Check on the Region&lt;/li&gt;&#xd;
   &lt;li&gt;Generate results and summary report&lt;/li&gt;&#xd;
-  &lt;li&gt;Process test results and publishes it&lt;/li&gt;&#xd;
-  &lt;li&gt;Change global region status to &apos;OK&apos; or &apos;NOK&apos;&lt;/li&gt;&#xd;
+  &lt;li&gt;Process report via NGSI Adapter to change global region status to &apos;OK&apos; or &apos;NOK&apos;&lt;/li&gt;&#xd;
 &lt;/ul&gt;&#xd;
 &#xd;
-&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
-&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
+&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests&lt;br&gt;&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/master/fiware-region-sanity-tests/README.rst</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -63,7 +61,7 @@ This Job executes the Sanity Check on the selected region:&#xd;
   <customWorkspace>$FIHEALTH_WORKSPACE</customWorkspace>
   <builders>
     <hudson.tasks.Shell>
-      <command># Execute &amp;apos;exec&amp;apos; script
+      <command># Execute &apos;exec&apos; action
 ./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh exec</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
