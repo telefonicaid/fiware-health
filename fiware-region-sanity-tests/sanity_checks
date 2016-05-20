@@ -20,7 +20,7 @@
 # Launch testcase execution and generate reports
 #
 # Usage:
-#     $0 [options] [region ...]
+#     $0 [options] [test_spec ...]
 #     $0 --help|--version
 #
 # Options:
@@ -38,6 +38,11 @@
 #     -n, --os-tenant-name=NAME		optional OpenStack tenant_name
 #     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name (to
 #     					replace the former if Identity API v3)
+#
+# Test specification examples:
+#     Region				run all tests in the given region only
+#     Region.test_name			run 'test_name' in the given region
+#     Region.test_pattern		run tests matching the pattern
 #
 # Environment:
 #     SANITY_CHECKS_SETTINGS		default value for --settings
@@ -95,9 +100,10 @@ export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
 REGIONS_AVAILABLE=$(cat $SANITY_CHECKS_SETTINGS | \
 	python -c "import sys; import json; \
 	print ' '.join(json.load(sys.stdin)['region_configuration'].keys())")
-REGIONS_PATTERN='^\('$(echo $REGIONS_AVAILABLE | sed 's/ /\\|/g')'\)$'
+TEST_SPEC_PATTERN='^\('$(echo $REGIONS_AVAILABLE | sed 's/ /\\|/g')'\)\(\..*\)\?$'
 
-# Regions to check
+# Tests to execute
+TESTS=
 REGIONS=
 
 # Process command line
@@ -107,7 +113,7 @@ OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0)
 while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
 case $OPT in
 's')	if [ -r $OPTARG ]; then SANITY_CHECKS_SETTINGS=$OPTARG;
-	else OPTERR="Cannot find file $OPTARG"; fi;;
+	else OPTERR="Cannot find file '$OPTARG'"; fi;;
 'v')	NOSEOPTS="$NOSEOPTS --logging-level=DEBUG";;
 'e')	TEST_PHONEHOME_ENDPOINT=$OPTARG;;
 't')	TEMPLATE_NAME=$OPTARG;;
@@ -135,9 +141,11 @@ case $OPT in
 esac; break; done; done
 shift $(expr $OPTIND - 1)
 while [ -z "$OPTERR" -a -n "$1" ]; do
-	REGION_NAME=$(expr "$1" : "$REGIONS_PATTERN")
-	[ -z "$REGION_NAME" ] && OPTERR="Unknown region '$1'"
-	REGIONS="$REGIONS $REGION_NAME"
+	TEST=$1
+	REGION=$(expr "$TEST" : "$TEST_SPEC_PATTERN")
+	[ -z "$TEST" -o -z "$REGION" ] && OPTERR="Invalid region/test '$TEST'"
+	TESTS="$TESTS $TEST"
+	REGIONS="$REGIONS $REGION"
 	shift
 done
 [ -n "$OPTERR" ] && {
@@ -149,21 +157,22 @@ done
 }
 
 # Unless otherwise specified, run all tests in all regions
+TESTS="${TESTS:-$REGIONS_AVAILABLE}"
 REGIONS="${REGIONS:-$REGIONS_AVAILABLE}"
 
 # First delete all previously generated Nova Console-Log files for given regions
-echo "Deleting all previous Nova Console-Log files for: $REGIONS..."
+echo "Deleting all previous Nova Console-Log files for:" $REGIONS...
 for REGION in $REGIONS; do
-	rm -f ${OUTPUT_NOVA_CONSOLE_NAME}_${REGION}_*.log
+	rm -f ${OUTPUT_NOVA_CONSOLE_NAME}_$(echo $REGION|sed 's/.*/\L&/')_*.log
 done
 
 # Sanity Checks execution
-echo "Running Sanity Checks"
+echo "Running Sanity Checks..."
 tests/run.py $NOSEOPTS -v --exe \
 	--with-xunit --xunit-file=$OUTPUT_NAME.xml \
 	--with-html --html-report=$OUTPUT_NAME.html \
 	--html-report-template=resources/templates/$TEMPLATE_NAME \
-	$REGIONS
+	$TESTS
 
 # Summary report
 printf "Generating summary report... "

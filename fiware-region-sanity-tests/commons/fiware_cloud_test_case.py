@@ -494,8 +494,8 @@ class FiwareTestCase(unittest.TestCase):
 
         # Initialize session trying to get auth token; on success, continue with initialization
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
-        test_image = cls.region_conf[PROPERTIES_CONFIG_REGION_TEST_IMAGE]
-        test_flavor = cls.region_conf[PROPERTIES_CONFIG_REGION_TEST_FLAVOR]
+        test_image = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_IMAGE, TEST_IMAGE_DEFAULT)
+        test_flavor = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_FLAVOR, TEST_FLAVOR_DEFAULT)
         if cls.init_auth():
             cls.init_clients(tenant_id, test_flavor, test_image)
             cls.init_world(cls.suite_world, suite=True)
