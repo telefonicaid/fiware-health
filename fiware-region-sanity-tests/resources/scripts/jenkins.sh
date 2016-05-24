@@ -35,6 +35,7 @@
 #     -l, --os-auth-url=URL		optional OpenStack auth_url (see below)
 #     -u, --os-username=STRING		optional OpenStack username
 #     -p, --os-password=STRING		optional OpenStack password
+#     -I, --os-user-id=ID		optional OpenStack user_id
 #     -i, --os-tenant-id=ID		optional OpenStack tenant_id
 #     -n, --os-tenant-name=NAME		optional OpenStack tenant_name
 #     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name (to
@@ -62,6 +63,7 @@
 #     OS_AUTH_URL			default value for --os-auth-url
 #     OS_USERNAME			default value for --os-username
 #     OS_PASSWORD			default value for --os-password
+#     OS_USER_ID			default value for --os-user-id
 #     OS_TENANT_ID			default value for --os-tenant-id
 #     OS_TENANT_NAME			default value for --os-tenant-name
 #     OS_USER_DOMAIN_NAME		default value for --os-user-domain-name
@@ -87,6 +89,7 @@ OPTS=`tr -d '\n ' <<END
       l(os-auth-url):
       u(os-username):
       p(os-password):
+      I(os-user-id):
       i(os-tenant-id):
       n(os-tenant-name):
       d(os-user-domain-name):
@@ -111,6 +114,7 @@ case $OPT in
 'l')	OS_AUTH_URL=$OPTARG;;
 'u')	OS_USERNAME=$OPTARG;;
 'p')	OS_PASSWORD=$OPTARG;;
+'I')	OS_USER_ID=$OPTARG;;
 'i')	OS_TENANT_ID=$OPTARG;;
 'n')	OS_TENANT_NAME=$OPTARG;;
 'd')	OS_USER_DOMAIN_NAME=$OPTARG;;
@@ -366,7 +370,7 @@ exec)
 	source $VIRTUALENV/bin/activate
 
 	# Execute tests
-	export OS_AUTH_URL OS_USERNAME OS_PASSWORD
+	export OS_AUTH_URL OS_USERNAME OS_PASSWORD OS_USER_ID
 	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
 
 	# Get 'start_time' before executing Sanity Checks (milliseconds)

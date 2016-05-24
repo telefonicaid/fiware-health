@@ -150,6 +150,7 @@ configuration of Jenkins or as part of the jobs:
 - **OS_AUTH_URL**: The URL of OpenStack Identity Service for authentication
 - **OS_USERNAME**: The username for authentication
 - **OS_PASSWORD**: The password for authentication
+- **OS_USER_ID**: The user identifier for authentication
 - **OS_TENANT_ID**: The tenant identifier for authentication
 - **OS_TENANT_NAME**: The tenant name for authentication
 - **OS_USER_DOMAIN_NAME**: (Only in Identity v3) The user domain name for
@@ -225,8 +226,9 @@ This may come from the file ``resources/settings.json``:
 - ``credentials``: data needed for authorization
 
   * ``keystone_url`` is the OpenStack auth URL
-  * ``user`` is the OpenStack username
+  * ``user_name`` is the OpenStack username
   * ``password`` is the OpenStack password
+  * ``user_id`` is the OpentSack user_id
   * ``tenant_id`` is the OpentSack tenant_id
   * ``tenant_name`` is the OpenStack tenant_name
   * ``user_domain_name`` is the OpenStack user_domain_name (Identity v3)
@@ -263,6 +265,7 @@ are required:
             "keystone_url": "http://cloud.lab.fiware.org:4731/v2.0/",
             "tenant_id": "00000000000000000000000000000",
             "tenant_name": "MyTenantName",
+            "user_id": "00000000000000000000000000000",
             "user": "MyUser",
             "password": "MyPassword"
         },
