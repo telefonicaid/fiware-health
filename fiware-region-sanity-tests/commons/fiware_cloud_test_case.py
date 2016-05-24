@@ -178,7 +178,7 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the OpenStack API clients
         """
-        user_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER]
+        user_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER_ID]
         cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor, test_image,
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
