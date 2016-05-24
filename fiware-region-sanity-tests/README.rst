@@ -223,7 +223,7 @@ Configuration file
 ------------------
 
 Some configuration is needed before test execution (Sanity Checks execution).
-This may come from the file ``resources/settings.json``:
+This may come from the file ``etc/settings.json``:
 
 - ``credentials``: data needed for authorization
 
