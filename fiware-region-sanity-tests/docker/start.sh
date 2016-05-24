@@ -25,7 +25,6 @@ echo ${KEY} >> key.pem
 chmod 0600 key.pem
 ssh -i key.pem -o "StrictHostKeyChecking no" centos@${VMIP} -fnN -R0:8081:0:8081 &
 ./resources/docker/start.sh &
-<<<<<<< HEAD
 git checkout origin/$BRANCH
 git pull origin $BRANCH
 pip install -r requirements.txt
