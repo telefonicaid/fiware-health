@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -23,7 +23,7 @@
 
 
 from commons.constants import PHONEHOME_DBUS_NAME, PHONEHOME_TIMEOUT, PHONEHOME_SIGNAL, PHONEHOME_METADATA_SIGNAL,\
-    PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_DBUS_OBJECT_PATH
+    PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_TX_ID_HEADER
 
 from dbus import SystemBus
 from dbus.exceptions import DBusException
@@ -233,11 +233,13 @@ class DbusPhoneHomeServer:
     def emit_phonehome_signal(self, phonehome_data, phonehome_object_path, hostname, transaction_id):
         """This method emits `PHONEHOME_SIGNAL` to all clients connected to the bus, with the given data as value.
         :param phonehome_data: PhoneHome data (HTTP POST request)
+        :param phonehome_object_path: /metadata or /phonehome
         :param hostname: String with the header Hostname value
         :param transaction_id: String with the transaction id value
         :return: None
         """
-        self.logger.debug("%s - Emit signal, data:'%s' to '%s'", transaction_id, phonehome_data, hostname)
+        self.logger.debug("%s: %s - Emit signal, data:'%s' to '%s'", PHONEHOME_TX_ID_HEADER, transaction_id,
+                          phonehome_data, hostname)
 
         if phonehome_object_path == PHONEHOME_DBUS_OBJECT_METADATA_PATH:
             self.dbus_phonehome_objects[phonehome_object_path].phonehome_metadata_signal(phonehome_data, hostname)

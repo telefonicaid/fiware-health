@@ -17,10 +17,9 @@
 
 'use strict';
 
-var util = require('util'),
-    logger = require('./logger'),
+var logger = require('./logger'),
     config = require('./config').data,
-    jenkins = require('jenkins-api').init(util.format('http://%s:%d', config.jenkins.host, config.jenkins.port));
+    jenkins = require('jenkins-api').init(config.jenkins.url);
 
 
 /**
@@ -31,29 +30,34 @@ var util = require('util'),
  */
 function regionJobsInProgress(txid, callback) {
     var context = {trans: txid, op: 'jenkins#regionJobsInProgress'},
+        paramName = config.jenkins.parameterName,
         jobName = config.jenkins.path.split('/').pop(),
-        progress = {};
+        jobProgress = {};
 
-    logger.info(context, 'checking all jobs "%s" in progress', jobName);
+    logger.info(context, 'Checking all jobs "%s" in progress', jobName);
 
     /* jshint camelcase: false */
     jenkins.job_info(jobName, function (err, job) {
         if (err) {
             callback();
-            return logger.error(context, 'failed to get information for job %s: %s', jobName, err);
+            return logger.error(context, 'Failed to get information for job %s', jobName);
         }
         var buildCount = 0;
         job.builds.forEach(function (build) {
             jenkins.build_info(jobName, build.number, function (err, data) {
                 if (err) {
-                    logger.error(context, 'failed to get information for build #%d: %s', build.number, err);
+                    logger.error(context, 'Failed to get information for build #%d', build.number);
                 } else {
-                    var regionName = data.actions[0][0].value;
-                    progress[regionName] = progress[regionName] || data.building;
+                    var paramActions = data.actions.filter(function (item) {
+                        return (item.parameters instanceof Array) || (item instanceof Array);
+                    });
+                    var parameters = paramActions[0].parameters || paramActions[0],
+                        regionName = parameters.filter(function (item) { return item.name === paramName; })[0].value;
+                    jobProgress[regionName] = jobProgress[regionName] || data.building;
                 }
                 if (++buildCount === job.builds.length) {
-                    logger.debug(context, 'progress status=%j', progress);
-                    callback(progress);
+                    logger.debug(context, 'Progress status=%j', jobProgress);
+                    callback(jobProgress);
                 }
             });
         });

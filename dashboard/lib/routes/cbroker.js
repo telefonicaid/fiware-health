@@ -66,7 +66,7 @@ function parseRegions(txid, entities) {
             });
 
             if (config.cbroker.filter.indexOf(entry.contextElement.id) >= 0) {
-                logger.warn(context, 'Found in filter: %s', entry.contextElement.id);
+                logger.warn(context, 'Discarded region "%s" found in filter', entry.contextElement.id);
             } else {
                 result.push({
                     node: entry.contextElement.id,
@@ -79,6 +79,7 @@ function parseRegions(txid, entities) {
         }
     });
 
+    logger.debug(context, 'Result: %j', result);
     return result;
 }
 
@@ -130,7 +131,9 @@ function retrieveAllRegions(txid, callback) {
         res.on('end', function () {
             logger.debug(context, 'Response string: %s', responseString);
             try {
-                var resultObject = JSON.parse(responseString);
+                var resultObject = JSON.parse(responseString),
+                    regions = resultObject.contextResponses.map(function (item) {return item.contextElement.id;});
+                logger.info(context, 'Found %d regions: %s', regions.length, regions);
                 callback(parseRegions(txid, resultObject));
             } catch (ex) {
                 logger.warn(context, 'Error in parse response string: %s %s', responseString, ex);
@@ -159,12 +162,17 @@ function retrieveAllRegions(txid, callback) {
 
 
 /**
- * invoked when change is received from context broker
+ * Return the entity involved in a Context Broker notification
  * @param {string} txid
  * @param {*} req
  * @return {Object}
  */
-function changeReceived(txid, req) {
+function getEntity(txid, req) {
+    var context = {trans: txid, op: 'getEntity'};
+    if (typeof req.body !== 'string') {
+        logger.warn(context, 'Non-string request body');
+        req.body = JSON.stringify(req.body);
+    }
     var result = parseRegions(txid, JSON.parse(req.body));
     return result[0];
 }
@@ -177,4 +185,4 @@ module.exports.retrieveAllRegions = retrieveAllRegions;
 module.exports.parseRegions = parseRegions;
 
 /** @export */
-module.exports.changeReceived = changeReceived;
+module.exports.getEntity = getEntity;

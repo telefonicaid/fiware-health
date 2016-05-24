@@ -23,10 +23,10 @@
 # contact with opensource@tid.es
 
 
-"""Run tests (using nose) for all regions or only for those given at command line.
+"""Run tests (using nose) in selected region/s, according to command line arguments.
 
 Usage:
-  {prog} [nose_options] REGION ...
+  {prog} [nose_options] region|test_spec ...
 
 Environment:
   OS_AUTH_URL                       The URL of OpenStack Identity Service for authentication
@@ -46,6 +46,15 @@ Files:
 
 """
 
+import re
+import sys
+import os.path
+import argparse
+import json
+import nose
+
+parentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, parentdir)
 
 from tests.fiware_region_with_networks_tests import FiwareRegionWithNetworkTest
 from tests.fiware_region_without_networks_tests import FiwareRegionWithoutNetworkTest
@@ -53,11 +62,16 @@ from tests.fiware_region_object_storage_tests import FiwareRegionsObjectStorageT
 from commons.constants import DEFAULT_SETTINGS_FILE, DEFAULT_LOGGING_CONF, \
     PROPERTIES_CONFIG_REGION, PROPERTIES_CONFIG_REGION_SHARED_NET, PROPERTIES_CONFIG_SWIFT_ENABLED
 
-import sys
-import os.path
-import argparse
-import json
-import nose
+
+class RegionTestsSelector(nose.selector.Selector):
+
+    test_selections = None
+
+    def wantMethod(self, method):
+        region = method.im_class.__name__
+        testname = '%s.%s' % (region, method.__name__)
+        return super(RegionTestsSelector, self).wantMethod(method) and \
+            any((selection == region or re.match(selection, testname)) for selection in self.test_selections)
 
 
 class RegionTestsLoader(nose.loader.TestLoader):
@@ -68,7 +82,7 @@ class RegionTestsLoader(nose.loader.TestLoader):
     home_dir = None
 
     def __init__(self, config=None, importer=None, workingDir=None, selector=None):
-        super(RegionTestsLoader, self).__init__(config, importer, workingDir, selector)
+        super(RegionTestsLoader, self).__init__(config, importer, workingDir, RegionTestsSelector(config))
 
         with open(self.settings_file) as settings:
             try:
@@ -99,7 +113,7 @@ class RegionTestsLoader(nose.loader.TestLoader):
         if region in self.regions_with_storage:
             super_classes.append(FiwareRegionsObjectStorageTests)
 
-        return type('test_%s' % region, tuple(super_classes), dict(
+        return type(region, tuple(super_classes), dict(
             region_name=region,
             conf=self.conf,
             home_dir=self.home_dir,
@@ -115,13 +129,13 @@ class RegionTestsLoader(nose.loader.TestLoader):
 if __name__ == '__main__':
     # Get nose options and regions to test from command line
     parser = argparse.ArgumentParser()
-    parser.add_argument('test_regions', metavar='regions', type=str, nargs='*')
+    parser.add_argument('tests', metavar='test_spec', type=str, nargs='*')
     args, options = parser.parse_known_args()
     argv = [__file__] + options + ['.']
-    RegionTestsLoader.test_regions = args.test_regions
+    RegionTestsSelector.test_selections = args.tests
+    RegionTestsLoader.test_regions = [re.sub(r'^(\w+)\.\S+$', '\g<1>', test) for test in args.tests]
 
     # Configuration files
-    parentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     default_settings_file = os.path.join(parentdir, DEFAULT_SETTINGS_FILE)
     default_logging_conf = os.path.join(parentdir, DEFAULT_LOGGING_CONF)
     RegionTestsLoader.settings_file = os.environ.get('SANITY_CHECKS_SETTINGS', default_settings_file)

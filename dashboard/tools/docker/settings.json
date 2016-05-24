@@ -1,0 +1,14 @@
+{
+    "environment": {
+        "name": "development"
+    },
+    "dashboard": {
+        "protocol": "http",
+        "host": "localhost",
+
+        "port": "3000",
+        "web_context": "/sanity/",
+        "selenium": "no"
+
+    }
+}

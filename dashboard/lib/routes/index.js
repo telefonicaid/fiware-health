@@ -65,11 +65,11 @@ function getIndex(req, res) {
      */
     function callbackRetrieveRegions(regions) {
 
-        logger.info(context, 'Regions: %j', regions);
+        logger.debug(context, 'Response from Context Broker: %j', regions);
 
         var userinfo = req.session.user;
 
-        logger.info(context, 'User info: role=%s %j', req.session.role, userinfo);
+        logger.debug(context, 'User role: %s info: %j', req.session.role, userinfo);
 
         regions.sort(compare);
 
@@ -94,7 +94,7 @@ function getIndex(req, res) {
 
             var afterSearchCallback = function () {
                 regions = common.addAuthorized(regions, userinfo.displayName);
-                logger.debug(context, 'before render: %s', JSON.stringify(regions));
+                logger.debug(context, 'Before render: %s', JSON.stringify(regions));
                 res.render('logged', {
                     name: userinfo.displayName,
                     regions: regions,
@@ -130,6 +130,8 @@ function getIndex(req, res) {
 
         }
     }
+
+    logger.info(context, 'Request for Sanity Check Status main page');
 
     cbroker.retrieveAllRegions(txid, function (regions) {
         // Update region sanity_status to `GLOBAL_STATUS_OTHER` for those currently in progress

@@ -139,7 +139,7 @@ suite('cbroker', function () {
             };
 
         //when
-        var result = cbroker.changeReceived(this.txid, req);
+        var result = cbroker.getEntity(this.txid, req);
 
         //then
         assert.deepEqual(expected, result);

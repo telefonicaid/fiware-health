@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -104,6 +104,7 @@ PHONEHOME_DBUS_OBJECT_PATH = "/phonehome"
 PHONEHOME_DBUS_OBJECT_METADATA_PATH = "/metadata"
 PHONEHOME_SIGNAL = "phonehome_signal"
 PHONEHOME_METADATA_SIGNAL = "phonehome_metadata_signal"
+PHONEHOME_TX_ID_HEADER = "TransactionId"
 
 # SERVICES NAMES
 SERVICE_SWIFT_NAME = "object-store"
