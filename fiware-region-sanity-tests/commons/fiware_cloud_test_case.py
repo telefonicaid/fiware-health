@@ -107,25 +107,19 @@ class FiwareTestCase(unittest.TestCase):
             PROPERTIES_CONFIG_CRED_USERNAME: username,
             PROPERTIES_CONFIG_CRED_PASSWORD: password,
             PROPERTIES_CONFIG_CRED_USER_ID: user_id,
-            PROPERTIES_CONFIG_CRED_TENANT_ID: tenant_id
+            PROPERTIES_CONFIG_CRED_TENANT_ID: tenant_id,
+            PROPERTIES_CONFIG_CRED_TENANT_NAME: tenant_name
         }
 
-        # Check Identity API version from auth_url (currently, both v2 and v3 are supported)
+        # Get Identity API version from auth_url (currently, both v2 and v3 are supported)
         try:
             cls.auth_url = environment_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
             cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
-            if cls.auth_api == 'v2.0':
+            if cls.auth_api == 'v3':
                 environment_cred.update({
-                    'tenant_name': tenant_name
+                    PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: usr_domain,
+                    PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME: prj_domain
                 })
-            elif cls.auth_api == 'v3':
-                environment_cred.update({
-                    'project_name': tenant_name,
-                    'user_domain_name': usr_domain,
-                    'project_domain_name': prj_domain
-                })
-            else:
-                assert False, "Identity API {} ({}) not supported".format(cls.auth_api, cls.auth_url)
         except IndexError:
             assert False, "Invalid setting {}.{}".format(PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_KEYSTONE_URL)
 
