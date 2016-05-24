@@ -6,6 +6,7 @@
         "tenant_name": "",
         "user_domain_name": "",
         "user": "",
+        "user_id": "",
         "password": ""
     },
     "test_configuration": {
