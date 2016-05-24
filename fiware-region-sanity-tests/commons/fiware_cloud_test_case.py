@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -53,10 +53,10 @@ import re
 
 class FiwareTestCase(unittest.TestCase):
 
-    # Test configuration (to be overriden)
+    # Test configuration (to be overridden)
     conf = None
 
-    # Test region (to be overriden)
+    # Test region (to be overridden)
     region_name = None
 
     # Test authentication
@@ -66,10 +66,10 @@ class FiwareTestCase(unittest.TestCase):
     auth_token = None
     auth_cred = {}
 
-    # Test neutron networks (could be overriden)
+    # Test neutron networks (could be overridden)
     with_networks = False
 
-    # Test storage (could be overriden)
+    # Test storage (could be overridden)
     with_storage = False
 
     # Test data for the suite
@@ -90,36 +90,52 @@ class FiwareTestCase(unittest.TestCase):
         cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION][cls.region_name]
         cls.glance_conf = cls.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_GLANCE]
 
-        # Check for environment variables related to credentials
+        # Auth credentials from configuration file
         cls.auth_cred = cls.conf[PROPERTIES_CONFIG_CRED]
-        env_cred = {
-            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL',
-                                                             cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
-            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME',
-                                                     cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
-            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
-            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID',
-                                                          cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
-            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME',
-                                                            cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+
+        # Check for environment variables overriding credentials from file
+        auth_url = environ.get('OS_AUTH_URL', cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL])
+        username = environ.get('OS_USERNAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USERNAME])
+        password = environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASSWORD])
+        user_id = environ.get('OS_USER_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_ID])
+        tenant_id = environ.get('OS_TENANT_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID])
+        tenant_name = environ.get('OS_TENANT_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+        usr_domain = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
+        prj_domain = environ.get('OS_PROJECT_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME])
+        environment_cred = {
+            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: auth_url,
+            PROPERTIES_CONFIG_CRED_USERNAME: username,
+            PROPERTIES_CONFIG_CRED_PASSWORD: password,
+            PROPERTIES_CONFIG_CRED_USER_ID: user_id,
+            PROPERTIES_CONFIG_CRED_TENANT_ID: tenant_id
         }
 
-        # Check Identity API version from auth_url (v3 requires additional properties)
+        # Check Identity API version from auth_url (currently, both v2 and v3 are supported)
         try:
-            cls.auth_url = env_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
-            cls.tenant_id = env_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]
+            cls.auth_url = environment_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
             cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
-            if cls.auth_api == 'v3':
-                domain = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
-                env_cred.update({PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: domain})
+            if cls.auth_api == 'v2.0':
+                environment_cred.update({
+                    'tenant_name': tenant_name
+                })
+            elif cls.auth_api == 'v3':
+                environment_cred.update({
+                    'project_name': tenant_name,
+                    'user_domain_name': usr_domain,
+                    'project_domain_name': prj_domain
+                })
+            else:
+                assert False, "Identity API {} ({}) not supported".format(cls.auth_api, cls.auth_url)
         except IndexError:
             assert False, "Invalid setting {}.{}".format(PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_KEYSTONE_URL)
 
         # Update credentials configuration after processing environment variables
-        cls.auth_cred.update(env_cred)
+        cls.auth_cred.update(environment_cred)
+        cls.tenant_id = cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]
 
-        # Ensure credentials are given (either by settings file or overriden by environment variables)
-        for name in env_cred.keys():
+        # Ensure credentials are given (either by settings file or overridden by environment variables)
+        mandatory_auth_properties = environment_cred.keys()
+        for name in mandatory_auth_properties:
             if not cls.auth_cred[name]:
                 assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)
 
@@ -134,22 +150,23 @@ class FiwareTestCase(unittest.TestCase):
     @classmethod
     def init_auth(cls):
         """
-        Init the variables related to authorization, needed to execute tests
+        Init an auth session, needed to execute tests
         :return: The auth token retrieved
         """
 
-        tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
         cred_kwargs = {
             'auth_url': cls.auth_url,
-            'username': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
-            'password': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS]
+            'username': cls.auth_cred[PROPERTIES_CONFIG_CRED_USERNAME],
+            'password': cls.auth_cred[PROPERTIES_CONFIG_CRED_PASSWORD]
         }
 
         # Currently, both v2 and v3 Identity API versions are supported
         if cls.auth_api == 'v2.0':
-            cred_kwargs['tenant_name'] = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_NAME]
+            cred_kwargs['tenant_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME]
         elif cls.auth_api == 'v3':
-            cred_kwargs['user_domain_name'] = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME]
+            cred_kwargs['project_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME]
+            cred_kwargs['user_domain_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME]
+            cred_kwargs['project_domain_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME]
         else:
             assert False, "Identity API {} ({}) not supported".format(cls.auth_api, cls.auth_url)
 
@@ -164,7 +181,7 @@ class FiwareTestCase(unittest.TestCase):
             assert False, "Could not find Identity API {} Password class: {}".format(cls.auth_api, e)
 
         # Get auth token
-        cls.logger.debug("Getting auth token for tenant %s...", tenant_id)
+        cls.logger.debug("Getting auth token for tenant %s...", cls.tenant_id)
         cls.auth_sess = session.Session(auth=credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
         try:
             cls.auth_token = cls.auth_sess.get_token()
@@ -178,7 +195,7 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the OpenStack API clients
         """
-        user_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER]
+        user_id = cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_ID]
         cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor, test_image,
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
@@ -187,10 +204,17 @@ class FiwareTestCase(unittest.TestCase):
                                                            user_id=user_id,
                                                            auth_session=cls.auth_sess,
                                                            auth_url=cls.auth_url, auth_token=cls.auth_token)
-        cls.keystone_operations.check_permited_role()
         if cls.with_storage:
             cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
                                                          auth_cred=cls.auth_cred)
+
+    @classmethod
+    def init_users(cls):
+        """
+        Check user for the tests and its roles
+        """
+        cls.user_id = cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_ID]
+        cls.keystone_operations.check_permitted_role()
 
     @classmethod
     def init_world(cls, world, suite=False):
@@ -506,11 +530,11 @@ class FiwareTestCase(unittest.TestCase):
         cls.configure()
 
         # Initialize session trying to get auth token; on success, continue with initialization
-        tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
         test_image = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_IMAGE, TEST_IMAGE_DEFAULT)
         test_flavor = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_FLAVOR, TEST_FLAVOR_DEFAULT)
         if cls.init_auth():
-            cls.init_clients(tenant_id, test_flavor, test_image)
+            cls.init_clients(cls.tenant_id, test_flavor, test_image)
+            cls.init_users()
             cls.init_world(cls.suite_world, suite=True)
             cls.logger.debug("suite_world = %s", cls.suite_world)
 

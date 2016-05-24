@@ -150,9 +150,12 @@ configuration of Jenkins or as part of the jobs:
 - **OS_AUTH_URL**: The URL of OpenStack Identity Service for authentication
 - **OS_USERNAME**: The username for authentication
 - **OS_PASSWORD**: The password for authentication
+- **OS_USER_ID**: The user identifier for authentication
 - **OS_TENANT_ID**: The tenant identifier for authentication
 - **OS_TENANT_NAME**: The tenant name for authentication
 - **OS_USER_DOMAIN_NAME**: (Only in Identity v3) The user domain name for
+  authentication
+- **OS_PROJECT_DOMAIN_NAME**: (Only in Identity v3) The project domain name for
   authentication
 
 
@@ -220,16 +223,18 @@ Configuration file
 ------------------
 
 Some configuration is needed before test execution (Sanity Checks execution).
-This may come from the file ``resources/settings.json``:
+This may come from the file ``etc/settings.json``:
 
 - ``credentials``: data needed for authorization
 
   * ``keystone_url`` is the OpenStack auth URL
-  * ``user`` is the OpenStack username
+  * ``username`` is the OpenStack username
   * ``password`` is the OpenStack password
+  * ``user_id`` is the OpentSack user_id
   * ``tenant_id`` is the OpentSack tenant_id
   * ``tenant_name`` is the OpenStack tenant_name
   * ``user_domain_name`` is the OpenStack user_domain_name (Identity v3)
+  * ``project_domain_name`` is the OpenStack project_domain_name (Identity v3)
 
 - ``test_configuration``: other configuration values
 
@@ -261,10 +266,13 @@ are required:
     {
         "environment": "fiware-lab",
         "credentials": {
-            "keystone_url": "http://cloud.lab.fiware.org:4731/v2.0/",
+            "keystone_url": "http://cloud.lab.fiware.org:4731/v3/",
+            "user_id": "00000000000000000000000000000",
             "tenant_id": "00000000000000000000000000000",
             "tenant_name": "MyTenantName",
-            "user": "MyUser",
+            "user_domain_name": "MyUserDomainName",
+            "project_domain_name": "MyProjectDomainName",
+            "username": "MyUser",
             "password": "MyPassword"
         },
         "test_configuration": {

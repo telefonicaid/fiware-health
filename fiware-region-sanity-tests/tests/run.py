@@ -32,9 +32,11 @@ Environment:
   OS_AUTH_URL                       The URL of OpenStack Identity Service for authentication
   OS_USERNAME                       The username for authentication
   OS_PASSWORD                       The password for authentication
+  OS_USER_ID                        The user identifier for authentication
   OS_TENANT_ID                      The tenant identifier for authentication
   OS_TENANT_NAME                    The tenant name for authentication
   OS_USER_DOMAIN_NAME               (Only in Identity v3) The user domain name for authentication
+  OS_PROJECT_DOMAIN_NAME            (Only in Identity v3) The project domain name for authentication
   SANITY_CHECKS_SETTINGS            (Optional) Path to settings file
   SANITY_CHECKS_LOGGING             (Optional) Path to logging configuration file
   TEST_PHONEHOME_ENDPOINT           (Optional) PhoneHome service endpoint
