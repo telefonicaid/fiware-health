@@ -32,7 +32,6 @@ WORKDIR /opt/fiware-health/fiware-region-sanity-tests
 RUN cp ./resources/docker/system.conf /etc/dbus-1/system.conf
 RUN source /root/venv/fiware-region-sanity-tests/bin/activate; pip2.7 install -r requirements.txt --allow-all-external
 EXPOSE 8081
-COPY settings.json resources/settings.json
-COPY test_regionone.py tests/regions/test_regionone.py
+COPY settings.json settings.json
 COPY start.sh start.sh
 CMD ./start.sh

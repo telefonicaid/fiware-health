@@ -25,4 +25,8 @@ echo ${KEY} >> key.pem
 chmod 0600 key.pem
 ssh -i key.pem -o "StrictHostKeyChecking no" centos@${VMIP} -fnN -R0:8081:0:8081 &
 ./resources/docker/start.sh &
-./resources/scripts/jenkins.sh exec
+git checkout origin/$BRANCH
+git pull origin $BRANCH
+pip install -r requirements.txt
+cp settings.json etc/settings.json
+./sanity_checks $OS_REGION_NAME

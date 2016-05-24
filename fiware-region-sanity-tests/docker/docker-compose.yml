@@ -9,5 +9,6 @@ ph:
    - OS_TENANT_NAME
    - OS_TENANT_ID
    - OS_REGION_NAME
+   - BRANCH
   ports:
    - 8081:8081

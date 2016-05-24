@@ -5,7 +5,9 @@
         "tenant_id": "",
         "tenant_name": "",
         "user_domain_name": "",
-        "user": "",
+        "project_domain_name": "",
+        "user_id": "",
+        "user_name": "",
         "password": ""
     },
     "test_configuration": {
@@ -26,11 +28,10 @@
         "openstack_metadata_service_url": "http://169.254.169.254/openstack/latest/meta_data.json"
     },
     "region_configuration": {
-        "external_network_name": {
-            "RegionOne": "ext-net"
-        },
-        "shared_network_name": {
-            "RegionOne": "shared-net"
+        "RegionOne": {
+            "external_network_name": "ext-net",
+            "shared_network_name": "shared-net",
+            "test_object_storage": true
         },
         "test_flavor": {
             "Prague": "tiny"
