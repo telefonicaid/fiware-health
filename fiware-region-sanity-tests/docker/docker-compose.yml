@@ -3,6 +3,9 @@ ph:
   environment: 
    - KEY
    - VMIP
+   - OS_USER_DOMAIN_NAME
+   - OS_PROJECT_DOMAIN_NAME
+   - OS_IDENTITY_API_VERSION
    - OS_USERNAME
    - OS_PASSWORD
    - OS_AUTH_URL

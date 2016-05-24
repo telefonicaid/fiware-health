@@ -1,6 +1,3 @@
-export OS_USER_DOMAIN_NAME=default
-export OS_PROJECT_DOMAIN_NAME=default
-export OS_IDENTITY_API_VERSION=3
 openstack project create test
 openstack user create test --password test --project test
 openstack role add --user test --project test owner
@@ -31,5 +28,4 @@ ssh -i key.pem -o "StrictHostKeyChecking no" centos@${VMIP} -fnN -R0:8081:0:8081
 git checkout origin/$BRANCH
 git pull origin $BRANCH
 pip install -r requirements.txt
-cp settings.json etc/settings.json
 ./sanity_checks $OS_REGION_NAME
