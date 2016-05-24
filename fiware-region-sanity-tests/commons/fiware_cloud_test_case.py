@@ -95,8 +95,8 @@ class FiwareTestCase(unittest.TestCase):
         env_cred = {
             PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL',
                                                              cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
-            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME',
-                                                     cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
+            PROPERTIES_CONFIG_CRED_USER_NAME: environ.get('OS_USERNAME',
+                                                     cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_NAME]),
             PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
             PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID',
                                                           cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
@@ -141,7 +141,7 @@ class FiwareTestCase(unittest.TestCase):
         tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
         cred_kwargs = {
             'auth_url': cls.auth_url,
-            'username': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
+            'username': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER_NAME],
             'password': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS]
         }
 
