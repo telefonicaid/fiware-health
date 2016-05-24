@@ -1,0 +1,46 @@
+{
+    "environment": "test",
+    "credentials": {
+        "keystone_url": "http:/$OS_KEYSTONE_IP:5000/v2.0/",
+        "tenant_id": "",
+        "tenant_name": "",
+        "user_domain_name": "",
+        "project_domain_name": "",
+        "user_id": "",
+        "user_name": "",
+        "password": ""
+    },
+    "test_configuration": {
+        "phonehome_endpoint": "",
+        "glance_configuration": {
+            "required_images": [
+                "base_centos_6",
+                "base_centos_7",
+                "base_debian_7",
+                "base_ubuntu_12.04",
+                "base_ubuntu_14.04"
+            ]
+        },
+        "swift_configuration": {
+            "big_file_url_1": "https://github.com/telefonicaid/fiware-paas/archive/1.1.0.zip",
+            "big_file_url_2": "https://github.com/telefonicaid/fiware-paas/archive/1.3.4.zip"
+        },
+        "openstack_metadata_service_url": "http://169.254.169.254/openstack/latest/meta_data.json"
+    },
+    "region_configuration": {
+
+        "RegionOne": {
+            "external_network_name": "ext-net",
+            "shared_network_name": "shared-net",
+            "test_object_storage": true
+        },
+        "test_flavor": {
+            "Prague": "tiny"
+        },
+        "test_image": {
+            "Lannion2": "CentOS-6.3init_deprecated"
+        }
+    },
+    "key_test_cases": [ "test_(.*)" ],
+    "opt_test_cases": [ "test_.*container.*" ]
+}
