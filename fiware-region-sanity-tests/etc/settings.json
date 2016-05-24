@@ -34,6 +34,11 @@
         "test_.*container.*"
     ],
     "region_configuration": {
+        "RegionOne": {
+            "external_network_name": "ext-net",
+            "shared_network_name": "shared-net",
+            "test_object_storage": true
+        },
         "Spain2": {
             "external_network_name": "public-ext-net-01",
             "shared_network_name": "node-int-net-01",
