@@ -42,7 +42,7 @@ class FiwareKeystoneOperations:
         self.region_name = region_name
         self.client = client.Client(session=kwargs.get('auth_session'),
                                     auth_url=kwargs.get('auth_url'), auth_token=kwargs.get('auth_token'),
-                                    endpoint_type='publicURL', endpoint_override=auth_url, service_type="identity",
+                                    endpoint_type='publicURL', endpoint_override=kwargs.get('auth_url'), service_type="identity",
                                     region_name=region_name,
                                     timeout=DEFAULT_REQUEST_TIMEOUT)
 
