@@ -4,8 +4,8 @@
   <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
 This job executes the Sanity Check on each FIWARE Lab node. It will spawn parallel executions of one job per region (if there are resources to do that)&#xd;
 &lt;br&gt;&lt;br&gt;&#xd;
-&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
-&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
+&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests&lt;br&gt;&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/master/fiware-region-sanity-tests/README.rst</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>

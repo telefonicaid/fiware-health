@@ -29,15 +29,9 @@ from neutronclient.common.exceptions import NeutronClientException, IpAddressGen
 from datetime import datetime
 from commons.dbus_phonehome_service import DbusPhoneHomeClient
 from commons.template_utils import replace_template_properties
-from commons.constants import PHONEHOME_TX_ID_HEADER
 import re
 import json
 import uuid
-
-
-def _build_path_resource(path_resource):
-    """Build url path with a transactionId param"""
-    return '{0}?{1}={2}'.format(path_resource, PHONEHOME_TX_ID_HEADER, str(uuid.uuid1()))
 
 
 class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
@@ -150,11 +144,10 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         external_network_id = None
         external_network_list = self.neutron_operations.find_networks(router_external=True)
         if len(external_network_list) != 0:
-            external_net_region = self.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_EXTERNAL_NET]
-            if self.region_name in external_net_region:
-                ext_net_config = external_net_region[self.region_name]
+            external_net_conf = self.region_conf.get(PROPERTIES_CONFIG_REGION_EXTERNAL_NET)
+            if external_net_conf:
                 for external_network in external_network_list:
-                    if external_network['name'] == ext_net_config:
+                    if external_network['name'] == external_net_conf:
                         external_network_id = external_network['id']
             if external_network_id is None:
                 external_network_id = external_network_list[0]['id']
@@ -168,10 +161,7 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         :return: Shared network name
         """
         # get from settings the name of the shared network to lookup
-        lookup_network_name = TEST_SHARED_NET_DEFAULT
-        shared_network_conf = self.conf[PROPERTIES_CONFIG_REGION].get(PROPERTIES_CONFIG_REGION_SHARED_NET)
-        if shared_network_conf:
-            lookup_network_name = shared_network_conf.get(self.region_name, TEST_SHARED_NET_DEFAULT)
+        lookup_network_name = self.region_conf.get(PROPERTIES_CONFIG_REGION_SHARED_NET, TEST_SHARED_NET_DEFAULT)
 
         # find the network in the list of existing shared networks
         lookup_network_list = self.neutron_operations.find_networks(name=lookup_network_name,
@@ -181,6 +171,13 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.assertIsNotNone(shared_network_name, "No shared network %s found" % lookup_network_name)
 
         return shared_network_name
+
+    @staticmethod
+    def __add_transaction_id(path_resource):
+        """
+        Build url path with a transactionId param
+        """
+        return '{0}?{1}={2}'.format(path_resource, PHONEHOME_TX_ID_HEADER, str(uuid.uuid1()))
 
     def __e2e_connection_using_public_ip_test_helper__(self, use_shared_network=True):
         """
@@ -251,14 +248,15 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
             self.skipTest("No value found for '{}.{}' setting".format(
                 PROPERTIES_CONFIG_TEST, PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT))
 
-        path_resource = PHONEHOME_DBUS_OBJECT_PATH
+        path_resource = self.__add_transaction_id(PHONEHOME_DBUS_OBJECT_PATH)
 
         # Load userdata from file and compile the template (replacing variable values)
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_PATH)
         with open(PHONEHOME_USERDATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
-                                                           path_resource=_build_path_resource(path_resource))
+            userdata_content = replace_template_properties(userdata_content,
+                                                           phonehome_endpoint=phonehome_endpoint,
+                                                           path_resource=path_resource)
             self.logger.debug("Userdata content: %s", userdata_content)
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
@@ -544,7 +542,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.logger.debug("Loading userdata from file '%s'", PHONEHOME_USERDATA_METADATA_PATH)
         with open(PHONEHOME_USERDATA_METADATA_PATH, "r") as userdata_file:
             userdata_content = userdata_file.read()
-            userdata_content = replace_template_properties(userdata_content, phonehome_endpoint=phonehome_endpoint,
+            userdata_content = replace_template_properties(userdata_content,
+                                                           phonehome_endpoint=phonehome_endpoint,
                                                            path_resource=path_resource,
                                                            openstack_metadata_service_url=metadata_service_url)
 

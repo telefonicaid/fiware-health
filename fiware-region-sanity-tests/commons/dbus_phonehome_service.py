@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -22,16 +22,21 @@
 # contact with opensource@tid.es
 
 
-import dbus
+from commons.constants import PHONEHOME_DBUS_NAME, PHONEHOME_TIMEOUT, PHONEHOME_SIGNAL, PHONEHOME_METADATA_SIGNAL,\
+    PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_TX_ID_HEADER
+
 from dbus import SystemBus
 from dbus.exceptions import DBusException
 from dbus.service import BusName
 from dbus.mainloop.glib import DBusGMainLoop
+import dbus
 import gobject
-from commons.constants import PHONEHOME_DBUS_NAME, PHONEHOME_TIMEOUT, PHONEHOME_SIGNAL, PHONEHOME_METADATA_SIGNAL,\
-    PHONEHOME_DBUS_OBJECT_METADATA_PATH, PHONEHOME_DBUS_OBJECT_PATH, PHONEHOME_TX_ID_HEADER
 import re
-import json
+
+
+log_message_data_out_of_sequence =\
+    "Received data are not for this FIWARE Node. Probably they come from another SanityCheck execution running "\
+    "at the same time. Skipping and waiting for more data from PhoneHome Server..."
 
 
 class DbusPhoneHomeClient:
@@ -42,10 +47,9 @@ class DbusPhoneHomeClient:
     logger = None
 
     def __init__(self, logger):
-        """
-        Inits the DBus client and creates a new System bus
+        """Inits the DBus client and creates a new System bus.
         :param logger: Logger
-        :return: None
+        :return:
         """
 
         self.logger = logger
@@ -59,8 +63,7 @@ class DbusPhoneHomeClient:
 
     @staticmethod
     def timeout(mainloop, logger, *args):
-        """
-        Timeout function for DBus MainLopp
+        """Timeout function for DBus MainLoop.
         :param mainloop: Loop manager (MainLoop)
         :param logger: Logger
         :param args: Rest of arguments
@@ -73,10 +76,8 @@ class DbusPhoneHomeClient:
 
     @staticmethod
     def phonehome_signal_handler(phonehome_http_data):
-        """
-        Handler for the signal 'phonehome_signal'.
-        :param phonehome_http_data: Receives the data of the VM emitted in the signal. If matches with the expected
-         one, main loop will be finished.
+        """Handler for `PHONEHOME_SIGNAL`.
+        :param phonehome_http_data: Data the VM emitted in the signal. If matches the expected one, main loop finishes.
         :return: None
         """
         DbusPhoneHomeClient.logger.debug("Data received from PhoneHome Server: '%s'",
@@ -89,18 +90,13 @@ class DbusPhoneHomeClient:
             DbusPhoneHomeClient.data_received = phonehome_http_data
             DbusPhoneHomeClient.mainloop.quit()
         else:
-            DbusPhoneHomeClient.logger.debug("Received data are not for this FIWARE Node. "
-                                             "Probably they come from another SanityCheck execution running "
-                                             "at the same time. Skipping and waiting for more data from PhoneHome "
-                                             "Server...")
+            DbusPhoneHomeClient.logger.debug(log_message_data_out_of_sequence)
 
     @staticmethod
     def phonehome_signal_handler_metadata(phonehome_http_data, hostname):
-        """
-        Handler for the signal 'phonehome_signal'.
-        :param phonehome_http_data: Receives the metadata of the VM emitted in the signal.
-        :param hostname: Receives the name of the host. If matches with the expected one,
-         main loop will be finished.
+        """Handler for `PHONEHOME_METADATA_SIGNAL`.
+        :param phonehome_http_data: Data the VM emitted in the signal.
+        :param hostname: VM hostname. If matches the expected one, main loop finishes.
         :return: None
         """
         DbusPhoneHomeClient.logger.debug("Data received from PhoneHome Server (Hostname): '%s'",
@@ -111,22 +107,17 @@ class DbusPhoneHomeClient:
             DbusPhoneHomeClient.data_received = phonehome_http_data
             DbusPhoneHomeClient.mainloop.quit()
         else:
-            DbusPhoneHomeClient.logger.debug("Received data are not for this FIWARE Node. "
-                                             "Probably they come from another SanityCheck execution running "
-                                             "at the same time. Skipping and waiting for more data from PhoneHome "
-                                             "Server...")
+            DbusPhoneHomeClient.logger.debug(log_message_data_out_of_sequence)
 
     def connect_and_wait_for_phonehome_signal(self, bus_name, object_path, phonehome_signal, data_expected):
-        """
-        Connects to Bus and get the published object (PhoneHome DBus object). The proxy are translated into
-         method calls on the remote object.
+        """Connects to Bus and gets the published object (PhoneHome DBus object).
         :param bus_name: str
                 A bus name (either the unique name or a well-known name)
                 of the application owning the object. The keyword argument
                 named_service is a deprecated alias for this. PhoneHome DBus service.
         :param object_path: str
                 The object path of the desired PhoneHome Object.
-        :param data_expected: The PhoneHome client will wait for a 'phonehome signal' with this data value.
+        :param data_expected: The PhoneHome client will wait for `PHONEHOME_SIGNAL` with this data value.
          When received, main loop will be finished and data received from the signal will be returned.
         :return: None if signal has not been received after the timewait; Else, the content received in the signal
         """
@@ -169,11 +160,9 @@ class DbusPhoneHomeClient:
 class DbusPhoneHomeObject(dbus.service.Object):
 
     def __init__(self, logger, bus, object_path):
-        """
-        Creates and registers a new PhoneHome service in the bus.
+        """Creates and registers a new PhoneHome service in the bus.
         :param bus: BusName. The created DBus with well-known name.
-        :param object_path: str
-                The object path of the desired PhoneHome Object.
+        :param object_path: The object path of the desired PhoneHome Object.
         :return:
         """
 
@@ -187,29 +176,26 @@ class DbusPhoneHomeObject(dbus.service.Object):
 
     @dbus.service.signal(dbus_interface=PHONEHOME_DBUS_NAME, signature='s')
     def phonehome_signal(self, phonehome_http_data):
-        """
-        This method is used to emit the signal "phonehome_signal" with the given http data
+        """This method is used to emit `PHONEHOME_SIGNAL` with the given http data.
         :param phonehome_http_data: String with all BODY data of the POST request
-        :return : None
+        :return: None
         """
 
         self.logger.debug("PhoneHome signal emitted with data: %s", str(phonehome_http_data))
 
     @dbus.service.signal(dbus_interface=PHONEHOME_DBUS_NAME, signature='ss')
     def phonehome_metadata_signal(self, phonehome_http_data, hostname):
-        """
-        This method is used to emit the signal "phonehome_metadata_signal" with the given http data
+        """This method is used to emit `PHONEHOME_METADATA_SIGNAL` with the given http data.
         :param phonehome_http_data: String with all BODY data of the POST request
         :param hostname: String with the header hostname value.
-        :return : None
+        :return: None
         """
 
         self.logger.debug("PhoneHome Metadata signal emitted with data: %s for the hostname %s",
                           str(phonehome_http_data), hostname)
 
     def remove_object(self):
-        """
-        Makes this object inaccessible via the given D-Bus connection and object path:
+        """Makes this object inaccessible via the given D-Bus connection and object path:
          The object ceases to be accessible via any connection or path.
         :return: None
         """
@@ -221,8 +207,7 @@ class DbusPhoneHomeObject(dbus.service.Object):
 class DbusPhoneHomeServer:
 
     def __init__(self, logger):
-        """
-        Inits the DbusPhoneHomeServer.
+        """Initializes the DbusPhoneHomeServer.
         :param logger: Logger
         :return:
         """
@@ -233,10 +218,8 @@ class DbusPhoneHomeServer:
         DBusGMainLoop(set_as_default=True)
 
     def register_phonehome_object(self, phonehome_object_path):
-        """
-        Registers the bus name and a new phonehome object in this one.
-        :param phonehome_object_path: str
-                The object path tho publish the desired PhoneHome Object. Format: /xxx/...
+        """Registers the bus name and a new phonehome object in this one.
+        :param phonehome_object_path: The object path tho publish the desired PhoneHome Object. Format: /xxx/...
         :return: None
         """
 
@@ -248,9 +231,7 @@ class DbusPhoneHomeServer:
                                                                                  phonehome_object_path)
 
     def emit_phonehome_signal(self, phonehome_data, phonehome_object_path, hostname, transaction_id):
-        """
-        This method emits the phonehome signal to all clients connected to the bus,
-         with the given data as value.
+        """This method emits `PHONEHOME_SIGNAL` to all clients connected to the bus, with the given data as value.
         :param phonehome_data: PhoneHome data (HTTP POST request)
         :param phonehome_object_path: /metadata or /phonehome
         :param hostname: String with the header Hostname value
@@ -266,12 +247,15 @@ class DbusPhoneHomeServer:
             self.dbus_phonehome_objects[phonehome_object_path].phonehome_signal(phonehome_data)
 
     def remove_object(self, phonehome_object_path):
-        """
-        Makes the PhoneHome object inaccessible via the given D-Bus connection and object path:
+        """Makes the PhoneHome object inaccessible via the given D-Bus connection and object path:
          The object ceases to be accessible via any connection or path.
         :return: None
         """
         self.dbus_phonehome_objects[phonehome_object_path].remove_object()
 
     def logdebug(self, trace):
+        """Writes a debug log trace.
+        :param trace: Message to trace
+        :return: None
+        """
         self.logger.debug(trace)
