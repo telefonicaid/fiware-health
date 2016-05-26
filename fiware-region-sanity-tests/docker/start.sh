@@ -31,5 +31,5 @@ ssh -i key.pem -o "StrictHostKeyChecking no" centos@${VMIP} -fnN -R0:8081:0:8081
 ./resources/docker/start.sh &
 git checkout origin/$BRANCH
 git pull origin $BRANCH
-pip install -r requirements.txt
-./sanity_checks $OS_REGION_NAME
+source /root/venv/fiware-region-sanity-tests/bin/activate; pip2.7 install -r requirements.txt
+source /root/venv/fiware-region-sanity-tests/bin/activate; tests/run.py $OS_REGION_NAME
