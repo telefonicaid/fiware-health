@@ -37,7 +37,7 @@
         "RegionOne": {
             "external_network_name": "ext-net",
             "shared_network_name": "shared-net",
-            "test_object_storage": true
+            "test_object_storage": false
         },
         "Spain2": {
             "external_network_name": "public-ext-net-01",

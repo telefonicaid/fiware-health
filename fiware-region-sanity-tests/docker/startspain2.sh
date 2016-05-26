@@ -1,19 +1,8 @@
 export OS_IDENTITY_API_VERSION=3
-openstack --os-interface public project create test
-openstack --os-interface public user create test --password test --project test
-openstack --os-interface public role add --user test --project test owner
-openstack --os-interface public project show test > project
-openstack --os-interface public  user show test > user
-glance image-list |grep cirros > images
-export image=`cat images | awk 'NR==1{print $2}'`
-glance image-update $image --name base_centos_6
+openstack --os-interface public project show $OS_TENANT_NAME > project
+openstack --os-interface public  user show $OS_USERNAME > user
 export OS_TENANT_ID=`grep "| id" project | awk 'NR==1{print $4}'`
 export OS_USER_ID=`grep "| id" user | awk 'NR==1{print $4}'`
-echo $OS_USER_ID
-echo $OS_TENANT_ID
-export OS_USERNAME=test
-export OS_PASSWORD=test
-export OS_TENANT_NAME=test
 export JOB_URL=.
 export JENKINS_HOME=.
 export JENKINS_URL=.
