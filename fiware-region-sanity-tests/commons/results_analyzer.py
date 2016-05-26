@@ -22,14 +22,30 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
+
+"""Generate a summary report including the sanity status of the regions.
+
+Usage:
+  {prog} XUNIT_RESULTS_FILE
+
+Environment:
+  SANITY_CHECKS_SETTINGS            (Optional) Path to settings file
+
+Files:
+  etc/settings.json                 Default settings file
+  test_results.xml                  Default xUnit results file
+
+"""
 
 
 from xml.dom import minidom
-from constants import PROPERTIES_FILE, PROPERTIES_CONFIG_KEY_TEST_CASES, PROPERTIES_CONFIG_OPT_TEST_CASES
+from constants import DEFAULT_SETTINGS_FILE, PROPERTIES_CONFIG_KEY_TEST_CASES, PROPERTIES_CONFIG_OPT_TEST_CASES
+import os.path
 import json
 import sys
 import re
+
+DEFAULT_RESULTS_FILE = "test_results.xml"
 
 ATTR_TESTS_TOTAL = "tests"
 ATTR_TESTS_SKIP = "skip"
@@ -51,7 +67,8 @@ GLOBAL_STATUS_OK = TEST_STATUS_OK
 
 
 class ResultAnalyzer(object):
-    def __init__(self, file='test_results.xml'):
+    def __init__(self, conf, file=DEFAULT_RESULTS_FILE):
+        self.conf = conf
         self.file = file
         self.dict = {}
 
@@ -92,7 +109,7 @@ class ResultAnalyzer(object):
 
     def print_results(self):
         """
-        Print report through standard output
+        Print report to standard output
         """
         print "\n*********************************\n"
         print "REGION TEST SUMMARY REPORT: "
@@ -151,29 +168,27 @@ class ResultAnalyzer(object):
                     have *POK* (partial OK) status.
         :return:
         """
-        with open(PROPERTIES_FILE) as config_file:
-            try:
-                conf = json.load(config_file)
-            except Exception, e:
-                print 'Error parsing config file: %s' % e
 
-        # dict holding global status according either key or optional test cases
+        key_test_cases = self.conf[PROPERTIES_CONFIG_KEY_TEST_CASES]
+        opt_test_cases = self.conf[PROPERTIES_CONFIG_OPT_TEST_CASES]
+
+        # dictionary holding global status according either key or optional test cases
         global_status = {
             GLOBAL_STATUS_OK: {
-                'caption': 'Regions satisfying all key test cases: %s' % conf[PROPERTIES_CONFIG_KEY_TEST_CASES],
+                'caption': 'Regions satisfying all key test cases: %s' % key_test_cases,
                 'empty_msg': 'NONE!!!!!!!',
                 'region_list': []
             },
             GLOBAL_STATUS_PARTIAL_OK: {
-                'caption': 'Regions only failing in optional test cases: %s' % conf[PROPERTIES_CONFIG_OPT_TEST_CASES],
+                'caption': 'Regions only failing in optional test cases: %s' % opt_test_cases,
                 'empty_msg': 'N/A',
                 'region_list': []
             }
         }
 
         # check status
-        key_test_cases_patterns = [re.compile(item) for item in conf[PROPERTIES_CONFIG_KEY_TEST_CASES]]
-        opt_test_cases_patterns = [re.compile(item) for item in conf[PROPERTIES_CONFIG_OPT_TEST_CASES]]
+        key_test_cases_patterns = [re.compile(item) for item in key_test_cases]
+        opt_test_cases_patterns = [re.compile(item) for item in opt_test_cases]
         for region, results in self.dict.iteritems():
             key_test_cases = [
                 item for item in results
@@ -198,12 +213,23 @@ class ResultAnalyzer(object):
 
 
 if __name__ == "__main__":
-
     if len(sys.argv) != 2:
-        print "Usage: python {} <xUnitResultFile.xml>".format(sys.argv[0])
+        usage = re.findall(r'.*{prog}.*', __doc__)[0].format(prog=os.path.basename(__file__)).strip()
+        print "Usage: %s" % usage
         sys.exit(-1)
 
-    checker = ResultAnalyzer(sys.argv[1])
+    results_file = sys.argv[1]
+
+    parentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    settings_file = os.environ.get('SANITY_CHECKS_SETTINGS', os.path.join(parentdir, DEFAULT_SETTINGS_FILE))
+    with open(settings_file) as settings:
+        try:
+            conf = json.load(settings)
+        except Exception as e:
+            print "Error parsing config file '{}': {}".format(settings_file, e)
+            sys.exit(-1)
+
+    checker = ResultAnalyzer(conf, results_file)
     checker.get_results()
     checker.print_global_status()
     checker.print_results()

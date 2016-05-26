@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -38,15 +38,14 @@ from commons.neutron_operations import FiwareNeutronOperations
 from commons.keystone_operations import FiwareKeystoneOperations
 from commons.swift_operations import FiwareSwiftOperations
 from commons.constants import *
+from ConfigParser import ConfigParser
+from os.path import isfile, join
 from os import environ
 from os import listdir
-from os.path import isfile, join
 import unittest
 import urlparse
 import logging
 import logging.config
-from ConfigParser import ConfigParser
-import json
 import time
 import os
 import re
@@ -54,7 +53,10 @@ import re
 
 class FiwareTestCase(unittest.TestCase):
 
-    # Test region (to be overriden)
+    # Test configuration (to be overridden)
+    conf = None
+
+    # Test region (to be overridden)
     region_name = None
 
     # Test authentication
@@ -64,10 +66,10 @@ class FiwareTestCase(unittest.TestCase):
     auth_token = None
     auth_cred = {}
 
-    # Test neutron networks (could be overriden)
+    # Test neutron networks (could be overridden)
     with_networks = False
 
-    # Test storage (could be overriden)
+    # Test storage (could be overridden)
     with_storage = False
 
     # Test data for the suite
@@ -77,79 +79,88 @@ class FiwareTestCase(unittest.TestCase):
     logger = None
 
     @classmethod
-    def load_project_properties(cls):
+    def configure(cls):
         """
-        Parse the JSON configuration file located in the settings folder and store the resulting dictionary in the
-        `conf` class variable. Values from "standard" OpenStack environment variables override this configuration.
+        Configure the test case with values taken from `conf` read from settings file (although environment variables
+        may override this configuration).
         """
 
-        cls.logger.debug("Loading test settings...")
-        with open(PROPERTIES_FILE) as config_file:
-            try:
-                cls.conf = json.load(config_file)
-            except Exception as e:
-                assert False, "Error parsing config file '{}': {}".format(PROPERTIES_FILE, e)
+        cls.logger.debug('Configuring tests for region "%s" ...', cls.region_name)
 
-        # Check for environment variables related to credentials and update configuration
+        cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION][cls.region_name]
+        cls.glance_conf = cls.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_GLANCE]
+
+        # Auth credentials from configuration file
         cls.auth_cred = cls.conf[PROPERTIES_CONFIG_CRED]
-        env_cred = {
-            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: environ.get('OS_AUTH_URL',
-                                                             cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]),
-            PROPERTIES_CONFIG_CRED_USER: environ.get('OS_USERNAME',
-                                                     cls.auth_cred[PROPERTIES_CONFIG_CRED_USER]),
-            PROPERTIES_CONFIG_CRED_PASS: environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASS]),
-            PROPERTIES_CONFIG_CRED_TENANT_ID: environ.get('OS_TENANT_ID',
-                                                          cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]),
-            PROPERTIES_CONFIG_CRED_TENANT_NAME: environ.get('OS_TENANT_NAME',
-                                                            cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+
+        # Check for environment variables overriding credentials from file
+        auth_url = environ.get('OS_AUTH_URL', cls.auth_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL])
+        username = environ.get('OS_USERNAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USERNAME])
+        password = environ.get('OS_PASSWORD', cls.auth_cred[PROPERTIES_CONFIG_CRED_PASSWORD])
+        user_id = environ.get('OS_USER_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_ID])
+        tenant_id = environ.get('OS_TENANT_ID', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID])
+        tenant_name = environ.get('OS_TENANT_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME])
+        usr_domain = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
+        prj_domain = environ.get('OS_PROJECT_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME])
+        environment_cred = {
+            PROPERTIES_CONFIG_CRED_KEYSTONE_URL: auth_url,
+            PROPERTIES_CONFIG_CRED_USERNAME: username,
+            PROPERTIES_CONFIG_CRED_PASSWORD: password,
+            PROPERTIES_CONFIG_CRED_USER_ID: user_id,
+            PROPERTIES_CONFIG_CRED_TENANT_ID: tenant_id,
+            PROPERTIES_CONFIG_CRED_TENANT_NAME: tenant_name
         }
 
-        # Check Identity API version from auth_url (v3 requires additional properties)
+        # Get Identity API version from auth_url (currently, both v2 and v3 are supported)
         try:
-            cls.auth_url = env_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
-            cls.tenant_id = env_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]
+            cls.auth_url = environment_cred[PROPERTIES_CONFIG_CRED_KEYSTONE_URL]
             cls.auth_api = urlparse.urlsplit(cls.auth_url).path.split('/')[1]
             if cls.auth_api == 'v3':
-                domain = environ.get('OS_USER_DOMAIN_NAME', cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
-                env_cred.update({PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: domain})
+                environment_cred.update({
+                    PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME: usr_domain,
+                    PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME: prj_domain
+                })
         except IndexError:
             assert False, "Invalid setting {}.{}".format(PROPERTIES_CONFIG_CRED, PROPERTIES_CONFIG_CRED_KEYSTONE_URL)
 
-        # Update configuration with values from environment variables
-        cls.auth_cred.update(env_cred)
+        # Update credentials configuration after processing environment variables
+        cls.auth_cred.update(environment_cred)
+        cls.tenant_id = cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_ID]
 
-        # Check for optional environment variables related to test configuration and update configuration
-        conf = cls.conf[PROPERTIES_CONFIG_TEST]
-        phonehome_endpoint = environ.get('TEST_PHONEHOME_ENDPOINT', conf[PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT])
+        # Ensure credentials are given (either by settings file or overridden by environment variables)
+        mandatory_auth_properties = environment_cred.keys()
+        for name in mandatory_auth_properties:
+            if not cls.auth_cred[name]:
+                assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)
+
+        # Check for the rest of optional environment variables and update configuration accordingly
+        default_phonehome_endpoint = cls.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT]
+        phonehome_endpoint = environ.get('TEST_PHONEHOME_ENDPOINT', default_phonehome_endpoint)
         env_conf = {
             PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT: phonehome_endpoint
         }
-        conf.update(env_conf)
-
-        # Ensure credentials are given (either by settings file or overriden by environment variables)
-        for name in env_cred.keys():
-            if not cls.auth_cred[name]:
-                assert False, "A value for '{}.{}' setting must be provided".format(PROPERTIES_CONFIG_CRED, name)
+        cls.conf[PROPERTIES_CONFIG_TEST].update(env_conf)
 
     @classmethod
     def init_auth(cls):
         """
-        Init the variables related to authorization, needed to execute tests
+        Init an auth session, needed to execute tests
         :return: The auth token retrieved
         """
 
-        tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
         cred_kwargs = {
             'auth_url': cls.auth_url,
-            'username': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER],
-            'password': cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_PASS]
+            'username': cls.auth_cred[PROPERTIES_CONFIG_CRED_USERNAME],
+            'password': cls.auth_cred[PROPERTIES_CONFIG_CRED_PASSWORD]
         }
 
         # Currently, both v2 and v3 Identity API versions are supported
         if cls.auth_api == 'v2.0':
-            cred_kwargs['tenant_name'] = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_NAME]
+            cred_kwargs['tenant_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME]
         elif cls.auth_api == 'v3':
-            cred_kwargs['user_domain_name'] = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME]
+            cred_kwargs['project_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_TENANT_NAME]
+            cred_kwargs['user_domain_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME]
+            cred_kwargs['project_domain_name'] = cls.auth_cred[PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME]
         else:
             assert False, "Identity API {} ({}) not supported".format(cls.auth_api, cls.auth_url)
 
@@ -164,7 +175,7 @@ class FiwareTestCase(unittest.TestCase):
             assert False, "Could not find Identity API {} Password class: {}".format(cls.auth_api, e)
 
         # Get auth token
-        cls.logger.debug("Getting auth token for tenant %s...", tenant_id)
+        cls.logger.debug("Getting auth token for tenant %s...", cls.tenant_id)
         cls.auth_sess = session.Session(auth=credentials, timeout=DEFAULT_REQUEST_TIMEOUT)
         try:
             cls.auth_token = cls.auth_sess.get_token()
@@ -178,7 +189,7 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the OpenStack API clients
         """
-        user_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_USER]
+        user_id = cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_ID]
         cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor, test_image,
                                                    auth_session=cls.auth_sess)
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
@@ -187,10 +198,17 @@ class FiwareTestCase(unittest.TestCase):
                                                            user_id=user_id,
                                                            auth_session=cls.auth_sess,
                                                            auth_url=cls.auth_url, auth_token=cls.auth_token)
-        cls.keystone_operations.check_permited_role()
         if cls.with_storage:
             cls.swift_operations = FiwareSwiftOperations(cls.logger, cls.region_name, cls.auth_api,
                                                          auth_cred=cls.auth_cred)
+
+    @classmethod
+    def init_users(cls):
+        """
+        Check user for the tests and its roles
+        """
+        cls.user_id = cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_ID]
+        cls.keystone_operations.check_permitted_role()
 
     @classmethod
     def init_world(cls, world, suite=False):
@@ -462,10 +480,13 @@ class FiwareTestCase(unittest.TestCase):
         """
         Init the world['containers'] entry (after deleting existing resources)
         """
+
+        local_objects_path = join(cls.home_dir, SWIFT_RESOURCES_PATH)
+
         if suite and cls.with_storage:
             # get pre-existing test local files list (ideally, empty when starting the tests)
-            files = [f for f in listdir(SWIFT_RESOURCES_PATH) if isfile(join(SWIFT_RESOURCES_PATH, f))]
-            for file in files:
+            local_files = [f for f in listdir(local_objects_path) if isfile(join(local_objects_path, f))]
+            for file in local_files:
                 cls.logger.debug("init_world() found local object '%s' not deleted", file)
                 if (file != TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION) \
                         and (file not in list(world['local_objects'])):
@@ -473,11 +494,11 @@ class FiwareTestCase(unittest.TestCase):
 
         # release resources to ensure a clean world
         for local_file in list(world['local_objects']):
-                os.remove(SWIFT_RESOURCES_PATH + local_file)
-                try:
-                    world['local_objects'].remove(local_file)
-                except ValueError:
-                    cls.logger.warn("This file was removed and it came from an older execution: %s", local_file)
+            os.remove(join(local_objects_path, local_file))
+            try:
+                world['local_objects'].remove(local_file)
+            except ValueError:
+                cls.logger.warn("This file was removed and it came from an older execution: %s", local_file)
 
     @classmethod
     def setUpClass(cls):
@@ -485,39 +506,29 @@ class FiwareTestCase(unittest.TestCase):
         Setup testcase (executed before ALL tests): release resources, initialize logger and REST clients.
         """
 
-        # Initialize logger
-        # > Get logging configuration for Sanity Checks
+        # Initialize logger with a new custom file handler for SanityChecks using UTC time format
         config = ConfigParser()
-        config.read(LOGGING_FILE_SANITYCHECKS)
+        config.read(cls.logging_conf)
+        cls.logger_level = config.get(LOGGING_CONF_SECTION_HANDLER, 'level')
+        formatter = logging.Formatter(config.get(LOGGING_CONF_SECTION_FORMATTER, 'format', raw=True))
+        file_handler = logging.FileHandler(config.get(LOGGING_CONF_SECTION_HANDLER, 'filename').
+                                           format(region_name=cls.region_name), mode='w')
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(cls.logger_level)
 
-        # > Configure a new custom file handler for SanityChecks
-        log_formatter = logging.Formatter(config.get('sanitychecks_formatter_fileFormatter', 'format', raw=True))
-        file_handler = logging.FileHandler(
-            config.get('sanitychecks_handler_fileHandler', 'filename').format(region_name=cls.region_name), mode='w')
-        file_handler.setFormatter(log_formatter)
-        file_handler.setLevel(config.get('sanitychecks_handler_fileHandler', 'level'))
-        cls.logger_level = config.get('sanitychecks_handler_fileHandler', 'level')
-
-        # > Set FileHandler for default root logger and configure UTC time formatter
-        logging.getLogger('').addHandler(file_handler)
+        logging.root.addHandler(file_handler)
         logging.Formatter.converter = time.gmtime
+        cls.logger = logging.getLogger(LOGGING_TEST_LOGGER)
 
-        cls.logger = logging.getLogger(PROPERTIES_LOGGER)
-
-        # Load properties
-        cls.load_project_properties()
-
-        # These tests should be particularized for a region
-        cls.logger.debug("Tests for '%s' region", cls.region_name)
-
-        # Get properties from global config
-        tenant_id = cls.conf[PROPERTIES_CONFIG_CRED][PROPERTIES_CONFIG_CRED_TENANT_ID]
-        test_flavor = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_FLAVOR].get(cls.region_name)
-        test_image = cls.conf[PROPERTIES_CONFIG_REGION][PROPERTIES_CONFIG_REGION_TEST_IMAGE].get(cls.region_name)
+        # Global configuration of tests
+        cls.configure()
 
         # Initialize session trying to get auth token; on success, continue with initialization
+        test_image = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_IMAGE, TEST_IMAGE_DEFAULT)
+        test_flavor = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_FLAVOR, TEST_FLAVOR_DEFAULT)
         if cls.init_auth():
-            cls.init_clients(tenant_id, test_flavor, test_image)
+            cls.init_clients(cls.tenant_id, test_flavor, test_image)
+            cls.init_users()
             cls.init_world(cls.suite_world, suite=True)
             cls.logger.debug("suite_world = %s", cls.suite_world)
 

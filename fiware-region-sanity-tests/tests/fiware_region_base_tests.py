@@ -34,15 +34,6 @@ import socket
 
 class FiwareRegionsBaseTests(FiwareTestCase):
 
-    region_conf = None
-    glance_conf = None
-
-    @classmethod
-    def setUpClass(cls):
-        super(FiwareRegionsBaseTests, cls).setUpClass()
-        cls.region_conf = cls.conf[PROPERTIES_CONFIG_REGION]
-        cls.glance_conf = cls.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_GLANCE]
-
     def setUp(self):
         super(FiwareRegionsBaseTests, self).setUp()
         self.test_world = {}
@@ -68,7 +59,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         HELPER. Allocates a IP from the Public Pool of the region
         :return IP address (String)
         """
-        net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET][self.region_name]
+        net = self.region_conf[PROPERTIES_CONFIG_REGION_EXTERNAL_NET]
         try:
             allocated_ip_data = self.nova_operations.allocate_ip(net)
             self.assertIsNotNone(allocated_ip_data, "Problems allocating IP from pool '%s'" % net)

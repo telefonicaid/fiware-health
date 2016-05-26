@@ -35,10 +35,11 @@
 #     -l, --os-auth-url=URL		optional OpenStack auth_url (see below)
 #     -u, --os-username=STRING		optional OpenStack username
 #     -p, --os-password=STRING		optional OpenStack password
+#     -I, --os-user-id=ID		optional OpenStack user_id
 #     -i, --os-tenant-id=ID		optional OpenStack tenant_id
 #     -n, --os-tenant-name=NAME		optional OpenStack tenant_name
-#     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name (to
-#     					replace the former if Identity API v3)
+#     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name
+#     -P, --os-project-domain-name=NAME	optional OpenStack project_domain_name
 #
 # Actions:
 #     setup				Setup environment for Sanity Check
@@ -50,7 +51,6 @@
 #     JENKINS_USER 			username of the Jenkins CI
 #     JENKINS_PASSWORD			password of the Jenkins CI
 #     JENKINS_URL			URL of the Jenkins CI
-#     JOB_URL				full URL for this build job
 #     TEST_PHONEHOME_ENDPOINT		endpoint of supporting PhoneHome server
 #     FIHEALTH_WORKSPACE		default value for --workspace
 #     FIHEALTH_HISTORY			default value for --history
@@ -62,16 +62,15 @@
 #     OS_AUTH_URL			default value for --os-auth-url
 #     OS_USERNAME			default value for --os-username
 #     OS_PASSWORD			default value for --os-password
+#     OS_USER_ID			default value for --os-user-id
 #     OS_TENANT_ID			default value for --os-tenant-id
 #     OS_TENANT_NAME			default value for --os-tenant-name
 #     OS_USER_DOMAIN_NAME		default value for --os-user-domain-name
+#     OS_PROJECT_DOMAIN_NAME		default value for --os-project-domain-name
 #
 # Requirements:
 #     python2.7				Python 2.7 interpreter (found in path)
 #     virtualenv			Python package 'virtualenv'
-#
-# OpenStack credentials:
-#     Override those defined in 'settings.json', used by 'sanity_checks' script.
 #
 
 NAME=$(basename $0)
@@ -87,9 +86,11 @@ OPTS=`tr -d '\n ' <<END
       l(os-auth-url):
       u(os-username):
       p(os-password):
+      I(os-user-id):
       i(os-tenant-id):
       n(os-tenant-name):
       d(os-user-domain-name):
+      P(os-project-domain-name):
 END`
 
 # Command line options
@@ -111,9 +112,11 @@ case $OPT in
 'l')	OS_AUTH_URL=$OPTARG;;
 'u')	OS_USERNAME=$OPTARG;;
 'p')	OS_PASSWORD=$OPTARG;;
+'I')	OS_USER_ID=$OPTARG;;
 'i')	OS_TENANT_ID=$OPTARG;;
 'n')	OS_TENANT_NAME=$OPTARG;;
 'd')	OS_USER_DOMAIN_NAME=$OPTARG;;
+'P')	OS_PROJECT_DOMAIN_NAME=$OPTARG;;
 'h')	OPTERR="$OPTHLP";;
 '?')	OPTERR="Unknown option -$OPTARG";;
 ':')	OPTERR="Missing value for option -$OPTARG";;
@@ -215,44 +218,38 @@ function restart_phone_home_server() {
 }
 
 # Main
+
+# Check environment variables for Jenkins CI
+if [ -z "$JENKINS_URL" ]; then
+	printf "Environment variable JENKINS_URL not defined\n" 1>&2
+	exit 2
+elif [ -z "$(expr "$JENKINS_URL" : "^\(http://\)\S\S*:\S\S*\(/\S*\)\?$")" ]; then
+	printf "Environment variable JENKINS_URL has a malformed value\n" 1>&2
+	exit 2
+elif [ -z "$JENKINS_USER" -o -z "$JENKINS_PASSWORD" ]; then
+	printf "Either Jenkins user or password not specified\n" 1>&2
+	exit 2
+fi
+
+# Check environment variables for paths
 if [ -z "$JENKINS_HOME" ]; then
-	printf "Jenkins variable JENKINS_HOME missing\n" 1>&2
+	printf "Environment variable JENKINS_HOME not defined\n" 1>&2
 	exit 2
-fi
-
-if [ -z "$JOB_URL" ]; then
-	printf "Jenkins variable JOB_URL missing (maybe not in a job?)\n" 1>&2
-	exit 2
-fi
-
-# Check FIHealth environment variables for paths
-if [ -z "$FIHEALTH_WORKSPACE" -o -z "$FIHEALTH_HTDOCS" ]; then
+elif [ -z "$FIHEALTH_WORKSPACE" -o -z "$FIHEALTH_HTDOCS" ]; then
 	printf "Either 'workspace' or 'htdocs' path not specified\n" 1>&2
-	exit 3
+	exit 2
 fi
 
 # Check FIHealth environment variables for endpoints
 if [ -z "$FIHEALTH_ADAPTER_URL" -o -z "$FIHEALTH_CB_URL" ]; then
 	printf "Either NGSI Adapter or ContextBroker URL not specified\n" 1>&2
-	exit 3
-fi
-
-# Check FIHealth environment variables for Jenkins
-if [ -z "$JENKINS_USER" -o -z "$JENKINS_PASSWORD" ]; then
-	printf "Either Jenkins user or Jenkins password not specified\n" 1>&2
-	exit 3
-fi
-
-# Check FIHealth environment variables for Jenkins
-if [ -z "$JENKINS_URL" ]; then
-	printf "The environment variable JENKINS_URL is not defined\n" 1>&2
-	exit 3
+	exit 2
 fi
 
 # Check python2.7 and virtualenv
 if ! which python2.7 virtualenv >/dev/null 2>&1; then
 	printf "python2.7 or virtualenv not found\n" 1>&2
-	exit 4
+	exit 3
 fi
 
 # Project name and root directory at Jenkins
@@ -304,27 +301,9 @@ setup)
 	make
 	make install
 
-	# Extract the URL of the Jenkins from the JENKINS_URL environment variable.
-	# It has the format 'http://somehost:someport/' and we get only somehost:someport
-	re1="(http?)://([^\s/$.?#]*.[^\s]*)/"
-	re2="([^\s/$.?#]*.[^\s]*:[0-9]*)"
-
-	if [[ $JENKINS_URL =~ $re1 ]]; then
-		# First, check if the URL has the format http://somehost:someport/
-		JENKINSURL=${BASH_REMATCH[2]};
-	elif [[ $JENKINS_URL =~ $re2 ]]; then
-		# Second, check if the URL has the format somehost:sopeport
-		JENKINSURL=${BASH_REMATCH[1]};
-	else
-		printf "Malformed JENKINS_URL environment variable\n" 1>&2
-		printf "Expected value 'http://somehost:someport/' or 'somehost:someport'\n" 1>&2
-		printf "Current value: '$JENKINS_URL'\n" 1>&2
-		exit 4
-	fi
-
 	# Update Jenkins jobs
 	cd $PROJECT_DIR
-	BASE_JOB_URL=http://$JENKINS_USER:$JENKINS_PASSWORD@$JENKINSURL/job
+	BASE_JOB_URL=http://$JENKINS_USER:$JENKINS_PASSWORD@${JENKINS_URL#http://}/job
 	for JOB_NAME in	FIHealth-SanityCheck-0-RestartTestServers \
 			FIHealth-SanityCheck-0-SetUp \
 			FIHealth-SanityCheck-1-Flow \
@@ -366,8 +345,8 @@ exec)
 	source $VIRTUALENV/bin/activate
 
 	# Execute tests
-	export OS_AUTH_URL OS_USERNAME OS_PASSWORD
-	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
+	export OS_AUTH_URL OS_USERNAME OS_PASSWORD OS_USER_ID
+	export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME OS_PROJECT_DOMAIN_NAME
 
 	# Get 'start_time' before executing Sanity Checks (milliseconds)
 	start_time=$(date +%s%3N)

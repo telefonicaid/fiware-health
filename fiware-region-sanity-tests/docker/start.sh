@@ -7,7 +7,6 @@ openstack user show test > user
 glance image-list |grep cirros > images
 export image=`cat images | awk 'NR==1{print $2}'`
 glance image-update $image --name base_centos_6
-
 export OS_TENANT_ID=`grep "| id" project | awk 'NR==1{print $4}'`
 export OS_USER_ID=`grep "| id" user | awk 'NR==1{print $4}'`
 echo $OS_USER_ID
@@ -30,5 +29,7 @@ echo ${KEY} >> key.pem
 chmod 0600 key.pem
 ssh -i key.pem -o "StrictHostKeyChecking no" centos@${VMIP} -fnN -R0:8081:0:8081 &
 ./resources/docker/start.sh &
-sleep 120000
+git checkout origin/$BRANCH
+git pull origin $BRANCH
+pip install -r requirements.txt
 ./sanity_checks $OS_REGION_NAME
