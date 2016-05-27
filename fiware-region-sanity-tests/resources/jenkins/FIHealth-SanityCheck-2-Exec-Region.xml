@@ -23,31 +23,11 @@ This job executes the Sanity Check on the selected region:&#xd;
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>OS_REGION_NAME</name>
-          <description>Name of the Region in FIWARE Lab.</description>
-          <choices class="java.util.Arrays$ArrayList">
-            <a class="string-array">
-              <string>Spain2</string>
-              <string>Trento2</string>
-              <string>Lannion2</string>
-              <string>Lannion3</string>
-              <string>Prague</string>
-              <string>Mexico</string>
-              <string>PiraeusU</string>
-              <string>SpainTenerife</string>
-              <string>Volos</string>
-              <string>Budapest2</string>
-              <string>SophiaAntipolis</string>
-              <string>Poznan</string>
-              <string>Zurich2</string>
-              <string>SaoPaulo</string>
-              <string>Crete</string>
-              <string>Vicenza</string>
-              <string>ZurichS</string>
-            </a>
-          </choices>
-        </hudson.model.ChoiceParameterDefinition>
+          <description>Name of the region in FIWARE Lab</description>
+          <defaultValue>Spain2</defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
