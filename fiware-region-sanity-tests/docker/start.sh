@@ -27,7 +27,7 @@ export JENKINS_PASSWORD=.
 export TEST_PHONEHOME_ENDPOINT=http://${VM_IP}:8081
 echo ${KEY} >> key.pem
 chmod 0600 key.pem
-ssh -i key.pem -o "StrictHostKeyChecking no" centos@${VM_IP} -fnN -R0:8081:0:8081 &
+ssh -i key.pem -o "StrictHostKeyChecking no" centos@{VM_IP} -fnN -R0:8081:0:8081 &
 ./resources/docker/start.sh &
 git checkout origin/$BRANCH
 git pull origin $BRANCH
