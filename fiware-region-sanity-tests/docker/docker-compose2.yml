@@ -11,6 +11,7 @@ ph:
    - OS_AUTH_URL
    - OS_TENANT_NAME
    - OS_TENANT_ID
+   - OS_USER_ID
    - OS_REGION_NAME
    - BRANCH
   ports:

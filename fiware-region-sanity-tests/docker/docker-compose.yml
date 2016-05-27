@@ -2,7 +2,7 @@ ph:
   image: ph
   environment: 
    - KEY
-   - VMIP
+   - VM_IP
    - OS_USER_DOMAIN_NAME
    - OS_PROJECT_DOMAIN_NAME
    - OS_IDENTITY_API_VERSION
