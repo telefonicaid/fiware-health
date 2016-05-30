@@ -58,11 +58,12 @@ import nose
 parentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.insert(0, parentdir)
 
-from tests.fiware_region_with_networks_tests import FiwareRegionWithNetworkTest
-from tests.fiware_region_without_networks_tests import FiwareRegionWithoutNetworkTest
-from tests.fiware_region_object_storage_tests import FiwareRegionsObjectStorageTests
-from commons.constants import DEFAULT_SETTINGS_FILE, DEFAULT_LOGGING_CONF, \
-    PROPERTIES_CONFIG_REGION, PROPERTIES_CONFIG_REGION_SHARED_NET, PROPERTIES_CONFIG_SWIFT_ENABLED
+from tests.fiware_region_with_networks_tests import FiwareRegionWithNetworkTest  # noqa: ignore=E402
+from tests.fiware_region_without_networks_tests import FiwareRegionWithoutNetworkTest  # noqa: ignore=E402
+from tests.fiware_region_object_storage_tests import FiwareRegionsObjectStorageTests  # noqa: ignore=E402
+from commons.constants import DEFAULT_SETTINGS_FILE, DEFAULT_LOGGING_CONF  # noqa: ignore=E402
+from commons.constants import PROPERTIES_CONFIG_REGION, PROPERTIES_CONFIG_REGION_SHARED_NET  # noqa: ignore=E402
+from commons.constants import PROPERTIES_CONFIG_SWIFT_ENABLED  # noqa: ignore=E402
 
 
 class RegionTestsSelector(nose.selector.Selector):

@@ -21,8 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'gjp'
-
 
 from swiftclient import client
 from commons.constants import DEFAULT_REQUEST_TIMEOUT, OBJECT_STORE_MAX_RETRIES, SERVICE_SWIFT_NAME,\
@@ -36,8 +34,8 @@ import keystoneclient.v3.client as keystoneclientv3
 
 class FiwareSwiftOperations:
 
-    ### TODO import keystoneclient dynamically from api version.
-    ### TODO Session is not taken from kwargs because swiftclient does not support it yet. It is needed auth credentials
+    # TODO import keystoneclient dynamically from api version.
+    # TODO Session is not taken from kwargs because swiftclient does not support it yet. It is needed auth credentials
 
     def __init__(self, logger, region_name, auth_api, **kwargs):
         """

@@ -21,8 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
-
 
 from commons.fiware_cloud_test_case import FiwareTestCase
 from commons.constants import *
@@ -127,7 +125,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         required_list = self.glance_conf.get(PROPERTIES_CONFIG_GLANCE_IMAGES, [])
 
         # Filter out required images not found in image list
-        image_list = [image for image in required_list if not image in image_list]
+        image_list = [image for image in required_list if image not in image_list]
 
         self.assertEqual(len(image_list), 0, "Required images %s not found" % image_list)
         self.logger.debug("Found required images %s", required_list)
