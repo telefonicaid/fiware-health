@@ -193,7 +193,7 @@ function change_status() {
 	local report=$1
 
 	# Finish if no region is set or no report is given
-	[ -n "$region" && -r "$report" ] || return 0
+	[ -n "$region" -a -r "$report" ] || return 0
 
 	# Adjust status according to results report
 	local resource="sanity_tests?id=$region&type=region"
