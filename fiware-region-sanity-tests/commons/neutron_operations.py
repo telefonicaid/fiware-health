@@ -21,8 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
-
 
 from neutronclient.v2_0 import client
 from neutronclient.common.exceptions import NeutronClientException
