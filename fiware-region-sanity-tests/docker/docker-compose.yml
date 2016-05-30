@@ -1,0 +1,17 @@
+ph:
+  image: ph
+  environment: 
+   - KEY
+   - VM_IP
+   - OS_USER_DOMAIN_NAME
+   - OS_PROJECT_DOMAIN_NAME
+   - OS_IDENTITY_API_VERSION
+   - OS_USERNAME
+   - OS_PASSWORD
+   - OS_AUTH_URL
+   - OS_TENANT_NAME
+   - OS_TENANT_ID
+   - OS_REGION_NAME
+   - BRANCH
+  ports:
+   - 8081:8081

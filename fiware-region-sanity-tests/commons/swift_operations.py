@@ -21,21 +21,21 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'gjp'
-
 
 from swiftclient import client
-from commons.constants import DEFAULT_REQUEST_TIMEOUT, OBJECT_STORE_MAX_RETRIES, PROPERTIES_CONFIG_CRED_KEYSTONE_URL, \
-    PROPERTIES_CONFIG_CRED_USER, PROPERTIES_CONFIG_CRED_PASS, PROPERTIES_CONFIG_CRED_TENANT_ID, SERVICE_SWIFT_NAME, \
-    ENDPOINT_TYPE_PUBLIC_URL, PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME
+from commons.constants import DEFAULT_REQUEST_TIMEOUT, OBJECT_STORE_MAX_RETRIES, SERVICE_SWIFT_NAME,\
+    ENDPOINT_TYPE_PUBLIC_URL, PROPERTIES_CONFIG_CRED_KEYSTONE_URL,\
+    PROPERTIES_CONFIG_CRED_USERNAME, PROPERTIES_CONFIG_CRED_PASSWORD, PROPERTIES_CONFIG_CRED_TENANT_ID,\
+    PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME, PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME
+
 import keystoneclient.v2_0.client as keystoneClient
 import keystoneclient.v3.client as keystoneclientv3
 
 
 class FiwareSwiftOperations:
 
-    ### TODO import keystoneclient dynamically from api version.
-    ### TODO Session is not taken from kwargs because swiftclient does not support it yet. It is needed auth credentials
+    # TODO import keystoneclient dynamically from api version.
+    # TODO Session is not taken from kwargs because swiftclient does not support it yet. It is needed auth credentials
 
     def __init__(self, logger, region_name, auth_api, **kwargs):
         """
@@ -50,18 +50,20 @@ class FiwareSwiftOperations:
         if auth_api == 'v2.0':
             self.keystone_client = keystoneClient.Client(
                 auth_url=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
-                username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER],
-                password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASS],
+                username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USERNAME],
+                password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASSWORD],
                 tenant_id=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_TENANT_ID])
         elif auth_api == 'v3':
             self.keystone_client = keystoneclientv3.Client(
                 auth_url=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
-                username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER],
-                password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASS],
-                user_domain_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME])
+                username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USERNAME],
+                password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASSWORD],
+                user_domain_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME],
+                project_domain_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME])
 
         object_store_url = self.keystone_client.service_catalog.url_for(service_type=SERVICE_SWIFT_NAME,
-                                                endpoint_type=ENDPOINT_TYPE_PUBLIC_URL, region_name=self.region_name)
+                                                                        endpoint_type=ENDPOINT_TYPE_PUBLIC_URL,
+                                                                        region_name=self.region_name)
 
         self.logger.info("Getting object_store_url from Keystone: %s", object_store_url)
 

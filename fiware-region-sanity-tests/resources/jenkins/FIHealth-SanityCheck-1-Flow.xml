@@ -4,8 +4,8 @@
   <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
 This job executes the Sanity Check on each FIWARE Lab node. It will spawn parallel executions of one job per region (if there are resources to do that)&#xd;
 &lt;br&gt;&lt;br&gt;&#xd;
-&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
-&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
+&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests&lt;br&gt;&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/master/fiware-region-sanity-tests/README.rst</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -32,25 +32,18 @@ This job executes the Sanity Check on each FIWARE Lab node. It will spawn parall
   <publishers/>
   <buildWrappers/>
   <icon/>
-  <dsl>parallel (
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Spain2&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Trento&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Trento2&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Lannion2&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Prague&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Mexico&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;PiraeusU&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Zurich&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;SpainTenerife&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Volos&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Budapest2&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;SophiaAntipolis&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Poznan&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Zurich2&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;SaoPaulo&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Crete&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;Vicenza&apos;) },
-    { build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: &apos;ZurichS&apos;) }
-)</dsl>
+  <dsl>def settings = env.FIHEALTH_WORKSPACE + &apos;/&apos;+ env.FIHEALTH_SANITY_PROJECT + &apos;/etc/settings.json&apos;
+settings=settings.replace(&apos;$JENKINS_HOME&apos;,System.getProperty(&apos;JENKINS_HOME&apos;))
+
+def inputFile = new File(settings)
+def inputJSON = new groovy.json.JsonSlurper().parseText(inputFile.text)
+
+def jobs=[]
+inputJSON.region_configuration.keySet().each { it -&gt;
+        def region = it
+        jobs.add({build ( &quot;FIHealth-SanityCheck-2-Exec-Region&quot;, OS_REGION_NAME: region)})
+}
+parallel(jobs)
+  </dsl>
   <buildNeedsWorkspace>false</buildNeedsWorkspace>
 </com.cloudbees.plugins.flow.BuildFlow>

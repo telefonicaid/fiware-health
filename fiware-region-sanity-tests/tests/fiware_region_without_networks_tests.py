@@ -21,7 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'jfernandez'
 
 from novaclient.exceptions import OverLimit, Forbidden, ClientException
 from tests.fiware_region_base_tests import FiwareRegionsBaseTests
@@ -187,7 +186,7 @@ class FiwareRegionWithoutNetworkTest(FiwareRegionsBaseTests):
         # Associate Public IP to Server
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
 
-        ## SSH Connection
+        # SSH Connection
         self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)
 
     def test_deploy_instance_and_e2e_snat_connection(self):

@@ -20,94 +20,105 @@
 # Launch testcase execution and generate reports
 #
 # Usage:
-#     $0 [options] [REGION|TESTS_SPEC ...]
+#     $0 [options] [test_spec ...]
 #     $0 --help|--version
 #
 # Options:
 #     -h, --help			show this help message
 #     -V, --version			show version number
 #     -v, --verbose			enable logging with verbose details
+#     -s, --settings=FILE		sanity checks configuration file
 #     -o, --output-name=NAME		basename for generated report files
 #     -t, --template-name=NAME		filename of the HTML report template
 #     -e, --phonehome-endpoint=URL	optional PhoneHome service endpoint
 #     -l, --os-auth-url=URL		optional OpenStack auth_url (see below)
 #     -u, --os-username=STRING		optional OpenStack username
 #     -p, --os-password=STRING		optional OpenStack password
+#     -I, --os-user-id=ID		optional OpenStack user_id
 #     -i, --os-tenant-id=ID		optional OpenStack tenant_id
 #     -n, --os-tenant-name=NAME		optional OpenStack tenant_name
-#     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name (to
-#     					replace the former if Identity API v3)
+#     -d, --os-user-domain-name=NAME	optional OpenStack user_domain_name
+#     -P, --os-project-domain-name=NAME	optional OpenStack project_domain_name
 #
-# Tests specification examples:
-#     tests.regions.test_<region>:TestSuite.test_<name>
+# Test specification examples:
+#     Region				run all tests in the given region only
+#     Region.test_name			run 'test_name' in the given region
+#     Region.test_pattern		run tests matching the pattern
 #
 # Environment:
+#     SANITY_CHECKS_SETTINGS		default value for --settings
 #     TEST_PHONEHOME_ENDPOINT		default value for --phonehome-endpoint
 #     OS_AUTH_URL			default value for --os-auth-url
 #     OS_USERNAME			default value for --os-username
 #     OS_PASSWORD			default value for --os-password
+#     OS_USER_ID			default value for --os-user-id
 #     OS_TENANT_ID			default value for --os-tenant-id
 #     OS_TENANT_NAME			default value for --os-tenant-name
 #     OS_USER_DOMAIN_NAME		default value for --os-user-domain-name
+#     OS_PROJECT_DOMAIN_NAME		default value for --os-project-domain-name
 #
 # Requirements:
 #     python2.7				Python 2.7 interpreter (found in path)
 #
-# OpenStack credentials and PhoneHome service endpoint:
-#     Given values override those defined in 'settings.json' configuration file
-#
-# Regions:
-#     Valid regions included in 'settings.json':
-#     $REGIONS_AVAILABLE
+# Notes:
+#     * By default, sanity checks settings are read from 'etc/settings.json'
+#     * Environment variables (OpenStack credentials, etc.) override settings
+#     * Valid regions are those included in "region_configuration" of settings
 #
 
-VERSION=1.7.1
+VERSION=1.8.0
 NAME=$(basename $0)
 OPTS=`tr -d '\n ' <<END
       h(help)
       V(version)
       v(verbose)
+      s(settings):
       o(output-name):
       t(template-name):
       e(phonehome-endpoint):
       l(os-auth-url):
       u(os-username):
       p(os-password):
+      I(os-user-id):
       i(os-tenant-id):
       n(os-tenant-name):
       d(os-user-domain-name):
+      P(os-project-domain-name):
 END`
 
-# Settings file
-SETTINGS=resources/settings.json
+# Default options for nosetests
+NOSEOPTS="--config=etc/nose.cfg"
 
 # Command line options (default values)
 OUTPUT_NAME=test_results
 TEMPLATE_NAME=test_report_template.html
 OUTPUT_NOVA_CONSOLE_NAME=test_novaconsole
+SANITY_CHECKS_SETTINGS=etc/settings.json
 
-# Environment variables for nosetests
+# Environment variables required by the tests
+export SANITY_CHECKS_SETTINGS
 export TEST_PHONEHOME_ENDPOINT
-export OS_AUTH_URL OS_USERNAME OS_PASSWORD
-export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME
+export OS_AUTH_URL OS_USERNAME OS_PASSWORD OS_USER_ID
+export OS_TENANT_ID OS_TENANT_NAME OS_USER_DOMAIN_NAME OS_PROJECT_DOMAIN_NAME
 
-# Options for nosetests
+# Regions available
+REGIONS_AVAILABLE=$(cat $SANITY_CHECKS_SETTINGS | \
+	python -c "import sys; import json; \
+	print ' '.join(json.load(sys.stdin)['region_configuration'].keys())")
+TEST_SPEC_PATTERN='^\('$(echo $REGIONS_AVAILABLE | sed 's/ /\\|/g')'\)\(\..*\)\?$'
+
+# Tests to execute
 TESTS=
 REGIONS=
-NOSEOPTS="--config=nose.cfg"
-
-# Available regions
-REGIONS_AVAILABLE=$(sed -n '/"external_network_name"/,/}/ p' $SETTINGS \
-	| awk -F\" 'NF==5 {print $2}')
-REGIONS_PATTERN='^\('$(echo $REGIONS_AVAILABLE | sed 's/ /\\|/g')'\)$'
 
 # Process command line
 OPTERR=
 OPTSTR=$(echo :-:$OPTS | sed 's/([a-zA-Z0-9]*)//g')
-OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0 | head -n -2;
-	for i in $REGIONS_AVAILABLE; do printf "    - %s\n" $i; done)
+OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0)
 while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
 case $OPT in
+'s')	if [ -r $OPTARG ]; then SANITY_CHECKS_SETTINGS=$OPTARG;
+	else OPTERR="Cannot find file '$OPTARG'"; fi;;
 'v')	NOSEOPTS="$NOSEOPTS --logging-level=DEBUG";;
 'e')	TEST_PHONEHOME_ENDPOINT=$OPTARG;;
 't')	TEMPLATE_NAME=$OPTARG;;
@@ -115,9 +126,11 @@ case $OPT in
 'l')	OS_AUTH_URL=$OPTARG;;
 'u')	OS_USERNAME=$OPTARG;;
 'p')	OS_PASSWORD=$OPTARG;;
+'I')	OS_USER_ID=$OPTARG;;
 'i')	OS_TENANT_ID=$OPTARG;;
 'n')	OS_TENANT_NAME=$OPTARG;;
 'd')	OS_USER_DOMAIN_NAME=$OPTARG;;
+'P')	OS_PROJECT_DOMAIN_NAME=$OPTARG;;
 '?')	OPTERR="Unknown option -$OPTARG";;
 ':')	OPTERR="Missing value for option -$OPTARG";;
 'h')	OPTERR="$OPTHLP";;
@@ -135,12 +148,11 @@ case $OPT in
 esac; break; done; done
 shift $(expr $OPTIND - 1)
 while [ -z "$OPTERR" -a -n "$1" ]; do
-	REGION=$(expr "$1" : "$REGIONS_PATTERN" | sed 's/.*/\L&/')
-	TESTS_SPEC=$(expr "$1" : "^\(tests\.regions\.test.*\)")
-	TESTS_REGION=$(expr "$1" : "^tests\.regions\.test_\(.*\):.*")
-	[ -z "$REGION" -a -z "$TESTS_SPEC" ] && OPTERR="Invalid argument '$1'"
-	TESTS="$TESTS ${TESTS_SPEC:-tests.regions.test_$REGION}"
-	REGIONS="$REGIONS ${REGION:-$TESTS_REGION}"
+	TEST=$1
+	REGION=$(expr "$TEST" : "$TEST_SPEC_PATTERN")
+	[ -z "$TEST" -o -z "$REGION" ] && OPTERR="Invalid region/test '$TEST'"
+	TESTS="$TESTS $TEST"
+	REGIONS="$REGIONS $REGION"
 	shift
 done
 [ -n "$OPTERR" ] && {
@@ -152,21 +164,22 @@ done
 }
 
 # Unless otherwise specified, run all tests in all regions
-TESTS="${TESTS:-tests/regions}"
-REGIONS="${REGIONS:-$(echo $REGIONS_AVAILABLE | sed 's/.*/\L&/')}"
+TESTS="${TESTS:-$REGIONS_AVAILABLE}"
+REGIONS="${REGIONS:-$REGIONS_AVAILABLE}"
 
 # First delete all previously generated Nova Console-Log files for given regions
-echo "Deleting all previous Nova Console-Log files for: $REGIONS..."
+echo "Deleting all previous Nova Console-Log files for:" $REGIONS...
 for REGION in $REGIONS; do
-	rm -f ${OUTPUT_NOVA_CONSOLE_NAME}_${REGION}_*.log
+	rm -f ${OUTPUT_NOVA_CONSOLE_NAME}_$(echo $REGION|sed 's/.*/\L&/')_*.log
 done
 
-# Run 'nose' to execute the Sanity Checks
+# Sanity Checks execution
 echo "Running Sanity Checks..."
-nosetests $TESTS $NOSEOPTS -v --exe \
+tests/run.py $NOSEOPTS -v --exe \
 	--with-xunit --xunit-file=$OUTPUT_NAME.xml \
 	--with-html --html-report=$OUTPUT_NAME.html \
-	--html-report-template=resources/templates/$TEMPLATE_NAME
+	--html-report-template=resources/templates/$TEMPLATE_NAME \
+	$TESTS
 
 # Summary report
 printf "Generating summary report... "

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -22,14 +22,18 @@
 # contact with opensource@tid.es
 
 
+# DEFAULTS
+DEFAULT_SETTINGS_FILE = 'etc/settings.json'
+DEFAULT_LOGGING_CONF = 'etc/logging_sanitychecks.conf'
+DEFAULT_PHONEHOME_LOGGING_CONF = 'etc/logging_phonehome.conf'
+
 # LOGGING CONFIGURATION
-LOGGING_FILE_PHONEHOME = "resources/logging_phonehome.conf"
-LOGGING_FILE_SANITYCHECKS = "resources/logging_sanitychecks.conf"
+LOGGING_TEST_LOGGER = "TestCase"
+LOGGING_CONF_SECTION_HANDLER = 'sanitychecks_handler_fileHandler'
+LOGGING_CONF_SECTION_FORMATTER = 'sanitychecks_formatter_fileFormatter'
 LOGGING_OUTPUT_NOVA_CONSOLE_LOG_TEMPLATE = "test_novaconsole_{region_name}_{server_id}.log"
 
 # CONFIGURATION PROPERTIES
-PROPERTIES_FILE = "resources/settings.json"
-PROPERTIES_LOGGER = "TestCase"
 PROPERTIES_CONFIG_ENV = "environment"
 PROPERTIES_CONFIG_ENV_NAME = "name"
 PROPERTIES_CONFIG_CRED = "credentials"
@@ -37,8 +41,10 @@ PROPERTIES_CONFIG_CRED_KEYSTONE_URL = "keystone_url"
 PROPERTIES_CONFIG_CRED_TENANT_ID = "tenant_id"
 PROPERTIES_CONFIG_CRED_TENANT_NAME = "tenant_name"
 PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME = "user_domain_name"
-PROPERTIES_CONFIG_CRED_USER = "user"
-PROPERTIES_CONFIG_CRED_PASS = "password"
+PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME = "project_domain_name"
+PROPERTIES_CONFIG_CRED_USER_ID = "user_id"
+PROPERTIES_CONFIG_CRED_USERNAME = "username"
+PROPERTIES_CONFIG_CRED_PASSWORD = "password"
 PROPERTIES_CONFIG_TEST = "test_configuration"
 PROPERTIES_CONFIG_TEST_PHONEHOME_ENDPOINT = "phonehome_endpoint"
 PROPERTIES_CONFIG_REGION = "region_configuration"
@@ -53,6 +59,7 @@ PROPERTIES_CONFIG_GLANCE_IMAGES = "required_images"
 PROPERTIES_CONFIG_SWIFT = "swift_configuration"
 PROPERTIES_CONFIG_SWIFT_BIG_FILE_1 = "big_file_url_1"
 PROPERTIES_CONFIG_SWIFT_BIG_FILE_2 = "big_file_url_2"
+PROPERTIES_CONFIG_SWIFT_ENABLED = "test_object_storage"
 PROPERTIES_CONFIG_METADATA_SERVICE_URL = "openstack_metadata_service_url"
 
 # TASK TIMERS AND TIMEOUTS (in seconds)
@@ -83,7 +90,7 @@ TEST_BIG_OBJECT_REMOTE_PREFIX = "remote_"
 TEST_TEXT_FILE_EXTENSION = ".txt"
 TEST_BIG_FILE_EXTENSION = ".zip"
 
-# SWIFT CONTANTS
+# SWIFT CONSTANTS
 SWIFT_RESOURCES_PATH = "resources/swift_objects/"
 
 # SSH CONNECTION (timeouts in seconds)

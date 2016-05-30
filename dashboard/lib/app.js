@@ -44,26 +44,30 @@ var app = express();
 
 logger.info('Running app in web context: %s', config.webContext);
 
+
 /**
- * base web context in url
+ * Base web context in URL
  * @type {string}
  */
 app.base = config.webContext;
 
+
 /**
- * web context
+ * Web context
  * @type {string}
  */
 app.locals.webContext = config.webContext;
+
+
 /**
- * contain title of web page
+ * Title of web page
  * @type {string}
  */
 app.locals.title = 'Sanity check status';
 
 
 /**
- * compile stylus css on runtime
+ * Compile Stylus CSS on runtime
  * @param {String} str
  * @param {String} path
  * @return {*|Function}
@@ -76,51 +80,49 @@ function compile(str, path) {
                 return new stylus.nodes.Literal('url("' + config.webContext + 'images/logo.png")');
         });
 }
+
+
 /**
- * called when /contextbroker post
+ * Called when POST on either `CONTEXT_SANITY_STATUS_VALUE` or `CONTEXT_SANITY_STATUS_CHANGE`
  * @param {*} req
  * @param {*} res
  */
-function postContextbroker(req, res) {
+function postContextBroker(req, res) {
 
     var txid = req.headers[constants.TRANSACTION_ID_HEADER.toLowerCase()] || cuid(),
-        context = {trans: txid, op: 'app#contextbroker'};
+        context = {trans: txid, op: 'app#contextbroker'},
+        mailman = subscribe;
 
     try {
-        var region = cbroker.changeReceived(txid, req),
+        var region = cbroker.getEntity(txid, req),
             notifyExclude = [ constants.GLOBAL_STATUS_OTHER ];
 
-        logger.info(context, 'status change notification received from contextbroker for region: %s', region.node);
+        logger.info(context, 'Received sanity_status notification from Context Broker for region "%s"', region.node);
         res.status(200).end();
 
         if (notifyExclude.indexOf(region.status) === -1) {
-            subscribe.notify(region, function (err) {
+            var recipient = (req.path.match('/' + constants.CONTEXT_SANITY_STATUS_CHANGE + '$')) ? mailman : monasca;
+            recipient.notify(region, function (err) {
                 if (err) {
-                    logger.error(context, 'post to mailing list failed: %s', err);
+                    logger.error(context, 'Notification to %s failed: %s', recipient.notify.destination, err);
                 } else {
-                    logger.info(context, 'post to mailing list succeeded');
-                }
-            });
-            monasca.notify(region, function (err) {
-                if (err) {
-                    logger.error(context, 'post to Monasca failed: %s', err);
-                } else {
-                    logger.info(context, 'post to Monasca succeeded');
+                    logger.info(context, 'Notification to %s succeeded', recipient.notify.destination);
                 }
             });
         } else {
-            logger.info(context, 'notifications not sent because region status %s is excluded', region.status);
+            logger.info(context, 'Discarded sanity_status notification (status %s is excluded)', region.status);
         }
 
     } catch (ex) {
-        logger.error(context, 'error in contextbroker notification: %s', ex);
+        logger.error(context, 'Processing of Context Broker notification failed: %s', ex);
         res.status(400).send({ error: 'bad request! ' + ex });
     }
 
 }
 
+
 /**
- * called when /logout get
+ * Called when GET on `CONTEXT_LOGOUT`
  * @param {*} req
  * @param {*} res
  */
@@ -137,7 +139,6 @@ function getLogout(req, res) {
 
 
 /**
- *
  * @param {*} response
  * @param {*} req
  * @param {*} res
@@ -156,8 +157,9 @@ function oauthGetCallback(response, req, res) {
     res.redirect(config.webContext);
 }
 
+
 /**
- * called when /signin get
+ * Called when GET on `CONTEXT_SIGNIN`
  * @param {*} req
  * @param {*} res
  * @param {*} oauth2
@@ -172,17 +174,16 @@ function getSignin(req, res, oauth2) {
         res.redirect(path);
         // If auth_token is stored in a session cookie it sends a button to get user info
     } else {
-
         oauth2.get(config.idm.url + '/user/', req.session.accessToken, function (e, response) {
             oauthGetCallback(response, req, res);
-
         });
 
     }
 }
 
+
 /**
- * check access token
+ * Check access token
  * @param {*} req
  * @param {*} res
  * @param {function} next
@@ -191,40 +192,39 @@ function getSignin(req, res, oauth2) {
 function checkToken(req, res, next, debugMessage) {
     logger.debug(debugMessage);
     if (req.session.accessToken) {
-
         next();
     } else {
         common.notAuthorized(req, res);
     }
 }
 
+
 /**
- *
  * @param {Object} results
  * @param {*} req
  * @param {*} res
  * @param {*} oauth2
  */
-
 function getOAuthAccessTokenCallback(results, req, res, oauth2) {
     logger.debug({op: 'app#get login'}, 'get access token:' + results);
 
-        if (results !== undefined) {
+    if (results !== undefined) {
 
-            // Stores the accessToken in a session cookie
-            /*jshint camelcase: false */
-            req.session.accessToken = results.access_token;
+        // Stores the accessToken in a session cookie
+        /*jshint camelcase: false */
+        req.session.accessToken = results.access_token;
 
-            logger.debug({op: 'app#get login'}, 'accessToken: ' + results.access_token);
+        logger.debug({op: 'app#get login'}, 'accessToken: ' + results.access_token);
 
-            oauth2.get(config.idm.url + '/user/', results.access_token, function (e, response) {
-                oauthGetCallback(response, req, res);
-            });
-        } else {
-            res.redirect(config.webContext);
+        oauth2.get(config.idm.url + '/user/', results.access_token, function (e, response) {
+            oauthGetCallback(response, req, res);
+        });
+    } else {
+        res.redirect(config.webContext);
 
-        }
+    }
 }
+
 
 /**
  * Handles requests from IDM with the access code
@@ -238,9 +238,7 @@ function getLogin(req, res, oauth2) {
 
     // Using the access code goes again to the IDM to obtain the accessToken
     oauth2.getOAuthAccessToken(req.query.code, function (e, results) {
-
         getOAuthAccessTokenCallback(results, req, res, oauth2);
-
     });
 }
 
@@ -262,9 +260,13 @@ app.use(config.webContext, stylus.middleware(
 
 app.use(session({secret: config.secret}));
 
-// trace all requests
+// trace all requests and include transaction id (if not present)
 app.use(function (req, res, next) {
-    logger.debug({op: 'app#use'}, '%s %s %s', req.method, req.url, req.path);
+    var txidHeader = constants.TRANSACTION_ID_HEADER.toLowerCase(),
+        txid = req.headers[txidHeader] || cuid(),
+        context = {trans: txid, op: 'app#use'};
+    logger.debug(context, '%s %s', req.method, req.url);
+    req.headers[txidHeader] = txid;
     next();
 });
 
@@ -276,24 +278,23 @@ app.use(cookieParser());
 app.use(config.webContext, express.static(path.join(__dirname, 'public')));
 
 
-app.use(config.webContext + 'refresh', function (req, res, next) {
-    checkToken(req, res, next, 'Accessing to refresh');
+app.use(config.webContext + constants.CONTEXT_REFRESH, function (req, res, next) {
+    checkToken(req, res, next, 'Accessing to /' + constants.CONTEXT_REFRESH);
 }, refresh);
 
-app.use(config.webContext + 'subscribe', function (req, res, next) {
-    checkToken(req, res, next, 'Accessing to subscribe');
 
+app.use(config.webContext + constants.CONTEXT_SUBSCRIBE, function (req, res, next) {
+    checkToken(req, res, next, 'Accessing to /' + constants.CONTEXT_SUBSCRIBE);
 }, subscribe);
 
-app.use(config.webContext + 'unsubscribe', function (req, res, next) {
-    checkToken(req, res, next, 'Accessing to unSubscribe');
 
+app.use(config.webContext + constants.CONTEXT_UNSUBSCRIBE, function (req, res, next) {
+    checkToken(req, res, next, 'Accessing to /' + constants.CONTEXT_UNSUBSCRIBE);
 }, unsubscribe);
 
 
 app.use(config.webContext, index);
 
-//configure login with oAuth
 
 // Creates oauth library object with the config data
 var oa = new OAuth2(config.idm.clientId,
@@ -304,39 +305,42 @@ var oa = new OAuth2(config.idm.clientId,
     config.idm.callbackURL);
 
 
-
-app.get(config.webContext + 'signin', function (req, res) {
+app.get(config.webContext + constants.CONTEXT_SIGNIN, function (req, res) {
     getSignin(req, res, oa);
 });
 
 
-app.get(config.webContext + 'login', function (req, res) {
-
-  getLogin(req, res, oa);
-
+app.get(config.webContext + constants.CONTEXT_LOGIN, function (req, res) {
+    getLogin(req, res, oa);
 });
 
-// listen request from contextbroker changes
-app.post(config.webContext + 'contextbroker', function (req, res) {
-   postContextbroker(req, res);
+
+// Change sanity_status notifications from Context Broker
+app.post(config.webContext + constants.CONTEXT_SANITY_STATUS_CHANGE, function (req, res) {
+    postContextBroker(req, res);
+});
+
+
+// Value sanity_status notifications from Context Broker
+app.post(config.webContext + constants.CONTEXT_SANITY_STATUS_VALUE, function (req, res) {
+    postContextBroker(req, res);
 });
 
 
 // Redirection to IDM authentication portal
-app.get(config.webContext + 'auth', function (req, res) {
+app.get(config.webContext + constants.CONTEXT_AUTH, function (req, res) {
     var path = oa.getAuthorizeUrl();
     res.redirect(path);
 });
 
+
 // Handles logout requests to remove accessToken from the session cookie
-app.get(config.webContext + 'logout', function (req, res) {
-
+app.get(config.webContext + constants.CONTEXT_LOGOUT, function (req, res) {
     getLogout(req, res);
-
 });
 
 
-// catch 404 and forward to error handler
+// Catch 404 and forward to error handler
 app.use(function (req, res) {
     var err = new Error('Not Found');
     err.status = 404;
@@ -345,14 +349,11 @@ app.use(function (req, res) {
         error: err,
         timestamp: req.session.titleTimestamp
     });
-
 });
 
 
-// error handlers
-
-// production error handler
-// no stacktraces leaked to user
+// Error handlers
+// Production error handler (no stacktraces leaked to user)
 app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.render('error', {
@@ -366,9 +367,8 @@ app.use(function (err, req, res) {
 /** @export */
 module.exports = app;
 
-
 /** @export */
-module.exports.postContextbroker = postContextbroker;
+module.exports.postContextBroker = postContextBroker;
 
 /** @export */
 module.exports.getLogout = getLogout;

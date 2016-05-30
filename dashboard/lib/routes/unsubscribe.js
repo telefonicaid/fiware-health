@@ -25,7 +25,7 @@ var express = require('express'),
 
 
 /**
- * router get unSubscribe
+ * Called by router when GET
  * @param {Object} req
  * @param {Object} res
  */
@@ -67,6 +67,7 @@ function getUnSubscribe(req, res) {
             res.redirect(config.webContext);
         });
     });
+
     mailmainRequest.on('error', function (e) {
         logger.error('Error in connection with mailman: ' + e);
         res.redirect(config.webContext);
@@ -79,7 +80,6 @@ function getUnSubscribe(req, res) {
 }
 
 
-/* GET /unsubcribe: send DELETE to mailman*/
 router.get('/', getUnSubscribe);
 
 /** @export */

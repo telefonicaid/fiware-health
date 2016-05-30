@@ -5,14 +5,14 @@
 This Job executes the SetUp procedure for Sanity Check execution&#xd;
 &lt;ul&gt;&#xd;
   &lt;li&gt;Create workspace&lt;/li&gt;&#xd;
-  &lt;li&gt;Download source code from Fiware-Health repository&lt;/li&gt;&#xd;
+  &lt;li&gt;Download source code from FIHealth repository&lt;/li&gt;&#xd;
   &lt;li&gt;Clean all generated test data (*.html, *.txt, *.xml)&lt;/li&gt;&#xd;
-  &lt;li&gt;Create Virtualenv and configures the test environment&lt;/li&gt;&#xd;
+  &lt;li&gt;Create virtualenv and configure the test environment&lt;/li&gt;&#xd;
   &lt;li&gt;Install all project requirements&lt;/li&gt;&#xd;
 &lt;/ul&gt;&#xd;
 &#xd;
-&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/develop/fiware-region-sanity-tests&lt;br&gt;&#xd;
-&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/develop/fiware-region-sanity-tests/README.rst</description>
+&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests&lt;br&gt;&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/master/fiware-region-sanity-tests/README.rst</description>
   <logRotator class="hudson.tasks.LogRotator">
     <daysToKeep>7</daysToKeep>
     <numToKeep>14</numToKeep>
@@ -49,7 +49,7 @@ This Job executes the SetUp procedure for Sanity Check execution&#xd;
       <command># Workaround to spawn processes from build (https://wiki.jenkins-ci.org/display/JENKINS/Spawning+processes+from+build)
 BUILD_ID=dontKillMe
 
-# Execute &amp;apos;setup&amp;apos; script
+# Execute &apos;setup&apos; action
 ./$FIHEALTH_SANITY_PROJECT/resources/scripts/jenkins.sh setup</command>
     </hudson.tasks.Shell>
   </builders>
