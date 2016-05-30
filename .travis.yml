@@ -1,7 +1,10 @@
-language: node_js
+language: python
+
 node_js:
   - "0.10"
 
+python:
+  - "2.7"
 env:
   global:
   - COVERALLS_SERVICE_NAME=travis-ci
@@ -9,14 +12,21 @@ env:
   - secure: "Z7KuUAYdVxE1fUG6a+ZsZezOA0Ti4IeYCq9Hh988R/ANbkqd36N9HF3ijGBl2ADn9AA4opvMsfPj/77/XcJEhb+CDD3fl6yUskESXxvm3Sa4efBeZWc0a/0nF4kzFs8H2GoYy8ArTewyZZZAg4hrqAKptSImNMyotdTgDA4YQ2U="
 
 install:
-  - cd fiware-region-sanity-tests
+  - export PROJECT=`pwd`
+  - cd $PROJECT/fiware-region-sanity-tests
+  - pip install --upgrade pip
+  - pip install --upgrade setuptools
   - pip install -r requirements.txt
+  - pip install pep8
   - pep8 --max-line-length=120 .
-  - cd ../dashboard 
+  - cd $PROJECT/dashboard
   - npm install
   - npm install -g grunt-cli
   - npm install coveralls --save
 
+script:
+  - cd $PROJECT/fiware-region-sanity-tests; pep8 --max-line-length=120 .
+  - cd $PROJECT/dashboard; grunt lint test
+
 after_success:
-  - grunt lint
-  - grunt coverage-report && cat report/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - cd $PROJECT/dashboard; grunt coverage-report && cat report/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
