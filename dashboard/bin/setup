@@ -83,13 +83,14 @@ elif [ ! -r "$CONFIG_FILE" ]; then
 	exit 3
 fi
 
-# Parse config file to get settings file (region list) and endpoints
+# Parse config file to get settings file, region list and endpoints
 eval `cd $BASEDIR; node -p <<-EOF
 	var fs = require('fs'),
 	    url = require('url'),
 	    util = require('util'),
 	    yaml = require('js-yaml'),
 	    config = yaml.safeLoad(fs.readFileSync('$CONFIG_FILE', 'utf8')),
+	    settings = undefined,
 	    constants = require('./lib/constants'),
 	    isLocalCB = config.cbroker.host.match(/127.0.0.1|localhost/);
 	var notifyBaseUrl = url.format({
@@ -98,13 +99,20 @@ eval `cd $BASEDIR; node -p <<-EOF
 	    port: config.app.port,
 	    pathname: config.app.webContext
 	});
+	try {
+	    settings = require(config.app.settings);
+	} catch (e) {
+	    settings = {'region_configuration': {}};
+	}
 	util.format('\
 	    SETTINGS=%s \
+	    REGIONS="%s" \
 	    BROKER_URL=http://%s:%s/NGSI10 \
 	    CALLBACK_URL_CHANGE=%s%s \
 	    CALLBACK_URL_VALUE=%s%s \
 	    EMAIL_FROM=%s',
 	    config.app.settings,
+	    Object.keys(settings.region_configuration).join(' '),
 	    config.cbroker.host, config.cbroker.port,
 	    notifyBaseUrl, constants.CONTEXT_SANITY_STATUS_CHANGE,
 	    notifyBaseUrl, constants.CONTEXT_SANITY_STATUS_VALUE,
@@ -114,6 +122,9 @@ EOF`
 if [ ! -r "$SETTINGS" ]; then
 	printf "Cannot find '%s' settings file\n" "$SETTINGS" 1>&2
 	exit 3
+elif [ -z "$REGIONS" ]; then
+	printf "Empty attribute 'region_configuration' in settings file\n" 1>&2
+	exit 4
 elif [ -z "$EMAIL_FROM" ]; then
 	printf "Empty attribute 'email_from' in '%s' file\n" "$CONFIG_FILE" 1>&2
 	exit 4
@@ -122,8 +133,7 @@ fi
 # Mailing lists to be created (one per region, only those not existing yet)
 EXISTING_LISTS=$($MAILMANLIB_PATH/bin/list_lists -b)
 EXCLUDE_LISTS='^('$(echo $EXISTING_LISTS | tr ' ' '|')')$'
-LISTS=$(sed -n '/"external_network_name"/,/}/ { s/.*/\L&/; p}' $SETTINGS \
-	| awk -F\" 'NF==5 {print $2}' | egrep -v $EXCLUDE_LISTS)
+LISTS=$(echo "$REGIONS" | sed -n '{ s/.*/\L&/; p}' | egrep -v $EXCLUDE_LISTS)
 
 # Admin details (ask for admin password, if not given)
 ADMIN_MAIL=$EMAIL_FROM
