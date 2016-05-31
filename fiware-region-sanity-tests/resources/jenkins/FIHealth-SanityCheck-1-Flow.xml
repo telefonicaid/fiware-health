@@ -32,7 +32,7 @@ This job executes the Sanity Check on each FIWARE Lab node. It will spawn parall
   <publishers/>
   <buildWrappers/>
   <icon/>
-  <dsl>def settings = env.FIHEALTH_WORKSPACE + &apos;/&apos;+ env.FIHEALTH_SANITY_PROJECT + &apos;/etc/settings.json&apos;
+  <dsl>def settings = env.SANITY_CHECKS_SETTINGS
 settings=settings.replace(&apos;$JENKINS_HOME&apos;,System.getProperty(&apos;JENKINS_HOME&apos;))
 
 def inputFile = new File(settings)
