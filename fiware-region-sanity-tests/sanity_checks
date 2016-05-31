@@ -88,14 +88,14 @@ END`
 
 # Default options for nosetests
 NOSEOPTS="--config=etc/nose.cfg"
+OUTPUT_NOVA_CONSOLE_NAME=test_novaconsole
 
-# Command line options (default values)
+# Command line options (default values / environment variables)
 OUTPUT_NAME=test_results
 TEMPLATE_NAME=test_report_template.html
-OUTPUT_NOVA_CONSOLE_NAME=test_novaconsole
-SANITY_CHECKS_SETTINGS=etc/settings.json
+SANITY_CHECKS_SETTINGS=${SANITY_CHECKS_SETTINGS:-etc/settings.json}
 
-# Environment variables required by the tests
+# Export environment variables required by the tests
 export SANITY_CHECKS_SETTINGS
 export TEST_PHONEHOME_ENDPOINT
 export OS_AUTH_URL OS_USERNAME OS_PASSWORD OS_USER_ID
@@ -182,6 +182,8 @@ tests/run.py $NOSEOPTS -v --exe \
 	$TESTS
 
 # Summary report
-printf "Generating summary report... "
-commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
-printf "%s\n" $OUTPUT_NAME.txt
+if [ -s $OUTPUT_NAME.xml ]; then
+	printf "Generating summary report... "
+	commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
+	printf "%s\n" $OUTPUT_NAME.txt
+fi

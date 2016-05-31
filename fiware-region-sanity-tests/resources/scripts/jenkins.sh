@@ -148,7 +148,7 @@ function move_reports_to_history() {
 	local region=$1
 	local timestamp=$(ls -l --time-style='+%Y%m%d%H%M' ${region}_results.txt 2>/dev/null | cut -d' ' -f6)
 	local histreport=$FIHEALTH_HISTORY/${timestamp}_${region}_results.txt
-	if [ -n "$region" -a -n "$FIHEALTH_HISTORY" ]; then
+	if [ -n "$region" -a -n "$timestamp" -a -n "$FIHEALTH_HISTORY" ]; then
 		printf "$region previous report stored as $histreport\n"
 		mv ${region}_results.txt $histreport
 		rm ${region}_results.*
@@ -193,7 +193,7 @@ function change_status() {
 	local report=$1
 
 	# Finish if no region is set or no report is given
-	[ -n "$region" && -r "$report" ] || return 0
+	[ -n "$region" -a -r "$report" ] || return 0
 
 	# Adjust status according to results report
 	local resource="sanity_tests?id=$region&type=region"
@@ -367,10 +367,10 @@ exec)
 	update_elapsed_time_context_broker $elapsed_time
 
 	# Publish results to webserver
-	cp -f $OUTPUT_NAME.html $FIHEALTH_HTDOCS
-	cp -f $OUTPUT_NAME.txt $FIHEALTH_HTDOCS
+	[ -s $OUTPUT_NAME.html ] && cp -f $OUTPUT_NAME.html $FIHEALTH_HTDOCS
+	[ -s $OUTPUT_NAME.txt ] && cp -f $OUTPUT_NAME.txt $FIHEALTH_HTDOCS
 
-	# In single region tests, change status according to results
-	change_status $OUTPUT_NAME.txt
+	# In case of single region tests, change status according to results
+	[ -s $OUTPUT_NAME.txt ] && change_status $OUTPUT_NAME.txt
 	;;
 esac
