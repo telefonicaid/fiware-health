@@ -67,6 +67,7 @@ GLOBAL_STATUS_OK = TEST_STATUS_OK
 
 
 class ResultAnalyzer(object):
+
     def __init__(self, conf, file=DEFAULT_RESULTS_FILE):
         self.conf = conf
         self.file = file
@@ -96,11 +97,10 @@ class ResultAnalyzer(object):
                 elif child_node_list[0].localName == CHILD_NODE_SKIP:
                     status = TEST_STATUS_SKIP
 
-            # Filter out the "regular" test cases (...test_<region>.TestSuite)
+            # Filter out the "regular" test cases (__main__.<Region>)
             testclass = testcase.getAttribute('classname')
-            if re.match(".*\.test_.+\.TestSuite$", testclass):
-                testpackage = testclass.split(".")[-2]
-                testregion = testpackage.replace("test_", "")
+            if re.match("^__main__\.[A-Z].+$", testclass):
+                testregion = testclass.split(".")[1]
                 info_test = {"test_name": testcase.getAttribute('name'), "status": status}
                 if testregion in self.dict:
                     self.dict[testregion].append(info_test)
