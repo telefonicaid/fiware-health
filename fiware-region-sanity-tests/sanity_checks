@@ -182,6 +182,8 @@ tests/run.py $NOSEOPTS -v --exe \
 	$TESTS
 
 # Summary report
-printf "Generating summary report... "
-commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
-printf "%s\n" $OUTPUT_NAME.txt
+if [ -s $OUTPUT_NAME.xml ]; then
+	printf "Generating summary report... "
+	commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
+	printf "%s\n" $OUTPUT_NAME.txt
+fi
