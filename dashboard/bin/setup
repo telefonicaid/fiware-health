@@ -132,8 +132,8 @@ fi
 
 # Mailing lists to be created (one per region, only those not existing yet)
 EXISTING_LISTS=$($MAILMANLIB_PATH/bin/list_lists -b)
-EXCLUDE_LISTS='^('$(echo $EXISTING_LISTS | tr ' ' '|')')$'
-LISTS=$(echo "$REGIONS" | sed -n '{ s/.*/\L&/; p}' | egrep -v $EXCLUDE_LISTS)
+EXCLUDE='^('$(echo $EXISTING_LISTS | tr ' ' '|')')$'
+LISTS=$(echo $REGIONS | tr ' ' \\n | sed -n '{s/.*/\L&/;p}' | egrep -v $EXCLUDE)
 
 # Admin details (ask for admin password, if not given)
 ADMIN_MAIL=$EMAIL_FROM
@@ -163,7 +163,7 @@ rm -f $TMP_FILE
 
 # Create site-wide mailing list (mandatory)
 LIST="mailman"
-if echo $LIST | egrep -qv $EXCLUDE_LISTS; then
+if echo $LIST | egrep -qv $EXCLUDE; then
 	$MAILMANLIB_PATH/bin/newlist -q \
 		-u $URL_HOST -e $EMAIL_HOST \
 		$LIST $ADMIN_MAIL $ADMIN_PASS \
