@@ -229,7 +229,8 @@ class FiwareRegionWithNetworkTest(FiwareRegionsBaseTests):
         self.nova_operations.add_floating_ip_to_instance(server_id=server_id, ip_address=allocated_ip)
 
         # SSH Connection
-        self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value)
+        username = self.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_USERNAME, TEST_USERNAME_DEFAULT)
+        self.__ssh_connection_test_helper__(host=allocated_ip, private_key=private_keypair_value, username=username)
 
     def __e2e_snat_connection_test_helper__(self, use_shared_network=True):
         """
