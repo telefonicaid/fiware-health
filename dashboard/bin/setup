@@ -30,9 +30,9 @@
 #     -h, --help			show this help message
 #
 
-NAME=$(basename $0)
 OPTS='h(help)l(mailman-lib-path):e(mailman-email-host):p(admin-password):'
 BASEDIR=$(readlink -f $(dirname $0)/..)
+PROG=$(basename $0)
 
 # Command line options (default values)
 CONFIG_FILE=$BASEDIR/config/dashboard.yml
@@ -43,7 +43,7 @@ ADMIN_PASS=
 # Process command line
 OPTERR=
 OPTSTR=$(echo :-:$OPTS | sed 's/([a-zA-Z0-9]*)//g')
-OPTHLP=$(sed -n '20,/^$/ { s/$0/'$NAME'/; s/^#[ ]\?//p }' $0)
+OPTHLP=$(sed -n '20,/^$/ { s/$0/'$PROG'/; s/^#[ ]\?//p }' $0)
 while getopts $OPTSTR OPT; do while [ -z "$OPTERR" ]; do
 case $OPT in
 'l')	MAILMANLIB_PATH=$OPTARG;;
@@ -67,7 +67,7 @@ shift $(expr $OPTIND - 1)
 [ -z "$OTTERR" -a -n "$1" ] && { CONFIG_FILE="$1"; shift; }
 [ -z "$OPTERR" -a -n "$*" ] && { OPTERR="Too many arguments"; }
 [ -n "$OPTERR" ] && {
-	[ "$OPTERR" != "$OPTHLP" ] && OPTERR="${OPTERR}\nTry \`$NAME --help'"
+	[ "$OPTERR" != "$OPTHLP" ] && OPTERR="${OPTERR}\nTry \`$PROG --help'"
 	TAB=4; LEN=$(echo "$OPTERR" | awk -F'\t' '/ .+\t/ {print $1}' | wc -L)
 	TABSTOPS=$TAB,$(((2+LEN/TAB)*TAB)); WIDTH=${COLUMNS:-$(tput cols)}
 	printf "$OPTERR" | tr -s '\t' | expand -t$TABSTOPS | fmt -$WIDTH -s 1>&2
@@ -135,16 +135,18 @@ EXISTING_LISTS=$($MAILMANLIB_PATH/bin/list_lists -b)
 EXCLUDE='^('$(echo $EXISTING_LISTS | tr ' ' '|')')$'
 LISTS=$(echo $REGIONS | tr ' ' \\n | sed -n '{s/.*/\L&/;p}' | egrep -v $EXCLUDE)
 
-# Admin details (ask for admin password, if not given)
+# List administration details (ask for admin password, if not given)
 ADMIN_MAIL=$EMAIL_FROM
 [ -n "$LISTS" -a -z "$ADMIN_PASS" ] && read -p "Admin password: " ADMIN_PASS
 
 # Create mailing lists not existing yet
 LANGUAGE='en'
 URL_HOST=$EMAIL_HOST
-TMP_FILE=/tmp/$NAME_$$
-for LIST in $LISTS; do
-	DESCRIPTION="FIHealth mailing list for region $LIST"
+TMP_FILE=/tmp/$PROG_$$
+for NAME in $REGIONS; do
+	LIST=$(echo $NAME | sed '{s/.*/\L&/}' | egrep -v $EXCLUDE)
+	[ -z "$LIST" ] && continue
+	DESCRIPTION="FIHealth mailing list for region $NAME"
 	$MAILMANLIB_PATH/bin/newlist -q -l $LANGUAGE \
 		-u $URL_HOST -e $EMAIL_HOST \
 		$LIST $ADMIN_MAIL $ADMIN_PASS \
