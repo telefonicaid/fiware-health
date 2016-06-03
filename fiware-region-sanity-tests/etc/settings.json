@@ -42,7 +42,8 @@
         "Spain2": {
             "external_network_name": "public-ext-net-01",
             "shared_network_name": "node-int-net-01",
-            "test_object_storage": true
+            "test_object_storage": true,
+            "test_login_name": "centos"
         },
         "Trento2": {
             "external_network_name": "public-ext-net-01",

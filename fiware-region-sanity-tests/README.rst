@@ -251,6 +251,8 @@ configuration values under ``region_configuration``:
 - ``test_object_storage`` enables object storage tests, if true
 - ``test_flavor`` specifies the flavor of instances launched in tests
 - ``test_image`` specifies the base image of instances launched in tests
+- ``test_login_name`` specifies the user name for login to instances launched in tests
+
 
 Finally, in order to calculate the global status of a region, these properties
 are required:
@@ -306,6 +308,7 @@ are required:
                 "external_network_name": "public-ext-net-02",
                 "shared_network_name": "my-shared-net-02",
                 "test_image": "base_image"
+                "test_login_name": "user"
             },
             "RegionWithCustomFlavor": {
                 "external_network_name": "public-ext-net-01",

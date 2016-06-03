@@ -68,14 +68,15 @@ class FiwareRegionsBaseTests(FiwareTestCase):
 
         return allocated_ip_data['ip']
 
-    def __ssh_connection_test_helper__(self, host, private_key):
+    def __ssh_connection_test_helper__(self, host, private_key, login_name):
         """
         HELPER. Tries to connect (SSH) to the given host and retries if some failed (socket error)
         :param host: IP or Hostname (String)
         :param private_key: Private key value (String)
+        :param login_name: Login used to connection
         :return:
         """
-        ssh_client = SSHClient(self.logger, host=host, username='root', private_key=private_key)
+        ssh_client = SSHClient(self.logger, host=host, username=login_name, private_key=private_key)
         try:
             ssh_client.connect_and_retry()
         except AuthenticationException as e:

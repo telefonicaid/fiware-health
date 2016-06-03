@@ -30,7 +30,7 @@ import time
 import sys
 
 
-class SSHClient():
+class SSHClient:
 
     ssh_client = None
 
