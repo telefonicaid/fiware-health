@@ -43,7 +43,6 @@ class FiwareRegionsBaseTests(FiwareTestCase):
             self.logger.error(ex)
             self.skipTest(ex)
 
-
     def __create_keypair_test_helper__(self, keypair_name):
         """
         HELPER. Creates new Keypair

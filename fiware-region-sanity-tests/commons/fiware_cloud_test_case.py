@@ -586,8 +586,6 @@ class FiwareTestCase(unittest.TestCase):
             cls.logger.error("Error in setup class: %s", ex.message)
             cls.skip_message = "Error in setup class: {0}".format(ex.message)
 
-
-
     @classmethod
     def tearDownClass(cls):
         None
