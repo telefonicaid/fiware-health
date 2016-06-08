@@ -47,6 +47,7 @@ import logging.config
 import time
 import os
 import re
+import functools
 
 
 class FiwareTestCase(unittest.TestCase):
@@ -75,6 +76,9 @@ class FiwareTestCase(unittest.TestCase):
 
     # Test logger
     logger = None
+
+    # Skip message
+    skip_message = None
 
     @classmethod
     def configure(cls):
@@ -228,22 +232,36 @@ class FiwareTestCase(unittest.TestCase):
         })
 
         if suite:
-            cls.reset_world_servers(world, suite)
-            cls.reset_world_sec_groups(world, suite)
-            cls.reset_world_keypair_names(world, suite)
-            cls.reset_world_ports(world, suite)
-            cls.reset_world_networks(world, suite)
-            cls.reset_world_routers(world, suite)
-            cls.reset_world_allocated_ips(world, suite)
-            cls.reset_world_containers(world, suite)
-            cls.reset_world_local_objects(world, suite)
+            resets = ["cls.reset_world_servers(world, suite)",
+                      "cls.reset_world_networks(world, suite)",
+                      "cls.reset_world_sec_groups(world, suite)",
+                      "cls.reset_world_keypair_names(world, suite)",
+                      "cls.reset_world_ports(world, suite)",
+                      "cls.reset_world_routers(world, suite)",
+                      "cls.reset_world_allocated_ips(world, suite)",
+                      "cls.reset_world_containers(world, suite)",
+                      "cls.reset_world_local_objects(world, suite)"
+                      ]
+
+            def eval_reset_method(source, globals=None, locals=None):
+                result = eval(source, globals, locals)
+                if not result:
+                    cls.logger.error("Fail with: {0}".format(source))
+                return result
+
+            results = map(functools.partial(eval_reset_method, globals=globals(), locals=locals()), resets)
+            if not all(results):
+                cls.logger.error("Fail in some reset_world")
+                return False
+
+        return True
 
     @classmethod
     def reset_world_servers(cls, world, suite=False):
         """
         Init the world['servers'] entry (after deleting existing resources)
         """
-
+        result = True
         if suite:
             # get pre-existing server list (ideally, empty when starting the tests)
             try:
@@ -253,6 +271,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['servers'].append(server.id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get server list: %s", e)
+                result = False
 
         # release resources to ensure a clean world
         for server_id in list(world['servers']):
@@ -282,16 +301,18 @@ class FiwareTestCase(unittest.TestCase):
                 cls.logger.debug("Deleted instance %s", server_id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete server %s: %s", server_id, e)
+                result = False
 
         # wait after server deletion process
         time.sleep(5)
+        return result
 
     @classmethod
     def reset_world_sec_groups(cls, world, suite=False):
         """
         Init the world['sec_groups'] entry (after deleting existing resources)
         """
-
+        result = True
         if suite:
             # get pre-existing test security group list (ideally, empty when starting the tests)
             try:
@@ -302,6 +323,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['sec_groups'].append(sec_group_data.id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get security group list: %s", e)
+                result = False
 
         # release resources to ensure a clean world
         for sec_group_id in list(world['sec_groups']):
@@ -310,6 +332,8 @@ class FiwareTestCase(unittest.TestCase):
                 world['sec_groups'].remove(sec_group_id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete security group %s: %s", sec_group_id, e)
+                result = False
+        return result
 
     @classmethod
     def reset_world_keypair_names(cls, world, suite=False):
@@ -317,6 +341,7 @@ class FiwareTestCase(unittest.TestCase):
         Init the world['keypair_names'] entry (after deleting existing resources)
         """
 
+        result = True
         if suite:
             # get pre-existing test keypair list (ideally, empty when starting the tests)
             try:
@@ -326,6 +351,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['keypair_names'].append(keypair.name)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get keypair list: %s", e)
+                result = False
 
         # release resources to ensure a clean world
         for keypair_name in list(world['keypair_names']):
@@ -334,12 +360,15 @@ class FiwareTestCase(unittest.TestCase):
                 world['keypair_names'].remove(keypair_name)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete keypair %s: %s", keypair_name, e)
+                result = False
+        return result
 
     @classmethod
     def reset_world_networks(cls, world, suite=False):
         """
         Init the world['networks'] entry (after deleting existing resources)
         """
+        result = True
 
         if suite and cls.with_networks:
             # get pre-existing test network list (ideally, empty when starting the tests)
@@ -350,6 +379,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['networks'].append(network['id'])
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get network list: %s", e)
+                result = False
 
         # release resources to ensure a clean world
         for network_id in list(world['networks']):
@@ -358,13 +388,16 @@ class FiwareTestCase(unittest.TestCase):
                 world['networks'].remove(network_id)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete network %s: %s", network_id, e)
+                result = False
+
+        return result
 
     @classmethod
     def reset_world_routers(cls, world, suite=False):
         """
         Init the world['routers'] entry (after deleting existing resources)
         """
-
+        result = True
         if suite and cls.with_networks:
             # get pre-existing test router list (ideally, empty when starting the tests)
             try:
@@ -374,6 +407,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['routers'].append(router['id'])
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get router list: %s", e)
+                result = False
 
         # release resources to ensure a clean world
         for router_id in list(world['routers']):
@@ -382,13 +416,15 @@ class FiwareTestCase(unittest.TestCase):
                 world['routers'].remove(router_id)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete router %s: %s", router_id, e)
+                result = False
+        return result
 
     @classmethod
     def reset_world_allocated_ips(cls, world, suite=False):
         """
         Init the world['allocated_ips'] entry (after deallocating existing resources)
         """
-
+        result = True
         if suite:
             # get pre-existing allocated IP list (ideally, empty when starting the tests)
             try:
@@ -398,6 +434,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['allocated_ips'].append(ip_data.id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get allocated IP list: %s", e)
+                result = False
 
         # release resources to ensure a clean world
         for allocated_ip_id in list(world['allocated_ips']):
@@ -406,12 +443,16 @@ class FiwareTestCase(unittest.TestCase):
                 world['allocated_ips'].remove(allocated_ip_id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to deallocate IP %s: %s", allocated_ip_id, e)
+                result = False
+
+        return result
 
     @classmethod
     def reset_world_ports(cls, world, suite=False):
         """
         Init the world['ports'] entry (after deleting existing resources)
         """
+        result = True
         if suite and cls.with_networks:
             # get pre-existing port list (ideally, empty when starting the tests)
             try:
@@ -421,6 +462,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['ports'].append(port)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("init_world() failed to get port list: %s", e)
+                result = False
 
         # release resources to ensure a clean test_world
 
@@ -442,12 +484,15 @@ class FiwareTestCase(unittest.TestCase):
                     world['ports'].remove(port)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
                 cls.logger.error("Failed to delete port %s: %s", port['id'], e)
+                result = False
+        return result
 
     @classmethod
     def reset_world_containers(cls, world, suite=False):
         """
         Init the world['containers'] entry (after deleting existing resources)
         """
+        result = True
         if suite and cls.with_storage:
             # get pre-existing test containers list (ideally, empty when starting the tests)
             try:
@@ -457,6 +502,7 @@ class FiwareTestCase(unittest.TestCase):
                     world['containers'].append(container["name"])
             except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
                 cls.logger.error("init_world() failed to get container list: %s", e)
+                result = False
 
         # release resources to ensure a clean world
         for container in list(world['containers']):
@@ -472,13 +518,15 @@ class FiwareTestCase(unittest.TestCase):
                 world['containers'].remove(container)
             except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
                 cls.logger.error("Failed to delete container %s: %s", container, e)
+                result = False
+        return result
 
     @classmethod
     def reset_world_local_objects(cls, world, suite=False):
         """
         Init the world['containers'] entry (after deleting existing resources)
         """
-
+        result = True
         local_objects_path = join(cls.home_dir, SWIFT_RESOURCES_PATH)
 
         if suite and cls.with_storage:
@@ -498,37 +546,47 @@ class FiwareTestCase(unittest.TestCase):
             except ValueError:
                 cls.logger.warn("This file was removed and it came from an older execution: %s", local_file)
 
+        return result
+
     @classmethod
     def setUpClass(cls):
         """
         Setup testcase (executed before ALL tests): release resources, initialize logger and REST clients.
         """
 
-        # Initialize logger with a new custom file handler for SanityChecks using UTC time format
-        config = ConfigParser()
-        config.read(cls.logging_conf)
-        cls.logger_level = config.get(LOGGING_CONF_SECTION_HANDLER, 'level')
-        formatter = logging.Formatter(config.get(LOGGING_CONF_SECTION_FORMATTER, 'format', raw=True))
-        file_handler = logging.FileHandler(config.get(LOGGING_CONF_SECTION_HANDLER, 'filename').
-                                           format(region_name=cls.region_name), mode='w')
-        file_handler.setFormatter(formatter)
-        file_handler.setLevel(cls.logger_level)
+        try:
 
-        logging.root.addHandler(file_handler)
-        logging.Formatter.converter = time.gmtime
-        cls.logger = logging.getLogger(LOGGING_TEST_LOGGER)
+            # Initialize logger with a new custom file handler for SanityChecks using UTC time format
+            config = ConfigParser()
+            config.read(cls.logging_conf)
+            cls.logger_level = config.get(LOGGING_CONF_SECTION_HANDLER, 'level')
+            formatter = logging.Formatter(config.get(LOGGING_CONF_SECTION_FORMATTER, 'format', raw=True))
+            file_handler = logging.FileHandler(config.get(LOGGING_CONF_SECTION_HANDLER, 'filename').
+                                               format(region_name=cls.region_name), mode='w')
+            file_handler.setFormatter(formatter)
+            file_handler.setLevel(cls.logger_level)
 
-        # Global configuration of tests
-        cls.configure()
+            logging.root.addHandler(file_handler)
+            logging.Formatter.converter = time.gmtime
+            cls.logger = logging.getLogger(LOGGING_TEST_LOGGER)
 
-        # Initialize session trying to get auth token; on success, continue with initialization
-        test_image = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_IMAGE, TEST_IMAGE_DEFAULT)
-        test_flavor = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_FLAVOR, TEST_FLAVOR_DEFAULT)
-        if cls.init_auth():
-            cls.init_clients(cls.tenant_id, test_flavor, test_image)
-            cls.init_users()
-            cls.init_world(cls.suite_world, suite=True)
-            cls.logger.debug("suite_world = %s", cls.suite_world)
+            # Global configuration of tests
+            cls.configure()
+
+            # Initialize session trying to get auth token; on success, continue with initialization
+            test_image = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_IMAGE, TEST_IMAGE_DEFAULT)
+            test_flavor = cls.region_conf.get(PROPERTIES_CONFIG_REGION_TEST_FLAVOR, TEST_FLAVOR_DEFAULT)
+            if cls.init_auth():
+                cls.init_clients(cls.tenant_id, test_flavor, test_image)
+                cls.init_users()
+                if not cls.init_world(cls.suite_world, suite=True):
+                    raise Exception("Error in init world")
+                cls.logger.debug("suite_world = %s", cls.suite_world)
+        except Exception as ex:
+            cls.logger.error("Error in setup class: %s", ex.message)
+            cls.skip_message = "Error in setup class: {0}".format(ex.message)
+
+
 
     @classmethod
     def tearDownClass(cls):
@@ -538,6 +596,8 @@ class FiwareTestCase(unittest.TestCase):
         """
         Setup each single test
         """
+        if self.skip_message:
+            self.skipTest(self.skip_message)
 
         # skip test if no auth token could be retrieved
         if not self.auth_token:
