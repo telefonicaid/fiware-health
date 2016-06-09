@@ -180,6 +180,7 @@ tests/run.py $NOSEOPTS -v --exe \
 	--with-html --html-report=$OUTPUT_NAME.html \
 	--html-report-template=resources/templates/$TEMPLATE_NAME \
 	$TESTS
+echo "Result code=$?"
 
 # Summary report
 if [ -s $OUTPUT_NAME.xml ]; then
