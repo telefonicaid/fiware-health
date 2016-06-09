@@ -37,8 +37,8 @@ class FiwareRegionsBaseTests(FiwareTestCase):
             super(FiwareRegionsBaseTests, self).setUp()
             self.test_world = {}
             if not self.init_world(self.test_world):
-                self.logger.error("Error in init world")
-                self.skipTest("Error in init world")
+                self.logger.error("Error in initialization phase")
+                self.skipTest("Error in initialization phase")
         except Exception as ex:
             self.logger.error(ex)
             self.skipTest(ex)
@@ -182,44 +182,44 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         if self.test_world.get('servers'):
             self.logger.debug("Tearing down servers...")
             if not self.reset_world_servers(self.test_world):
-                self.fail("Fails tearing down servers in test %s", self._testMethodName)
+                self.fail("Fails in releasing servers in the %s", self._testMethodName)
 
         if self.test_world.get('sec_groups'):
             self.logger.debug("Tearing down security groups...")
             if not self.reset_world_sec_groups(self.test_world):
-                self.fail("Fails tearing down security groups in test %s", self._testMethodName)
+                self.fail("Fails in releasing security groups in the %s", self._testMethodName)
 
         if self.test_world.get('keypair_names'):
             self.logger.debug("Tearing down keypairs...")
             if not self.reset_world_keypair_names(self.test_world):
-                self.fail("Fails tearing down keypairs in test %s", self._testMethodName)
+                self.fail("Fails in releasing keypairs in the %s", self._testMethodName)
 
         if self.test_world.get('ports'):
             self.logger.debug("Tearing down ports...")
             if not self.reset_world_ports(self.test_world):
-                self.fail("Fails tearing down ports in test %s", self._testMethodName)
+                self.fail("Fails in releasing ports in the  %s", self._testMethodName)
 
         if self.test_world.get('networks'):
             self.logger.debug("Tearing down networks...")
             if not self.reset_world_networks(self.test_world):
-                self.fail("Fails tearing down networks in test ".self._testMethodName)
+                self.fail("Fails in releasing networks in the %s", self._testMethodName)
 
         if self.test_world.get('routers'):
             self.logger.debug("Tearing down routers...")
             if not self.reset_world_routers(self.test_world):
-                self.fail("Fails tearing down routers in test ".self._testMethodName)
+                self.fail("Fails in releasing routers in the %s", self._testMethodName)
 
         if self.test_world.get('allocated_ips'):
             self.logger.debug("Tearing down allocated IPs...")
             if not self.reset_world_allocated_ips(self.test_world):
-                self.fail("Fails tearing down allocated IPs in test ".self._testMethodName)
+                self.fail("Fails in releasing IPs in the %s", self._testMethodName)
 
         if self.test_world.get('containers'):
             self.logger.debug("Tearing down containers...")
             if not self.reset_world_containers(self.test_world):
-                self.fail("Fails tearing down containers in test ".self._testMethodName)
+                self.fail("Fails in releasing containers in the %s", self._testMethodName)
 
         if self.test_world.get('local_objects'):
             self.logger.debug("Tearing down local objects...")
             if not self.reset_world_local_objects(self.test_world):
-                self.fail("Fails tearing down local in test ".self._testMethodName)
+                self.fail("Fails in releasing local objects in the %s", self._testMethodName)

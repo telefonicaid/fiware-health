@@ -580,11 +580,11 @@ class FiwareTestCase(unittest.TestCase):
                 cls.init_clients(cls.tenant_id, test_flavor, test_image)
                 cls.init_users()
                 if not cls.init_world(cls.suite_world, suite=True):
-                    raise Exception("Error in init world")
+                    raise Exception("Error in initialization phase, objects from an older execution can't be deleted")
                 cls.logger.debug("suite_world = %s", cls.suite_world)
         except Exception as ex:
-            cls.logger.error("Error in setup class: %s", ex.message)
-            cls.skip_message = "Error in setup class: {0}".format(ex.message)
+            cls.logger.error("Error in initialization phase: %s", ex.message)
+            cls.skip_message = "Error in initialization phase: {0}".format(ex.message)
 
     @classmethod
     def tearDownClass(cls):
