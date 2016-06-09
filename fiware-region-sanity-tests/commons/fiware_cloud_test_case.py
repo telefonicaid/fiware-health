@@ -512,7 +512,7 @@ class FiwareTestCase(unittest.TestCase):
                     try:
                         world['swift_objects'].remove(container + "/" + object["name"])
                     except ValueError:
-                        cls.logger.warn("This object was removed and it came from an older execution: %s",
+                        cls.logger.warn("This object was removed and it came from a previous execution: %s",
                                         container + "/" + object["name"])
                 cls.swift_operations.delete_container(container)
                 world['containers'].remove(container)
@@ -544,7 +544,7 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 world['local_objects'].remove(local_file)
             except ValueError:
-                cls.logger.warn("This file was removed and it came from an older execution: %s", local_file)
+                cls.logger.warn("This file was removed and it came from a previous execution: %s", local_file)
 
         return result
 
@@ -580,7 +580,7 @@ class FiwareTestCase(unittest.TestCase):
                 cls.init_clients(cls.tenant_id, test_flavor, test_image)
                 cls.init_users()
                 if not cls.init_world(cls.suite_world, suite=True):
-                    raise Exception("Error in initialization phase, objects from an older execution can't be deleted")
+                    raise Exception("Error in initialization phase: resources from previous executions not released")
                 cls.logger.debug("suite_world = %s", cls.suite_world)
         except Exception as ex:
             cls.logger.error("Error in initialization phase: %s", ex.message)
