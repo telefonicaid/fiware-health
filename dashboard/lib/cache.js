@@ -22,7 +22,10 @@ var NodeCache = require('node-cache');
 var regionsCache = new NodeCache({ stdTTL: 0, checkperiod: 600 });
 
 
-
+/**
+ * Load regions from settings and assign default values
+ * @param {string} file name
+ */
 regionsCache.init = function (settings) {
     /**
      * Read settings file with available regions
@@ -45,8 +48,7 @@ regionsCache.init = function (settings) {
         });
     }
 
-
-}
+};
 
 /**
  * Compare two region name nodes
@@ -81,7 +83,7 @@ regionsCache.getRegions = function() {
     });
 
     return regions;
-}
+};
 
 /**
  * udpate or add new value to region
@@ -95,9 +97,11 @@ regionsCache.update = function (regionName, field, value) {
     region[field] = value;
     regionsCache.set(regionName, region);
 
-}
+};
 
 
-
+/** @export */
 module.exports = regionsCache;
+
+/** @export */
 module.exports.compare = compare;
