@@ -1,0 +1,34 @@
+{
+    "region_configuration": {
+        "ZRegionLongName1": {
+            "external_network_name": "ext-net",
+            "shared_network_name": "shared-net",
+            "test_object_storage": false
+        },
+        "Region2": {
+            "external_network_name": "public-ext-net-01",
+            "shared_network_name": "node-int-net-01",
+            "test_object_storage": true,
+            "test_login_name": "centos"
+        },
+        "Region3": {
+            "external_network_name": "public-ext-net-01",
+            "shared_network_name": "node-int-net-01",
+            "test_object_storage": true
+        },
+        "Region4": {
+            "external_network_name": "public-ext-net-01",
+            "shared_network_name": "node-int-net-01",
+            "test_object_storage": true,
+            "test_image": "CentOS-6.3init_deprecated"
+        },
+        "Region5": {
+            "external_network_name": "public-ext-net-01",
+            "shared_network_name": "node-int-net-01"
+        },
+        "Region6": {
+            "external_network_name": "default",
+            "test_flavor": "tiny"
+        }
+    }
+}

@@ -37,6 +37,7 @@ suite('config', function () {
         assert.deepEqual(['INFO', 'Read configuration file'], result);
         assert.equal(config.data.logLevel, 'ERROR');
         assert.equal(config.data.webContext, '/');
+        assert.equal(config.data.settings, 'config/settings.json.sample');
         assert.notEqual(config.data.idm, undefined);
         assert.notEqual(config.data.mailman, undefined);
         assert.equal(config.data.jenkins.token, '12345678');

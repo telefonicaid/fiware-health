@@ -143,7 +143,7 @@ function loadRegionsFromSettings() {
      * Read settings file with available regions
      */
 
-    var json = JSON.parse(require('fs').readFileSync('config/settings.json', 'utf8'));
+    var json = JSON.parse(require('fs').readFileSync(config.settings, 'utf8'));
 
     /**
      * Fill cache

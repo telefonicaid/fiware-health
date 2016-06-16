@@ -38,6 +38,7 @@ var config = {
     logLevel: 'DEBUG',
     listenPort: 3000,
     webContext: '/',
+    settings: 'config/settings.json.sample',
     secret: 'ssshhh',
     paths: {
         reportsUrl: '/report',
@@ -95,6 +96,7 @@ function readConfigFile(file) {
                 case 'app':
                     config.listenPort = cfgParse.app.port;
                     config.webContext = cfgParse.app.webContext;
+                    config.settings = cfgParse.app.settings;
                     config.fiHealthUrl = util.format('https://%s%s', cfgParse.app.host, cfgParse.app.webContext);
                     break;
                 case 'logging':
