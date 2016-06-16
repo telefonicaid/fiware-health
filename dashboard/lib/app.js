@@ -39,7 +39,9 @@ var express = require('express'),
     monasca = require('./monasca'),
     NodeCache = require('node-cache');
 
-
+/**
+ * regions cache
+ */
 global.regionsCache = new NodeCache({ stdTTL: 0, checkperiod: 600 });
 
 /**
@@ -77,6 +79,12 @@ global.regionsCache.getRegions = function () {
     return regions;
 };
 
+/**
+ * udpate or add new value to region
+ * @param {String} region name
+ * @param {String} name of field to set, (i.g: status, timestamp)
+ * @param {Object} the new value
+ */
 global.regionsCache.update = function (regionName, field, value) {
 
     var region = global.regionsCache.get(regionName);
@@ -137,19 +145,13 @@ function loadRegionsFromSettings() {
 
     var json = JSON.parse(require('fs').readFileSync('config/settings.json', 'utf8'));
 
-
-    var regions = [];
-    for (region in json.region_configuration) {
-        regions.push(region);
-    }
-
     /**
-     * Open and configure cache
+     * Fill cache
      */
+    /*jshint -W069 */
+    for (var region in json['region_configuration']) {
 
-    for (var region in json.region_configuration) {
-
-        regionsCache.set(region, {
+        global.regionsCache.set(region, {
             node: region,
             status: '',
             timestamp: 0,
@@ -323,7 +325,7 @@ function getLogin(req, res, oauth2) {
 }
 
 
-loadRegionsFromSettings()
+loadRegionsFromSettings();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -448,8 +450,6 @@ app.use(function (err, req, res) {
 
 /** @export */
 module.exports = app;
-
-module.exports.regionsCache = regionsCache;
 
 /** @export */
 module.exports.postContextBroker = postContextBroker;

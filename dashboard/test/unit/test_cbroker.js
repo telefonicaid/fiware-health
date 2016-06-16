@@ -189,7 +189,7 @@ suite('cbroker', function () {
 
             //then
             http.request.restore();
-            assert.notEqual(global.regionsCache.get(region), undefined)
+            assert.notEqual(global.regionsCache.get(region), undefined);
             done();
         });
 

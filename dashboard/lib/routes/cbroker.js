@@ -20,8 +20,7 @@
 var http = require('http'),
     logger = require('../logger'),
     config = require('../config').data,
-    dateFormat = require('dateformat'),
-    app = require('../app');
+    dateFormat = require('dateformat');
 
 
 var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about regions status
@@ -41,7 +40,7 @@ function parseRegions(txid, entities) {
     var context = {trans: txid, op: 'cbroker#parseRegions'};
 
     logger.debug(context, 'Entities to parse: %j', entities);
-    var regions =[]
+    var regions = [];
 
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;

@@ -46,12 +46,12 @@ function getIndex(req, res) {
      */
     function callbackRetrieveRegions() {
 
+        var regions = global.regionsCache.getRegions();
         logger.debug(context, 'Response from Context Broker: %j', regions);
 
         var userinfo = req.session.user;
 
         logger.debug(context, 'User role: %s info: %j', req.session.role, userinfo);
-        var regions = global.regionsCache.getRegions();
 
 
         if (userinfo !== undefined) {
@@ -119,7 +119,7 @@ function getIndex(req, res) {
             if (progress) {
                 global.regionsCache.keys.forEach(function (region) {
                     if (progress[region] === true) {
-                        global.regionsCache.update(region, "status", constants.GLOBAL_STATUS_OTHER);
+                        global.regionsCache.update(region, 'status', constants.GLOBAL_STATUS_OTHER);
                     }
                 });
             }

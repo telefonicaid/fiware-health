@@ -87,20 +87,19 @@ function checkAuthorizedByConfig(region, regionName, username) {
     }
 }
 /**
- *  check if username is authorized to manage region and introduce a new field in object
- * @param {[]} regions
+ * Check if username is authorized to manage region and introduce a new field in object
  * @param {String} username
  */
 function addAuthorized(username) {
 
     global.regionsCache.keys().filter(function (key) {
 
-        var region = global.regionsCache.get(key)
+        var region = global.regionsCache.get(key);
         var regionName = getRegionNameForCompare(region.node);
         region.authorized = ((username.indexOf(regionName)) !== -1);
 
         checkAuthorizedByConfig(region, regionName, username);
-        global.regionsCache.update(region.node, "authorized", region.authorized);
+        global.regionsCache.update(region.node, 'authorized', region.authorized);
 
     });
 

@@ -40,7 +40,7 @@ suite('subscribe', function () {
     function fillCache(regions) {
         global.regionsCache.flushAll();
         for (var index in regions) {
-            regionsCache.set(regions[index].node, {
+            global.regionsCache.set(regions[index].node, {
                 node: regions[index].node,
                 status: regions[index].status,
                 timestamp: 0,
@@ -157,7 +157,7 @@ suite('subscribe', function () {
     test('should_add_subscribed_to_false_in_isSubscribed_with_unknown_region', function (done) {
         //given
         var user = 'kk@mail.com';
-        var regions = [{node: 'unknown', status:''}];
+        var regions = [{node: 'unknown', status: ''}];
 
         sinon.stub(http, 'request', function(options, callback) {
 
@@ -172,7 +172,7 @@ suite('subscribe', function () {
             request.end = sinon.spy();
             return request;
         });
-        fillCache(regions)
+        fillCache(regions);
         //when
         subscribe.isSubscribed(user, regions[0], function () {
             assert(!global.regionsCache.get(regions[0].node).subscribed);

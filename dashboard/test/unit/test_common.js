@@ -31,7 +31,7 @@ suite('common', function () {
     function fillCache(regions) {
         global.regionsCache.flushAll();
         for (var index in regions) {
-            regionsCache.set(regions[index].node, {
+            global.regionsCache.set(regions[index].node, {
                 node: regions[index].node,
                 status: regions[index].status,
                 timestamp: regions[index].timestamp,
@@ -105,7 +105,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_NOT_OK,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: true,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             },
             {
@@ -113,7 +113,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: false,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             },
             {
@@ -121,7 +121,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_OK,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: false,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             }
         ];
@@ -163,7 +163,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_OK,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: true,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             },
             {
@@ -171,7 +171,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_NOT_OK,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: true,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             },
             {
@@ -179,7 +179,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: false,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             }
         ];
@@ -189,7 +189,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionone');
 
         //Then
-        regions=global.regionsCache.getRegions();
+        regions = global.regionsCache.getRegions();
         assert(_.isEqual(expected, regions));
 
     });
@@ -220,7 +220,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_OK,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: true,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             },
             {
@@ -228,7 +228,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_NOT_OK,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: true,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             },
             {
@@ -236,7 +236,7 @@ suite('common', function () {
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
                 authorized: false,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN
             }
         ];
@@ -248,7 +248,7 @@ suite('common', function () {
         common.addAuthorized('admin-with-name');
 
         //Then
-        regions=global.regionsCache.getRegions();
+        regions = global.regionsCache.getRegions();
         assert(_.isEqual(expected, regions));
         config.idm.regionsAuthorized = [];
 
@@ -279,7 +279,7 @@ suite('common', function () {
         var expected = [
             {
                 authorized: false,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN,
                 node: 'RegionOne',
                 status: constants.GLOBAL_STATUS_NOT_OK,
@@ -287,7 +287,7 @@ suite('common', function () {
             },
             {
                 authorized: false,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN,
                 node: 'RegionTree',
                 status: constants.GLOBAL_STATUS_OTHER,
@@ -295,7 +295,7 @@ suite('common', function () {
             },
             {
                 authorized: false,
-                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTime: 'NaNh, NaNm, NaNs',
                 elapsedTimeMillis: NaN,
                 node: 'RegionTwo',
                 status: constants.GLOBAL_STATUS_OK,
@@ -308,7 +308,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionfour');
 
         //Then
-        regions=global.regionsCache.getRegions();
+        regions = global.regionsCache.getRegions();
         assert(_.isEqual(expected, regions));
     });
 
