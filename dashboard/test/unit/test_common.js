@@ -29,9 +29,9 @@ var assert = require('assert'),
 suite('common', function () {
 
     function fillCache(regions) {
-        global.regionsCache.flushAll();
+        config.regions.flushAll();
         for (var index in regions) {
-            global.regionsCache.set(regions[index].node, {
+            config.regions.set(regions[index].node, {
                 node: regions[index].node,
                 status: regions[index].status,
                 timestamp: regions[index].timestamp,
@@ -132,7 +132,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionone');
 
         //Then
-        regions = global.regionsCache.getRegions();
+        regions = config.regions.getRegions();
         assert(_.isEqual(expected, regions));
 
     });
@@ -189,7 +189,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionone');
 
         //Then
-        regions = global.regionsCache.getRegions();
+        regions = config.regions.getRegions();
         assert(_.isEqual(expected, regions));
 
     });
@@ -248,7 +248,7 @@ suite('common', function () {
         common.addAuthorized('admin-with-name');
 
         //Then
-        regions = global.regionsCache.getRegions();
+        regions = config.regions.getRegions();
         assert(_.isEqual(expected, regions));
         config.idm.regionsAuthorized = [];
 
@@ -308,7 +308,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionfour');
 
         //Then
-        regions = global.regionsCache.getRegions();
+        regions = config.regions.getRegions();
         assert(_.isEqual(expected, regions));
     });
 

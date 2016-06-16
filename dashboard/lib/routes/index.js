@@ -46,7 +46,7 @@ function getIndex(req, res) {
      */
     function callbackRetrieveRegions() {
 
-        var regions = global.regionsCache.getRegions();
+        var regions = config.regions.getRegions();
         logger.debug(context, 'Response from Context Broker: %j', regions);
 
         var userinfo = req.session.user;
@@ -73,7 +73,7 @@ function getIndex(req, res) {
 
             var afterSearchCallback = function () {
                 common.addAuthorized(userinfo.displayName);
-                regions = global.regionsCache.getRegions();
+                regions = config.regions.getRegions();
                 logger.debug(context, 'Before render: %s', JSON.stringify(regions));
                 res.render('logged', {
                     name: userinfo.displayName,
@@ -117,9 +117,9 @@ function getIndex(req, res) {
         // Update region sanity_status to `GLOBAL_STATUS_OTHER` for those currently in progress
         jenkins.regionJobsInProgress(txid, function (progress) {
             if (progress) {
-                global.regionsCache.keys.forEach(function (region) {
+                config.regions.keys.forEach(function (region) {
                     if (progress[region] === true) {
-                        global.regionsCache.update(region, 'status', constants.GLOBAL_STATUS_OTHER);
+                        config.regions.update(region, 'status', constants.GLOBAL_STATUS_OTHER);
                     }
                 });
             }

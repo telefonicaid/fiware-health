@@ -24,7 +24,8 @@ var path = require('path'),
     optimist = require('optimist'),
     yaml = require('js-yaml'),
     util = require('util'),
-    fs = require('fs');
+    fs = require('fs'),
+    cache = require('./cache');
 
 
 /**
@@ -176,6 +177,9 @@ function main() {
 
     // process config file
     readConfigFile(config.configFile);
+
+    config.regions = cache;
+    cache.init(config.settings);
 
     // process command line arguments
     argParser

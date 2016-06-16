@@ -23,7 +23,8 @@ var assert = require('assert'),
     http = require('http'),
     init = require('./init'),
     logger = require('../../lib/logger'),
-    subscribe = require('../../lib/routes/subscribe');
+    subscribe = require('../../lib/routes/subscribe'),
+    config = require('../../lib/config').data;
 
 
 /* jshint unused: false */
@@ -38,9 +39,9 @@ suite('subscribe', function () {
     });
 
     function fillCache(regions) {
-        global.regionsCache.flushAll();
+        config.regions.flushAll();
         for (var index in regions) {
-            global.regionsCache.set(regions[index].node, {
+            config.regions.set(regions[index].node, {
                 node: regions[index].node,
                 status: regions[index].status,
                 timestamp: 0,
@@ -84,8 +85,8 @@ suite('subscribe', function () {
 
         //when
         subscribe.searchSubscription(user, function () {
-            assert(global.regionsCache.get(regions[0].node).subscribed);
-            assert(!global.regionsCache.get(regions[1].node).subscribed);
+            assert(config.regions.get(regions[0].node).subscribed);
+            assert(!config.regions.get(regions[1].node).subscribed);
             done();
         });
         //then
@@ -116,7 +117,7 @@ suite('subscribe', function () {
 
         //when
         subscribe.isSubscribed(user, regions[0], function () {
-            assert(global.regionsCache.get(regions[0].node).subscribed);
+            assert(config.regions.get(regions[0].node).subscribed);
             done();
         });
         //then
@@ -175,7 +176,7 @@ suite('subscribe', function () {
         fillCache(regions);
         //when
         subscribe.isSubscribed(user, regions[0], function () {
-            assert(!global.regionsCache.get(regions[0].node).subscribed);
+            assert(!config.regions.get(regions[0].node).subscribed);
             done();
         });
         //then

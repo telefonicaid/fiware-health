@@ -128,7 +128,7 @@ suite('cbroker', function () {
 
         //when
         cbroker.parseRegions(this.txid, entities);
-        var result = global.regionsCache.getRegions();
+        var result = config.regions.getRegions();
 
         //then
         assert.equal(expected[2].node, result[2].node);
@@ -189,7 +189,7 @@ suite('cbroker', function () {
 
             //then
             http.request.restore();
-            assert.notEqual(global.regionsCache.get(region), undefined);
+            assert.notEqual(config.regions.get(region), undefined);
             done();
         });
 

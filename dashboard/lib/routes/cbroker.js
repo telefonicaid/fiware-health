@@ -67,16 +67,16 @@ function parseRegions(txid, entities) {
 
             if (config.cbroker.filter.indexOf(entry.contextElement.id) >= 0) {
                 logger.warn(context, 'Discarded region "%s" found in filter', entry.contextElement.id);
-                global.regionsCache.del(entry.contextElement.id);
+                config.regions.del(entry.contextElement.id);
             } else {
 
-                var region = global.regionsCache.get(entry.contextElement.id);
+                var region = config.regions.get(entry.contextElement.id);
                 if (region !== undefined) {
                     regions.push(entry.contextElement.id);
-                    global.regionsCache.update(entry.contextElement.id, 'status', sanityStatus);
-                    global.regionsCache.update(entry.contextElement.id, 'timestamp', timestamp);
-                    global.regionsCache.update(entry.contextElement.id, 'elapsedTime', elapsedTimeStr);
-                    global.regionsCache.update(entry.contextElement.id, 'elapsedTimeMillis', elapsedTimeMillis);
+                    config.regions.update(entry.contextElement.id, 'status', sanityStatus);
+                    config.regions.update(entry.contextElement.id, 'timestamp', timestamp);
+                    config.regions.update(entry.contextElement.id, 'elapsedTime', elapsedTimeStr);
+                    config.regions.update(entry.contextElement.id, 'elapsedTimeMillis', elapsedTimeMillis);
                 } else {
                     logger.warn(context, 'Discarded region "%s" found in context broker', entry.contextElement.id);
 
@@ -181,7 +181,7 @@ function getEntity(txid, req) {
         req.body = JSON.stringify(req.body);
     }
     var result = parseRegions(txid, JSON.parse(req.body));
-    return global.regionsCache.get(result[0]);
+    return config.regions.get(result[0]);
 
 }
 

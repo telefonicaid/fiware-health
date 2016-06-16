@@ -115,7 +115,7 @@ function isSubscribed(user, region, isSubscribedCallback) {
             } catch (ex) {
                 region.subscribed = false;
             }
-            global.regionsCache.update(region.node, 'subscribed', region.subscribed);
+            config.regions.update(region.node, 'subscribed', region.subscribed);
             isSubscribedCallback();
 
 
@@ -125,7 +125,7 @@ function isSubscribed(user, region, isSubscribedCallback) {
     mailmainRequest.on('error', function (e) {
         logger.error({op: 'subscribe#isSubscribed'}, 'Error in connection with mailman: %s', e);
         region.subscribed = false;
-        global.regionsCache.update(region.node, 'subscribed', region.subscribed);
+        config.regions.update(region.node, 'subscribed', region.subscribed);
         isSubscribedCallback();
     });
 
@@ -140,7 +140,7 @@ function isSubscribed(user, region, isSubscribedCallback) {
 function searchSubscription(user, callback) {
 
     logger.debug('searchSubscription');
-    var regions = global.regionsCache.getRegions();
+    var regions = config.regions.getRegions();
     var finished = _.after(regions.length, callback);
     regions.map(function (region) {
         isSubscribed(user, region, finished);

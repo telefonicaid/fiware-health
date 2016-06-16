@@ -92,14 +92,14 @@ function checkAuthorizedByConfig(region, regionName, username) {
  */
 function addAuthorized(username) {
 
-    global.regionsCache.keys().filter(function (key) {
+    config.regions.keys().filter(function (key) {
 
-        var region = global.regionsCache.get(key);
+        var region = config.regions.get(key);
         var regionName = getRegionNameForCompare(region.node);
         region.authorized = ((username.indexOf(regionName)) !== -1);
 
         checkAuthorizedByConfig(region, regionName, username);
-        global.regionsCache.update(region.node, 'authorized', region.authorized);
+        config.regions.update(region.node, 'authorized', region.authorized);
 
     });
 

@@ -342,40 +342,5 @@ suite('app', function () {
         assert.equal(req.session.accessToken, undefined);
     });
 
-    test('should_return_1_when_first_argument_greater_than_second', function () {
-        //given
-        var a = 'Zregion';
-        var b = 'Aregion';
-
-        //when
-        var result = app.compare(a, b);
-
-        //then
-        assert(result === 1);
-    });
-
-    test('should_return_negative__when_first_argument_less_than_second', function () {
-        //given
-        var a = 'Aregion';
-        var b = 'Zregion';
-
-        //when
-        var result = app.compare(a, b);
-
-        //then
-        assert(result === -1);
-    });
-
-    test('should_return_0_when_first_argument_equal_than_second', function () {
-        //given
-        var a = 'Aregion';
-        var b = 'Aregion';
-
-        //when
-        var result = app.compare(a, b);
-
-        //then
-        assert(result === 0);
-    });
 
 });

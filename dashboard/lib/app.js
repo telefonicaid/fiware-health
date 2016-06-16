@@ -36,62 +36,7 @@ var express = require('express'),
     logger = require('./logger'),
     OAuth2 = require('./oauth2').OAuth2,
     constants = require('./constants'),
-    monasca = require('./monasca'),
-    NodeCache = require('node-cache');
-
-/**
- * regions cache
- */
-global.regionsCache = new NodeCache({ stdTTL: 0, checkperiod: 600 });
-
-/**
- * Compare two region name nodes
- * @param {Json} a
- * @param {Json} b
- * @returns {number}
- */
-function compare(a, b) {
-    if (a > b) {
-        return 1;
-    }
-    if (a < b) {
-        return -1;
-    }
-    // a must be equal to b
-    return 0;
-}
-
-/**
- * getRegions return a dict with regions and regions object by asc order
- * @returns {Array}
- */
-global.regionsCache.getRegions = function () {
-
-    var regionNames = global.regionsCache.keys();
-    var regions = [];
-
-    regionNames.sort(compare);
-
-    regionNames.forEach(function (key) {
-        regions.push(global.regionsCache.get(key));
-    });
-
-    return regions;
-};
-
-/**
- * udpate or add new value to region
- * @param {String} region name
- * @param {String} name of field to set, (i.g: status, timestamp)
- * @param {Object} the new value
- */
-global.regionsCache.update = function (regionName, field, value) {
-
-    var region = global.regionsCache.get(regionName);
-    region[field] = value;
-    global.regionsCache.set(regionName, region);
-
-};
+    monasca = require('./monasca');
 
 var app = express();
 
@@ -135,32 +80,6 @@ function compile(str, path) {
         .define('logoImage', function() {
                 return new stylus.nodes.Literal('url("' + config.webContext + 'images/logo.png")');
         });
-}
-
-
-function loadRegionsFromSettings() {
-    /**
-     * Read settings file with available regions
-     */
-
-    var json = JSON.parse(require('fs').readFileSync(config.settings, 'utf8'));
-
-    /**
-     * Fill cache
-     */
-    /*jshint -W069 */
-    for (var region in json['region_configuration']) {
-
-        global.regionsCache.set(region, {
-            node: region,
-            status: '',
-            timestamp: 0,
-            elapsedTime: 'NaNh, NaNm, NaNs',
-            elapsedTimeMillis: NaN
-        });
-    }
-
-
 }
 
 
@@ -325,8 +244,6 @@ function getLogin(req, res, oauth2) {
 }
 
 
-loadRegionsFromSettings();
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -472,6 +389,4 @@ module.exports.getOAuthAccessTokenCallback = getOAuthAccessTokenCallback;
 /** @export */
 module.exports.oauthGetCallback = oauthGetCallback;
 
-/** @export */
-module.exports.compare = compare;
 
