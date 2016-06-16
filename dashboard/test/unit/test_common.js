@@ -21,12 +21,25 @@ var assert = require('assert'),
     init = require('./init'),
     common = require('../../lib/routes/common'),
     constants = require('../../lib/constants'),
-    config = require('../../lib/config').data;
+    config = require('../../lib/config').data,
+    _ = require('underscore');
 
 
 /* jshint unused: false */
 suite('common', function () {
 
+    function fillCache(regions) {
+        global.regionsCache.flushAll();
+        for (var index in regions) {
+            regionsCache.set(regions[index].node, {
+                node: regions[index].node,
+                status: regions[index].status,
+                timestamp: regions[index].timestamp,
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
+            });
+        }
+    }
 
     test('should_return_superuser_after_parse_roles_for_superuser_user', function () {
         //Given
@@ -91,27 +104,36 @@ suite('common', function () {
                 node: 'RegionOne',
                 status: constants.GLOBAL_STATUS_NOT_OK,
                 timestamp: '2015/05/13 11:10 UTC',
-                authorized: true
-            },
-            {
-                node: 'RegionTwo',
-                status: constants.GLOBAL_STATUS_OK,
-                timestamp: '2015/05/13 11:10 UTC',
-                authorized: false
+                authorized: true,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
             },
             {
                 node: 'RegionTree',
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
-                authorized: false
+                authorized: false,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
+            },
+            {
+                node: 'RegionTwo',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
             }
         ];
+        fillCache(regions);
+
 
         //When
-        regions = common.addAuthorized(regions, 'admin-regionone');
+        common.addAuthorized('admin-regionone');
 
         //Then
-        assert.deepEqual(expected, regions);
+        regions = global.regionsCache.getRegions();
+        assert(_.isEqual(expected, regions));
 
     });
 
@@ -137,30 +159,38 @@ suite('common', function () {
         ];
         var expected = [
             {
-                node: 'RegionOne1',
-                status: constants.GLOBAL_STATUS_NOT_OK,
-                timestamp: '2015/05/13 11:10 UTC',
-                authorized: true
-            },
-            {
                 node: 'RegionOne',
                 status: constants.GLOBAL_STATUS_OK,
                 timestamp: '2015/05/13 11:10 UTC',
-                authorized: true
+                authorized: true,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
+            },
+            {
+                node: 'RegionOne1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
             },
             {
                 node: 'RegionTree',
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
-                authorized: false
+                authorized: false,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
             }
         ];
+        fillCache(regions);
 
         //When
-        regions = common.addAuthorized(regions, 'admin-regionone');
+        common.addAuthorized('admin-regionone');
 
         //Then
-        assert.deepEqual(expected, regions);
+        regions=global.regionsCache.getRegions();
+        assert(_.isEqual(expected, regions));
 
     });
 
@@ -186,32 +216,40 @@ suite('common', function () {
         ];
         var expected = [
             {
-                node: 'RegionOne1',
-                status: constants.GLOBAL_STATUS_NOT_OK,
-                timestamp: '2015/05/13 11:10 UTC',
-                authorized: true
-            },
-            {
                 node: 'RegionOne',
                 status: constants.GLOBAL_STATUS_OK,
                 timestamp: '2015/05/13 11:10 UTC',
-                authorized: true
+                authorized: true,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
+            },
+            {
+                node: 'RegionOne1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
             },
             {
                 node: 'RegionTree',
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
-                authorized: false
+                authorized: false,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN
             }
         ];
+        fillCache(regions);
         var data = [{'RegionOne': 'admin1'}, {'RegionOne1': 'admin-with-name'}, {'RegionOne': 'admin-with-name'}];
         config.idm.regionsAuthorized = data;
 
         //When
-        regions = common.addAuthorized(regions, 'admin-with-name');
+        common.addAuthorized('admin-with-name');
 
         //Then
-        assert.deepEqual(expected, regions);
+        regions=global.regionsCache.getRegions();
+        assert(_.isEqual(expected, regions));
         config.idm.regionsAuthorized = [];
 
 
@@ -240,30 +278,38 @@ suite('common', function () {
         ];
         var expected = [
             {
+                authorized: false,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN,
                 node: 'RegionOne',
                 status: constants.GLOBAL_STATUS_NOT_OK,
-                timestamp: '2015/05/13 11:10 UTC',
-                authorized: false
+                timestamp: '2015/05/13 11:10 UTC'
             },
             {
-                node: 'RegionTwo',
-                status: constants.GLOBAL_STATUS_OK,
-                timestamp: '2015/05/13 11:10 UTC',
-                authorized: false
-            },
-            {
+                authorized: false,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN,
                 node: 'RegionTree',
                 status: constants.GLOBAL_STATUS_OTHER,
-                timestamp: '2015/05/13 11:10 UTC',
-                authorized: false
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                authorized: false,
+                elapsedTime: "NaNh, NaNm, NaNs",
+                elapsedTimeMillis: NaN,
+                node: 'RegionTwo',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC'
             }
         ];
+        fillCache(regions);
 
         //When
-        regions = common.addAuthorized(regions, 'admin-regionfour');
+        common.addAuthorized('admin-regionfour');
 
         //Then
-        assert.deepEqual(expected, regions);
+        regions=global.regionsCache.getRegions();
+        assert(_.isEqual(expected, regions));
     });
 
 });

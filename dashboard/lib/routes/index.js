@@ -33,24 +33,6 @@ var MESSAGE = 'Page cannot be displayed due to a Context Broker error (connectio
 
 
 /**
- * Compare two region name nodes
- * @param {Json} a
- * @param {Json} b
- * @returns {number}
- */
-function compare(a, b) {
-    if (a.node > b.node) {
-        return 1;
-    }
-    if (a.node < b.node) {
-        return -1;
-    }
-    // a must be equal to b
-    return 0;
-}
-
-
-/**
  * @param {*} req
  * @param {*} res
  */
@@ -61,22 +43,19 @@ function getIndex(req, res) {
 
     /**
      * callback for cbroker.retrieveAllRegions
-     * @param {[]} regions
      */
-    function callbackRetrieveRegions(regions) {
+    function callbackRetrieveRegions() {
 
         logger.debug(context, 'Response from Context Broker: %j', regions);
 
         var userinfo = req.session.user;
 
         logger.debug(context, 'User role: %s info: %j', req.session.role, userinfo);
+        var regions = global.regionsCache.getRegions();
 
-        regions.sort(compare);
 
         if (userinfo !== undefined) {
             //search for subscription
-
-            logger.debug(context, 'Regions: %s', regions.constructor.name);
 
             if (regions.length === 0) {
                 res.render('error', {
@@ -93,7 +72,8 @@ function getIndex(req, res) {
             }
 
             var afterSearchCallback = function () {
-                regions = common.addAuthorized(regions, userinfo.displayName);
+                common.addAuthorized(userinfo.displayName);
+                regions = global.regionsCache.getRegions();
                 logger.debug(context, 'Before render: %s', JSON.stringify(regions));
                 res.render('logged', {
                     name: userinfo.displayName,
@@ -103,7 +83,7 @@ function getIndex(req, res) {
                 });
             };
 
-            subscribe.searchSubscription(userinfo.email, regions, afterSearchCallback);
+            subscribe.searchSubscription(userinfo.email, afterSearchCallback);
 
         } else {
 
@@ -133,17 +113,17 @@ function getIndex(req, res) {
 
     logger.info(context, 'Request for Sanity Check Status main page');
 
-    cbroker.retrieveAllRegions(txid, function (regions) {
+    cbroker.retrieveAllRegions(txid, function () {
         // Update region sanity_status to `GLOBAL_STATUS_OTHER` for those currently in progress
         jenkins.regionJobsInProgress(txid, function (progress) {
             if (progress) {
-                regions.forEach(function (region) {
-                    if (progress[region.node] === true) {
-                        region.status = constants.GLOBAL_STATUS_OTHER;
+                global.regionsCache.keys.forEach(function (region) {
+                    if (progress[region] === true) {
+                        global.regionsCache.update(region, "status", constants.GLOBAL_STATUS_OTHER);
                     }
                 });
             }
-            callbackRetrieveRegions(regions);
+            callbackRetrieveRegions();
         });
     });
 }
@@ -159,5 +139,3 @@ module.exports = router;
 /** @export */
 module.exports.getIndex = getIndex;
 
-/** @export */
-module.exports.compare = compare;

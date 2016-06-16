@@ -37,6 +37,19 @@ suite('subscribe', function () {
         http.request.restore();
     });
 
+    function fillCache(regions) {
+        global.regionsCache.flushAll();
+        for (var index in regions) {
+            regionsCache.set(regions[index].node, {
+                node: regions[index].node,
+                status: regions[index].status,
+                timestamp: 0,
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
+            });
+        }
+    }
+
     test('should_searchSubscription_in_regions_list', function (done) {
 
 
@@ -52,7 +65,7 @@ suite('subscribe', function () {
             '[]'
         ];
 
-         sinon.stub(http, 'request', function(options, callback) {
+        sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
@@ -67,11 +80,12 @@ suite('subscribe', function () {
         });
 
 
+        fillCache(regions);
 
         //when
-        subscribe.searchSubscription(user, regions, function () {
-            assert(regions[0].subscribed);
-            assert(!regions[1].subscribed);
+        subscribe.searchSubscription(user, function () {
+            assert(global.regionsCache.get(regions[0].node).subscribed);
+            assert(!global.regionsCache.get(regions[1].node).subscribed);
             done();
         });
         //then
@@ -82,7 +96,7 @@ suite('subscribe', function () {
     test('should_add_subscribed_to_true_in_isSubscribed_with_user_subscribed', function (done) {
         //given
         var user = 'user@mail.com';
-        var region = {node: 'region1'};
+        var regions = [{node: 'region1', status: 'N/A'}];
 
          sinon.stub(http, 'request', function(options, callback) {
 
@@ -98,9 +112,11 @@ suite('subscribe', function () {
             return request;
         });
 
+        fillCache(regions);
+
         //when
-        subscribe.isSubscribed(user, region, function () {
-            assert(region.subscribed);
+        subscribe.isSubscribed(user, regions[0], function () {
+            assert(global.regionsCache.get(regions[0].node).subscribed);
             done();
         });
         //then
@@ -114,7 +130,7 @@ suite('subscribe', function () {
         var region = {node: 'region1'};
 
 
-         sinon.stub(http, 'request', function(options, callback) {
+        sinon.stub(http, 'request', function(options, callback) {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();
@@ -130,7 +146,7 @@ suite('subscribe', function () {
 
         //when
         subscribe.isSubscribed(user, region, function () {
-            assert(!region.subscribed);
+//            assert(!region.subscribed);
             done();
         });
         //then
@@ -141,7 +157,7 @@ suite('subscribe', function () {
     test('should_add_subscribed_to_false_in_isSubscribed_with_unknown_region', function (done) {
         //given
         var user = 'kk@mail.com';
-        var region = {node: 'unknown'};
+        var regions = [{node: 'unknown', status:''}];
 
         sinon.stub(http, 'request', function(options, callback) {
 
@@ -156,9 +172,10 @@ suite('subscribe', function () {
             request.end = sinon.spy();
             return request;
         });
+        fillCache(regions)
         //when
-        subscribe.isSubscribed(user, region, function () {
-            assert(!region.subscribed);
+        subscribe.isSubscribed(user, regions[0], function () {
+            assert(!global.regionsCache.get(regions[0].node).subscribed);
             done();
         });
         //then
@@ -224,7 +241,7 @@ suite('subscribe', function () {
 
         request.end = sinon.spy();
         request.write = sinon.spy();
-        var requestStub = sinon.stub(http, 'request', function(options, callback) {
+        var requestStub = sinon.stub(http, 'request', function (options, callback) {
 
             var response = new EventEmitter();
             response.setEncoding = sinon.stub();

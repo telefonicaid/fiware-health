@@ -91,18 +91,18 @@ function checkAuthorizedByConfig(region, regionName, username) {
  * @param {[]} regions
  * @param {String} username
  */
-function addAuthorized(regions, username) {
+function addAuthorized(username) {
 
-    regions.filter(function(region) {
+    global.regionsCache.keys().filter(function (key) {
 
+        var region = global.regionsCache.get(key)
         var regionName = getRegionNameForCompare(region.node);
         region.authorized = ((username.indexOf(regionName)) !== -1);
 
         checkAuthorizedByConfig(region, regionName, username);
+        global.regionsCache.update(region.node, "authorized", region.authorized);
 
     });
-
-    return regions;
 
 }
 

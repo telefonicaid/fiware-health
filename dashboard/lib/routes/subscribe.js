@@ -115,6 +115,7 @@ function isSubscribed(user, region, isSubscribedCallback) {
             } catch (ex) {
                 region.subscribed = false;
             }
+            global.regionsCache.update(region.node, "subscribed", region.subscribed);
             isSubscribedCallback();
 
 
@@ -124,6 +125,7 @@ function isSubscribed(user, region, isSubscribedCallback) {
     mailmainRequest.on('error', function (e) {
         logger.error({op: 'subscribe#isSubscribed'}, 'Error in connection with mailman: %s', e);
         region.subscribed = false;
+        global.regionsCache.update(region.node, "subscribed", region.subscribed);
         isSubscribedCallback();
     });
 
@@ -136,9 +138,10 @@ function isSubscribed(user, region, isSubscribedCallback) {
  * @param {[]} regions
  * @param {callback} callback
  */
-function searchSubscription(user, regions, callback) {
+function searchSubscription(user, callback) {
 
     logger.debug('searchSubscription');
+    var regions = global.regionsCache.getRegions();
     var finished = _.after(regions.length, callback);
     regions.map(function (region) {
         isSubscribed(user, region, finished);
@@ -159,9 +162,9 @@ function notify(region, notifyCallback) {
     logger.info({op: 'subscribe#notify'}, 'notify change in region: ' + regionName);
 
     var payloadString = 'name_from= fi-health sanity&';
-        payloadString += 'email_from=' + config.mailman.emailFrom + '&';
-        payloadString += 'subject=Status changed for region ' + regionName + '&';
-        payloadString += 'body=Status changed to ' + regionStatus + ' for region ' + regionName +
+    payloadString += 'email_from=' + config.mailman.emailFrom + '&';
+    payloadString += 'subject=Status changed for region ' + regionName + '&';
+    payloadString += 'body=Status changed to ' + regionStatus + ' for region ' + regionName +
                          ' (visit ' + config.fiHealthUrl + 'report/' + regionName + '_results.html for details)';
 
     var headers = {

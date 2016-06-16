@@ -72,7 +72,7 @@
                     {
                         "name": "sanity_check_elapsed_time",
                         "type": "string",
-                        "value": "N/A"
+                        "value": "60000"
                     }
                 ],
                 "id": "Region3",
@@ -100,7 +100,7 @@
                     {
                         "name": "sanity_check_elapsed_time",
                         "type": "string",
-                        "value": "60000"
+                        "value": "N/A"
                     }
                 ],
                 "id": "Region4",
@@ -116,6 +116,18 @@
             "contextElement": {
                 "attributes": [],
                 "id": "Region5",
+                "isPattern": "false",
+                "type": "region"
+            },
+            "statusCode": {
+                "code": "200",
+                "reasonPhrase": "OK"
+            }
+        },
+        {
+            "contextElement": {
+                "attributes": [],
+                "id": "Region6",
                 "isPattern": "false",
                 "type": "region"
             },

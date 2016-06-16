@@ -36,10 +36,57 @@ var express = require('express'),
     logger = require('./logger'),
     OAuth2 = require('./oauth2').OAuth2,
     constants = require('./constants'),
-    monasca = require('./monasca');
+    monasca = require('./monasca'),
+    NodeCache = require('node-cache');
 
+
+global.regionsCache = new NodeCache({ stdTTL: 0, checkperiod: 600 });
+
+/**
+ * Compare two region name nodes
+ * @param {Json} a
+ * @param {Json} b
+ * @returns {number}
+ */
+function compare(a, b) {
+    if (a > b) {
+        return 1;
+    }
+    if (a < b) {
+        return -1;
+    }
+    // a must be equal to b
+    return 0;
+}
+
+/**
+ * getRegions return a dict with regions and regions object by asc order
+ * @returns {Array}
+ */
+global.regionsCache.getRegions = function () {
+
+    var regionNames = global.regionsCache.keys();
+    var regions = [];
+
+    regionNames.sort(compare);
+
+    regionNames.forEach(function (key) {
+        regions.push(global.regionsCache.get(key));
+    });
+
+    return regions;
+};
+
+global.regionsCache.update = function (regionName, field, value) {
+
+    var region = global.regionsCache.get(regionName);
+    region[field] = value;
+    global.regionsCache.set(regionName, region);
+
+};
 
 var app = express();
+
 
 
 logger.info('Running app in web context: %s', config.webContext);
@@ -50,6 +97,7 @@ logger.info('Running app in web context: %s', config.webContext);
  * @type {string}
  */
 app.base = config.webContext;
+
 
 
 /**
@@ -79,6 +127,38 @@ function compile(str, path) {
         .define('logoImage', function() {
                 return new stylus.nodes.Literal('url("' + config.webContext + 'images/logo.png")');
         });
+}
+
+
+function loadRegionsFromSettings() {
+    /**
+     * Read settings file with available regions
+     */
+
+    var json = JSON.parse(require('fs').readFileSync('config/settings.json', 'utf8'));
+
+
+    var regions = [];
+    for (region in json.region_configuration) {
+        regions.push(region);
+    }
+
+    /**
+     * Open and configure cache
+     */
+
+    for (var region in json.region_configuration) {
+
+        regionsCache.set(region, {
+            node: region,
+            status: '',
+            timestamp: 0,
+            elapsedTime: 'NaNh, NaNm, NaNs',
+            elapsedTimeMillis: NaN
+        });
+    }
+
+
 }
 
 
@@ -243,6 +323,8 @@ function getLogin(req, res, oauth2) {
 }
 
 
+loadRegionsFromSettings()
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -367,6 +449,8 @@ app.use(function (err, req, res) {
 /** @export */
 module.exports = app;
 
+module.exports.regionsCache = regionsCache;
+
 /** @export */
 module.exports.postContextBroker = postContextBroker;
 
@@ -387,3 +471,7 @@ module.exports.getOAuthAccessTokenCallback = getOAuthAccessTokenCallback;
 
 /** @export */
 module.exports.oauthGetCallback = oauthGetCallback;
+
+/** @export */
+module.exports.compare = compare;
+
