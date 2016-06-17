@@ -39,7 +39,7 @@ var config = {
     logLevel: 'DEBUG',
     listenPort: 3000,
     webContext: '/',
-    settings: 'config/settings.json.sample',
+    settings: '',
     secret: 'ssshhh',
     paths: {
         reportsUrl: '/report',

@@ -26,6 +26,13 @@ var assert = require('assert'),
 /* jshint unused: false */
 suite('config', function () {
 
+    setup(function () {
+        var file = path.resolve(__dirname, 'settings.json');
+        config.data.settings = file;
+        config.data.regions.init(file);
+    });
+
+
     test('should_return_valid_config', function () {
         //Given
         var filename = path.join(__dirname, 'test_config.yml');
@@ -37,7 +44,6 @@ suite('config', function () {
         assert.deepEqual(['INFO', 'Read configuration file'], result);
         assert.equal(config.data.logLevel, 'ERROR');
         assert.equal(config.data.webContext, '/');
-        assert.equal(config.data.settings, 'config/settings.json.sample');
         assert.notEqual(config.data.idm, undefined);
         assert.notEqual(config.data.mailman, undefined);
         assert.equal(config.data.jenkins.token, '12345678');

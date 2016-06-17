@@ -140,7 +140,7 @@ function isSubscribed(user, region, isSubscribedCallback) {
 function searchSubscription(user, callback) {
 
     logger.debug('searchSubscription');
-    var regions = config.regions.getRegions();
+    var regions = config.regions.list();
     var finished = _.after(regions.length, callback);
     regions.map(function (region) {
         isSubscribed(user, region, finished);

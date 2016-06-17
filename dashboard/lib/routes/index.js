@@ -46,7 +46,7 @@ function getIndex(req, res) {
      */
     function callbackRetrieveRegions() {
 
-        var regions = config.regions.getRegions();
+        var regions = config.regions.list();
         logger.debug(context, 'Response from Context Broker: %j', regions);
 
         var userinfo = req.session.user;
@@ -73,7 +73,7 @@ function getIndex(req, res) {
 
             var afterSearchCallback = function () {
                 common.addAuthorized(userinfo.displayName);
-                regions = config.regions.getRegions();
+                regions = config.regions.list();
                 logger.debug(context, 'Before render: %s', JSON.stringify(regions));
                 res.render('logged', {
                     name: userinfo.displayName,

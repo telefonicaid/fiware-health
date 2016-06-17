@@ -28,6 +28,7 @@ var fs = require('fs'),
     logger = require('../../lib/logger'),
     config = require('../../lib/config').data,
     init = require('./init'),
+    path = require('path'),
     _ = require('underscore');
 
 
@@ -43,6 +44,13 @@ assert.isNaN = function (value) {
 
 /* jshint unused: false, sub: true */
 suite('cbroker', function () {
+
+    setup(function () {
+        var file = path.resolve(__dirname, 'settings.json');
+        config.settings = file;
+        config.regions.init(file);
+    });
+
 
     var stream = logger.stream;
 
@@ -128,7 +136,7 @@ suite('cbroker', function () {
 
         //when
         cbroker.parseRegions(this.txid, entities);
-        var result = config.regions.getRegions();
+        var result = config.regions.list();
 
         //then
         assert.equal(expected[2].node, result[2].node);

@@ -28,7 +28,6 @@ var assert = require('assert'),
 /* jshint unused: false */
 suite('unsubscribe', function () {
 
-
     test('should_unsubcribe_user_and_redirect_to_webcontext', function () {
 
         //given

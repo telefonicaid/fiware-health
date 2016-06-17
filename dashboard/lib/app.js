@@ -38,8 +38,8 @@ var express = require('express'),
     constants = require('./constants'),
     monasca = require('./monasca');
 
-var app = express();
 
+var app = express();
 
 
 logger.info('Running app in web context: %s', config.webContext);
@@ -50,7 +50,6 @@ logger.info('Running app in web context: %s', config.webContext);
  * @type {string}
  */
 app.base = config.webContext;
-
 
 
 /**
@@ -388,5 +387,3 @@ module.exports.getOAuthAccessTokenCallback = getOAuthAccessTokenCallback;
 
 /** @export */
 module.exports.oauthGetCallback = oauthGetCallback;
-
-

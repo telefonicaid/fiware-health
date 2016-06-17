@@ -132,7 +132,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionone');
 
         //Then
-        regions = config.regions.getRegions();
+        regions = config.regions.list();
         assert(_.isEqual(expected, regions));
 
     });
@@ -189,7 +189,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionone');
 
         //Then
-        regions = config.regions.getRegions();
+        regions = config.regions.list();
         assert(_.isEqual(expected, regions));
 
     });
@@ -248,7 +248,7 @@ suite('common', function () {
         common.addAuthorized('admin-with-name');
 
         //Then
-        regions = config.regions.getRegions();
+        regions = config.regions.list();
         assert(_.isEqual(expected, regions));
         config.idm.regionsAuthorized = [];
 
@@ -308,7 +308,7 @@ suite('common', function () {
         common.addAuthorized('admin-regionfour');
 
         //Then
-        regions = config.regions.getRegions();
+        regions = config.regions.list();
         assert(_.isEqual(expected, regions));
     });
 

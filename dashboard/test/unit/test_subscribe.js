@@ -24,11 +24,19 @@ var assert = require('assert'),
     init = require('./init'),
     logger = require('../../lib/logger'),
     subscribe = require('../../lib/routes/subscribe'),
+    path = require('path'),
     config = require('../../lib/config').data;
 
 
 /* jshint unused: false */
 suite('subscribe', function () {
+
+    setup(function () {
+        var file = path.resolve(__dirname, 'settings.json');
+        config.settings = file;
+        config.regions.init(file);
+    });
+
 
     suiteSetup(function() {
         logger.setLevel('ERROR');

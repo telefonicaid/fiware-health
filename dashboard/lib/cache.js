@@ -31,29 +31,32 @@ regionsCache.init = function (settings) {
      * Read settings file with available regions
      */
 
-    var json = JSON.parse(require('fs').readFileSync(settings, 'utf8'));
+    try {
+        var json = JSON.parse(require('fs').readFileSync(settings, 'utf8'));
 
-    /**
-     * Fill cache
-     */
-    /*jshint -W069 */
-    for (var region in json['region_configuration']) {
+        /*jshint -W069 */
+        for (var region in json['region_configuration']) {
 
-        regionsCache.set(region, {
-            node: region,
-            status: '',
-            timestamp: 0,
-            elapsedTime: 'NaNh, NaNm, NaNs',
-            elapsedTimeMillis: NaN
-        });
+            regionsCache.set(region, {
+                node: region,
+                status: '',
+                timestamp: 0,
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
+            });
+        }
+
+    } catch (err) {
+        console.log('warning, fail reading settings file: ' + settings);
     }
+
 
 };
 
 /**
  * Compare two region name nodes
- * @param {Json} a
- * @param {Json} b
+ * @param {String} a
+ * @param {String} b
  * @returns {number}
  */
 function compare(a, b) {
@@ -68,10 +71,10 @@ function compare(a, b) {
 }
 
 /**
- * getRegions return a dict with regions and regions object by asc order
+ * return a dict with regions and regions object by asc order
  * @returns {Array}
  */
-regionsCache.getRegions = function() {
+regionsCache.list = function() {
 
     var regionNames = regionsCache.keys();
     var regions = [];
