@@ -126,9 +126,11 @@ if [ $1 -ge 1 ]; then
 	cd $DASHBOARD_DIR
 	npm config set ca=""
 	npm install --production || STATUS=1
+	echo
 
 	# install pip dependencies (in current python env or virtualenv)
-	pip install mailman-api==0.2.9
+	echo "Installing package dependencies ..."
+	pip install mailman-api==0.2.9 -q || STATUS=1
 
 	# check FIWARE user
 	if ! getent passwd $FIWARE_USR >/dev/null; then
@@ -180,8 +182,8 @@ if [ $1 -ge 1 ]; then
 		EOF
 	else fmt --width=${COLUMNS:-$(tput cols)} 1>&2 <<-EOF
 
-		ERROR: Failed to install dependencies. Please check
-		\`npm-debug.log' file for problems and then reinstall package.
+		ERROR: Failed to install dependencies. Please check the error
+		messages and then reinstall the package.
 
 		EOF
 	fi
