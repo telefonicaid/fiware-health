@@ -136,7 +136,7 @@ suite('subscribe', function () {
     test('should_add_subscribed_to_false_in_isSubscribed_with_user_not_subscribed', function (done) {
         //given
         var user = 'kk@mail.com';
-        var region = {node: 'region1'};
+        var regions = [{node: 'region1', status: 'N/A'}];
 
 
         sinon.stub(http, 'request', function(options, callback) {
@@ -154,8 +154,8 @@ suite('subscribe', function () {
         });
 
         //when
-        subscribe.isSubscribed(user, region, function () {
-//            assert(!region.subscribed);
+        subscribe.isSubscribed(user, regions[0], function () {
+            assert(!config.regions.get(regions[0].node).subscribed);
             done();
         });
         //then

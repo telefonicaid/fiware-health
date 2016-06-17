@@ -117,7 +117,7 @@ function getIndex(req, res) {
         // Update region sanity_status to `GLOBAL_STATUS_OTHER` for those currently in progress
         jenkins.regionJobsInProgress(txid, function (progress) {
             if (progress) {
-                config.regions.keys.forEach(function (region) {
+                config.regions.keys().forEach(function (region) {
                     if (progress[region] === true) {
                         config.regions.update(region, 'status', constants.GLOBAL_STATUS_OTHER);
                     }
