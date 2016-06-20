@@ -39,7 +39,7 @@
     "node-cache": "^3.2.1",
     "optimist": "^0.6.1",
     "serve-favicon": "~2.2.0",
-    "sleep": "^3.0.0",
+    "sleep": "^3.0.1",
     "stylus": "^0.51.1",
     "underscore": "^1.8.3",
     "util": "^0.10.3"
