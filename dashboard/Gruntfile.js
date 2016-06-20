@@ -95,7 +95,7 @@ module.exports = function (grunt) {
                 src: 'Gruntfile.js'
             },
             lib: {
-                src: ['<%= dirs.lib[0] %>/**/*.js']
+                src: ['<%= dirs.lib[0] %>/**/*.js', '!lib/public/javascripts/jquery*.js']
             },
             test: {
                 src: ['<%= dirs.test[0] %>/unit/*.js']
@@ -218,6 +218,7 @@ module.exports = function (grunt) {
                     '--flagfile .gjslintrc' //use flag file
                 ],
                 force: false
+
             },
             gruntfile: {
                 src: '<%= jshint.gruntfile.src %>'
