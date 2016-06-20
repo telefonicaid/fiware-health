@@ -24,7 +24,8 @@ var path = require('path'),
     optimist = require('optimist'),
     yaml = require('js-yaml'),
     util = require('util'),
-    fs = require('fs');
+    fs = require('fs'),
+    cache = require('./cache');
 
 
 /**
@@ -38,6 +39,7 @@ var config = {
     logLevel: 'DEBUG',
     listenPort: 3000,
     webContext: '/',
+    settings: '',
     secret: 'ssshhh',
     paths: {
         reportsUrl: '/report',
@@ -95,6 +97,7 @@ function readConfigFile(file) {
                 case 'app':
                     config.listenPort = cfgParse.app.port;
                     config.webContext = cfgParse.app.webContext;
+                    config.settings = cfgParse.app.settings;
                     config.fiHealthUrl = util.format('https://%s%s', cfgParse.app.host, cfgParse.app.webContext);
                     break;
                 case 'logging':
@@ -174,6 +177,9 @@ function main() {
 
     // process config file
     readConfigFile(config.configFile);
+
+    config.regions = cache;
+    cache.init(config.settings);
 
     // process command line arguments
     argParser

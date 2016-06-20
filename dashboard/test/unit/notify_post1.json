@@ -23,7 +23,7 @@
                 ],
                 "type": "region",
                 "isPattern": "false",
-                "id": "Region1"
+                "id": "Region2"
             },
             "statusCode": {
                 "code": "200",

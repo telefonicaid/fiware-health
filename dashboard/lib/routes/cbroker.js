@@ -34,13 +34,13 @@ var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about reg
  * Extract regions from the entities included in contextbroker notification
  * @param {string} txid
  * @param {Object} entities
- * @return {Array}
+ * @return {Array} with regions parsed
  */
 function parseRegions(txid, entities) {
-    var context = {trans: txid, op: 'cbroker#parseRegions'},
-        result = [];
+    var context = {trans: txid, op: 'cbroker#parseRegions'};
 
     logger.debug(context, 'Entities to parse: %j', entities);
+    var regions = [];
 
     entities.contextResponses.forEach(function (entry) {
         var type = entry.contextElement.type;
@@ -67,26 +67,32 @@ function parseRegions(txid, entities) {
 
             if (config.cbroker.filter.indexOf(entry.contextElement.id) >= 0) {
                 logger.warn(context, 'Discarded region "%s" found in filter', entry.contextElement.id);
+                config.regions.del(entry.contextElement.id);
             } else {
-                result.push({
-                    node: entry.contextElement.id,
-                    status: sanityStatus,
-                    timestamp: timestamp,
-                    elapsedTime: elapsedTimeStr,
-                    elapsedTimeMillis: elapsedTimeMillis
-                });
+
+                var region = config.regions.get(entry.contextElement.id);
+                if (region !== undefined) {
+                    regions.push(entry.contextElement.id);
+                    config.regions.update(entry.contextElement.id, 'status', sanityStatus);
+                    config.regions.update(entry.contextElement.id, 'timestamp', timestamp);
+                    config.regions.update(entry.contextElement.id, 'elapsedTime', elapsedTimeStr);
+                    config.regions.update(entry.contextElement.id, 'elapsedTimeMillis', elapsedTimeMillis);
+                } else {
+                    logger.warn(context, 'Discarded region "%s" found in context broker', entry.contextElement.id);
+
+                }
+
             }
         }
     });
+    return regions;
 
-    logger.debug(context, 'Result: %j', result);
-    return result;
 }
 
 
 /**
  * @function retrieveAllRegions
- * Call to context broker and get all regions and status.
+ * Call to context broker and get region status for each region in regionsCache.
  * @param {string} txid
  * @param {function} callback
  */
@@ -132,13 +138,14 @@ function retrieveAllRegions(txid, callback) {
             logger.debug(context, 'Response string: %s', responseString);
             try {
                 var resultObject = JSON.parse(responseString),
-                    regions = resultObject.contextResponses.map(function (item) {return item.contextElement.id;});
+                    regions = resultObject.contextResponses.map(function (item) {return item.contextElement.id; });
+
                 logger.info(context, 'Found %d regions: %s', regions.length, regions);
-                callback(parseRegions(txid, resultObject));
+                parseRegions(txid, resultObject);
             } catch (ex) {
                 logger.warn(context, 'Error in parse response string: %s %s', responseString, ex);
-                callback([]);
             }
+            callback();
         });
     });
 
@@ -174,7 +181,8 @@ function getEntity(txid, req) {
         req.body = JSON.stringify(req.body);
     }
     var result = parseRegions(txid, JSON.parse(req.body));
-    return result[0];
+    return config.regions.get(result[0]);
+
 }
 
 

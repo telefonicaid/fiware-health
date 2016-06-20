@@ -26,6 +26,13 @@ var assert = require('assert'),
 /* jshint unused: false */
 suite('config', function () {
 
+    setup(function () {
+        var file = path.resolve(__dirname, 'settings.json');
+        config.data.settings = file;
+        config.data.regions.init(file);
+    });
+
+
     test('should_return_valid_config', function () {
         //Given
         var filename = path.join(__dirname, 'test_config.yml');

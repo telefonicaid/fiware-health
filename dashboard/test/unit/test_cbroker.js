@@ -27,7 +27,9 @@ var fs = require('fs'),
     constants = require('../../lib/constants'),
     logger = require('../../lib/logger'),
     config = require('../../lib/config').data,
-    init = require('./init');
+    init = require('./init'),
+    path = require('path'),
+    _ = require('underscore');
 
 
 /**
@@ -43,6 +45,13 @@ assert.isNaN = function (value) {
 /* jshint unused: false, sub: true */
 suite('cbroker', function () {
 
+    setup(function () {
+        var file = path.resolve(__dirname, 'settings.json');
+        config.settings = file;
+        config.regions.init(file);
+    });
+
+
     var stream = logger.stream;
 
     suiteSetup(function () {
@@ -51,7 +60,7 @@ suite('cbroker', function () {
         this.sampleDataQueryContext = fs.readFileSync('test/unit/post1.json', 'utf8');
         this.parsedRegionsNotifyContext = [
             {
-                node: 'Region1',
+                node: 'Region2',
                 status: constants.GLOBAL_STATUS_OK,
                 timestamp: '2015/05/13 11:10 UTC',
                 elapsedTime: '0h, 2m, 40s',
@@ -59,13 +68,6 @@ suite('cbroker', function () {
             }
         ];
         this.parsedRegionsQueryContext = [
-            {
-                node: 'ZRegionLongName1',
-                status: constants.GLOBAL_STATUS_NOT_OK,
-                timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: '0h, 2m, 40s',
-                elapsedTimeMillis: 160000
-            },
             {
                 node: 'Region2',
                 status: constants.GLOBAL_STATUS_OK,
@@ -77,15 +79,15 @@ suite('cbroker', function () {
                 node: 'Region3',
                 status: constants.GLOBAL_STATUS_OTHER,
                 timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: 'NaNh, NaNm, NaNs',
-                elapsedTimeMillis: NaN
+                elapsedTime: '0h, 1m, 0s',
+                elapsedTimeMillis: 60000
             },
             {
                 node: 'Region4',
                 status: constants.GLOBAL_STATUS_PARTIAL_OK,
                 timestamp: '2015/05/13 11:10 UTC',
-                elapsedTime: '0h, 1m, 0s',
-                elapsedTimeMillis: 60000
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
             },
             {
                 node: 'Region5',
@@ -93,6 +95,20 @@ suite('cbroker', function () {
                 timestamp: '',
                 elapsedTime: '',
                 elapsedTimeMillis: ''
+            },
+            {
+                node: 'Region6',
+                status: '',
+                timestamp: '',
+                elapsedTime: '',
+                elapsedTimeMillis: ''
+            },
+            {
+                node: 'ZRegionLongName1',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                elapsedTime: '0h, 2m, 40s',
+                elapsedTimeMillis: 160000
             }
         ];
     });
@@ -119,15 +135,14 @@ suite('cbroker', function () {
             expected = this.parsedRegionsQueryContext;
 
         //when
-        var result = cbroker.parseRegions(this.txid, entities);
+        cbroker.parseRegions(this.txid, entities);
+        var result = config.regions.list();
 
         //then
         assert.equal(expected[2].node, result[2].node);
         assert.isNaN(expected[2].elapsedTimeMillis);
         assert.isNaN(result[2].elapsedTimeMillis);
-        delete expected[2].elapsedTimeMillis;
-        delete result[2].elapsedTimeMillis;
-        assert.deepEqual(expected, result);
+        assert(_.isEqual(expected, result));
     });
 
     test('should_receive_notify_from_context_broker_and_return_200_ok', function () {
@@ -149,7 +164,7 @@ suite('cbroker', function () {
         //given
         var data = this.sampleDataQueryContext,
             index = 0,
-            region = JSON.parse(data)['contextResponses'][index]['contextElement'].id,
+            region = JSON.parse(data).contextResponses[index].contextElement.id,
             req = {
                 param: sinon.stub(),
                 session: {
@@ -178,11 +193,11 @@ suite('cbroker', function () {
         });
 
         //when
-        cbroker.retrieveAllRegions(this.txid, function (result) {
+        cbroker.retrieveAllRegions(this.txid, function () {
 
             //then
             http.request.restore();
-            assert.deepEqual(region, result[index].node);
+            assert.notEqual(config.regions.get(region), undefined);
             done();
         });
 
@@ -225,11 +240,10 @@ suite('cbroker', function () {
         });
 
         //when
-        cbroker.retrieveAllRegions(this.txid, function (result) {
+        cbroker.retrieveAllRegions(this.txid, function () {
 
             //then
             http.request.restore();
-            assert.deepEqual([], result);
             done();
         });
 

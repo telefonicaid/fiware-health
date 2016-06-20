@@ -87,22 +87,21 @@ function checkAuthorizedByConfig(region, regionName, username) {
     }
 }
 /**
- *  check if username is authorized to manage region and introduce a new field in object
- * @param {[]} regions
+ * Check if username is authorized to manage region and introduce a new field in object
  * @param {String} username
  */
-function addAuthorized(regions, username) {
+function addAuthorized(username) {
 
-    regions.filter(function(region) {
+    config.regions.keys().filter(function (key) {
 
+        var region = config.regions.get(key);
         var regionName = getRegionNameForCompare(region.node);
         region.authorized = ((username.indexOf(regionName)) !== -1);
 
         checkAuthorizedByConfig(region, regionName, username);
+        config.regions.update(region.node, 'authorized', region.authorized);
 
     });
-
-    return regions;
 
 }
 
