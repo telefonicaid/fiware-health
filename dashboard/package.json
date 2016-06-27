@@ -5,7 +5,7 @@
   "product": {
     "name": "fiware-health",
     "area": "iotplatform",
-    "release": "5.3.2"
+    "release": "5.3.3"
   },
   "repository": {
     "type": "git",
