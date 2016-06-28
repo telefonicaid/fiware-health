@@ -32,8 +32,8 @@ paths:
 cbroker:
   host: 'localhost'			# ContextBroker listen host
   port: 1000				# ContextBroker listen port
-  path: '/NGSI10/queryContext'		# QueryContext operation
-  timeout: 10000            		# Timeout after request. 0 disabled it.
+  path: '/v1/queryContext'		# QueryContext operation
+  timeout: 10000			# Timeout after request. 0 disabled it.
   filter: []				# List of regions to remove from web
 
 #----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ idm:
   url: ''				# IdM's authentication URL
   logoutURL: ''				# Idm's logout URL
   callbackURL: ''			# App's callback URL after auth
-  regionsAuthorized: []      		# List of regions authorized to username: [{'RegionName': 'username'}]
+  regionsAuthorized: []			# List of regions authorized to username: [{'RegionName': 'username'}]
 
 #----------------------------------------------------------------------------
 # mailman-api section (mandatory)
@@ -54,7 +54,7 @@ mailman:
   host: 'localhost'			# mailman-api listen host
   port: 8000				# mailman-api listen port
   path: '/'				# mailman-api context
-  emailFrom: ''				# Sender of email notifications
+  emailFrom: ''				# sender of email notifications
 
 #----------------------------------------------------------------------------
 # monasca-api section (mandatory)

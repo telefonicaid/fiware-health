@@ -7,6 +7,7 @@ app:
   port: 3001
   webContext: '/'
   settings: 'settings.json'
+
 #---------------------------------------------------------------------
 # Logging options section (mandatory)
 #---------------------------------------------------------------------
@@ -32,7 +33,7 @@ paths:
 cbroker:
   host: 'localhost'
   port: 8000
-  path: '/NGSI10/queryContext'
+  path: '/v1/queryContext'
 
 #---------------------------------------------------------------------
 # IdM OAuth2 section (mandatory)

@@ -141,10 +141,17 @@ __ `Jenkins CI - API`_
 The following environment variables should be defined either in the global
 configuration of Jenkins or as part of the jobs:
 
+- **JENKINS_USER**: The username for Jenkins CI Remote Access API
+- **JENKINS_PASSWORD**: The password for Jenkins CI Remote Access API
 - **FIHEALTH_WORKSPACE**: The absolute path of Jenkins job workspace
+- **FIHEALTH_SANITY_PROJECT**: The relative path of Sanity Checks project
 - **FIHEALTH_HTDOCS**: The absolute path where to publish HTML reports
+- **FIHEALTH_HISTORY**: TODO
 - **FIHEALTH_ADAPTER_URL**: The endpoint of NGSI Adapter
-- **FIHEALTH_CB_URL**: The endpoint of Context Broker
+- **FIHEALTH_CB_URL**: The endpoint of Context Broker (*including API version*)
+- **SANITY_CHECKS_SETTINGS**: The absolute path to settings file
+- **TEST_PHONEHOME_ENDPOINT**: The public endpoint of PhoneHome server
+  (*see below*)
 - **WORKON_HOME**: The optional base path for virtualenv
 - **OS_REGION_NAME**: The optional region to restrict tests to
 - **OS_AUTH_URL**: The URL of OpenStack Identity Service for authentication

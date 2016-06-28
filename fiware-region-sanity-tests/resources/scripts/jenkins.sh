@@ -161,7 +161,7 @@ function update_elapsed_time_context_broker() {
 	local region=$OS_REGION_NAME
 
 	printf "Updating elapsed time in Context Broker for $region. Elapsed time: $sc_elapsed_time. "
-	curl $FIHEALTH_CB_URL/NGSI10/updateContext -o /dev/null -s -S \
+	curl $FIHEALTH_CB_URL/updateContext -o /dev/null -s -S \
 	--write-out "HTTP %{http_code} result from %{url_effective}\n" \
 	--header 'Content-Type: application/json' \
 	--header 'Accept: application/json' --data @- <<-EOF
