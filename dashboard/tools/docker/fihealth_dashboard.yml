@@ -74,9 +74,8 @@ monasca:
 # jenkins-api section (mandatory)
 #---------------------------------------------------------------------
 jenkins:
-  host: 'localhost'
-  port: 80
-  token: ''
-  path: '/jenkins/job/FiHealth-SanityCheck-ExecRegion'
-  parameterName: 'OS_REGION_NAME'
-
+  host: 'localhost'			# jenkins-api listen host
+  port: 80				# jenkins-api listen port
+  token: ''				# job auth token, configured in job
+  path: '/jenkins/job/FIHealth-SanityCheck-ExecRegion'	# jenkins job name
+  parameterName: 'OS_REGION_NAME'	# jenkins job parameter name for region
