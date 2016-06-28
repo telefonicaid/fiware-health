@@ -31,7 +31,7 @@ app.all('*', function (req, res, next) {
 });
 
 // context broker dummy
-app.post('/NGSI10/*', function (req, res) {
+app.post('/v1/*', function (req, res) {
     console.log("POST context broker ");
     var fs = require('fs');
     var json = JSON.parse(fs.readFileSync(__dirname + '/../unit/post1.json', 'utf8'));

@@ -89,31 +89,33 @@ eval `cd $BASEDIR; node -p <<-EOF
 	    url = require('url'),
 	    util = require('util'),
 	    yaml = require('js-yaml'),
+	    constants = require('./lib/constants'),
 	    config = yaml.safeLoad(fs.readFileSync('$CONFIG_FILE', 'utf8')),
 	    settings = undefined,
-	    constants = require('./lib/constants'),
-	    isLocalCB = config.cbroker.host.match(/127.0.0.1|localhost/);
+	    app = config.app,
+	    cbroker = config.cbroker,
+	    isLocalCB = cbroker.host.match(/127.0.0.1|localhost/);
 	var notifyBaseUrl = url.format({
 	    protocol: 'http',
-	    hostname: (isLocalCB) ? config.cbroker.host : config.app.host,
-	    port: config.app.port,
-	    pathname: config.app.webContext
+	    hostname: (isLocalCB) ? cbroker.host : app.host,
+	    port: app.port,
+	    pathname: app.webContext
 	});
 	try {
-	    settings = require(config.app.settings);
+	    settings = require(app.settings);
 	} catch (e) {
 	    settings = {'region_configuration': {}};
 	}
 	util.format('\
 	    SETTINGS=%s \
 	    REGIONS="%s" \
-	    BROKER_URL=http://%s:%s/NGSI10 \
+	    BROKER_URL=http://%s:%s/%s \
 	    CALLBACK_URL_CHANGE=%s%s \
 	    CALLBACK_URL_VALUE=%s%s \
 	    EMAIL_FROM=%s',
-	    config.app.settings,
+	    app.settings,
 	    Object.keys(settings.region_configuration).join(' '),
-	    config.cbroker.host, config.cbroker.port,
+	    cbroker.host, cbroker.port, cbroker.path.split('/')[1],
 	    notifyBaseUrl, constants.CONTEXT_SANITY_STATUS_CHANGE,
 	    notifyBaseUrl, constants.CONTEXT_SANITY_STATUS_VALUE,
 	    config.mailman.emailFrom

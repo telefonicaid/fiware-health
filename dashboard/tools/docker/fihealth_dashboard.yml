@@ -2,10 +2,10 @@
 # Dashboard application section (mandatory)
 #----------------------------------------------------------------------------
 app:
-  host: 'localhost' # App listen host
-  port: 3000 # App listen port
-  webContext: '/sanity/' # App context
-  settings: 'settings.json' # Path of Sanity Checks settings file
+  host: 'localhost'				# App listen host
+  port: 3000					# App listen port
+  webContext: '/sanity/'		# App context
+  settings: 'settings.json'		# Path of Sanity Checks settings file
 
 #----------------------------------------------------------------------------
 # Logging options section (mandatory)
@@ -17,7 +17,7 @@ logging:
 # HTTP session section (mandatory)
 #----------------------------------------------------------------------------
 session:
-  secret: 'sssshhh' # Default key to encrypt sessions
+  secret: 'sssshhh'				# Default key to encrypt sessions
 
 #----------------------------------------------------------------------------
 # Web server paths section (mandatory)
@@ -30,12 +30,12 @@ paths:
 # Context Broker section (mandatory)
 #----------------------------------------------------------------------------
 cbroker:
-  host: 'localhost' # ContextBroker listen host
-  port: '1026' # ContextBroker listen port
-  path: '/NGSI10/queryContext' # QueryContext operation
-  timeout: 10000            		# Timeout after request. 0 disabled it.
-  filter: []				# List of regions to remove from web
-  filter: ["qa_hidden"]       # List of regions to remove from web
+  host: 'localhost'				# ContextBroker listen host
+  port: '1026'					# ContextBroker listen port
+  path: '/v1/queryContext'		# QueryContext operation
+  timeout: 10000				# Timeout after request. 0 disabled it.
+  filter: []					# List of regions to remove from web
+  filter: ["qa_hidden"]			# List of regions to remove from web
 
 #----------------------------------------------------------------------------
 # IdM OAuth2 section (mandatory)
@@ -53,30 +53,30 @@ idm:
 # mailman-api section (mandatory)
 #----------------------------------------------------------------------------
 mailman:
-  host: 'localhost' # mailman-api listen host
-  port: 8000 # mailman-api listen port
-  path: '/' # mailman-api context
-  emailFrom: '' # Sender of email notifications
+  host: 'localhost'				# mailman-api listen host
+  port: 8000					# mailman-api listen port
+  path: '/'						# mailman-api context
+  emailFrom: ''					# sender of email notifications
 
 #----------------------------------------------------------------------------
 # monasca-api section (mandatory)
 #----------------------------------------------------------------------------
 monasca:
-  host: 'localhost'			# monasca-api listen host
-  port: 8070				# monasca-api listen port
+  host: 'localhost'						# monasca-api listen host
+  port: 8070							# monasca-api listen port
   keystoneHost: 'cloud.lab.fiware.org'	# keystone host
-  keystonePort: 4731			# keystone port
-  keystonePath: '/v3/auth/tokens'	# keystone path to get an auth token
-  keystoneUser: ''	# keystone user with 'monasca_user' role
+  keystonePort: 4731					# keystone port
+  keystonePath: '/v3/auth/tokens'		# keystone path to get an auth token
+  keystoneUser: ''						# keystone user with 'monasca_user' role
   keystonePass: ''
 
 #---------------------------------------------------------------------
 # jenkins-api section (mandatory)
 #---------------------------------------------------------------------
 jenkins:
-  host: 'localhost'  # jenkins-api listen host
-  port: 80 # jenkins-api listen port
-  token: '' # job auth token, configured in job
-  path: '/jenkins/job/FiHealth-SanityCheck-ExecRegion' # jenkins job name
-  parameterName: 'OS_REGION_NAME' # jenkins job parameter name for region
+  host: 'localhost'
+  port: 80
+  token: ''
+  path: '/jenkins/job/FiHealth-SanityCheck-ExecRegion'
+  parameterName: 'OS_REGION_NAME'
 

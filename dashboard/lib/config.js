@@ -48,7 +48,7 @@ var config = {
     cbroker: {
         host: 'localhost',
         port: '1026',
-        path: '/NGSI10/queryContext',
+        path: '/v1/queryContext',
         timeout: 10000,
         filter: []
     },
