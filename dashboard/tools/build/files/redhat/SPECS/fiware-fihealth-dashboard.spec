@@ -209,7 +209,17 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
-* Mon May 03 2016 Telefónica I+D <opensource@tid.es> 1.7.0-1
+
+* Mon Jun 27 2016 Telefónica I+D <opensource@tid.es> 1.9.0-1
+- fix jquery call. Due to use https, we have a problem using jquery
+- add feature: new regions cache
+- improve navigators/compatibility css in dashboard
+- modify CSS style for non-data regions
+
+* Thu May 31 2016 Telefónica I+D <opensource@tid.es> 1.8.0-1
+- Use a separate subscription to get sanity_status values
+
+* Thu May 3 2016 Telefónica I+D <opensource@tid.es> 1.7.0-1
 - Progress status of sanity checks retrieved from Jenkins
 
 * Mon Apr 04 2016 Telefónica I+D <opensource@tid.es> 1.6.0-1
@@ -243,7 +253,7 @@ fi
 - Add jslint and gjslint support
 - Fix documentation
 
-* Thu Sep 28 2015 Telefónica I+D <opensource@tid.es> 1.1.3-1
+* Mon Sep 28 2015 Telefónica I+D <opensource@tid.es> 1.1.3-1
 - Bugfixing
 
 * Tue Sep 08 2015 Telefónica I+D <opensource@tid.es> 1.1.2-1
@@ -263,49 +273,3 @@ fi
 - New overview and details pages.
 - IdM authentication.
 - Mail notifications in subscriptions to status changes.
-
-* Wed Sep 9, 2015 Telefónica I+D <opensource@tid.es> 1.1.2-1
-- Bugfixing
-
-* Mon Sep 28, 2015 Telefónica I+D <opensource@tid.es> 1.1.3-1
-- Bugfixing
-
-* Mon Oct 26, 2015 Telefónica I+D <opensource@tid.es> 1.2.0-1
-- Elapsed time of Sanity Check executions.
-- Username of region administrators given by configuration.
-- Documentation
-
-* Mon Nov 30, 2015 Telefónica I+D <opensource@tid.es> 1.3.0-1
-- Timeout management for requests to Context Broker.
-
-* Thu Dec 1, 2015 Telefónica I+D <opensource@tid.es> 1.3.1-1
-- Hotfix: Layout problem with long name regions.
-
-* Thu Feb 1, 2016 Telefónica I+D <opensource@tid.es> 1.4.0-1
-- Add FIWARE signOut library
-- Fix checkstyle to avoid JShint errors
-- Add filter list to configuration
-
-* Mon Mar 7, 2016 Telefónica I+D <opensource@tid.es> 1.5.0-1
-- Add *.yml config file to /etc/sysconfig when packaging.
-- Fix file permissions.
-- Add new acceptance test with behave.
-
-* Mon Apr 4, 2016 Telefónica I+D <opensource@tid.es> 1.6.0-1
-- Add request to Monasca on notification from ContextBroker
-- Fix timestamp handling
-- Fix request to Monasca including value_meta
-- Add elapsed time when publishing to Monasca
-- Update documentation
-
-* Thu May 3, 2016 Telefónica I+D <opensource@tid.es> 1.7.0-1
-- Progress status of sanity checks retrieved from Jenkins
-
-* Thu May 31, 2016 Telefónica I+D <opensource@tid.es> 1.8.0-1
-- Use a separate subscription to get sanity_status values
-
-* Mon Jun 27, 2016 Telefónica I+D <opensource@tid.es> 1.9.0-1
-- fix jquery call. Due to use https, we have a problem using jquery
-- add feature: new regions cache
-- improve navigators/compatibility css in dashboard
-- modify CSS style for non-data regions
