@@ -26,7 +26,9 @@ var assert = require('assert'),
     subscribe = require('../../lib/routes/subscribe'),
     common = require('../../lib/routes/common'),
     logger = require('../../lib/logger'),
-    constants = require('../../lib/constants');
+    constants = require('../../lib/constants'),
+    path = require('path'),
+    config = require('../../lib/config').data;
 
 
 /* jshint unused: false */
@@ -45,6 +47,9 @@ suite('app', function () {
     setup(function () {
         this.request = {headers: []};
         this.response = {};
+        var file = path.resolve(__dirname, 'settings.json');
+        config.settings = file;
+        config.regions.init(file);
     });
 
     teardown(function () {
@@ -342,5 +347,36 @@ suite('app', function () {
         assert.equal(req.session.accessToken, undefined);
     });
 
+    test('should_return_404_with_invalid_region', function () {
+        //given
+        var req = this.request,
+            res = this.response,
+            end = sinon.stub();
+
+        res.status = sinon.stub();
+        res.status.withArgs(404).returns(end);
+        end.end = sinon.spy();
+
+        //when
+        app.getRegion(req, res, 'kk');
+
+        //then
+        assert(res.status.calledWith(404));
+        assert(end.end.calledOnce);
+    });
+
+
+    test('should_return_json_with_existing_region', function () {
+        //given
+        var req = this.request,
+            res = this.response;
+
+        res.json = sinon.spy();
+        //when
+        app.getRegion(req, res, 'Region2');
+
+        //then
+        assert(res.json.calledOnce);
+    });
 
 });
