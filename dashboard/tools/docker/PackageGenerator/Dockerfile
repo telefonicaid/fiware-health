@@ -1,9 +1,9 @@
 # How to execute:
 # - It is needed to configure some environment variables:
 #   $ export BRANCH=develop
-# 	$ export OS_USERNAME_VALUE=<OpenStack username>
-# 	$ export OS_PASSWORD_VALUE=<OpenStack password>
-# 	$ export OS_TENANT_NAME_VALUE=<OpenStack tenant name>
+#   $ export OS_USERNAME_VALUE=<OpenStack username>
+#   $ export OS_PASSWORD_VALUE=<OpenStack password>
+#   $ export OS_TENANT_NAME_VALUE=<OpenStack tenant name>
 #
 # $ docker build -t fiware-dashboard-rpm .
 # $ docker run --name fiware-dashboard-rpm fiware-dashboard-rpm
