@@ -1,8 +1,14 @@
 # How to execute:
-# $ docker build -t fiwaredashboard .
-# $ docker run -p 3000:3000 -d fiwaredashboard
+# - It is needed to configure some environment variables:
+#   $ export BRANCH=develop
+#   $ export OS_USERNAME_VALUE=<OpenStack username>
+#   $ export OS_PASSWORD_VALUE=<OpenStack password>
+#   $ export OS_TENANT_NAME_VALUE=<OpenStack tenant name>
+#
+# $ docker build -t fiware-dashboard-rpm .
+# $ docker run --name fiware-dashboard-rpm fiware-dashboard-rpm
 
-FROM centos
+FROM fiwarecentos:6.6
 WORKDIR /opt
 RUN yum -y install git
 RUN curl --silent --location https://rpm.nodesource.com/setup | bash -
@@ -20,14 +26,6 @@ RUN npm install -g grunt-cli
 RUN npm install
 RUN PROJECT_VERSION=$(sed -n '/"version"/ {s/.*:.*"\(.*\)".*/\1/; p; q}' package.json);tools/build/package.sh -v $PROJECT_VERSION
 RUN yum clean all; yum -y install epel-release
-RUN yum -y install python-pip
 RUN yum -y install mailman
-RUN RPM_FILE=$(find $WORKSPACE -name "*.rpm"); rpm -i $RPM_FILE
-COPY dashboard/tools/docker/fihealth_dashboard.yml /etc/sysconfig/fihealth_dashboard.yml
-COPY dashboard/tools/docker/settings.json /opt/fiware-health/dashboard/test/acceptance/conf/settings.json
-WORKDIR /opt/fiware-health/dashboard/test/acceptance
-RUN yum -y install python-devel libffi-devel openssl-devel nc
-RUN pip install -r requirements.txt
-RUN pip install behave
-CMD /etc/init.d/fihealth_dashboard start; (while ! nc -vn 127.0.0.1 3000; do sleep 1; done); behave features/ --tags ~@selenium --junit --junit-directory testreport
-
+RUN pip2.7 install http://repositories.lab.fiware.org/repo/files/fiware-repositories-uploadPkg-1.1.0.tar.gz
+RUN RPM_FILE=$(find $WORKSPACE -name "*.rpm" -printf "%f");uploadPkg.py --os-username=$OS_USERNAME_VALUE --os-password=$OS_PASSWORD_VALUE --os-tenant-name=$OS_TENANT_NAME_VALUE $RPM_FILE
