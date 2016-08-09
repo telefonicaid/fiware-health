@@ -44,39 +44,39 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         """
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-        containerName = TEST_CONTAINER_PREFIX + suffix
+        container_name = TEST_CONTAINER_PREFIX + suffix
 
-        response = self.swift_operations.create_container(containerName)
+        response = self.swift_operations.create_container(container_name)
 
         self.assertIsNone(response, "Container could not be created")
-        self.test_world['containers'].append(containerName)
-        self.logger.debug("Created %s container was created", containerName)
+        self.test_world['containers'].append(container_name)
+        self.logger.debug("Created %s container was created", container_name)
 
-        response = self.swift_operations.get_container(containerName)
+        response = self.swift_operations.get_container(container_name)
         self.assertEquals('x-container-object-count' in response[0], True, "There is no container header in response")
         self.assertEquals(len(response[-1]), 0, "The container is not empty")  # The list of items should be 0.
-        self.logger.debug("Getting %s container details from the object storage", containerName)
+        self.logger.debug("Getting %s container details from the object storage", container_name)
 
     def test_delete_container(self):
         """
         Test whether it is possible to delete a container.
         """
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-        containerName = TEST_CONTAINER_PREFIX + suffix
+        container_name = TEST_CONTAINER_PREFIX + suffix
 
-        response = self.swift_operations.create_container(containerName)
+        response = self.swift_operations.create_container(container_name)
         self.assertIsNone(response, "Container could not be created")
-        self.test_world['containers'].append(containerName)
+        self.test_world['containers'].append(container_name)
 
-        response = self.swift_operations.delete_container(containerName)
+        response = self.swift_operations.delete_container(container_name)
         self.assertIsNone(response, "Container could not be deleted")
-        self.test_world['containers'].remove(containerName)
+        self.test_world['containers'].remove(container_name)
 
         try:
-            self.swift_operations.get_container(containerName)
+            self.swift_operations.get_container(container_name)
         except SwiftClientException as e:
             self.assertRaises(e)
-            self.logger.debug("%s container was successfully removed from the object storage", containerName)
+            self.logger.debug("%s container was successfully removed from the object storage", container_name)
 
     def test_create_text_object_and_download_it_from_container(self):
         """
@@ -85,7 +85,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
         container_name = TEST_CONTAINER_PREFIX + suffix
-        text_object_name = self.region_name + TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
+        text_object_name = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(container_name)
         self.assertIsNone(response, "Container could not be created")
@@ -123,7 +123,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
         container_name = TEST_CONTAINER_PREFIX + suffix
-        text_object_name = self.region_name + TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
+        text_object_name = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(container_name)
         self.assertIsNone(response, "Container could not be created")
@@ -154,9 +154,9 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         """
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
-        container_name = self.region_name + TEST_CONTAINER_PREFIX + suffix
+        container_name = TEST_CONTAINER_PREFIX + suffix
         big_object_name = TEST_BIG_OBJECT_PREFIX + TEST_BIG_FILE_EXTENSION
-        remote_big_object_name = self.region_name + TEST_BIG_OBJECT_REMOTE_PREFIX + TEST_BIG_OBJECT_PREFIX + \
+        remote_big_object_name = TEST_BIG_OBJECT_REMOTE_PREFIX + TEST_BIG_OBJECT_PREFIX + \
             suffix + TEST_BIG_FILE_EXTENSION
 
         response = self.swift_operations.create_container(container_name)

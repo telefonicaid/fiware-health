@@ -2,7 +2,7 @@
 # $ docker build -t fiwaredashboard .
 # $ docker run -p 3000:3000 -d fiwaredashboard
 
-FROM centos
+FROM fiwarecentos:6.6
 WORKDIR /opt
 RUN yum -y install git
 RUN curl --silent --location https://rpm.nodesource.com/setup | bash -
@@ -20,4 +20,4 @@ RUN npm install
 RUN grunt test
 RUN sed -i 's/production/development/' Gruntfile.js
 COPY sonar-project.properties sonar-project.properties
-CMD ./node_modules/.bin/grunt test; grunt lint-report test-report coverage-report
+CMD grunt test; grunt lint-report test-report coverage-report

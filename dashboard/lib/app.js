@@ -139,6 +139,24 @@ function getLogout(req, res) {
 
 
 /**
+ * Called when GET /show/:region
+ * @param {*} req
+ * @param {*} res
+ * @param {string} name
+ */
+function getRegion(req, res, name) {
+
+    var region = config.regions.get(name);
+
+    if (region) {
+        res.json(region);
+    } else {
+        res.status(404).end();
+    }
+
+}
+
+/**
  * @param {*} response
  * @param {*} req
  * @param {*} res
@@ -340,6 +358,12 @@ app.get(config.webContext + constants.CONTEXT_LOGOUT, function (req, res) {
 });
 
 
+// Handles show requests to get info about a reggion
+app.get(config.webContext + constants.CONTEXT_SHOW + '/:region', function (req, res) {
+    getRegion(req, res, req.params.region);
+});
+
+
 // Catch 404 and forward to error handler
 app.use(function (req, res) {
     var err = new Error('Not Found');
@@ -387,3 +411,6 @@ module.exports.getOAuthAccessTokenCallback = getOAuthAccessTokenCallback;
 
 /** @export */
 module.exports.oauthGetCallback = oauthGetCallback;
+
+/** @export */
+module.exports.getRegion = getRegion;

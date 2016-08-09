@@ -45,6 +45,9 @@ module.exports.CONTEXT_LOGIN = 'login';
 module.exports.CONTEXT_LOGOUT = 'logout';
 
 /** @export */
+module.exports.CONTEXT_SHOW = 'show';
+
+/** @export */
 module.exports.CONTEXT_REFRESH = 'refresh';
 
 /** @export */

@@ -1,11 +1,11 @@
 {
   "name": "fihealth_dashboard",
   "description": "FIHealth Dashboard",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "product": {
     "name": "fiware-health",
     "area": "iotplatform",
-    "release": "5.3.3"
+    "release": "5.4.1"
   },
   "repository": {
     "type": "git",
