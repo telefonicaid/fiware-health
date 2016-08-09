@@ -210,6 +210,9 @@ fi
 
 %changelog
 
+* Tue Ago 09 2016 Telefónica I+D <opensource@tid.es> 1.9.1-1
+- Add /show/:region API query
+
 * Mon Jun 27 2016 Telefónica I+D <opensource@tid.es> 1.9.0-1
 - fix jquery call. Due to use https, we have a problem using jquery
 - add feature: new regions cache
