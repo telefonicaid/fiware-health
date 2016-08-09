@@ -42,7 +42,8 @@ class FiwareSwiftOperations:
         Initializes Swift-Client.
         :param logger: Logger object
         :param region_name: FIWARE Region name
-        :param cred: Credentials to logging into keystone
+        :param auth_api: Authentication API version
+        :param kwargs: Keystone credentials
         """
         self.region_name = region_name
 
@@ -100,7 +101,9 @@ class FiwareSwiftOperations:
         """
         Creates a new object into a container
         :param container_name: Name of the container
-        :return: None if container was created and the error message if something failed.
+        :param local_file: Name of the local file
+        :param object_name: Name of the object
+        :return: None if object was created and the error message if something failed.
         """
         with open(local_file, 'r') as test_file:
             response = self.client.put_object(container_name, object_name, contents=test_file.read())
@@ -123,25 +126,26 @@ class FiwareSwiftOperations:
         """
         Deletes an Object
         :param container_name: Name of the container
-        :return: None if container was deleted and the error message if something failed.
+        :param object_name: Name of the object
+        :return: None if object was deleted and the error message if something failed.
         """
         response = self.client.delete_object(container_name, object_name)
         return response
 
-    def get_container(self, containerName):
+    def get_container(self, container_name):
         """
         Gets an specific Container
         :param container_name: Name of the container
         :return: Tuple with the request response about the container.
         """
-        response = self.client.get_container(containerName)
+        response = self.client.get_container(container_name)
         return response
 
-    def delete_container(self, containerName):
+    def delete_container(self, container_name):
         """
         Deletes a Container
         :param container_name: Name of the container
         :return: None if container was deleted and the error message if something failed.
         """
-        response = self.client.delete_container(containerName)
+        response = self.client.delete_container(container_name)
         return response
