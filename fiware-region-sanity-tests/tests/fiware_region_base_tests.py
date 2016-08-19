@@ -36,7 +36,7 @@ class FiwareRegionsBaseTests(FiwareTestCase):
         try:
             super(FiwareRegionsBaseTests, self).setUp()
             self.test_world = {}
-            if not self.init_world(self.test_world):
+            if not self.init_world(self.test_world, FiwareTestCase._add_skip_message):
                 self.logger.error("Error in initialization phase")
                 self.skipTest("Error in initialization phase")
         except Exception as ex:
