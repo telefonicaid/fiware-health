@@ -214,7 +214,7 @@ class FiwareTestCase(unittest.TestCase):
         cls.keystone_operations.check_permitted_role()
 
     @classmethod
-    def init_world(cls, world, _add_skip_message, suite=False):
+    def init_world(cls, world, suite=False):
         """
         Init the `world` variable to store created data by tests
         """
@@ -264,8 +264,7 @@ class FiwareTestCase(unittest.TestCase):
             if not all(results):
                 cls.logger.error("Fail in some reset_world")
                 _stop_capture()
-                if _add_skip_message:
-                    _add_skip_message("Errors: {0}".format(init_buffer.getvalue()))
+                cls._add_skip_message("Errors: {0}".format(init_buffer.getvalue()))
                 return False
 
         _stop_capture()
@@ -595,7 +594,7 @@ class FiwareTestCase(unittest.TestCase):
             if cls.init_auth():
                 cls.init_clients(cls.tenant_id, test_flavor, test_image)
                 cls.init_users()
-                if not cls.init_world(cls.suite_world, cls._add_skip_message, suite=True):
+                if not cls.init_world(cls.suite_world, suite=True):
                     raise Exception("Error in initialization phase: resources from previous executions not released")
                 cls.logger.debug("suite_world = %s", cls.suite_world)
         except Exception as ex:
