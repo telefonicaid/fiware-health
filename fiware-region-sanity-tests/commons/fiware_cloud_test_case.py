@@ -613,8 +613,6 @@ class FiwareTestCase(unittest.TestCase):
         else:
             cls.skip_message = message
 
-
-
     @classmethod
     def tearDownClass(cls):
         None
