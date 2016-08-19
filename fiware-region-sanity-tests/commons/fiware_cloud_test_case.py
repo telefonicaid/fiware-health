@@ -40,6 +40,7 @@ from ConfigParser import ConfigParser
 from os.path import isfile, join
 from os import environ
 from os import listdir
+from StringIO import StringIO
 import unittest
 import urlparse
 import logging
@@ -231,6 +232,16 @@ class FiwareTestCase(unittest.TestCase):
             'local_objects': []
         })
 
+        init_buffer = StringIO()
+        log_handler = logging.StreamHandler(init_buffer)
+        log_handler.setFormatter(cls.formatter)
+        cls.logger.addHandler(log_handler)
+
+        def _stop_capture():
+            cls.logger.removeHandler(log_handler)
+            log_handler.flush()
+            init_buffer.flush()
+
         if suite:
             resets = ["cls.reset_world_servers(world, suite)",
                       "cls.reset_world_networks(world, suite)",
@@ -252,7 +263,11 @@ class FiwareTestCase(unittest.TestCase):
             results = map(functools.partial(eval_reset_method, globals=globals(), locals=locals()), resets)
             if not all(results):
                 cls.logger.error("Fail in some reset_world")
+                _stop_capture()
+                cls._add_skip_message("Errors: {0}".format(init_buffer.getvalue()))
                 return False
+
+        _stop_capture()
 
         return True
 
@@ -267,11 +282,11 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 server_list = cls.nova_operations.list_servers(TEST_SERVER_PREFIX, tenant_id=cls.tenant_id)
                 for server in server_list:
-                    cls.logger.debug("init_world() found server '%s' not deleted", server.name)
+                    cls.logger.debug("init_world(): found server '%s' not deleted", server.name)
                     world['servers'].append(server.id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("init_world() failed to get server list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Nova: failed to get server list: %s", e)
+                return False
 
         # release resources to ensure a clean world
         for server_id in list(world['servers']):
@@ -319,11 +334,11 @@ class FiwareTestCase(unittest.TestCase):
                 sec_group_data_list = cls.nova_operations.list_security_groups(TEST_SEC_GROUP_PREFIX,
                                                                                tenant_id=cls.tenant_id)
                 for sec_group_data in sec_group_data_list:
-                    cls.logger.debug("init_world() found security group '%s' not deleted", sec_group_data.name)
+                    cls.logger.debug("init_world(): found security group '%s' not deleted", sec_group_data.name)
                     world['sec_groups'].append(sec_group_data.id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("init_world() failed to get security group list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Nova: failed to get security group list: %s", e)
+                return False
 
         # release resources to ensure a clean world
         for sec_group_id in list(world['sec_groups']):
@@ -347,11 +362,11 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 keypair_list = cls.nova_operations.list_keypairs(TEST_KEYPAIR_PREFIX)
                 for keypair in keypair_list:
-                    cls.logger.debug("init_world() found keypair '%s' not deleted", keypair.name)
+                    cls.logger.debug("init_world(): found keypair '%s' not deleted", keypair.name)
                     world['keypair_names'].append(keypair.name)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("init_world() failed to get keypair list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Nova: failed to get keypair list: %s", e)
+                return False
 
         # release resources to ensure a clean world
         for keypair_name in list(world['keypair_names']):
@@ -378,8 +393,8 @@ class FiwareTestCase(unittest.TestCase):
                     cls.logger.debug("init_world() found network '%s' not deleted", network['name'])
                     world['networks'].append(network['id'])
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("init_world() failed to get network list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Neutron: failed to get network list: %s", e)
+                return False
 
         # release resources to ensure a clean world
         for network_id in list(world['networks']):
@@ -403,11 +418,11 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 router_list = cls.neutron_operations.list_routers(TEST_ROUTER_PREFIX)
                 for router in router_list:
-                    cls.logger.debug("init_world() found router '%s' not deleted", router['name'])
+                    cls.logger.debug("init_world(): found router '%s' not deleted", router['name'])
                     world['routers'].append(router['id'])
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("init_world() failed to get router list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Neutron: failed to get router list: %s", e)
+                return False
 
         # release resources to ensure a clean world
         for router_id in list(world['routers']):
@@ -430,11 +445,11 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 ip_data_list = cls.nova_operations.list_allocated_ips()
                 for ip_data in ip_data_list:
-                    cls.logger.debug("init_world() found IP %s not deallocated", ip_data.ip)
+                    cls.logger.debug("init_world(): found IP %s not deallocated", ip_data.ip)
                     world['allocated_ips'].append(ip_data.id)
             except (NovaClientException, NovaConnectionRefused, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("init_world() failed to get allocated IP list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Nova: failed to get allocated IP list: %s", e)
+                return False
 
         # release resources to ensure a clean world
         for allocated_ip_id in list(world['allocated_ips']):
@@ -458,11 +473,11 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 port_list = cls.neutron_operations.list_ports()
                 for port in port_list:
-                    cls.logger.debug("init_world() found port '%s' not deleted", port['id'])
+                    cls.logger.debug("init_world(): found port '%s' not deleted", port['id'])
                     world['ports'].append(port)
             except (NeutronClientException, KeystoneConnectionRefused, KeystoneRequestTimeout) as e:
-                cls.logger.error("init_world() failed to get port list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Neutron: failed to get port list: %s", e)
+                return False
 
         # release resources to ensure a clean test_world
 
@@ -498,11 +513,11 @@ class FiwareTestCase(unittest.TestCase):
             try:
                 container_list = cls.swift_operations.list_containers(TEST_CONTAINER_PREFIX)
                 for container in container_list:
-                    cls.logger.debug("init_world() found container '%s' not deleted", container["name"])
+                    cls.logger.debug("init_world(): found container '%s' not deleted", container["name"])
                     world['containers'].append(container["name"])
             except (SwiftClientException, KeystoneConnectionRefused, KeystoneRequestTimeout, ConnectionError) as e:
-                cls.logger.error("init_world() failed to get container list: %s", e)
-                result = False
+                cls.logger.error("init_world(), failure in Swift: failed to get container list: %s", e)
+                return False
 
         # release resources to ensure a clean world
         for container in list(world['containers']):
@@ -560,10 +575,10 @@ class FiwareTestCase(unittest.TestCase):
             config = ConfigParser()
             config.read(cls.logging_conf)
             cls.logger_level = config.get(LOGGING_CONF_SECTION_HANDLER, 'level')
-            formatter = logging.Formatter(config.get(LOGGING_CONF_SECTION_FORMATTER, 'format', raw=True))
+            cls.formatter = logging.Formatter(config.get(LOGGING_CONF_SECTION_FORMATTER, 'format', raw=True))
             file_handler = logging.FileHandler(config.get(LOGGING_CONF_SECTION_HANDLER, 'filename').
                                                format(region_name=cls.region_name), mode='w')
-            file_handler.setFormatter(formatter)
+            file_handler.setFormatter(cls.formatter)
             file_handler.setLevel(cls.logger_level)
 
             logging.root.addHandler(file_handler)
@@ -584,7 +599,18 @@ class FiwareTestCase(unittest.TestCase):
                 cls.logger.debug("suite_world = %s", cls.suite_world)
         except Exception as ex:
             cls.logger.error("Error in initialization phase: %s", ex.message)
-            cls.skip_message = "Error in initialization phase: {0}".format(ex.message)
+            cls._add_skip_message("Error in initialization phase: {0}".format(ex.message))
+
+    @classmethod
+    def _add_skip_message(cls, message):
+        """
+        Build a message with all traces in case of skip test
+        :param message: new line to add
+        """
+        if cls.skip_message:
+            cls.skip_message = "{0}\n{1}".format(cls.skip_message, message)
+        else:
+            cls.skip_message = message
 
     @classmethod
     def tearDownClass(cls):
