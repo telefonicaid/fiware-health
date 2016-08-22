@@ -21,7 +21,7 @@ var express = require('express'),
     fs = require('fs'),
     app = express();
 
-var TWO_SECONDS = 2000;
+var BACKEND_PROCESS_SIMULATION = 2000;
 
 //Here we are configuring express to use body-parser as middle-ware.
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -39,7 +39,7 @@ app.post('/v1/*', function (req, res) {
     //sleep for 2 seconds
     setTimeout(function () {
         res.send(json);
-    }, TWO_SECONDS);
+    }, BACKEND_PROCESS_SIMULATION);
 
 });
 

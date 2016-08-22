@@ -24,7 +24,7 @@ var express = require('express'),
     config = require('../config').data,
     common = require('./common');
 
-var TEN_SECONDS = 10000;
+var REFRESH_DELAY_MILLIS = 10000;
 
 /**
  *
@@ -74,7 +74,7 @@ function getRefresh(req, res) {
             //sleep for 10 seconds
             setTimeout(function () {
                 res.redirect(config.webContext);
-            }, TEN_SECONDS);
+            }, REFRESH_DELAY_MILLIS);
         });
     });
     jenkinsRequest.on('error', function (e) {
@@ -84,7 +84,7 @@ function getRefresh(req, res) {
         //sleep for 10 seconds
         setTimeout(function () {
             res.redirect(config.webContext);
-        }, TEN_SECONDS);
+        }, REFRESH_DELAY_MILLIS);
     });
 
     jenkinsRequest.write(payloadString);
