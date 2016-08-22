@@ -21,10 +21,10 @@ var express = require('express'),
     router = express.Router(),
     logger = require('../logger'),
     http = require('http'),
-    sleep = require('sleep'),
     config = require('../config').data,
     common = require('./common');
 
+var TEN_SECONDS = 10000;
 
 /**
  *
@@ -38,7 +38,7 @@ function getRefresh(req, res) {
     logger.info({op: 'refresh#get'}, 'refresh region: %s, received role: %s', region, req.session.role);
 
     if (req.session.role === undefined || req.session.role === '') {
-        logger.warn({op: 'refresh#get'},'unauthorized operation, invalid role: %s', req.session.role);
+        logger.warn({op: 'refresh#get'}, 'unauthorized operation, invalid role: %s', req.session.role);
         common.notAuthorized(req, res);
         return;
     }
@@ -71,16 +71,20 @@ function getRefresh(req, res) {
             logger.info('response jenkins: code: %s message: %s',
                 jenkinsResponse.statusCode, jenkinsResponse.statusMessage);
 
-            sleep.sleep(10); //sleep for 10 seconds
-            res.redirect(config.webContext);
+            //sleep for 10 seconds
+            setTimeout(function () {
+                res.redirect(config.webContext);
+            }, TEN_SECONDS);
         });
     });
     jenkinsRequest.on('error', function (e) {
         // TODO: handle error.
         logger.error('Error in connection with jenkins: ' + e);
 
-        sleep.sleep(10); //sleep for 10 seconds
-        res.redirect(config.webContext);
+        //sleep for 10 seconds
+        setTimeout(function () {
+            res.redirect(config.webContext);
+        }, TEN_SECONDS);
     });
 
     jenkinsRequest.write(payloadString);

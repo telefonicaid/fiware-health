@@ -11,7 +11,7 @@
 FROM fiwarecentos:6.6
 WORKDIR /opt
 RUN yum -y install git
-RUN curl --silent --location https://rpm.nodesource.com/setup | bash -
+RUN curl --silent --location https://rpm.nodesource.com/setup_4.x | bash -
 RUN yum -y groupinstall 'Development Tools'
 RUN yum -y install nodejs
 RUN yum -y install rpm-build

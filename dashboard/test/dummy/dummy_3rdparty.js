@@ -19,8 +19,9 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
     fs = require('fs'),
-    sleep = require('sleep'),
     app = express();
+
+var TWO_SECONDS = 2000;
 
 //Here we are configuring express to use body-parser as middle-ware.
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -35,8 +36,10 @@ app.post('/v1/*', function (req, res) {
     console.log("POST context broker ");
     var fs = require('fs');
     var json = JSON.parse(fs.readFileSync(__dirname + '/../unit/post1.json', 'utf8'));
-    sleep.sleep(2);  //2 sec
-    res.send(json);
+    //sleep for 2 seconds
+    setTimeout(function () {
+        res.send(json);
+    }, TWO_SECONDS);
 
 });
 
