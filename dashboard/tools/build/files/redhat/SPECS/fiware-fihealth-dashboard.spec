@@ -58,8 +58,8 @@ echo "FILES:"; cat %{_topdir}/MANIFEST
 # pre install ($1 == 1) or upgrade ($1 == 2)
 if [ $1 -ge 1 ]; then
 	NODE_REQ_VERSION=%{_node_req_ver}
-	MAJOR=${NODE_REQ_VERSION%%.*}
-	MINOR=$(expr ${NODE_REQ_VERSION%.*} : '0\.\(.*\)' '|' 'x')
+    MAJOR=${NODE_REQ_VERSION%%%%.*}
+    MINOR=$(expr ${NODE_REQ_VERSION%%.*} : '0\.\(.*\)' '|' 'x')
 
 	# Function to compare version strings (in `x.y.z' format)
 	valid_version() {
