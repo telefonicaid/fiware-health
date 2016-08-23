@@ -9,7 +9,7 @@
 %define _dashboard_dir %{_fiware_dir}/%{_dashboard_srv}
 %define _logging_dir /var/log/%{_dashboard_srv}
 %define _forever_dir /var/run/fiware/.forever
-%define _node_req_ver %(awk '/"node":/ {split($0,v,/["~=<>]/); print v[6]}' %{_basedir}/package.json)
+%define _node_req_ver %(awk '/"node":/ {N=split($0,v,/["~=<>]/); print v[N-1]}' %{_basedir}/package.json)
 
 # Package main attributes (_topdir, _basedir, _version and _release must be given at command line)
 Summary: FIHealth Dashboard.
