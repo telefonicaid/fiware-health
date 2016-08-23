@@ -9,7 +9,7 @@
 %define _dashboard_dir %{_fiware_dir}/%{_dashboard_srv}
 %define _logging_dir /var/log/%{_dashboard_srv}
 %define _forever_dir /var/run/fiware/.forever
-%define _node_req_ver %(awk '/"node":/ {split($0,v,/["~=<>]/); print v[6]}' %{_basedir}/package.json)
+%define _node_req_ver %(awk '/"node":/ {N=split($0,v,/["~=<>]/); print v[N-1]}' %{_basedir}/package.json)
 
 # Package main attributes (_topdir, _basedir, _version and _release must be given at command line)
 Summary: FIHealth Dashboard.
@@ -57,6 +57,10 @@ echo "FILES:"; cat %{_topdir}/MANIFEST
 %pre
 # pre install ($1 == 1) or upgrade ($1 == 2)
 if [ $1 -ge 1 ]; then
+	NODE_REQ_VERSION=%{_node_req_ver}
+	MAJOR=${NODE_REQ_VERSION%%.*}
+	MINOR=$(expr ${NODE_REQ_VERSION%.*} : '0\.\(.*\)' '|' 'x')
+
 	# Function to compare version strings (in `x.y.z' format)
 	valid_version() {
 		local CUR=$1
@@ -77,7 +81,7 @@ if [ $1 -ge 1 ]; then
 		# prepare sources list configuration for the next `yum' command
 		# (this requires removing the lock to allow access to the repositories configuration)
 		find /var/lib/rpm -name "*.lock" -exec rm -f {} \;
-		curl -sL https://rpm.nodesource.com/setup | bash - >/dev/null
+		curl -sL https://rpm.nodesource.com/setup_$MAJOR.$MINOR | bash - >/dev/null
 		if [ $? -eq 0 ]; then fmt --width=${COLUMNS:-$(tput cols)} 1>&2 <<-EOF
 
 			Please run \`sudo yum -y install nodejs' to install/upgrade version
@@ -93,7 +97,6 @@ if [ $1 -ge 1 ]; then
 		fi
 	}
 
-	NODE_REQ_VERSION=%{_node_req_ver}
 	NODE_CUR_VERSION=$(node -pe 'process.versions.node' 2>/dev/null)
 	if ! valid_version ${NODE_CUR_VERSION:-0.0.0} $NODE_REQ_VERSION; then
 		setup_nodesource
@@ -210,7 +213,7 @@ fi
 
 %changelog
 
-* Tue Ago 09 2016 Telefónica I+D <opensource@tid.es> 1.9.1-1
+* Tue Aug 09 2016 Telefónica I+D <opensource@tid.es> 1.9.1-1
 - Add /show/:region API query
 
 * Mon Jun 27 2016 Telefónica I+D <opensource@tid.es> 1.9.0-1
