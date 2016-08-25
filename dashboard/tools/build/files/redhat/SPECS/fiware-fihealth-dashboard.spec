@@ -213,7 +213,7 @@ fi
 
 %changelog
 
-* Tue Aug 25 2016 Telefónica I+D <opensource@tid.es> 1.10.0
+* Thu Aug 25 2016 Telefónica I+D <opensource@tid.es> 1.10.0-1
 - upgrade to nodejs 4.5.0
 - change sleep function by setTimeout
 - improve rpm spec file
