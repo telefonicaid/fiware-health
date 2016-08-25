@@ -8,7 +8,7 @@
 # $ docker build -t fiware-dashboard-rpm .
 # $ docker run --name fiware-dashboard-rpm fiware-dashboard-rpm
 
-FROM fiwarecentos:6.6
+FROM fiware/fiwarecentos
 WORKDIR /opt
 RUN yum -y install git
 RUN curl --silent --location https://rpm.nodesource.com/setup_4.x | bash -

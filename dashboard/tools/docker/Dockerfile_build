@@ -2,7 +2,7 @@
 # $ docker build -t fiwaredashboard .
 # $ docker run -p 3000:3000 -d fiwaredashboard
 
-FROM fiwarecentos:6.6
+FROM fiware/fiwarecentos
 WORKDIR /opt
 RUN yum -y install git
 RUN curl --silent --location https://rpm.nodesource.com/setup_4.x | bash -
