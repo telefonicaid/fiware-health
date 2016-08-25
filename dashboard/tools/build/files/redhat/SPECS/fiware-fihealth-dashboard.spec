@@ -213,6 +213,11 @@ fi
 
 %changelog
 
+* Tue Aug 25 2016 Telefónica I+D <opensource@tid.es> 1.10.0
+- upgrade to nodejs 4.5.0
+- change sleep function by setTimeout
+- improve rpm spec file
+
 * Tue Aug 09 2016 Telefónica I+D <opensource@tid.es> 1.9.1-1
 - Add /show/:region API query
 
