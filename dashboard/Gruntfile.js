@@ -108,7 +108,7 @@ module.exports = function (grunt) {
                 }
             },
             reportLib: {
-                src: '<%= dirs.lib[0] %>/**/*.js',
+                src: ['<%= dirs.lib[0] %>/**/*.js', '!lib/public/javascripts/jquery*.js'],
                 options: {
                     reporter: 'checkstyle',
                     reporterOutput: '<%= dirs.reportLint[0] %>/jshint-lib.xml'
@@ -292,3 +292,4 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['lint-jshint', 'test']);
 
 };
+
