@@ -94,6 +94,7 @@ TEST_BIG_FILE_EXTENSION = ".zip"
 
 # SWIFT CONSTANTS
 SWIFT_RESOURCES_PATH = "resources/swift_objects/"
+SWIFT_TMP_RESOURCES_PATH = "/tmp/swift_objects/"
 
 # SSH CONNECTION (timeouts in seconds)
 SSH_CONNECTION_PORT = 22

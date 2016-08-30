@@ -24,7 +24,8 @@
 
 from tests.fiware_region_base_tests import FiwareRegionsBaseTests
 from commons.constants import TEST_CONTAINER_PREFIX, TEST_TEXT_OBJECT_PREFIX, TEST_TEXT_FILE_EXTENSION, \
-    SWIFT_RESOURCES_PATH, TEST_BIG_OBJECT_PREFIX, TEST_BIG_FILE_EXTENSION, PROPERTIES_CONFIG_SWIFT,\
+    SWIFT_RESOURCES_PATH, SWIFT_TMP_RESOURCES_PATH, TEST_BIG_OBJECT_PREFIX, TEST_BIG_FILE_EXTENSION, \
+    PROPERTIES_CONFIG_SWIFT,\
     PROPERTIES_CONFIG_SWIFT_BIG_FILE_1, PROPERTIES_CONFIG_SWIFT_BIG_FILE_2, PROPERTIES_CONFIG_TEST,\
     TEST_BIG_OBJECT_REMOTE_PREFIX
 from swiftclient.exceptions import ClientException as SwiftClientException
@@ -85,7 +86,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
         container_name = TEST_CONTAINER_PREFIX + suffix
-        text_object_name = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
+        text_object_name = self.region_name + TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(container_name)
         self.assertIsNone(response, "Container could not be created")
@@ -103,11 +104,11 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.logger.debug("Created %s object was created", text_object_name)
 
         # Downloading the object
-        response = self.swift_operations.get_object(container_name, text_object_name, SWIFT_RESOURCES_PATH)
+        response = self.swift_operations.get_object(container_name, text_object_name, SWIFT_TMP_RESOURCES_PATH)
         self.assertTrue(response, "Object could not be downloaded")
         self.test_world['local_objects'].append(text_object_name)
 
-        remote = hashlib.md5(open(SWIFT_RESOURCES_PATH + text_object_name, 'rb').read()).hexdigest()
+        remote = hashlib.md5(open(SWIFT_TMP_RESOURCES_PATH + text_object_name, 'rb').read()).hexdigest()
 
         # Checking original file with remote file
         try:
@@ -123,7 +124,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
         container_name = TEST_CONTAINER_PREFIX + suffix
-        text_object_name = TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
+        text_object_name = self.region_name + TEST_TEXT_OBJECT_PREFIX + suffix + TEST_TEXT_FILE_EXTENSION
 
         response = self.swift_operations.create_container(container_name)
         self.assertIsNone(response, "Container could not be created")
@@ -143,7 +144,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.test_world['swift_objects'].remove(container_name + "/" + text_object_name)
 
         try:
-            self.swift_operations.get_object(container_name, text_object_name, SWIFT_RESOURCES_PATH)
+            self.swift_operations.get_object(container_name, text_object_name, SWIFT_TMP_RESOURCES_PATH)
         except SwiftClientException as e:
             self.assertRaises(e)
             self.logger.debug("%s object was successfully removed from the object storage", text_object_name)
@@ -155,8 +156,8 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
 
         suffix = datetime.utcnow().strftime('%Y%m%d%H%M%S%m')
         container_name = TEST_CONTAINER_PREFIX + suffix
-        big_object_name = TEST_BIG_OBJECT_PREFIX + TEST_BIG_FILE_EXTENSION
-        remote_big_object_name = TEST_BIG_OBJECT_REMOTE_PREFIX + TEST_BIG_OBJECT_PREFIX + \
+        big_object_name = self.region_name + TEST_BIG_OBJECT_PREFIX + TEST_BIG_FILE_EXTENSION
+        remote_big_object_name = self.region_name + TEST_BIG_OBJECT_REMOTE_PREFIX + TEST_BIG_OBJECT_PREFIX + \
             suffix + TEST_BIG_FILE_EXTENSION
 
         response = self.swift_operations.create_container(container_name)
@@ -165,56 +166,56 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.logger.debug("Created %s container was created", container_name)
 
         # Creating a new big object if do not exits
-        if not os.path.isfile(SWIFT_RESOURCES_PATH + big_object_name):
+        if not os.path.isfile(SWIFT_TMP_RESOURCES_PATH + big_object_name):
             big_file_url_1 = \
                 self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_SWIFT][PROPERTIES_CONFIG_SWIFT_BIG_FILE_1]
             f = urllib2.urlopen(big_file_url_1)
             data = f.read()
 
             try:
-                with open(SWIFT_RESOURCES_PATH + big_object_name, "wb") as code:
+                with open(SWIFT_TMP_RESOURCES_PATH + big_object_name, "wb") as code:
                         code.write(data)
             except IOError:
-                self.logger.error("Error while writing %s file", SWIFT_RESOURCES_PATH + big_object_name)
+                self.logger.error("Error while writing %s file", SWIFT_TMP_RESOURCES_PATH + big_object_name)
 
         # Uploading the object
-        response = self.swift_operations.create_object(container_name, SWIFT_RESOURCES_PATH + big_object_name,
+        response = self.swift_operations.create_object(container_name, SWIFT_TMP_RESOURCES_PATH + big_object_name,
                                                        remote_big_object_name)
-        origin_hash = hashlib.md5(open(SWIFT_RESOURCES_PATH + big_object_name, 'rb').read()).hexdigest()
+        origin_hash = hashlib.md5(open(SWIFT_TMP_RESOURCES_PATH + big_object_name, 'rb').read()).hexdigest()
 
         self.assertIsNotNone(response, "Object could not be created")
         self.test_world['swift_objects'].append(container_name + "/" + remote_big_object_name)
         self.logger.debug("Created %s object with name %s", big_object_name, remote_big_object_name)
 
         # Downloading the object
-        response = self.swift_operations.get_object(container_name, remote_big_object_name, SWIFT_RESOURCES_PATH)
+        response = self.swift_operations.get_object(container_name, remote_big_object_name, SWIFT_TMP_RESOURCES_PATH)
         self.assertTrue(response, "Object could not be downloaded")
         self.test_world['local_objects'].append(remote_big_object_name)
 
-        remote_hash = hashlib.md5(open(SWIFT_RESOURCES_PATH + remote_big_object_name, 'rb').read()).hexdigest()
+        remote_hash = hashlib.md5(open(SWIFT_TMP_RESOURCES_PATH + remote_big_object_name, 'rb').read()).hexdigest()
 
         # Checking original file with remote file
         self.assertEqual(origin_hash, remote_hash, "The original file and the downloaded file are different")
 
         # Downloading a second big file to check that is different
         suffix2 = "second_file"
-        if not os.path.isfile(SWIFT_RESOURCES_PATH + TEST_BIG_OBJECT_PREFIX + suffix2 + TEST_BIG_FILE_EXTENSION):
+        if not os.path.isfile(SWIFT_TMP_RESOURCES_PATH + self.region_name + TEST_BIG_OBJECT_PREFIX + suffix2 +
+                              TEST_BIG_FILE_EXTENSION):
             big_file_url_2 = \
                 self.conf[PROPERTIES_CONFIG_TEST][PROPERTIES_CONFIG_SWIFT][PROPERTIES_CONFIG_SWIFT_BIG_FILE_2]
             f2 = urllib2.urlopen(big_file_url_2)
             data = f2.read()
             try:
-                with open(SWIFT_RESOURCES_PATH + TEST_BIG_OBJECT_PREFIX + suffix2 + TEST_BIG_FILE_EXTENSION,
-                          "wb") as code2:
+                with open(SWIFT_TMP_RESOURCES_PATH + self.region_name + TEST_BIG_OBJECT_PREFIX + suffix2 +
+                          TEST_BIG_FILE_EXTENSION, "wb") as code2:
                     code2.write(data)
             except IOError:
-                self.logger.error("Error while writing %s file", SWIFT_RESOURCES_PATH + TEST_BIG_OBJECT_PREFIX +
-                                  suffix2 + TEST_BIG_FILE_EXTENSION)
+                self.logger.error("Error while writing %s file", SWIFT_TMP_RESOURCES_PATH + self.region_name +
+                                  TEST_BIG_OBJECT_PREFIX + suffix2 + TEST_BIG_FILE_EXTENSION)
 
         # Checking that two different files generates are different
-        origin2 = hashlib.md5(open(SWIFT_RESOURCES_PATH + TEST_BIG_OBJECT_PREFIX + suffix2 + TEST_BIG_FILE_EXTENSION,
-                                   'rb')
-                              .read()).hexdigest()
+        origin2 = hashlib.md5(open(SWIFT_TMP_RESOURCES_PATH + self.region_name + TEST_BIG_OBJECT_PREFIX + suffix2 +
+                                   TEST_BIG_FILE_EXTENSION, 'rb').read()).hexdigest()
 
         self.assertNotEqual(origin2, remote_hash, "The second file and the downloaded file are the same,"
                                                   " it cannot be possible")
