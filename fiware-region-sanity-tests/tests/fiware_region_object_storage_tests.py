@@ -94,8 +94,9 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.logger.debug("Created %s container was created", container_name)
 
         # Uploading the object
-        response = self.swift_operations.create_object(container_name, SWIFT_RESOURCES_PATH + TEST_TEXT_OBJECT_BASENAME +
-                                                       TEST_TEXT_FILE_EXTENSION, text_object_name)
+        response = self.swift_operations.create_object(container_name, SWIFT_RESOURCES_PATH +
+                                                       TEST_TEXT_OBJECT_BASENAME + TEST_TEXT_FILE_EXTENSION,
+                                                       text_object_name)
         origin = hashlib.md5(open(SWIFT_RESOURCES_PATH + TEST_TEXT_OBJECT_BASENAME +
                                   TEST_TEXT_FILE_EXTENSION, 'rb').read()).hexdigest()
 
@@ -132,8 +133,9 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         self.logger.debug("Created %s container was created", container_name)
 
         # Uploading the object
-        response = self.swift_operations.create_object(container_name, SWIFT_RESOURCES_PATH + TEST_TEXT_OBJECT_BASENAME +
-                                                       TEST_TEXT_FILE_EXTENSION, text_object_name)
+        response = self.swift_operations.create_object(container_name, SWIFT_RESOURCES_PATH +
+                                                       TEST_TEXT_OBJECT_BASENAME + TEST_TEXT_FILE_EXTENSION,
+                                                       text_object_name)
         self.assertIsNotNone(response, "Object could not be created")
         self.test_world['swift_objects'].append(container_name + "/" + text_object_name)
         self.logger.debug("Created %s object was created", text_object_name)
@@ -158,7 +160,7 @@ class FiwareRegionsObjectStorageTests(FiwareRegionsBaseTests):
         container_name = TEST_CONTAINER_PREFIX + suffix
         big_object_name = self.region_name + TEST_BIG_OBJECT_BASENAME + TEST_BIG_FILE_EXTENSION
         remote_big_object_name = self.region_name + TEST_BIG_OBJECT_REMOTE + TEST_BIG_OBJECT_BASENAME + \
-                                 suffix + TEST_BIG_FILE_EXTENSION
+            suffix + TEST_BIG_FILE_EXTENSION
 
         response = self.swift_operations.create_container(container_name)
         self.assertIsNone(response, "Container could not be created")
