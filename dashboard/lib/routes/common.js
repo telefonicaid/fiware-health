@@ -56,13 +56,13 @@ function parseRoles(roles) {
     return '';
 }
 /**
- * Convert to lower case and cut the last character
+ * Convert to lower case and cut the last character whenever number
  * @param {string} regionName
  * @returns {string} ready for compare
  */
 function getRegionNameForCompare(regionName) {
 
-    return (regionName.substring(0, regionName.length - 1)).toLowerCase();
+    return regionName.replace( /\d/ ,'').toLowerCase();
 
 }
 /**
@@ -96,7 +96,8 @@ function addAuthorized(username) {
 
         var region = config.regions.get(key);
         var regionName = getRegionNameForCompare(region.node);
-        region.authorized = ((username.indexOf(regionName)) !== -1);
+        var usernameWithoutAdmin=username.substring(username.indexOf("-")+1);
+        region.authorized = (usernameWithoutAdmin === regionName);
 
         checkAuthorizedByConfig(region, regionName, username);
         config.regions.update(region.node, 'authorized', region.authorized);
