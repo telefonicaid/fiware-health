@@ -532,7 +532,7 @@ class FiwareTestCase(unittest.TestCase):
             local_files = [f for f in listdir(local_objects_path) if isfile(join(local_objects_path, f))]
             for file in local_files:
                 cls.logger.debug("init_world() found local object '%s' not deleted", file)
-                if file.startswith(cls.region_name) and file not in list(world['local_objects']):
+                if file.startswith(cls.region_name + '_') and file not in list(world['local_objects']):
                     world['local_objects'].append(file)
 
         # release resources to ensure a clean world
