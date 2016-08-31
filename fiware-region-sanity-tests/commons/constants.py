@@ -86,14 +86,15 @@ TEST_SERVER_PREFIX = "testing_instance"
 TEST_NETWORK_PREFIX = "testing_network"
 TEST_ROUTER_PREFIX = "testing_router"
 TEST_CONTAINER_PREFIX = "testing_container"
-TEST_TEXT_OBJECT_PREFIX = "testing_text_object"
-TEST_BIG_OBJECT_PREFIX = "test_big_file"
-TEST_BIG_OBJECT_REMOTE_PREFIX = "remote_"
+TEST_TEXT_OBJECT_BASENAME = "_testing_text_object"
+TEST_BIG_OBJECT_BASENAME = "_test_big_file"
+TEST_BIG_OBJECT_REMOTE = "_remote_"
 TEST_TEXT_FILE_EXTENSION = ".txt"
 TEST_BIG_FILE_EXTENSION = ".zip"
 
 # SWIFT CONSTANTS
 SWIFT_RESOURCES_PATH = "resources/swift_objects/"
+SWIFT_TMP_RESOURCES_PATH = "/tmp/swift_objects/"
 
 # SSH CONNECTION (timeouts in seconds)
 SSH_CONNECTION_PORT = 22

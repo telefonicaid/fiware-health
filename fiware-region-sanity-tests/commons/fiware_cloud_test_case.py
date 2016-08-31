@@ -525,15 +525,14 @@ class FiwareTestCase(unittest.TestCase):
         Init the world['containers'] entry (after deleting existing resources)
         """
         result = True
-        local_objects_path = join(cls.home_dir, SWIFT_RESOURCES_PATH)
+        local_objects_path = join(cls.home_dir, SWIFT_TMP_RESOURCES_PATH)
 
         if suite and cls.with_storage:
             # get pre-existing test local files list (ideally, empty when starting the tests)
             local_files = [f for f in listdir(local_objects_path) if isfile(join(local_objects_path, f))]
             for file in local_files:
                 cls.logger.debug("init_world() found local object '%s' not deleted", file)
-                if (file != TEST_TEXT_OBJECT_PREFIX + TEST_TEXT_FILE_EXTENSION) \
-                        and (file not in list(world['local_objects'])):
+                if file.startswith(cls.region_name + '_') and file not in list(world['local_objects']):
                     world['local_objects'].append(file)
 
         # release resources to ensure a clean world
