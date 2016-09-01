@@ -62,7 +62,7 @@ function parseRoles(roles) {
  */
 function getRegionNameForCompare(regionName) {
 
-    return regionName.replace( /\d/ ,'').toLowerCase();
+    return regionName.replace(/\d/, '').toLowerCase();
 
 }
 /**
@@ -96,7 +96,7 @@ function addAuthorized(username) {
 
         var region = config.regions.get(key);
         var regionName = getRegionNameForCompare(region.node);
-        var usernameWithoutAdmin=username.substring(username.indexOf("-")+1);
+        var usernameWithoutAdmin = username.substring(username.indexOf('-') + 1);
         region.authorized = (usernameWithoutAdmin === regionName);
 
         checkAuthorizedByConfig(region, regionName, username);
