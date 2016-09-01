@@ -138,7 +138,7 @@ suite('common', function () {
     });
 
 
-    test('should_return_true_if_is_authorized_like_admin_for_region_with_postfix', function () {
+    test('should_return_true_if_is_authorized_like_admin_for_region_with_postfix_number', function () {
          //Given
          var regions = [
             {
@@ -187,6 +187,62 @@ suite('common', function () {
 
         //When
         common.addAuthorized('admin-regionone');
+
+        //Then
+        regions = config.regions.list();
+        assert(_.isEqual(expected, regions));
+
+    });
+
+    test('should_return_true_if_is_authorized_like_admin_for_region_with_postfix_string', function () {
+         //Given
+         var regions = [
+            {
+                node: 'RegionOneTest',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC'
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC'
+            }
+        ];
+        var expected = [
+            {
+                node: 'RegionOne',
+                status: constants.GLOBAL_STATUS_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false,
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
+            },
+            {
+                node: 'RegionOneTest',
+                status: constants.GLOBAL_STATUS_NOT_OK,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: true,
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
+            },
+            {
+                node: 'RegionTree',
+                status: constants.GLOBAL_STATUS_OTHER,
+                timestamp: '2015/05/13 11:10 UTC',
+                authorized: false,
+                elapsedTime: 'NaNh, NaNm, NaNs',
+                elapsedTimeMillis: NaN
+            }
+        ];
+        fillCache(regions);
+
+        //When
+        common.addAuthorized('admin-regiononetest');
 
         //Then
         regions = config.regions.list();
