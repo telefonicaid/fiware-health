@@ -123,9 +123,8 @@ function capitalizeFirstLetter(string) {
 function changeTitle(id) {
     var element = document.getElementById(id);
     var subtitle = element.innerText || element.textContent;
-    var n = subtitle.search('.TestSuite');
-    var underscorePosition = subtitle.search('_');
-    var newSubtitle = capitalizeFirstLetter(subtitle.substring(underscorePosition + 1, n)) + subtitle.substring(n + 10);
+    var dotPosition = subtitle.search('\\.');
+    var newSubtitle = capitalizeFirstLetter(subtitle.substring(dotPosition + 1));
     if (element.textContent === undefined) {
         document.getElementById(id).innerText = newSubtitle;
     } else {
@@ -137,6 +136,8 @@ function changeTitle(id) {
 function changeAllTitles() {
     changeTitle('subtitle');
     changeTitle('subtitle2');
+    changeTitle('subtitle3');
+    changeTitle('subtitle4');
 }
 
 
