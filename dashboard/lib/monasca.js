@@ -100,12 +100,13 @@ monasca.withAuthToken = function (context, callback) {
 /**
  * @function notify
  * Notify Monasca for new sanity_status value in a region
+ * @param {string} txid
  * @param {Object} region
  * @param {function} notifyCallback
  */
-monasca.notify = function (region, notifyCallback) {
+monasca.notify = function (txid, region, notifyCallback) {
     var regionName = region.node,
-        context = {op: 'monasca#notify'};
+        context = {trans: txid, op: 'monasca#notify'};
 
     logger.info(context, 'Notify sanity_status for region "%s"', regionName);
     this.withAuthToken(context, function (authToken) {

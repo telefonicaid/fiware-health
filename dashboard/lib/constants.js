@@ -33,6 +33,9 @@ module.exports.GLOBAL_STATUS_OTHER = 'N/A';
 module.exports.TRANSACTION_ID_HEADER = 'txid';
 
 /** @export */
+module.exports.TRANSACTION_ID_NGSI_ATTR = 'sanity_build_number';
+
+/** @export */
 module.exports.CONTEXT_AUTH = 'auth';
 
 /** @export */

@@ -89,20 +89,21 @@ function compile(str, path) {
  */
 function postContextBroker(req, res) {
 
-    var txid = req.headers[constants.TRANSACTION_ID_HEADER.toLowerCase()] || cuid(),
-        context = {trans: txid, op: 'app#contextbroker'},
-        mailman = subscribe;
+    var context = {op: 'app#contextbroker'},
+        mailman = subscribe,
+        recipient = (req.path.match('/' + constants.CONTEXT_SANITY_STATUS_CHANGE + '$')) ? mailman : monasca;
 
     try {
-        var region = cbroker.getEntity(txid, req),
-            notifyExclude = [ constants.GLOBAL_STATUS_OTHER ];
+        var region = cbroker.getEntity(req, context),
+            notifyExclude = [ constants.GLOBAL_STATUS_OTHER],
+            notifyType = (recipient === mailman) ? 'sanity status change' : 'sanity check execution',
+            txid = context.trans;
 
-        logger.info(context, 'Received sanity_status notification from Context Broker for region "%s"', region.node);
+        logger.info(context, 'Received %s notification from Context Broker for region "%s"', notifyType, region.node);
         res.status(200).end();
 
         if (notifyExclude.indexOf(region.status) === -1) {
-            var recipient = (req.path.match('/' + constants.CONTEXT_SANITY_STATUS_CHANGE + '$')) ? mailman : monasca;
-            recipient.notify(region, function (err) {
+            recipient.notify(txid, region, function (err) {
                 if (err) {
                     logger.error(context, 'Notification to %s failed: %s', recipient.notify.destination, err);
                 } else {
@@ -110,7 +111,7 @@ function postContextBroker(req, res) {
                 }
             });
         } else {
-            logger.info(context, 'Discarded sanity_status notification (status %s is excluded)', region.status);
+            logger.info(context, 'Discarded %s notification (status %s is excluded)', notifyType, region.status);
         }
 
     } catch (ex) {

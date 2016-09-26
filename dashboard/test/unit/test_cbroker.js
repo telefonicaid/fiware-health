@@ -119,10 +119,12 @@ suite('cbroker', function () {
 
     setup(function () {
         this.txid = cuid();
+        this.context = {trans: this.txid, op: 'test'};
     });
 
     teardown(function () {
         delete this.txid;
+        delete this.context;
     });
 
     test('should_have_a_retrieveAllRegions_method', function () {
@@ -150,11 +152,12 @@ suite('cbroker', function () {
         var data = this.sampleDataNotifyContext,
             expected = this.parsedRegionsNotifyContext[0],
             req = {
+                headers: [],
                 body: data
             };
 
         //when
-        var result = cbroker.getEntity(this.txid, req);
+        var result = cbroker.getEntity(req, this.context);
 
         //then
         assert.deepEqual(expected, result);
