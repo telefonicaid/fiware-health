@@ -95,7 +95,7 @@ function postContextBroker(req, res) {
 
     try {
         var region = cbroker.getEntity(req, context),
-            notifyExclude = [ constants.GLOBAL_STATUS_OTHER],
+            notifyExclude = [ constants.GLOBAL_STATUS_OTHER ],
             notifyType = (recipient === mailman) ? 'sanity status change' : 'sanity check execution',
             txid = context.trans;
 
