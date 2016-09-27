@@ -13,11 +13,13 @@ __ `Context Broker - Context subscriptions`_
 To do that, a request to the `NGSI Adapter`_ component must be issued. The name
 of the probe originating source data will be ``sanity_tests``::
 
-    $ curl "{adapter_endpoint}/sanity_tests?id={myregion}&type=region" -s -S \
-    --header 'Content-Type: text/plain' -X POST -d @test_results.txt
+    $ curl "{adapter_endpoint}/sanity_tests?id={myregion}&type=region" \
+    --header "Content-Type: text/plain" --header "txId: $BUILD_NUMBER" \
+    -X POST -s -S -d @test_results.txt
 
 Please note that the invocation to NGSI Adapter, once summary report has been
 generated, is **only** automated when running the Sanity Checks within Jenkins.
+Job's build number is used as transaction identifier for traceability.
 
 As a prerequisite, custom parser ``resources/parsers/sanity_tests.js`` (provided
 as part of this component) has to be installed together with the rest of parsers
@@ -25,14 +27,14 @@ bundled in NGSI Adapter package.
 
 Such parser will extract NGSI attributes from the summary report and then invoke
 Context Broker to update region context. In this process the **Sanity Status**
-is calculated depending the results of individual tests
+is calculated depending the results of individual tests.
 
 Here is an example of the generated ``test_results.txt`` for an specific region
 (*my_region*) is the following:
 
 ::
 
-    [Tests: 28, Errors: 0, Failures: 0, Skipped: 0]
+    [Tests: 28, Errors: 0, Failures: 0, Skipped: 0] | BUILD_NUMBER=12345
 
     REGION GLOBAL STATUS
 
@@ -77,16 +79,6 @@ Here is an example of the generated ``test_results.txt`` for an specific region
       OK	 test_images_not_empty
 
 
-Elapsed execution time of Sanity Checks
----------------------------------------
-
-Apart from the context attributes described above, when Sanity Checks
-have been executed from Jenkins, a new attribute is updated in the
-context information of the region: the elapsed time of the execution
-``sanity_check_elapsed_time``. This attribute will measure the time in
-milliseconds or 'N/A' if Sanity tests have not finished yet.
-
-
 Sanity Check Status and Test Execution Status
 ---------------------------------------------
 
@@ -105,12 +97,12 @@ have been *PASSED*. If some of these *key test cases* are failed but these ones
 are defined in the second property, the status of the region will
 be **Partial OK**.
 
-The target of the *Sanity Check Status* is to be used as value in the
+The aim of the *Sanity Check Status* is to be used as the value for the
 **sanity_check_status** context attribute to be sent to Context Broker
-by NGSI-Adapter. Other context attributes are sent to Context Broker,
-one for each executed sanity test with their result (**sanity_check_***).
+by NGSI Adapter. Additional context attributes are sent to Context Broker,
+one for each individual sanity test (named **sanity_check_***).
 
-So that, we have two type of statuses:
+Therefore, we have two type of statuses:
 
 - **Sanity Check Status**. The responsible for calculating this value is the
   custom parser for the NGSI Adapter aforementioned, whose input is the summary
@@ -134,9 +126,9 @@ So that, we have two type of statuses:
   +---------------+---------------------------------------------+
 
 
-- **Test status**. The ``commons/result_analyzer.py`` script only generates
-  the ``test_results.txt`` report with the list of executed test cases and their
-  results, and also 'mark' the region considering the *key_test_cases*
+- **Test status**. The ``commons/result_analyzer.py`` script generates the
+  ``test_results.txt`` report with the list of executed test cases and their
+  results, and also 'marks' the region considering the *key_test_cases*
   and *opt_test_cases*. Result of tests could be:
 
   +-------------+---------------------------------------------+
@@ -152,6 +144,16 @@ So that, we have two type of statuses:
   |             | assertions has failed or an exception       |
   |             | has been raised                             |
   +-------------+---------------------------------------------+
+
+
+Timestamp and elapsed execution time of Sanity Checks
+-----------------------------------------------------
+
+Apart from the context attributes described above, when Sanity Checks
+have been executed from Jenkins a new attribute ``sanity_check_elapsed_time``
+is updated in the context information of the region: the elapsed time of the
+execution in milliseconds. And the parser in NGSI Adapter will also add
+the ``sanity_check_timestamp`` attribute.
 
 
 .. REFERENCES
