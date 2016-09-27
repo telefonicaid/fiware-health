@@ -189,18 +189,19 @@ function update_elapsed_time_context_broker() {
 # test results included in summary report file $1, by invoking NGSI Adapter.
 function change_status() {
 	local region=$OS_REGION_NAME
-	local status="N/A"
 	local report=$1
+	local txId=$2
 
 	# Finish if no region is set or no report is given
 	[ -n "$region" -a -r "$report" ] || return 0
 
 	# Adjust status according to results report
 	local resource="sanity_tests?id=$region&type=region"
-	printf "Request to NGSI Adapter to change region status ... "
+	printf "Request txId=$txId to NGSI Adapter to change region status... "
 	curl "$FIHEALTH_ADAPTER_URL/$resource" -o /dev/null -s -S \
 	--write-out "HTTP %{http_code} result from %{url_effective}\n" \
-	--header 'Content-Type: text/plain' --data-binary @$report
+	--header "Content-Type: text/plain" --header "txId: $txId" \
+	--data-binary @$report
 
 	return $?
 }
@@ -326,10 +327,8 @@ restart)
 	;;
 
 exec)
-	elapsed_time='N/A'
-
 	# Start test action
-	printf "Running %s ...\n" "$(./sanity_checks --version 2>&1)"
+	printf "Build %s of %s ...\n" $BUILD_NUMBER "$(./sanity_checks --version 2>&1)"
 
 	# Optionally restrict tests to a region (leave empty for all)
 	REGIONS=$OS_REGION_NAME
@@ -337,9 +336,6 @@ exec)
 
 	# In single region tests, move previous reports to history of executions
 	move_reports_to_history $OS_REGION_NAME
-
-	# Update 'sanity_check_elapsed_time' context attribute
-	update_elapsed_time_context_broker $elapsed_time
 
 	# Activate virtualenv
 	source $VIRTUALENV/bin/activate
@@ -353,6 +349,7 @@ exec)
 
 	# Run sanity checks
 	./sanity_checks --verbose \
+		--build-number=$BUILD_NUMBER \
 		--output-name=$OUTPUT_NAME \
 		--template-name="dashboard_template.html" \
 		$REGIONS
@@ -371,6 +368,6 @@ exec)
 	[ -s $OUTPUT_NAME.txt ] && cp -f $OUTPUT_NAME.txt $FIHEALTH_HTDOCS
 
 	# In case of single region tests, change status according to results
-	[ -s $OUTPUT_NAME.txt ] && change_status $OUTPUT_NAME.txt
+	[ -s $OUTPUT_NAME.txt ] && change_status $OUTPUT_NAME.txt $BUILD_NUMBER
 	;;
 esac

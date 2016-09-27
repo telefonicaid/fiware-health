@@ -21,6 +21,7 @@ var assert = require('assert'),
     init = require('./init'),
     sinon = require('sinon'),
     http = require('http'),
+    cuid = require('cuid'),
     EventEmitter = require('events').EventEmitter,
     logger = require('../../lib/logger'),
     monasca = require('../../lib/monasca');
@@ -44,6 +45,14 @@ suite('monasca', function () {
 
     suiteTeardown(function () {
         logger.stream = stream;
+    });
+
+    setup(function () {
+        this.txid = cuid();
+    });
+
+    teardown(function () {
+        delete this.txid;
     });
 
     test('should_notify_to_monasca_api', function () {
@@ -74,7 +83,7 @@ suite('monasca', function () {
         var notifyError;
 
         //when
-        monasca.notify(region, function (err) {
+        monasca.notify(this.txid, region, function (err) {
             notifyError = err;
         });
 
@@ -108,7 +117,7 @@ suite('monasca', function () {
         });
 
         //when
-        monasca.notify(region, function (err) {
+        monasca.notify(this.txid, region, function (err) {
             http.request.restore();
             keystoneStub.restore();
             assert(err instanceof Error);
@@ -142,7 +151,7 @@ suite('monasca', function () {
         });
 
         //when
-        monasca.notify(region, function (err) {
+        monasca.notify(this.txid, region, function (err) {
             http.request.restore();
             assert(err instanceof Error);
             done();
@@ -168,7 +177,7 @@ suite('monasca', function () {
         });
 
         //when
-        monasca.notify(region, function (err) {
+        monasca.notify(this.txid, region, function (err) {
             http.request.restore();
             assert(err instanceof Error);
             done();
@@ -184,7 +193,7 @@ suite('monasca', function () {
         });
 
         //when
-        monasca.notify(region, function (err) {
+        monasca.notify(this.txid, region, function (err) {
             keystoneStub.restore();
             assert(err instanceof Error);
             done();

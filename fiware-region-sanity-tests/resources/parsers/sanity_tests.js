@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Telefónica I+D
+ * Copyright 2015-2016 Telefónica I+D
  * All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -23,6 +23,8 @@
  *
  * - sanity_status = global status of the region
  * - sanity_{test} = status of each individual {test}
+ * - sanity_build_number = the build number in Jenkins (optional)
+ * - sanity_check_timestamp = timestamp of last change of sanity_* attributes
  *
  * @module sanity_tests
  * @see https://github.com/telefonicaid/fiware-health/blob/master/fiware-region-sanity-tests
@@ -68,7 +70,7 @@ parser.parseRequest = function(request) {
  * @returns {Object} Context attributes.
  *
  * Sample report with GLOBAL_STATUS_NOT_OK: <code>
- * [Tests: 22, Errors: 0, Failures: 8, Skipped: 0]
+ * [Tests: 22, Errors: 0, Failures: 8, Skipped: 0] | BUILD_NUMBER=12345
  *
  * REGION GLOBAL STATUS
  *
@@ -108,7 +110,7 @@ parser.parseRequest = function(request) {
  * </code>
  *
  * Sample report with GLOBAL_STATUS_PARTIAL_OK: <code>
- * [Tests: 22, Errors: 0, Failures: 2, Skipped: 0]
+ * [Tests: 22, Errors: 0, Failures: 2, Skipped: 0] | BUILD_NUMBER=12345
  *
  * REGION GLOBAL STATUS
  *
@@ -163,13 +165,19 @@ parser.getContextAttrs = function(probeEntityData) {
     var empty_line = '\n\n',
         components = probeEntityData.status.split(empty_line),
         key_status_line = components[2].split('\n')[1],
-        opt_status_line = components[3].split('\n')[1];
+        opt_status_line = components[3].split('\n')[1],
+        build_number = components[0].split(' | BUILD_NUMBER=')[1];
 
     // Region global status
     if (key_status_line.match(/>>\s+\b\w+\b/)) {
         attrs['sanity_status'] = GLOBAL_STATUS_OK;
     } else if (opt_status_line.match(/>>\s+\b\w+\b/)) {
         attrs['sanity_status'] = GLOBAL_STATUS_PARTIAL_OK;
+    }
+
+    // Jenkins build number
+    if (build_number) {
+        attrs['sanity_build_number'] = build_number;
     }
 
     // Timestamp for tests results

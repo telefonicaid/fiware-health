@@ -150,15 +150,17 @@ function searchSubscription(user, callback) {
 
 /**
  * notify mailing list for a change in region
+ * @param {string} txid
  * @param {Object} region
  * @param {function} notifyCallback
  */
-function notify(region, notifyCallback) {
+function notify(txid, region, notifyCallback) {
 
     var regionName = region.node,
-        regionStatus = region.status;
+        regionStatus = region.status,
+        context = {trans: txid, op: 'subscribe#notify'};
 
-    logger.info({op: 'subscribe#notify'}, 'notify change in region: ' + regionName);
+    logger.info(context, 'notify change in region "%s"', regionName);
 
     var payloadString = 'name_from= fi-health sanity&';
     payloadString += 'email_from=' + config.mailman.emailFrom + '&';
@@ -188,15 +190,14 @@ function notify(region, notifyCallback) {
             responseString += data;
         });
         mailmanResponse.on('end', function () {
-            logger.info('response mailman: region: %s, code: %s, message: %s', regionName, mailmanResponse.statusCode,
-                mailmanResponse.statusMessage);
+            logger.info(context, 'response mailman: region: %s, code: %s, message: %s', regionName,
+                mailmanResponse.statusCode, mailmanResponse.statusMessage);
             notifyCallback();
-
         });
     });
 
     mailmanRequest.on('error', function (e) {
-        logger.error('Error in connection with mailman: %s', e);
+        logger.error(context, 'Error in connection with mailman: %s', e);
         notifyCallback(e);
     });
 

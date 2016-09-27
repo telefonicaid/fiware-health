@@ -21,6 +21,7 @@ var assert = require('assert'),
     sinon = require('sinon'),
     EventEmitter = require('events').EventEmitter,
     http = require('http'),
+    cuid = require('cuid'),
     init = require('./init'),
     logger = require('../../lib/logger'),
     subscribe = require('../../lib/routes/subscribe'),
@@ -262,7 +263,8 @@ suite('subscribe', function () {
         });
 
         //when
-        subscribe.notify(region, function() {
+        var txid = cuid();
+        subscribe.notify(txid, region, function() {
         });
 
         //then

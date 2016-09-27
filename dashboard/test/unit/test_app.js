@@ -70,6 +70,7 @@ suite('app', function () {
         res.send = sinon.spy();
         res.status = sinon.stub();
         res.status.withArgs(400).returns(res);
+        req.path = '/';
 
         var getEntityStub = sinon.stub(cbroker, 'getEntity');
         getEntityStub.throws();
@@ -147,6 +148,7 @@ suite('app', function () {
         res.end = sinon.spy();
         res.status = sinon.stub();
         res.status.withArgs(200).returns(res);
+        req.path = '/' + constants.CONTEXT_SANITY_STATUS_CHANGE;
 
         var mailmanNotifyStub = sinon.stub(subscribe, 'notify'),
             monascaNotifyStub = sinon.stub(monasca, 'notify'),

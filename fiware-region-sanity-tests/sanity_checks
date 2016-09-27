@@ -30,6 +30,7 @@
 #     -s, --settings=FILE		sanity checks configuration file
 #     -o, --output-name=NAME		basename for generated report files
 #     -t, --template-name=NAME		filename of the HTML report template
+#     -b, --build-number=NUMBER		optional Jenkins build number
 #     -e, --phonehome-endpoint=URL	optional PhoneHome service endpoint
 #     -l, --os-auth-url=URL		optional OpenStack auth_url (see below)
 #     -u, --os-username=STRING		optional OpenStack username
@@ -75,6 +76,7 @@ OPTS=`tr -d '\n ' <<END
       s(settings):
       o(output-name):
       t(template-name):
+      b(build-number):
       e(phonehome-endpoint):
       l(os-auth-url):
       u(os-username):
@@ -90,10 +92,11 @@ END`
 NOSEOPTS="--config=etc/nose.cfg"
 OUTPUT_NOVA_CONSOLE_NAME=test_novaconsole
 
-# Command line options (default values / environment variables)
+# Command line options (some default values taken from environment)
 OUTPUT_NAME=test_results
 TEMPLATE_NAME=test_report_template.html
 SANITY_CHECKS_SETTINGS=${SANITY_CHECKS_SETTINGS:-etc/settings.json}
+BUILD_NUMBER=
 
 # Export environment variables required by the tests
 export SANITY_CHECKS_SETTINGS
@@ -122,6 +125,7 @@ case $OPT in
 'v')	NOSEOPTS="$NOSEOPTS --logging-level=DEBUG";;
 'e')	TEST_PHONEHOME_ENDPOINT=$OPTARG;;
 't')	TEMPLATE_NAME=$OPTARG;;
+'b')	BUILD_NUMBER=$OPTARG;;
 'o')	OUTPUT_NAME=$OPTARG;;
 'l')	OS_AUTH_URL=$OPTARG;;
 'u')	OS_USERNAME=$OPTARG;;
@@ -185,6 +189,6 @@ echo "Result code=$?"
 # Summary report
 if [ -s $OUTPUT_NAME.xml ]; then
 	printf "Generating summary report... "
-	commons/results_analyzer.py $OUTPUT_NAME.xml > $OUTPUT_NAME.txt
+	commons/results_analyzer.py $OUTPUT_NAME.xml $BUILD_NUMBER > $OUTPUT_NAME.txt
 	printf "%s\n" $OUTPUT_NAME.txt
 fi

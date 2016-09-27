@@ -18,8 +18,10 @@
 'use strict';
 
 var http = require('http'),
+    cuid = require('cuid'),
     logger = require('../logger'),
     config = require('../config').data,
+    constants = require('../constants'),
     dateFormat = require('dateformat');
 
 
@@ -27,6 +29,26 @@ var SANITY_STATUS_ATTRIBUTE = 'sanity_status', // field name for value about reg
     TIMESTAMP_ATTRIBUTE = 'sanity_check_timestamp', // field name for value about timestamp
     ELAPSED_TIME = 'sanity_check_elapsed_time', // field name for value sanity_checks_elapsed_time
     REGION_TYPE = 'region';
+
+
+/**
+ * @function getTransactionId
+ * Extract txid from headers of Context Broker notification or from entity attributes
+ * @param {Object} req
+ * @param {Object} entities
+ * @return {string} txid
+ */
+function getTransactionId(req, entities) {
+    var txid = req.headers[constants.TRANSACTION_ID_HEADER.toLowerCase()];
+    entities.contextResponses.forEach(function (entry) {
+        entry.contextElement.attributes.forEach(function (attr) {
+            if (attr.name === constants.TRANSACTION_ID_NGSI_ATTR) {
+                txid = attr.value;
+            }
+        });
+    });
+    return txid;
+}
 
 
 /**
@@ -86,7 +108,6 @@ function parseRegions(txid, entities) {
         }
     });
     return regions;
-
 }
 
 
@@ -97,8 +118,7 @@ function parseRegions(txid, entities) {
  * @param {function} callback
  */
 function retrieveAllRegions(txid, callback) {
-
-    var context = {trans: txid, op: 'retrieveAllRegions'};
+    var context = {trans: txid, op: 'cbroker#retrieveAllRegions'};
 
     var payload = {
         entities: [
@@ -135,10 +155,12 @@ function retrieveAllRegions(txid, callback) {
             responseString += data;
         });
         res.on('end', function () {
-            logger.debug(context, 'Response string: %s', responseString);
+            logger.debug(context, 'Response string: %s', { toString: function () {
+                return responseString.split('\n').map(function (line) { return line.trim(); }).join(' ');
+            }});
             try {
                 var resultObject = JSON.parse(responseString),
-                    regions = resultObject.contextResponses.map(function (item) {return item.contextElement.id; });
+                    regions = resultObject.contextResponses.map(function (item) { return item.contextElement.id; });
 
                 logger.info(context, 'Found %d regions: %s', regions.length, regions);
                 parseRegions(txid, resultObject);
@@ -170,19 +192,19 @@ function retrieveAllRegions(txid, callback) {
 
 /**
  * Return the entity involved in a Context Broker notification
- * @param {string} txid
- * @param {*} req
+ * @param {Object} req
+ * @param {Object} context
  * @return {Object}
  */
-function getEntity(txid, req) {
-    var context = {trans: txid, op: 'getEntity'};
+function getEntity(req, context) {
     if (typeof req.body !== 'string') {
-        logger.warn(context, 'Non-string request body');
         req.body = JSON.stringify(req.body);
     }
-    var result = parseRegions(txid, JSON.parse(req.body));
+    var entities = JSON.parse(req.body),
+        txid = getTransactionId(req, entities) || cuid(),
+        result = parseRegions(txid, entities);
+    context.trans = txid;
     return config.regions.get(result[0]);
-
 }
 
 

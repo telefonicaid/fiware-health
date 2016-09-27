@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015-2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -26,7 +26,7 @@
 """Generate a summary report including the sanity status of the regions.
 
 Usage:
-  {prog} XUNIT_RESULTS_FILE
+  {prog} XUNIT_RESULTS_FILE [BUILD_NUMBER]
 
 Environment:
   SANITY_CHECKS_SETTINGS            (Optional) Path to settings file
@@ -68,7 +68,8 @@ GLOBAL_STATUS_OK = TEST_STATUS_OK
 
 class ResultAnalyzer(object):
 
-    def __init__(self, conf, file=DEFAULT_RESULTS_FILE):
+    def __init__(self, conf, file=DEFAULT_RESULTS_FILE, build_number=None):
+        self.build = build_number
         self.conf = conf
         self.file = file
         self.dict = {}
@@ -81,11 +82,13 @@ class ResultAnalyzer(object):
         testsuite = doc.getElementsByTagName("testsuite")[0]
 
         # Print a summary of the test results
-        print "[Tests: {}, Errors: {}, Failures: {}, Skipped: {}]".format(
+        build_info = " | BUILD_NUMBER=%s" % self.build if self.build else ""
+        print "[Tests: {}, Errors: {}, Failures: {}, Skipped: {}]{}".format(
             testsuite.getAttribute(ATTR_TESTS_TOTAL),
             testsuite.getAttribute(ATTR_TESTS_ERROR),
             testsuite.getAttribute(ATTR_TESTS_FAILURE),
-            testsuite.getAttribute(ATTR_TESTS_SKIP))
+            testsuite.getAttribute(ATTR_TESTS_SKIP),
+            build_info)
 
         # Count errors/failures/skips
         for testcase in doc.getElementsByTagName('testcase'):
@@ -213,12 +216,13 @@ class ResultAnalyzer(object):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) not in [2, 3]:
         usage = re.findall(r'.*{prog}.*', __doc__)[0].format(prog=os.path.basename(__file__)).strip()
         print "Usage: %s" % usage
         sys.exit(-1)
 
     results_file = sys.argv[1]
+    build_number = sys.argv[2] if len(sys.argv) > 2 else None
 
     parentdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     settings_file = os.environ.get('SANITY_CHECKS_SETTINGS', os.path.join(parentdir, DEFAULT_SETTINGS_FILE))
@@ -229,7 +233,7 @@ if __name__ == "__main__":
             print "Error parsing config file '{}': {}".format(settings_file, e)
             sys.exit(-1)
 
-    checker = ResultAnalyzer(conf, results_file)
+    checker = ResultAnalyzer(conf, results_file, build_number)
     checker.get_results()
     checker.print_global_status()
     checker.print_results()
