@@ -2,6 +2,11 @@
  FIWARE Health - Sanity Checks
 ===============================
 
+.. contents:: :local:
+
+Introduction
+============
+
 This is the code repository for **FIHealth - Sanity Checks**, a comprehensive
 collection of *sanity* test cases over each region in `FIWARE Lab`_ in order
 to validate the capabilities of the regions and get their *status*.
@@ -17,7 +22,6 @@ to provide feedback.
 
 __ `FIHealth - GitHub issues`_
 
-.. contents:: :local:
 
 Overall description
 ===================
