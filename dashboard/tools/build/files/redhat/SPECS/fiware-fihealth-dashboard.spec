@@ -213,6 +213,12 @@ fi
 
 %changelog
 
+* Thu Sep 28 2016 Telefónica I+D <opensource@tid.es> 1.11.0-1
+- new contribution policy
+- fix well parse	region name in title
+- now compare username with region name instead of part of region name
+- add transaction_id for traceability
+
 * Thu Aug 25 2016 Telefónica I+D <opensource@tid.es> 1.10.0-1
 - upgrade to nodejs 4.5.0
 - change sleep function by setTimeout
