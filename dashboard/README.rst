@@ -2,6 +2,11 @@
  FIWARE Health - Sanity Check Status Dashboard
 ===============================================
 
+.. contents:: :local:
+
+Introduction
+============
+
 This is the code repository for **FIHealth - Dashboard**, an overview page with
 a summary of the status of the regions in `FIWARE Lab`_ including links to the
 reports showing detailed information about the problems found.
