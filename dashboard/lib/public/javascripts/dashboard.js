@@ -184,17 +184,16 @@ function logout(redirectUrl, logoutUrl) {
 
 }
 
-
 function formatElapsedTime() {
     $("span[id*='elapsedTime']").each(function() {
-        dateInString = $(this).text();
+        textContent = $(this).text();
 
-        dateInArray = dateInString.split(/[:\.]/);
-        dateInArray = dateInArray.map(function (item) {
+        intArray = textContent.split(/[:\.]/);
+        intArray = intArray.map(function (item) {
             return parseInt(item, 10);
         });
 
-        $(this).text("(took: "+dateInArray[1]+"m, "+dateInArray[2]+"s)");
+        $(this).text("(took: " + intArray[1] + "m, " + intArray[2] + "s)");
     });
 
 }
