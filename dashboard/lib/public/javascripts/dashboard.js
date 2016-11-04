@@ -185,15 +185,15 @@ function logout(redirectUrl, logoutUrl) {
 }
 
 function formatElapsedTime() {
-    $("span[id*='elapsedTime']").each(function() {
-        textContent = $(this).text();
+    $('span[id*="elapsedTime"]').each(function() {
+        var textContent = $(this).text();
 
-        intArray = textContent.split(/[:\.]/);
+        var intArray = textContent.split(/[:\.]/);
         intArray = intArray.map(function (item) {
             return parseInt(item, 10);
         });
 
-        $(this).text("(took: " + intArray[1] + "m, " + intArray[2] + "s)");
+        $(this).text('(took: ' + intArray[1] + 'm, ' + intArray[2] + 's)');
     });
 
 }
