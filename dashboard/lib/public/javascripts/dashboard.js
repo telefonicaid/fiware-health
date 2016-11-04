@@ -183,3 +183,18 @@ function logout(redirectUrl, logoutUrl) {
     return window.location.href;
 
 }
+
+
+function formatElapsedTime() {
+    $("span[id*='elapsedTime']").each(function() {
+        dateInString = $(this).text();
+
+        dateInArray = dateInString.split(/[:\.]/);
+        dateInArray = dateInArray.map(function (item) {
+            return parseInt(item, 10);
+        });
+
+        $(this).text("(took: "+dateInArray[1]+"m, "+dateInArray[2]+"s)");
+    });
+
+}

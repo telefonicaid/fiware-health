@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="../../stylesheets/font-awesome.css" media="screen">
     <script src="../javascripts/dashboard.js"></script>
 </head>
-<body onload="calcHeight();displaySections();changeAllTitles()">
+<body onload="calcHeight();displaySections();changeAllTitles();formatElapsedTime();">
 <div class="box0">
     {% for class, group in report.items() %}
     <h1 align="left" class="subtitle" id="subtitle">Region {{ class }} - {{timestamp}}</h1>
@@ -43,7 +43,7 @@
             <ul class="results">
                 <li class="header_table" id="subtitle3">{{ class }}</li>
                 {% for test in group.tests %}
-                <li class="results"><a title="{{ test.shortDescription }}" {% if test.failed %}class="{% if test.type == 'skipped' %}skipped{% else %}failed{% endif %}" href="javascript:openFailureDetailsInNewWindow('#{{ class }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}</a></li>
+                <li class="results"><a title="{{ test.shortDescription }}" {% if test.failed %}class="{% if test.type == 'skipped' %}skipped{% else %}failed{% endif %}" href="javascript:openFailureDetailsInNewWindow('#{{ class }}:{{ test.name }}');" {% else %} class="success" {% endif %}>{{ test.name }}<span class="elapsedTime" id="elapsedTime">{{ test.time }}</span></a></li>
                 {% endfor %}
             </ul>
         </section>
