@@ -183,3 +183,17 @@ function logout(redirectUrl, logoutUrl) {
     return window.location.href;
 
 }
+
+function formatElapsedTime() {
+    $('span[id*="elapsedTime"]').each(function() {
+        var textContent = $(this).text();
+
+        var intArray = textContent.split(/[:\.]/);
+        intArray = intArray.map(function (item) {
+            return parseInt(item, 10);
+        });
+
+        $(this).text('(took: ' + intArray[1] + 'm, ' + intArray[2] + 's)');
+    });
+
+}
