@@ -1,3 +1,7 @@
+# How to:
+# docker build -t fiwarehealth .
+# docker run -p 8081:8081 -d fiwarehealth
+
 FROM centos:6.6
 WORKDIR /opt
 RUN yum update -y && yum install -y dbus-devel.x86_64 dbus-glib-devel.x86_64 which   system-config-firewall gcc git wget tar zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel openssh-server openssh-clients
@@ -32,5 +36,4 @@ WORKDIR /opt/fiware-health/fiware-region-sanity-tests
 RUN cp ./resources/docker/system.conf /etc/dbus-1/system.conf
 RUN source /root/venv/fiware-region-sanity-tests/bin/activate; pip2.7 install -r requirements.txt --allow-all-external
 EXPOSE 8081
-COPY startspain2.sh start.sh
 CMD ./start.sh

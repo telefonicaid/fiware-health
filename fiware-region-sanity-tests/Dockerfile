@@ -1,3 +1,4 @@
+# This dockerfile is used for development of phonehome server (commons/http_phonehome_server.py)
 # How to:
 # docker build -t fiwarehealth .
 # docker run -p 8081:8081 -d fiwarehealth
@@ -40,6 +41,6 @@ RUN mkdir /opt/fiware-health
 ADD . /opt/fiware-health
 WORKDIR /opt/fiware-health
 RUN cp resources/docker/system.conf /etc/dbus-1/system.conf
-RUN pip2.7 install -r requirements.txt --allow-all-external
+RUN source /opt/fihealth/bin/activate; pip2.7 install -r requirements.txt --allow-all-external
 EXPOSE 8081
 CMD ./resources/docker/start.sh
