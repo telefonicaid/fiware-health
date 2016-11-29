@@ -8,9 +8,9 @@ glance image-list |grep cirros > images
 export image=`cat images | awk 'NR==1{print $2}'`
 glance image-update $image --name base_centos_6
 export OS_TENANT_ID=`grep "| id" project | awk 'NR==1{print $4}'`
-export OS_USER_ID=`grep "| id" name | awk 'NR==1{print $4}'`
-echo $OS_USER_ID
-echo $OS_TENANT_ID
+export OS_USER_ID=`grep "| id" user | awk 'NR==1{print $4}'`
+echo OS_USER_ID=$OS_USER_ID
+echo OS_TENANT_ID=$OS_TENANT_ID
 export OS_USERNAME=test
 export OS_PASSWORD=test
 export OS_TENANT_NAME=test
@@ -33,5 +33,5 @@ git checkout origin/$BRANCH
 git pull origin $BRANCH
 pip2.7 install -r requirements.txt
 sed -i "s|OS_AUTH_URL|$OS_AUTH_URL|g" etc/settings.json
-ln -s /usr/local/bin/python2.7 /usr/bin/python
+rm -rf /usr/bin/python; ln -s /usr/local/bin/python2.7 /usr/bin/python
 ./sanity_checks $OS_REGION_NAME
