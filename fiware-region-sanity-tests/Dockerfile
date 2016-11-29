@@ -16,7 +16,6 @@ RUN wget --no-check-certificate http://pypi.python.org/packages/source/d/distrib
 RUN tar xf distribute-0.6.35.tar.gz
 RUN cd distribute-0.6.35;python2.7 setup.py install
 RUN easy_install-2.7 pip
-RUN pip2.7 install virtualenv
 RUN yum install -y dbus-devel.x86_64 dbus-glib-devel.x86_64
 RUN mkdir -p /opt/fihealth/src
 WORKDIR /opt/fihealth/src
@@ -44,4 +43,5 @@ WORKDIR /opt/fiware-health
 RUN cp resources/docker/system.conf /etc/dbus-1/system.conf
 RUN pip2.7 install -r requirements.txt --allow-all-external
 EXPOSE 8081
+RUN rm -rf /usr/bin/python;ln -s /usr/local/bin/python2.7 /usr/bin/python
 CMD ./resources/docker/start.sh

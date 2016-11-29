@@ -3,12 +3,12 @@ openstack --os-interface public project create test
 openstack --os-interface public user create test --password test --project test
 openstack --os-interface public role add --user test --project test owner
 openstack --os-interface public project show test > project
-openstack --os-interface public  user show test > user
+openstack --os-interface public user show test > user
 glance image-list |grep cirros > images
 export image=`cat images | awk 'NR==1{print $2}'`
 glance image-update $image --name base_centos_6
 export OS_TENANT_ID=`grep "| id" project | awk 'NR==1{print $4}'`
-export OS_USER_ID=`grep "| id" user | awk 'NR==1{print $4}'`
+export OS_USER_ID=`grep "| id" name | awk 'NR==1{print $4}'`
 echo $OS_USER_ID
 echo $OS_TENANT_ID
 export OS_USERNAME=test
@@ -31,5 +31,6 @@ ssh -i key.pem -o "StrictHostKeyChecking no" centos@{VM_IP} -fnN -R0:8081:0:8081
 ./resources/docker/start.sh &
 git checkout origin/$BRANCH
 git pull origin $BRANCH
-source /root/venv/fiware-region-sanity-tests/bin/activate; pip2.7 install -r requirements.txt
-source /root/venv/fiware-region-sanity-tests/bin/activate; ./sanity_checks $OS_REGION_NAME
+pip2.7 install -r requirements.txt
+sed -i "s|OS_AUTH_URL|$OS_AUTH_URL|g" etc/settings.json
+./sanity_checks $OS_REGION_NAME

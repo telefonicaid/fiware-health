@@ -13,27 +13,30 @@ RUN wget --no-check-certificate http://pypi.python.org/packages/source/d/distrib
 RUN tar xf distribute-0.6.35.tar.gz
 RUN cd distribute-0.6.35;python2.7 setup.py install
 RUN easy_install-2.7 pip
-RUN pip2.7 install virtualenv
-RUN virtualenv /root/venv/fiware-region-sanity-tests --system-site-packages
-RUN echo "source /root/venv/fiware-region-sanity-tests/bin/activate" >>/etc/bashrc
+RUN yum install -y dbus-devel.x86_64 dbus-glib-devel.x86_64
 RUN pip2.7 install python-config python-openstackclient
 RUN cp /usr/local/bin/python2.7-config /usr/bin/python-config
 # install dbus
 RUN wget http://repositories.lab.fiware.org/repo/files/dbus-python-0.84.0.tar.gz
 RUN tar -xf dbus-python-0.84.0.tar.gz
-RUN source /root/venv/fiware-region-sanity-tests/bin/activate; cd /opt/dbus-python-0.84.0;./configure 
-RUN cd /opt/dbus-python-0.84.0;make && make install
+ENV PYTHON_INCLUDES="-I/usr/local/include/python2.7"
+ENV PYTHON_LIBS="-L/usr/local/lib -L /usr/lib"
+ENV PYTHON="python2.7"
+RUN cd dbus-python-0.84.0;./configure --prefix=/usr/local
+RUN cd dbus-python-0.84.0;make && make install
+RUN yum -y install system-config-firewall
 RUN service messagebus start
 
 # install pygobject
 RUN wget http://repositories.lab.fiware.org/repo/files/pygobject-2.20.0.tar.gz
 RUN tar -xf pygobject-2.20.0.tar.gz
-RUN source /root/venv/fiware-region-sanity-tests/bin/activate; cd /opt/pygobject-2.20.0;./configure 
-RUN cd /opt/pygobject-2.20.0;make && make install
+RUN cd pygobject-2.20.0;PYTHON=/usr/local/bin/python2.7 ./configure --prefix=/usr/local
+RUN cd pygobject-2.20.0;make && make install
 
 RUN git clone https://github.com/telefonicaid/fiware-health /opt/fiware-health
 WORKDIR /opt/fiware-health/fiware-region-sanity-tests
 RUN cp ./resources/docker/system.conf /etc/dbus-1/system.conf
-RUN source /root/venv/fiware-region-sanity-tests/bin/activate; pip2.7 install -r requirements.txt --allow-all-external
+RUN pip2.7 install -r requirements.txt --allow-all-external
 EXPOSE 8081
-CMD ./start.sh
+COPY settings.json etc/settings.json
+CMD ./docker/start.sh

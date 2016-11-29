@@ -1,5 +1,5 @@
-ph:
-  image: ph
+fiware-health:
+  image: fiwarehealth
   environment: 
    - KEY
    - VM_IP
