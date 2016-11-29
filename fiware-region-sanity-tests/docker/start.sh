@@ -33,4 +33,5 @@ git checkout origin/$BRANCH
 git pull origin $BRANCH
 pip2.7 install -r requirements.txt
 sed -i "s|OS_AUTH_URL|$OS_AUTH_URL|g" etc/settings.json
+ln -s /usr/local/bin/python2.7 /usr/bin/python
 ./sanity_checks $OS_REGION_NAME
