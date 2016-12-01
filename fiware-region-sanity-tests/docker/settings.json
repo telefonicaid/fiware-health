@@ -2,13 +2,13 @@
     "environment": "fiware-lab",
     "credentials": {
         "keystone_url": "OS_AUTH_URL",
-        "user_id": "test",
-        "tenant_id": "test",
-        "tenant_name": "test",
-        "user_domain_name": "default",
-        "project_domain_name": "default",
-        "username": "test",
-        "password": "test"
+        "user_id": "",
+        "tenant_id": "",
+        "tenant_name": "",
+        "user_domain_name": "",
+        "project_domain_name": "",
+        "username": "",
+        "password": ""
     },
     "test_configuration": {
         "phonehome_endpoint": "",
