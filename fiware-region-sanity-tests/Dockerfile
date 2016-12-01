@@ -2,6 +2,7 @@
 # How to:
 # docker build -t phonehome .
 # docker run -p 8081:8081 -d phonehome
+# use "docker-machine ip" to get the ip
 FROM centos:6.6
 WORKDIR /opt
 RUN yum update -y
