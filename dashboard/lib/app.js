@@ -193,7 +193,9 @@ function getSignin(req, res, oauth2) {
         res.redirect(path);
         // If auth_token is stored in a session cookie it sends a button to get user info
     } else {
-        oauth2.get(config.idm.url + '/user/', req.session.accessToken, function (e, response) {
+        // We need to request information of the corresponding access token
+        // user?access_token=<accessToken>
+        oauth2.get(config.idm.url + '/user', req.session.accessToken, function (e, response) {
             oauthGetCallback(response, req, res);
         });
 
@@ -235,7 +237,9 @@ function getOAuthAccessTokenCallback(results, req, res, oauth2) {
 
         logger.debug({op: 'app#get login'}, 'accessToken: ' + results.access_token);
 
-        oauth2.get(config.idm.url + '/user/', results.access_token, function (e, response) {
+        // We need to request information of the corresponding access token
+        // user?access_token=<accessToken>
+        oauth2.get(config.idm.url + '/user', results.access_token, function (e, response) {
             oauthGetCallback(response, req, res);
         });
     } else {
