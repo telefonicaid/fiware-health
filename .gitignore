@@ -3,6 +3,7 @@
 .metadata/
 .settings/
 .project
+*/.vscode
 
 # Unit test and coverage reports
 coverage/
@@ -27,3 +28,6 @@ sonar*
 
 # Logfiles
 *.log
+
+# Virtual Environments
+*/*env*

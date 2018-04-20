@@ -193,10 +193,13 @@ class FiwareTestCase(unittest.TestCase):
         Init the OpenStack API clients
         """
         user_id = cls.auth_cred[PROPERTIES_CONFIG_CRED_USER_ID]
+
         cls.nova_operations = FiwareNovaOperations(cls.logger, cls.region_name, test_flavor, test_image,
                                                    auth_session=cls.auth_sess)
+
         cls.neutron_operations = FiwareNeutronOperations(cls.logger, cls.region_name, tenant_id,
                                                          auth_session=cls.auth_sess)
+
         cls.keystone_operations = FiwareKeystoneOperations(cls.logger, cls.region_name, tenant_id,
                                                            user_id=user_id,
                                                            auth_session=cls.auth_sess,
@@ -472,7 +475,8 @@ class FiwareTestCase(unittest.TestCase):
                 if port.get("tenant_id") != cls.tenant_id or port.get("device_owner") == 'compute:None':
                     continue
                 port_data = cls.neutron_operations.show_port(port.get('id'))
-                if 'network:router_interface' in port_data['device_owner']:
+                if 'network:router_interface' in port_data['device_owner'] or \
+                        'network:ha_router_replicated_interface' in port_data['device_owner']:
                     for fixed_ip in port_data['fixed_ips']:
                         cls.neutron_operations.delete_interface_router(router_id=port_data['device_id'],
                                                                        subnetwork_id=fixed_ip['subnet_id'])

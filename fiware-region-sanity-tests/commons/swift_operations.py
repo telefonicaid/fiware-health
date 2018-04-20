@@ -26,7 +26,8 @@ from swiftclient import client
 from commons.constants import DEFAULT_REQUEST_TIMEOUT, OBJECT_STORE_MAX_RETRIES, SERVICE_SWIFT_NAME,\
     ENDPOINT_TYPE_PUBLIC_URL, PROPERTIES_CONFIG_CRED_KEYSTONE_URL,\
     PROPERTIES_CONFIG_CRED_USERNAME, PROPERTIES_CONFIG_CRED_PASSWORD, PROPERTIES_CONFIG_CRED_TENANT_ID,\
-    PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME, PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME
+    PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME, PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME, \
+    PROPERTIES_CONFIG_CRED_TENANT_NAME
 
 import keystoneclient.v2_0.client as keystoneClient
 import keystoneclient.v3.client as keystoneclientv3
@@ -59,6 +60,7 @@ class FiwareSwiftOperations:
                 auth_url=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_KEYSTONE_URL],
                 username=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USERNAME],
                 password=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PASSWORD],
+                project_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_TENANT_NAME],
                 user_domain_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_USER_DOMAIN_NAME],
                 project_domain_name=kwargs.get('auth_cred')[PROPERTIES_CONFIG_CRED_PROJECT_DOMAIN_NAME])
 
