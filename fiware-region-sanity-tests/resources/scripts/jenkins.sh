@@ -307,7 +307,7 @@ setup)
 	BASE_JOB_URL=http://$JENKINS_USER:$JENKINS_PASSWORD@${JENKINS_URL#http://}/job
 	for JOB_NAME in	FIHealth-SanityCheck-0-RestartTestServers \
 			FIHealth-SanityCheck-0-SetUp \
-			FIHealth-SanityCheck-1-Flow \
+			FIHealth-SanityCheck-1-Pipeline \
 			FIHealth-SanityCheck-2-Exec-Region; do
 		printf "Updating job '%s'...\n" $JOB_NAME
 		curl -s -S -X POST $BASE_JOB_URL/$JOB_NAME/config.xml \

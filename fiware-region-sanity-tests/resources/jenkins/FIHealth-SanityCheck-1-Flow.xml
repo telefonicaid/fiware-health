@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- DEPRECATED, THE CLOUDBEES PLUGIN IS DISCONTINUED FROM THE LISTS OF AVAILABLE
+PLUGINS, THEREFORE WE CHANGE TO THE PIPELINE OPTION -->
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.17">
   <actions/>
   <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;

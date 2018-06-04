@@ -1,0 +1,73 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.21">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.9"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.2.9">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>&lt;h3&gt;FIHealth - Region Sanity Check&lt;/h3&gt;&#xd;
+This job executes the Sanity Check on each FIWARE Lab node. It will spawn parallel executions of one job per region (if there are resources to do that)&#xd;
+&lt;br&gt;&lt;br&gt;&#xd;
+&lt;b&gt;Project source code: &lt;/b&gt; https://github.com/telefonicaid/fiware-health/tree/master/fiware-region-sanity-tests&lt;br&gt;&#xd;
+&lt;b&gt;Documentation: &lt;/b&gt;  https://github.com/telefonicaid/fiware-health/blob/master/fiware-region-sanity-tests/README.rst</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>14</daysToKeep>
+        <numToKeep>7</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <hudson.triggers.TimerTrigger>
+          <spec>H 4,12,20 * * *</spec>
+        </hudson.triggers.TimerTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.53">
+    <script>import groovy.json.JsonSlurperClassic
+
+// While you can&apos;t use Groovy&apos;s .collect or similar methods currently, you can
+// still transform a list into a set of actual build steps to be executed in
+// parallel.
+
+// Our initial list of strings we want to echo in parallel
+def settings = env.SANITY_CHECKS_SETTINGS
+
+def inputFile = new File(settings)
+def inputJSON = jsonParse(inputFile.text)
+
+// The map we&apos;ll store the parallel steps in before executing them.
+stepsForParallel = inputJSON.region_configuration.keySet().collectEntries {
+    [(&quot;Testing_${it}&quot;) : transformIntoStep(it)]
+}
+
+// Take the string and echo it.
+def transformIntoStep(region) {
+    return {
+                build job: &apos;FIHealth-SanityCheck-2-Exec-Region&apos;, parameters: [
+                    string(name: &apos;OS_REGION_NAME&apos;, value: region)
+                ]
+    }
+}
+
+stage name: &quot;testing-nodes&quot;
+parallel stepsForParallel
+
+@NonCPS
+def jsonParse(def json) {
+    new JsonSlurperClassic().parseText(json)
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
