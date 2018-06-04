@@ -137,7 +137,7 @@ to create the corresponding jobs:
 
 - ``resources/jenkins/FIHealth-SanityCheck-0-SetUp.xml``
 - ``resources/jenkins/FIHealth-SanityCheck-0-RestartTestServers.xml``
-- ``resources/jenkins/FIHealth-SanityCheck-1-Pipeline.XML`
+- ``resources/jenkins/FIHealth-SanityCheck-1-Pipeline.XML``
 - ``resources/jenkins/FIHealth-SanityCheck-2-Exec-Region.xml``
 
 __ `Jenkins CI - API`_
