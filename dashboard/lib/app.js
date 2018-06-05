@@ -281,7 +281,11 @@ app.use(config.webContext, stylus.middleware(
     }
 ));
 
-app.use(session({secret: config.secret}));
+app.use(session({
+    secret: config.secret,
+    resave: true,
+    saveUninitialized: true
+}));
 
 // trace all requests and include transaction id (if not present)
 app.use(function (req, res, next) {

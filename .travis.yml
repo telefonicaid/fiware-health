@@ -25,7 +25,7 @@ install:
 
 script:
   - cd $BASEDIR/fiware-region-sanity-tests; pep8 --max-line-length=120 .
-  - cd $BASEDIR/dashboard; grunt lint test
+  - cd $BASEDIR/dashboard; grunt -verbose lint test
 
 after_success:
-  - cd $BASEDIR/dashboard; grunt coverage-report && cat report/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - cd $BASEDIR/dashboard; grunt -verbose coverage-report && cat report/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
